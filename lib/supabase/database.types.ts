@@ -127,6 +127,27 @@ export type Database = {
         };
         Relationships: [];
       };
+      billing_notices: {
+        Row: {
+          created_at: string;
+          kind: string;
+          reference: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          kind: string;
+          reference: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          kind?: string;
+          reference?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       contact_messages: {
         Row: {
           created_at: string;
@@ -386,7 +407,11 @@ export type Database = {
           billing_cycle: string;
           created_at: string;
           currency: string;
+          failure_reason: string | null;
           id: string;
+          kind: string;
+          paid_at: string | null;
+          payment_method: string | null;
           period_end: string | null;
           period_start: string | null;
           plan: string;
@@ -405,7 +430,11 @@ export type Database = {
           billing_cycle: string;
           created_at?: string;
           currency: string;
+          failure_reason?: string | null;
           id?: string;
+          kind?: string;
+          paid_at?: string | null;
+          payment_method?: string | null;
           period_end?: string | null;
           period_start?: string | null;
           plan: string;
@@ -424,7 +453,11 @@ export type Database = {
           billing_cycle?: string;
           created_at?: string;
           currency?: string;
+          failure_reason?: string | null;
           id?: string;
+          kind?: string;
+          paid_at?: string | null;
+          payment_method?: string | null;
           period_end?: string | null;
           period_start?: string | null;
           plan?: string;
@@ -814,6 +847,7 @@ export type Database = {
           provider_customer_id: string | null;
           provider_sub_id: string | null;
           scheduled_plan: string | null;
+          scheduled_plan_at: string | null;
           status: string;
           updated_at: string;
           user_id: string;
@@ -831,6 +865,7 @@ export type Database = {
           provider_customer_id?: string | null;
           provider_sub_id?: string | null;
           scheduled_plan?: string | null;
+          scheduled_plan_at?: string | null;
           status: string;
           updated_at?: string;
           user_id: string;
@@ -848,6 +883,7 @@ export type Database = {
           provider_customer_id?: string | null;
           provider_sub_id?: string | null;
           scheduled_plan?: string | null;
+          scheduled_plan_at?: string | null;
           status?: string;
           updated_at?: string;
           user_id?: string;
@@ -1007,6 +1043,15 @@ export type Database = {
       check_rate_limit: {
         Args: { p_bucket: string; p_max: number; p_window: string };
         Returns: boolean;
+      };
+      complete_payment: {
+        Args: { p_method: string; p_payment_id: string; p_provider_tx_id: string };
+        Returns: {
+          applied: boolean;
+          period_end: string;
+          period_start: string;
+          receipt_number: string;
+        }[];
       };
       get_usage_snapshot: { Args: { p_user_id: string }; Returns: Json };
       increment_usage: {

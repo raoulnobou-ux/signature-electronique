@@ -187,12 +187,7 @@
           "tab": "Administrations",
           "title": "Services publics et collectivités",
           "description": "Notes de service, courriers et annonces signés et diffusés plus vite, avec un historique clair de qui a signé quoi et quand.",
-          "examples": [
-            "Note de service",
-            "Courrier officiel",
-            "Annonce",
-            "Décision interne"
-          ]
+          "examples": ["Note de service", "Courrier officiel", "Annonce", "Décision interne"]
         }
       ]
     },
@@ -421,11 +416,7 @@
       "metaTitle": "Créer un compte",
       "title": "Créez votre compte",
       "subtitle": "6 jours gratuits, sans carte bancaire.",
-      "steps": [
-        "Compte",
-        "Profil",
-        "Confirmation"
-      ],
+      "steps": ["Compte", "Profil", "Confirmation"],
       "profileTitle": "Parlez-nous de votre structure",
       "profileSubtitle": "Facultatif — vous pourrez compléter plus tard.",
       "continue": "Continuer",
@@ -663,7 +654,6 @@
         "expired": "Expiré"
       },
       "trialEnds": "Fin de l'essai : {date}",
-      "renews": "Prochaine échéance : {date}",
       "ends": "Se termine le : {date}",
       "usage": "Utilisation ce mois-ci",
       "documents": "Documents signés",
@@ -673,9 +663,99 @@
       "of": "{used} sur {total}",
       "unlimited": "{used} · illimité",
       "choose": "Choisir un plan",
-      "paymentSoon": "Le paiement par Mobile Money et carte sera activé très prochainement.",
       "history": "Historique des paiements",
-      "noPayments": "Aucun paiement pour l'instant."
+      "noPayments": "Aucun paiement pour l'instant.",
+      "validUntil": "Valable jusqu'au {date}",
+      "renew": "Renouveler",
+      "paymentUnavailable": "Le paiement en ligne n'est pas encore activé. Écrivez-nous depuis la page Contact pour souscrire.",
+      "methodsNote": "Mobile Money (MTN, Orange) ou carte bancaire. Pas de prélèvement automatique : vous renouvelez quand vous voulez, nous vous rappelons avant l'échéance.",
+      "result": {
+        "succes": {
+          "title": "Paiement confirmé",
+          "body": "Merci ! Votre plan est actif. Votre reçu vous a été envoyé par e-mail."
+        },
+        "echec": {
+          "title": "Le paiement n'a pas abouti",
+          "body": "Aucun montant n'a été débité. Vérifiez votre solde ou essayez un autre moyen de paiement."
+        },
+        "attente": {
+          "title": "Paiement en cours de confirmation",
+          "body": "L'opérateur n'a pas encore confirmé la transaction. Votre plan s'activera automatiquement dès réception, sans nouvelle action de votre part."
+        }
+      },
+      "labels": {
+        "choose": "Choisir {plan}",
+        "renew": "Renouveler {plan}",
+        "upgrade": "Passer au Pro maintenant",
+        "switch": "Passer à {plan}"
+      },
+      "checkout": {
+        "title": "Récapitulatif",
+        "cycles": {
+          "monthly": "mensuel",
+          "yearly": "annuel"
+        },
+        "plan": "Plan {plan} · {cycle}",
+        "amount": "À payer",
+        "prorata": "Passage immédiat au Pro, au prorata de la période en cours (jusqu'au {date}).",
+        "startsNow": "Actif immédiatement, jusqu'au {date}.",
+        "startsLater": "La nouvelle période démarre le {date} : vos jours restants sont conservés.",
+        "pay": "Payer {amount}",
+        "secure": "Paiement sécurisé. QuickSign ne voit ni ne conserve jamais vos données de carte.",
+        "redirecting": "Redirection vers le paiement…",
+        "cancel": "Annuler"
+      },
+      "manage": {
+        "title": "Gérer l'abonnement",
+        "cancel": "Annuler l'abonnement",
+        "cancelTitle": "Annuler votre abonnement ?",
+        "cancelBody": "Vous gardez l'accès complet jusqu'au {date}. Ensuite, votre compte passera en lecture seule : vos documents restent consultables et téléchargeables.",
+        "cancelConfirm": "Confirmer l'annulation",
+        "keep": "Garder mon abonnement",
+        "resume": "Reprendre l'abonnement",
+        "canceledNote": "Abonnement annulé : accès complet jusqu'au {date}, sans rappel de renouvellement.",
+        "downgrade": "Passer à l'Essentiel à l'échéance",
+        "downgradeNote": "Passage à l'Essentiel prévu le {date}.",
+        "undoDowngrade": "Rester en Pro",
+        "switchNote": "Votre plan {plan} démarre le {date}.",
+        "done": "C'est noté."
+      },
+      "paymentStatus": {
+        "pending": "En attente",
+        "successful": "Payé",
+        "failed": "Échoué",
+        "cancelled": "Abandonné"
+      },
+      "kinds": {
+        "new": "Souscription",
+        "renewal": "Renouvellement",
+        "upgrade": "Passage au Pro"
+      },
+      "receipt": "Reçu",
+      "errors": {
+        "unauthenticated": "Votre session a expiré. Reconnectez-vous.",
+        "email_unverified": "Confirmez d'abord votre adresse e-mail.",
+        "payments_unavailable": "Le paiement en ligne n'est pas encore disponible.",
+        "rate_limited": "Trop de tentatives. Réessayez dans quelques minutes.",
+        "invalid": "Demande invalide.",
+        "not_allowed": "Action impossible pour votre abonnement actuel.",
+        "provider_error": "Le service de paiement ne répond pas. Réessayez dans un instant."
+      },
+      "sandbox": {
+        "metaTitle": "Paiement de test",
+        "title": "Paiement de test",
+        "notice": "Mode test : aucun argent réel n'est débité. En production, cette étape est remplacée par la page sécurisée de Flutterwave.",
+        "method": "Moyen de paiement",
+        "methods": {
+          "mtn": "MTN Mobile Money",
+          "orange": "Orange Money",
+          "card": "Carte bancaire"
+        },
+        "pay": "Payer {amount}",
+        "fail": "Simuler un échec",
+        "back": "Retour à l'abonnement",
+        "notFound": "Ce paiement est introuvable ou déjà traité."
+      }
     }
   },
   "documents": {

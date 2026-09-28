@@ -16,6 +16,9 @@ const serverSchema = z.object({
   FLUTTERWAVE_PUBLIC_KEY: z.string().optional(),
   FLUTTERWAVE_SECRET_KEY: z.string().optional(),
   FLUTTERWAVE_WEBHOOK_HASH: z.string().optional(),
+  /** "true" : paiements simulés sans clé Flutterwave (dev, tests). Ignoré en production Vercel. */
+  PAYMENTS_SANDBOX: z.enum(["true", "false"]).optional(),
+  VERCEL_ENV: z.string().optional(),
   SENTRY_DSN: z.string().optional(),
   CRON_SECRET: z.string().optional(),
 });

@@ -19,8 +19,10 @@ export interface SubscriptionSnapshot {
   status: SubscriptionStatus;
   currentPeriodEnd: Date;
   cancelAtPeriodEnd: boolean;
-  /** Plan qui s'appliquera au prochain renouvellement (rétrogradation programmée). */
+  /** Changement de plan programmé (renouvellement payé d'avance avec un autre plan, rétrogradation). */
   scheduledPlan: PaidPlan | null;
+  /** Date d'effet du changement programmé. */
+  scheduledPlanAt?: Date | null;
 }
 
 export interface UsageSnapshot {
@@ -62,6 +64,7 @@ export interface Entitlements {
   graceEndsAt: Date | null;
   cancelAtPeriodEnd: boolean;
   scheduledPlan: PaidPlan | null;
+  scheduledPlanAt: Date | null;
 }
 
 export interface GetEntitlementsInput {
@@ -81,11 +84,12 @@ function resolveState(sub: SubscriptionSnapshot, now: Date): AccessState {
     case "trialing":
       return t < end ? "trial" : "expired";
     case "active":
+    case "past_due":
       if (t < end) return "active";
+      // Annulé : l'accès s'arrête à la fin de la période payée, sans grâce.
+      if (sub.cancelAtPeriodEnd) return "expired";
       // Renouvellement non encore reçu (Mobile Money sans prélèvement automatique).
       return t < graceEnd ? "grace" : "expired";
-    case "past_due":
-      return t < graceEnd ? (t < end ? "active" : "grace") : "expired";
     case "canceled":
       // Annulation effective à la fin de la période déjà payée, sans période de grâce.
       return t < end ? "active" : "expired";
@@ -112,8 +116,18 @@ export function getEntitlements({
 
   let effectivePlan: PaidPlan | null = null;
   if (state === "trial") effectivePlan = "pro";
-  else if (state !== "expired")
-    effectivePlan = subscription.plan === "trial" ? "pro" : subscription.plan;
+  else if (state !== "expired") {
+    const switched =
+      subscription.scheduledPlan !== null &&
+      subscription.scheduledPlanAt != null &&
+      now.getTime() >= subscription.scheduledPlanAt.getTime();
+    // Un paiement pendant l'essai garde l'essai Pro jusqu'à sa fin (plan « trial » + bascule programmée).
+    effectivePlan = switched
+      ? subscription.scheduledPlan
+      : subscription.plan === "trial"
+        ? "pro"
+        : subscription.plan;
+  }
 
   const readOnly = effectivePlan === null;
   const planLimits = effectivePlan
@@ -155,6 +169,7 @@ export function getEntitlements({
       state === "grace" ? new Date(periodEnd.getTime() + GRACE_PERIOD_DAYS * DAY_MS) : null,
     cancelAtPeriodEnd: subscription.cancelAtPeriodEnd,
     scheduledPlan: subscription.scheduledPlan,
+    scheduledPlanAt: subscription.scheduledPlanAt ?? null,
   };
 }
 

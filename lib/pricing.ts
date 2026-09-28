@@ -1,17 +1,13 @@
 import "server-only";
 import { createClient } from "@supabase/supabase-js";
 import { headers } from "next/headers";
-import {
-  DEFAULT_PRICES,
-  isPaidPlan,
-  type BillingCycle,
-  type Currency,
-  type PaidPlan,
-} from "@/lib/entitlements/plans";
+import { DEFAULT_PRICES, isPaidPlan, type Currency } from "@/lib/entitlements/plans";
 import { publicEnv } from "@/lib/env";
 import type { Database } from "@/lib/supabase/database.types";
 
-export type PriceTable = Record<PaidPlan, Record<Currency, Record<BillingCycle, number>>>;
+import type { PriceTable } from "@/lib/billing/quote";
+
+export type { PriceTable };
 
 /**
  * Pays où l'on affiche les prix en FCFA par défaut (zone CEMAC, dont le Cameroun).

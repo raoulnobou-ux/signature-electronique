@@ -65,6 +65,8 @@ export function PricingPlans({
   /** Dans l'application : action de souscription (sinon, lien vers l'inscription). */
   checkout?: {
     label: string;
+    /** Libellé propre à un plan (« Renouveler Pro », « Passer au Pro maintenant »…). */
+    labelFor?: (plan: PaidPlan) => string;
     disabled?: boolean;
     onSelect?: (plan: PaidPlan, cycle: BillingCycle, currency: Currency) => void;
   };
@@ -171,7 +173,7 @@ export function PricingPlans({
                   disabled={checkout.disabled}
                   onClick={() => checkout.onSelect?.(plan, cycle, currency)}
                 >
-                  {checkout.label}
+                  {checkout.labelFor?.(plan) ?? checkout.label}
                 </Button>
               ) : (
                 <>

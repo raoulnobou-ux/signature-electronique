@@ -8,6 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import type { Account } from "@/lib/auth/account";
 import { TRIAL_DAYS } from "@/lib/entitlements/plans";
 import { formatBytes } from "@/lib/format";
+import { SubscriptionActions } from "./subscription-actions";
 
 /** Carte « plan actuel + usage », partagée par la page Abonnement et les paramètres. */
 export async function SubscriptionOverview({
@@ -58,9 +59,9 @@ export async function SubscriptionOverview({
                 <Badge variant={stateVariant[ent.state]}>{t(`status.${ent.state}`)}</Badge>
               </p>
             </div>
-            <Button asChild>
+            <Button asChild variant={ent.state === "active" ? "secondary" : "default"}>
               <Link href="/app/abonnement#plans">
-                <Sparkles /> {t("choose")}
+                <Sparkles /> {ent.state === "active" && ent.subscriptionPlan !== "trial" ? t("renew") : t("choose")}
               </Link>
             </Button>
           </div>
@@ -78,8 +79,19 @@ export async function SubscriptionOverview({
               <CalendarClock className="size-4" aria-hidden />
               {ent.cancelAtPeriodEnd || ent.state !== "active"
                 ? t("ends", { date })
-                : t("renews", { date })}
+                : t("validUntil", { date })}
             </p>
+          )}
+
+          {!compact && (
+            <SubscriptionActions
+              state={ent.state}
+              plan={ent.subscriptionPlan}
+              periodEnd={ent.periodEndsAt.toISOString()}
+              cancelAtPeriodEnd={ent.cancelAtPeriodEnd}
+              scheduledPlan={ent.scheduledPlan}
+              scheduledPlanAt={ent.scheduledPlanAt?.toISOString() ?? null}
+            />
           )}
         </CardContent>
       </Card>

@@ -142,3 +142,23 @@ _Mesure (Lighthouse mobile, build de production) :_ performance 94, accessibilit
 **D55 — Historique local et brouillon automatique.** Annuler/rétablir en mémoire (80 étapes) ; un geste (glisser, redimensionner) compte pour une seule étape. Le brouillon est enregistré 1 s après la dernière modification et restauré à la réouverture.
 
 **D56 — Rendus pdf.js annulables.** Chaque canevas garde son rendu en cours ; un zoom ou le démontage de la page l'annule proprement (l'annulation n'est pas une erreur). Après une action serveur, pas de `router.refresh()` en plus du `revalidatePath` : un rafraîchissement concurrent d'un changement de filtre pouvait réafficher l'ancienne liste.
+
+## Abonnements et paiements (Phase 6)
+
+**D57 — Flutterwave derrière une interface `PaymentProvider`** (`createCheckout`, `verifyTransaction`, `parseWebhook`) : Flutterwave (checkout hébergé v3, Mobile Money d'Afrique centrale + carte) aujourd'hui ; CinetPay ou Notch Pay s'ajoutent sans toucher au reste. La documentation Flutterwave n'était pas accessible depuis l'environnement de développement : l'intégration suit l'API v3 publique (`/v3/payments`, `/v3/transactions/{id}/verify`, `verify_by_reference`), **à revalider avec les clés de test avant la mise en ligne** (Phase 10).
+
+**D58 — Aucune activation sans revérification serveur.** Le webhook et la page de retour ne font que déclencher `settlePayment`, qui interroge l'API du prestataire et contrôle statut, référence, montant et devise. Les paramètres d'URL (`status=successful`) ne sont jamais crus. Webhook authentifié par le « secret hash » (en-tête `flutterwave-signature` HMAC-SHA256, ou `verif-hash`), journalisé dans `payment_events` avec une clé d'idempotence ; une erreur renvoie 500 pour que le prestataire réessaie.
+
+**D59 — Activation atomique en base** (`complete_payment`, verrou sur le paiement et l'abonnement, exécutable par le seul rôle service) : webhook et retour navigateur peuvent arriver en même temps, un seul active l'abonnement et numérote le reçu.
+
+**D60 — Pas de prélèvement automatique.** Mobile Money ne le permet pas : chaque paiement couvre une période (mensuelle ou annuelle). Rappels J-5, J-2 (« bientôt expiré ») et jour J avec lien de paiement, puis 3 jours de grâce, puis lecture seule. Le paiement par carte récurrente (tokenisation Flutterwave) pourra s'ajouter plus tard.
+
+**D61 — Aucun jour perdu.** Un paiement pendant l'essai ou avant l'échéance enchaîne la nouvelle période à la fin de l'actuelle ; si le plan change, la bascule est programmée à cette date (`scheduled_plan_at`) et appliquée par `getEntitlements` sans attendre la tâche planifiée. Essentiel → Pro : immédiat, au prorata des jours restants (arrondi au multiple de 5 FCFA supérieur, au centime en USD, 100 FCFA / 1 $ minimum). Pro → Essentiel ou annulation : à l'échéance.
+
+**D62 — Annulation = `cancel_at_period_end`** (le statut reste « active ») : accès complet jusqu'à la fin de la période payée, pas de rappel ni de période de grâce ensuite. `can_write` (RLS) et `getEntitlements` appliquent la même règle.
+
+**D63 — Reçus PDF numérotés** `QS-AAAA-000001` (séquence en base), générés avec pdf-lib, rangés dans le bucket privé `receipts`, joints à l'e-mail de confirmation et téléchargeables par URL signée de 2 minutes.
+
+**D64 — Bac à sable de paiement** pour le développement et les tests e2e (`PAYMENTS_SANDBOX=true`, sans clé Flutterwave) : checkout simulé dans l'application, identifiant de transaction signé par le serveur (impossible à forger), désactivé d'office en production Vercel et dès qu'une clé Flutterwave est présente.
+
+**D65 — Tâche quotidienne de facturation** (`/api/cron/billing`, 7 h UTC = 8 h à Douala) : fin d'essai J-2 et essai terminé, rappels, passage en grâce puis en lecture seule, bascules de plan, paiements abandonnés (> 24 h). Chaque e-mail est réservé dans `billing_notices` avant envoi : relancer la tâche ne crée aucun doublon.

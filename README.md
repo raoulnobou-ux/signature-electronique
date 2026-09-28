@@ -94,6 +94,14 @@ Le schéma complet (tables, Row Level Security, buckets privés, trigger de cré
 - Éditeur `/app/documents/<id>/signer` : placement au toucher, déplacement, redimensionnement, rotation, opacité, guides d'alignement, annuler/rétablir (Ctrl+Z / Ctrl+Y), brouillon enregistré automatiquement (`placed_fields`).
 - Finalisation côté serveur (pdf-lib) : nouvelle version `v<n>.pdf`, SHA-256 avant/après, événement d'audit `document.signed`, compteur mensuel. L'original et les versions précédentes ne sont jamais modifiés.
 
+## Abonnements et paiements
+
+- Page `/app/abonnement` : plan actuel, usage, choix du plan (mensuel/annuel, FCFA/USD), récapitulatif exact (prorata), historique et reçus PDF.
+- Prestataire : **Flutterwave** (Mobile Money MTN/Orange + carte). Renseigner `FLUTTERWAVE_SECRET_KEY`, `FLUTTERWAVE_PUBLIC_KEY` et `FLUTTERWAVE_WEBHOOK_HASH`, puis déclarer le webhook `https://<domaine>/api/webhooks/flutterwave` (Settings → Webhooks) avec le même « secret hash ». Commencer avec les clés de **test** Flutterwave.
+- Sans clé Flutterwave, `PAYMENTS_SANDBOX=true` active un paiement simulé (développement, tests e2e) ; jamais en production.
+- Tâche planifiée quotidienne : `/api/cron/billing` (rappels J-5/J-2/J, fin d'essai, grâce de 3 jours, lecture seule), déclarée dans `vercel.json`.
+- Les prix se modifient dans la table `plans_config` sans redéployer.
+
 ## Authentification
 
 - Inscription en deux étapes (compte, puis profil facultatif), connexion par e-mail ou Google, mot de passe oublié.

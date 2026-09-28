@@ -88,6 +88,7 @@ export const getCurrentAccount = cache(async (): Promise<Account | null> => {
       currentPeriodEnd: new Date(sub.current_period_end),
       cancelAtPeriodEnd: sub.cancel_at_period_end,
       scheduledPlan: isPaidPlan(sub.scheduled_plan) ? sub.scheduled_plan : null,
+      scheduledPlanAt: sub.scheduled_plan_at ? new Date(sub.scheduled_plan_at) : null,
     },
     usage,
     limits,
