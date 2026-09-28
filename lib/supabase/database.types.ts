@@ -142,6 +142,39 @@ export type Database = {
           },
         ];
       };
+      contact_messages: {
+        Row: {
+          created_at: string;
+          email: string;
+          handled_at: string | null;
+          id: string;
+          message: string;
+          name: string;
+          organization: string | null;
+          user_id: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          email: string;
+          handled_at?: string | null;
+          id?: string;
+          message: string;
+          name: string;
+          organization?: string | null;
+          user_id?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          email?: string;
+          handled_at?: string | null;
+          id?: string;
+          message?: string;
+          name?: string;
+          organization?: string | null;
+          user_id?: string | null;
+        };
+        Relationships: [];
+      };
       document_tags: {
         Row: {
           document_id: string;
@@ -599,6 +632,24 @@ export type Database = {
         };
         Relationships: [];
       };
+      rate_limit_hits: {
+        Row: {
+          bucket: string;
+          created_at: string;
+          id: number;
+        };
+        Insert: {
+          bucket: string;
+          created_at?: string;
+          id?: never;
+        };
+        Update: {
+          bucket?: string;
+          created_at?: string;
+          id?: never;
+        };
+        Relationships: [];
+      };
       request_signers: {
         Row: {
           created_at: string;
@@ -959,9 +1010,14 @@ export type Database = {
     Functions: {
       can_read_document: { Args: { p_document_id: string }; Returns: boolean };
       can_write: { Args: { p_user_id: string }; Returns: boolean };
+      check_rate_limit: {
+        Args: { p_bucket: string; p_max: number; p_window: string };
+        Returns: boolean;
+      };
       is_team_admin: { Args: { p_team_id: string }; Returns: boolean };
       is_team_member: { Args: { p_team_id: string }; Returns: boolean };
       owns_document: { Args: { p_document_id: string }; Returns: boolean };
+      purge_rate_limit_hits: { Args: Record<PropertyKey, never>; Returns: undefined };
     };
     Enums: {
       [_ in never]: never;

@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@plugin "@tailwindcss/typography";
 
 /* Le thème sombre est piloté par la classe .dark posée par next-themes. */
 @custom-variant dark (&:where(.dark, .dark *));
@@ -202,8 +203,11 @@
 @utility glass {
   background-color: var(--card);
   border: 1px solid var(--card-border);
-  backdrop-filter: blur(16px) saturate(140%);
-  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  /* Le flou d'arrière-plan coûte cher sur mobile : réservé aux écrans larges. */
+  @media (min-width: 768px) {
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+  }
 }
 
 /* Bordure dégradée (via masque) — pour les éléments mis en avant */
@@ -260,5 +264,98 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* ==========================================================================
+   Animations de la landing (CSS pur : aucun JavaScript requis)
+   ========================================================================== */
+
+/* Trait de signature qui s'écrit : le chemin SVG utilise pathLength="1". */
+@keyframes sig-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes stamp-in {
+  0% {
+    opacity: 0;
+    transform: rotate(-12deg) scale(1.6);
+  }
+  60% {
+    opacity: 0.92;
+    transform: rotate(-12deg) scale(0.94);
+  }
+  100% {
+    opacity: 0.88;
+    transform: rotate(-12deg) scale(1);
+  }
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@utility animate-sig-draw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: sig-draw 1.8s cubic-bezier(0.65, 0, 0.35, 1) 0.7s forwards;
+}
+
+@utility animate-stamp-in {
+  opacity: 0;
+  transform-origin: center;
+  animation: stamp-in 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) 2.5s forwards;
+}
+
+@utility animate-pop-in {
+  opacity: 0;
+  animation: pop-in 0.5s ease-out forwards;
+}
+
+@utility animate-fade-up {
+  animation: fade-up 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes rise-up {
+  from {
+    transform: translateY(28px) scale(0.985);
+  }
+  to {
+    transform: none;
+  }
+}
+
+/* Apparition au défilement (navigateurs compatibles), sans JavaScript. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    /* Uniquement un mouvement (pas d'opacité) : le texte reste toujours lisible et contrasté. */
+    .reveal {
+      animation: rise-up linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 22%;
+    }
   }
 }

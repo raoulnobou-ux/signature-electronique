@@ -12,6 +12,347 @@
     "save": "Enregistrer",
     "close": "Fermer",
     "loading": "Chargement…",
-    "toggleTheme": "Changer de thème"
+    "toggleTheme": "Changer de thème",
+    "openMenu": "Ouvrir le menu",
+    "skipToContent": "Aller au contenu",
+    "lastUpdated": "Dernière mise à jour : {date}"
+  },
+  "nav": {
+    "features": "Fonctionnalités",
+    "howItWorks": "Comment ça marche",
+    "pricing": "Tarifs",
+    "security": "Sécurité",
+    "faq": "FAQ",
+    "contact": "Contact",
+    "goToApp": "Mon espace"
+  },
+  "footer": {
+    "about": "La signature électronique simple et rapide, pensée pour le Cameroun et l'Afrique francophone.",
+    "product": "Produit",
+    "company": "QuickSign",
+    "legal": "Légal",
+    "terms": "Conditions générales",
+    "privacy": "Confidentialité",
+    "legalNotice": "Mentions légales",
+    "legalValidity": "Validité juridique",
+    "madeIn": "Conçu à Douala, pour l'Afrique francophone.",
+    "rights": "© {year} QuickSign. Tous droits réservés."
+  },
+  "landing": {
+    "hero": {
+      "badge": "Conçu pour le Cameroun et l'Afrique francophone",
+      "titleStart": "Signez, faites signer, terminé.",
+      "titleHighlight": "En 30 secondes.",
+      "subtitle": "Fini l'impression, le scan et les allers-retours. Ouvrez votre Word ou PDF, apposez votre signature et le cachet de votre structure, puis envoyez un PDF signé et horodaté — même depuis votre téléphone.",
+      "ctaPrimary": "Essayer gratuitement 6 jours",
+      "ctaSecondary": "Voir comment ça marche",
+      "reassurance1": "Sans carte bancaire",
+      "reassurance2": "Paiement Mobile Money",
+      "reassurance3": "Documents privés et chiffrés",
+      "demoDocTitle": "Contrat de prestation",
+      "demoDocMeta": "PDF · 2 pages",
+      "demoSigned": "Signé",
+      "demoSignedAt": "Horodaté · 28 sept. 2026, 09:41",
+      "demoSigner": "Me Awa Nkeng",
+      "demoStamp": "CABINET NKENG · DOUALA",
+      "demoHash": "Empreinte SHA-256 vérifiée"
+    },
+    "beforeAfter": {
+      "eyebrow": "Avant / Après",
+      "title": "Vingt minutes de papier. Ou trente secondes.",
+      "beforeTitle": "Sans QuickSign",
+      "beforeSteps": [
+        "Imprimer le document",
+        "Signer et tamponner à la main",
+        "Scanner chaque page",
+        "Envoyer, puis réimprimer"
+      ],
+      "beforeTime": "≈ 20 minutes, du papier et de l'encre",
+      "afterTitle": "Avec QuickSign",
+      "afterSteps": [
+        "Importer le Word ou le PDF",
+        "Poser signature et cachet",
+        "Télécharger, imprimer ou envoyer"
+      ],
+      "afterTime": "30 secondes, depuis votre téléphone"
+    },
+    "steps": {
+      "eyebrow": "Comment ça marche",
+      "title": "Trois gestes, et c'est signé.",
+      "subtitle": "Aucune formation nécessaire. Si vous savez envoyer un message WhatsApp, vous savez utiliser QuickSign.",
+      "items": [
+        {
+          "title": "Importez",
+          "description": "Glissez un Word, un PDF ou prenez une photo du document. La conversion en PDF est automatique."
+        },
+        {
+          "title": "Signez",
+          "description": "Dessinez votre signature au doigt, tapez votre nom ou importez-la. Ajoutez le cachet de votre structure."
+        },
+        {
+          "title": "Envoyez",
+          "description": "Téléchargez un PDF signé et horodaté, imprimez-le ou partagez-le par WhatsApp et e-mail."
+        }
+      ]
+    },
+    "features": {
+      "eyebrow": "Fonctionnalités",
+      "title": "Tout ce qu'il faut. Rien de superflu.",
+      "subtitle": "Les outils d'un grand éditeur international, adaptés à la façon dont on travaille ici.",
+      "items": [
+        {
+          "key": "stamp",
+          "title": "Votre cachet, en numérique",
+          "description": "Importez votre tampon ou générez-le : rond ou rectangulaire, encre bleue ou rouge, rendu réaliste."
+        },
+        {
+          "key": "momo",
+          "title": "Mobile Money",
+          "description": "Payez votre abonnement avec MTN MoMo, Orange Money ou une carte bancaire."
+        },
+        {
+          "key": "whatsapp",
+          "title": "Envoi par WhatsApp",
+          "description": "Faites signer un client ou un partenaire en lui envoyant un simple lien. Aucun compte requis."
+        },
+        {
+          "key": "ai",
+          "title": "Assistant IA intégré",
+          "description": "Il repère où signer, résume un contrat avant signature et rédige vos lettres et attestations."
+        },
+        {
+          "key": "proof",
+          "title": "Traçabilité complète",
+          "description": "Horodatage, empreinte SHA-256, journal d'audit et certificat de preuve vérifiable par QR code."
+        },
+        {
+          "key": "multi",
+          "title": "Plusieurs signataires",
+          "description": "Envoyez un document à plusieurs personnes, dans l'ordre ou en même temps, et suivez qui a signé."
+        },
+        {
+          "key": "word",
+          "title": "Word et PDF",
+          "description": "Vos documents Word sont convertis fidèlement en PDF. L'original est toujours conservé."
+        },
+        {
+          "key": "mobile",
+          "title": "Pensé pour le téléphone",
+          "description": "Léger et rapide, même avec une connexion lente. Tout se fait au doigt, sans ordinateur."
+        }
+      ]
+    },
+    "useCases": {
+      "eyebrow": "Pour qui ?",
+      "title": "Pour toutes les structures qui signent beaucoup.",
+      "items": [
+        {
+          "key": "firm",
+          "tab": "Cabinets",
+          "title": "Avocats, notaires, comptables, architectes",
+          "description": "Lettres de mission, conventions d'honoraires, procurations, rapports : signez et tamponnez chaque document en quelques secondes, avec une traçabilité qui rassure vos clients.",
+          "examples": [
+            "Lettre de mission",
+            "Convention d'honoraires",
+            "Procuration",
+            "Rapport d'expertise"
+          ]
+        },
+        {
+          "key": "school",
+          "tab": "Écoles",
+          "title": "Écoles, instituts et universités",
+          "description": "Attestations de scolarité, relevés, convocations et circulaires signés par la direction en série, avec le cachet de l'établissement.",
+          "examples": [
+            "Attestation de scolarité",
+            "Relevé de notes",
+            "Convocation",
+            "Note circulaire"
+          ]
+        },
+        {
+          "key": "business",
+          "tab": "PME et ONG",
+          "title": "Entreprises, ONG et associations",
+          "description": "Contrats, bons de commande, PV de réunion, ordres de mission : faites signer vos partenaires à distance et gardez chaque version en sécurité.",
+          "examples": [
+            "Contrat de prestation",
+            "Bon de commande",
+            "PV de réunion",
+            "Ordre de mission"
+          ]
+        },
+        {
+          "key": "admin",
+          "tab": "Administrations",
+          "title": "Services publics et collectivités",
+          "description": "Notes de service, courriers et annonces signés et diffusés plus vite, avec un historique clair de qui a signé quoi et quand.",
+          "examples": ["Note de service", "Courrier officiel", "Annonce", "Décision interne"]
+        }
+      ]
+    },
+    "pricing": {
+      "eyebrow": "Tarifs",
+      "title": "Un prix juste, en FCFA.",
+      "subtitle": "Commencez par 6 jours d'essai avec toutes les fonctionnalités Pro. Sans carte bancaire.",
+      "monthly": "Mensuel",
+      "yearly": "Annuel",
+      "yearlyBadge": "2 mois offerts",
+      "currencyLabel": "Devise",
+      "perMonth": "/ mois",
+      "perYear": "/ an",
+      "equivalentMonthly": "soit {amount} / mois",
+      "popular": "Le plus choisi",
+      "cta": "Commencer l'essai gratuit",
+      "trialNote": "6 jours gratuits, puis {price}. Annulable à tout moment.",
+      "paymentMethods": "Paiement par MTN MoMo, Orange Money ou carte Visa / Mastercard.",
+      "plans": {
+        "essential": {
+          "name": "Essentiel",
+          "description": "Pour signer vos propres documents, simplement.",
+          "features": [
+            "Import PDF et Word (conversion automatique)",
+            "Signature dessinée, tapée ou importée",
+            "Glisser-déposer et redimensionnement",
+            "PDF signé et horodaté",
+            "5 signatures enregistrées",
+            "50 documents signés par mois",
+            "1 Go de stockage",
+            "Assistant IA : 20 messages par jour"
+          ]
+        },
+        "pro": {
+          "name": "Pro",
+          "description": "Pour les structures qui font signer les autres.",
+          "features": [
+            "Tout l'Essentiel, plus :",
+            "Documents illimités",
+            "Cachets d'entreprise illimités",
+            "Plusieurs signataires, dans l'ordre ou en parallèle",
+            "Traçabilité et certificat de preuve",
+            "Modèles réutilisables",
+            "Envoi par WhatsApp et e-mail",
+            "Signature en lot (20 documents d'un coup)",
+            "Assistant IA avancé illimité",
+            "20 Go de stockage · équipe de 5 membres",
+            "Support prioritaire"
+          ]
+        }
+      }
+    },
+    "testimonials": {
+      "eyebrow": "Ils signent avec QuickSign",
+      "title": "Ce qu'en disent nos utilisateurs"
+    },
+    "faq": {
+      "eyebrow": "FAQ",
+      "title": "Vos questions, nos réponses.",
+      "items": [
+        {
+          "q": "Une signature QuickSign a-t-elle une valeur juridique ?",
+          "a": "QuickSign produit une signature électronique simple. Sa valeur de preuve repose sur la traçabilité : horodatage, empreinte numérique du document, journal d'audit et certificat de signature. Elle convient à la grande majorité des documents courants (contrats, attestations, courriers). Certains actes exigent une forme particulière (actes notariés, certains actes administratifs) : en cas de doute, vérifiez auprès d'un juriste."
+        },
+        {
+          "q": "Faut-il une carte bancaire pour l'essai gratuit ?",
+          "a": "Non. L'essai de 6 jours démarre dès votre inscription, sans carte ni paiement, avec toutes les fonctionnalités du plan Pro."
+        },
+        {
+          "q": "Comment puis-je payer ?",
+          "a": "Par MTN Mobile Money, Orange Money ou carte Visa / Mastercard, via notre partenaire de paiement sécurisé. Nous ne stockons jamais vos informations de paiement."
+        },
+        {
+          "q": "Que se passe-t-il à la fin de l'essai ?",
+          "a": "Votre compte passe en lecture seule : vous pouvez toujours consulter et télécharger vos documents signés. Rien n'est supprimé. Choisissez un plan quand vous voulez pour signer à nouveau."
+        },
+        {
+          "q": "Mes documents sont-ils en sécurité ?",
+          "a": "Vos documents sont stockés de façon privée et chiffrée, et ne sont accessibles que par des liens temporaires. Personne d'autre que vous (et les personnes que vous invitez) ne peut les voir. L'assistant IA ne lit un document que si vous le lui demandez."
+        },
+        {
+          "q": "Puis-je signer depuis mon téléphone ?",
+          "a": "Oui. QuickSign est conçu d'abord pour le téléphone : importez, signez au doigt et envoyez, même avec une connexion lente."
+        },
+        {
+          "q": "Mes documents Word sont-ils pris en charge ?",
+          "a": "Oui. Les fichiers .doc et .docx sont convertis automatiquement en PDF fidèle à l'original, que vous pouvez ensuite signer. Le fichier Word d'origine est conservé."
+        },
+        {
+          "q": "Les personnes que je fais signer doivent-elles créer un compte ?",
+          "a": "Non. Avec le plan Pro, elles reçoivent un lien sécurisé par WhatsApp ou e-mail, lisent le document et signent en quelques secondes, sans inscription."
+        },
+        {
+          "q": "Puis-je changer de plan ou annuler ?",
+          "a": "Oui, à tout moment depuis votre espace. Le passage au plan Pro est immédiat ; une annulation prend effet à la fin de la période déjà payée."
+        }
+      ]
+    },
+    "finalCta": {
+      "title": "Votre prochain document signé dans 30 secondes.",
+      "subtitle": "Rejoignez les structures qui ont dit adieu à l'imprimante et au scanner.",
+      "cta": "Essayer gratuitement 6 jours",
+      "secondary": "Voir les tarifs"
+    }
+  },
+  "pricingPage": {
+    "metaTitle": "Tarifs",
+    "metaDescription": "Essentiel à 5 000 FCFA / mois, Pro à 15 000 FCFA / mois. 6 jours d'essai gratuit, paiement Mobile Money ou carte.",
+    "compareTitle": "Comparer les plans",
+    "feature": "Fonctionnalité",
+    "included": "Inclus",
+    "notIncluded": "Non inclus",
+    "unlimited": "Illimité",
+    "rows": {
+      "documents": "Documents signés par mois",
+      "signatures": "Signatures enregistrées",
+      "storage": "Stockage",
+      "ai": "Assistant IA",
+      "aiEssential": "20 messages / jour",
+      "aiPro": "Avancé, illimité",
+      "stamps": "Cachets d'entreprise",
+      "multi": "Plusieurs signataires",
+      "audit": "Certificat de preuve et audit",
+      "templates": "Modèles réutilisables",
+      "whatsapp": "Envoi WhatsApp et e-mail",
+      "bulk": "Signature en lot",
+      "team": "Membres d'équipe",
+      "support": "Support prioritaire"
+    }
+  },
+  "security": {
+    "metaTitle": "Sécurité et validité juridique",
+    "metaDescription": "Comment QuickSign protège vos documents, et ce que vaut juridiquement une signature électronique simple."
+  },
+  "contact": {
+    "metaTitle": "Contact",
+    "metaDescription": "Une question, un besoin pour votre structure ? L'équipe QuickSign vous répond.",
+    "title": "Parlons de votre structure.",
+    "subtitle": "Une question sur QuickSign, un besoin pour votre cabinet, votre école ou votre entreprise ? Écrivez-nous, nous répondons sous 24 h ouvrées.",
+    "emailTitle": "Par e-mail",
+    "whatsappTitle": "Par WhatsApp",
+    "whatsappDescription": "Le plus rapide pour une question simple.",
+    "hoursTitle": "Horaires",
+    "hours": "Du lundi au vendredi, 8 h – 18 h (heure de Douala)",
+    "form": {
+      "name": "Nom complet",
+      "email": "Adresse e-mail",
+      "organization": "Structure (facultatif)",
+      "message": "Votre message",
+      "messagePlaceholder": "Dites-nous en quelques mots comment nous pouvons vous aider.",
+      "submit": "Envoyer le message",
+      "success": "Message envoyé. Nous vous répondons très vite.",
+      "error": "L'envoi a échoué. Réessayez, ou écrivez-nous directement par e-mail.",
+      "rateLimited": "Vous avez envoyé plusieurs messages en peu de temps. Réessayez dans une heure, ou écrivez-nous par e-mail."
+    }
+  },
+  "notFound": {
+    "title": "Cette page s'est envolée.",
+    "description": "Le lien est peut-être incorrect, ou la page a été déplacée.",
+    "cta": "Retour à l'accueil"
+  },
+  "validation": {
+    "required": "Ce champ est obligatoire.",
+    "email": "Cette adresse e-mail ne semble pas valide.",
+    "tooShort": "Trop court.",
+    "tooLong": "Trop long."
   }
 }

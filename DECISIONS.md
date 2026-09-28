@@ -57,3 +57,24 @@ _Raison :_ testable sans base de données, horloge injectable pour tester les da
 **D17 — Vitest (logique) + Playwright (parcours).** Playwright est épinglé sur la version dont le navigateur Chromium est installé dans l'environnement.
 
 **D18 — CI GitHub Actions** : lint, vérification de types, tests unitaires, build, à chaque push et pull request.
+
+## Pages publiques (Phase 2)
+
+**D19 — Landing sans JavaScript superflu.** Animations en CSS pur (signature qui s'écrit, cachet, apparition au défilement via `animation-timeline: view()` en amélioration progressive), FAQ en `<details>` natifs, halos d'ambiance en dégradés radiaux plutôt qu'en filtres `blur`, flou d'arrière-plan réservé aux écrans ≥ 768 px. Le fournisseur racine ne charge que le thème ; données, animations Motion, toasts et infobulles sont chargés par l'application connectée (`AppShellProviders`).
+_Mesure (Lighthouse mobile, build de production) :_ performance 94, accessibilité 100, SEO 100 ; bureau 100.
+
+**D20 — Traductions transmises au navigateur par espace de noms.** `ClientMessages` n'envoie au client que `common`, `validation` et les espaces demandés (ex. `landing.pricing`).
+
+**D21 — Devise affichée.** FCFA par défaut pour la zone CEMAC (pays détecté par l'en-tête `x-vercel-ip-country`) ou, à défaut, pour un navigateur en français ; USD sinon. Bascule manuelle toujours disponible. Les prix viennent de `plans_config` (cache 5 min), avec repli sur les valeurs par défaut.
+
+**D22 — Aucun faux témoignage.** La section Témoignages est prête mais masquée tant que `content/testimonials.ts` est vide.
+
+**D23 — Limitation de débit en base.** Fonction Postgres `check_rate_limit` (fenêtre glissante, verrou consultatif), clés hachées ; fonctionne sur plusieurs instances serverless sans service externe (Redis). En cas de panne de la base, on laisse passer plutôt que de bloquer un utilisateur légitime.
+
+**D24 — Formulaire de contact.** Validation zod partagée client/serveur, champ piège anti-robots, 5 messages/heure/IP, enregistrement dans `contact_messages` puis notification e-mail au support (si Resend est configuré).
+
+**D25 — E-mails via l'API HTTP de Resend** (pas de SDK) avec un gabarit maison en tableaux et styles en ligne (`lib/email/layout.ts`). Sans clé, l'e-mail est journalisé, jamais perdu silencieusement en production puisque la clé y est obligatoire.
+
+**D26 — Textes juridiques provisoires.** CGU, confidentialité et mentions légales sont rédigées et marquées « version provisoire » ; les champs d'identification de la société sont à compléter et l'ensemble doit être relu par un juriste local avant l'ouverture publique (cf. SPEC §12).
+
+**D27 — Corbeille par date, pas par statut.** `documents.trashed_at` plutôt qu'un statut « jeté » : un document restauré retrouve son statut d'origine (brouillon, signé…).

@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
-import { NextIntlClientProvider } from "next-intl";
 import { getLocale } from "next-intl/server";
 import { AppProviders } from "@/components/providers/app-providers";
+import { ClientMessages } from "@/components/providers/client-messages";
 import { siteConfig } from "@/lib/site";
 import "./globals.css";
 
@@ -57,9 +57,9 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       suppressHydrationWarning
     >
       <body className="min-h-dvh">
-        <NextIntlClientProvider>
+        <ClientMessages>
           <AppProviders>{children}</AppProviders>
-        </NextIntlClientProvider>
+        </ClientMessages>
       </body>
     </html>
   );

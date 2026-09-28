@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AppShellProviders } from "@/components/providers/app-shell-providers";
 import { DesignSystemShowcase } from "./showcase";
 
 export const metadata: Metadata = {
@@ -7,5 +8,9 @@ export const metadata: Metadata = {
 };
 
 export default function DesignPage() {
-  return <DesignSystemShowcase />;
+  return (
+    <AppShellProviders>
+      <DesignSystemShowcase />
+    </AppShellProviders>
+  );
 }

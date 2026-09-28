@@ -20,7 +20,7 @@ function EmptyState({ icon: Icon, title, description, action, className }: Empty
       )}
     >
       <div className="relative">
-        <div className="absolute inset-0 -z-10 scale-150 rounded-full bg-brand-gradient opacity-20 blur-2xl" />
+        <div className="absolute -inset-8 -z-10 bg-[radial-gradient(closest-side,rgb(129_140_248/0.3),transparent)]" />
         <div className="flex size-16 items-center justify-center rounded-2xl glass">
           <Icon className="size-7 text-accent-foreground" strokeWidth={1.6} />
         </div>
