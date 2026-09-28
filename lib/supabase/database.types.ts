@@ -125,22 +125,7 @@ export type Database = {
           request_id?: string | null;
           user_agent?: string | null;
         };
-        Relationships: [
-          {
-            foreignKeyName: "audit_events_document_id_fkey";
-            columns: ["document_id"];
-            isOneToOne: false;
-            referencedRelation: "documents";
-            referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "audit_events_request_id_fkey";
-            columns: ["request_id"];
-            isOneToOne: false;
-            referencedRelation: "signature_requests";
-            referencedColumns: ["id"];
-          },
-        ];
+        Relationships: [];
       };
       contact_messages: {
         Row: {
@@ -1024,6 +1009,10 @@ export type Database = {
         Returns: boolean;
       };
       get_usage_snapshot: { Args: { p_user_id: string }; Returns: Json };
+      increment_usage: {
+        Args: { p_amount?: number; p_kind: string; p_user_id: string };
+        Returns: undefined;
+      };
       is_team_admin: { Args: { p_team_id: string }; Returns: boolean };
       is_team_member: { Args: { p_team_id: string }; Returns: boolean };
       my_usage_snapshot: { Args: Record<PropertyKey, never>; Returns: Json };

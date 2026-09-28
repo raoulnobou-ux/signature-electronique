@@ -359,3 +359,17 @@
     }
   }
 }
+
+/* La signature « s'écrit » de gauche à droite à la validation. */
+@keyframes write-in {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@utility animate-write-in {
+  animation: write-in 1.1s cubic-bezier(0.65, 0, 0.35, 1) both;
+}

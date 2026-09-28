@@ -27,7 +27,7 @@ export default async function AppLayout({ children }: LayoutProps<"/app">) {
   };
 
   return (
-    <ClientMessages namespaces={["app", "auth", "documents"]}>
+    <ClientMessages namespaces={["app", "auth", "documents", "signatures", "editor"]}>
       <AppShellProviders>
         <AppShell account={shellAccount}>{children}</AppShell>
       </AppShellProviders>

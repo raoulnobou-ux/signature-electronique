@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { LogoMark } from "@/components/brand/logo";
 import { AccessBanner } from "./access-banner";
@@ -12,6 +13,15 @@ import type { ShellAccount } from "./types";
 import { UserMenu } from "./user-menu";
 
 export function AppShell({ account, children }: { account: ShellAccount; children: ReactNode }) {
+  const pathname = usePathname();
+  // Éditeur de signature : plein écran, sans barres de navigation.
+  if (pathname.endsWith("/signer")) {
+    return (
+      <main id="contenu" className="min-h-dvh">
+        {children}
+      </main>
+    );
+  }
   return (
     <div className="flex min-h-dvh">
       <AppSidebar account={account} />

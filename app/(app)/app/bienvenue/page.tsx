@@ -59,7 +59,7 @@ export default async function WelcomePage() {
       </ol>
 
       <div className="mt-10 flex flex-col justify-center gap-3 sm:flex-row">
-        <form action={completeOnboarding.bind(null, "/app/signatures")}>
+        <form action={completeOnboarding.bind(null, "/app/signatures?nouvelle=signature")}>
           <Button type="submit" size="lg" className="w-full sm:w-auto">
             {t("start")}
           </Button>

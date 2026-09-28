@@ -83,10 +83,10 @@ export function DocumentDetail({
           <Button variant="secondary" onClick={() => void download("pdf")}>
             <Download /> {t("actions.download")}
           </Button>
-          {!readOnly && !doc.trashed && doc.status !== "signed" && (
+          {!readOnly && !doc.trashed && (
             <Button asChild>
               <Link href={`/app/documents/${doc.id}/signer`}>
-                <FileSignature /> {t("actions.sign")}
+                <FileSignature /> {doc.status === "signed" ? t("actions.signAgain") : t("actions.sign")}
               </Link>
             </Button>
           )}

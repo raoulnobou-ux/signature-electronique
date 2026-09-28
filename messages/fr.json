@@ -187,7 +187,12 @@
           "tab": "Administrations",
           "title": "Services publics et collectivités",
           "description": "Notes de service, courriers et annonces signés et diffusés plus vite, avec un historique clair de qui a signé quoi et quand.",
-          "examples": ["Note de service", "Courrier officiel", "Annonce", "Décision interne"]
+          "examples": [
+            "Note de service",
+            "Courrier officiel",
+            "Annonce",
+            "Décision interne"
+          ]
         }
       ]
     },
@@ -416,7 +421,11 @@
       "metaTitle": "Créer un compte",
       "title": "Créez votre compte",
       "subtitle": "6 jours gratuits, sans carte bancaire.",
-      "steps": ["Compte", "Profil", "Confirmation"],
+      "steps": [
+        "Compte",
+        "Profil",
+        "Confirmation"
+      ],
       "profileTitle": "Parlez-nous de votre structure",
       "profileSubtitle": "Facultatif — vous pourrez compléter plus tard.",
       "continue": "Continuer",
@@ -723,7 +732,8 @@
       "trash": "Mettre à la corbeille",
       "restore": "Restaurer",
       "deleteForever": "Supprimer définitivement",
-      "deleteForeverConfirm": "Ces documents et leurs fichiers seront supprimés définitivement. Cette action est irréversible."
+      "deleteForeverConfirm": "Ces documents et leurs fichiers seront supprimés définitivement. Cette action est irréversible.",
+      "signAgain": "Ajouter une signature"
     },
     "toasts": {
       "trashed": "{count, plural, one {Document mis à la corbeille.} other {# documents mis à la corbeille.}}",
@@ -836,6 +846,172 @@
       "rtf": "RTF",
       "jpeg": "Photo (JPEG)",
       "png": "Image (PNG)"
+    }
+  },
+  "signatures": {
+    "metaTitle": "Signatures et cachets",
+    "title": "Signatures et cachets",
+    "subtitle": "Créez-les une fois, posez-les en un clic sur tous vos documents.",
+    "create": "Nouvelle signature",
+    "sections": {
+      "signature": "Signatures",
+      "initials": "Paraphes",
+      "stamp": "Cachets"
+    },
+    "emptySection": {
+      "signature": "Aucune signature. Créez la vôtre en quelques secondes.",
+      "initials": "Aucun paraphe. Utile pour parapher chaque page d'un contrat.",
+      "stamp": "Aucun cachet. Importez le tampon de votre structure."
+    },
+    "default": "Par défaut",
+    "setDefault": "Définir par défaut",
+    "rename": "Renommer",
+    "duplicate": "Dupliquer",
+    "delete": "Supprimer",
+    "deleteConfirm": "Supprimer « {name} » ? Les documents déjà signés ne sont pas modifiés.",
+    "limit": "{used} sur {max} signatures enregistrées",
+    "limitReached": "Vous avez atteint la limite de {max} signatures du plan Essentiel. Supprimez-en une ou passez au plan Pro.",
+    "proOnly": "Les cachets d'entreprise sont inclus dans le plan Pro.",
+    "toasts": {
+      "created": "Enregistré dans votre bibliothèque.",
+      "renamed": "Renommé.",
+      "deleted": "Supprimé.",
+      "defaultSet": "Défini par défaut.",
+      "duplicated": "Dupliqué.",
+      "error": "L'opération a échoué. Réessayez."
+    },
+    "methods": {
+      "draw": "Dessinée",
+      "type": "Tapée",
+      "upload": "Importée",
+      "generated": "Générée"
+    },
+    "creator": {
+      "title": "Créer une signature",
+      "titleInitials": "Créer un paraphe",
+      "titleStamp": "Ajouter un cachet",
+      "kind": "Type",
+      "kinds": {
+        "signature": "Signature",
+        "initials": "Paraphe",
+        "stamp": "Cachet"
+      },
+      "tabs": {
+        "draw": "Dessiner",
+        "type": "Taper",
+        "upload": "Importer"
+      },
+      "draw": {
+        "hint": "Signez dans le cadre, au doigt ou à la souris.",
+        "baseline": "Signez au-dessus de la ligne",
+        "undo": "Annuler le dernier trait",
+        "clear": "Effacer",
+        "color": "Couleur de l'encre",
+        "colors": {
+          "black": "Noir",
+          "blue": "Bleu stylo",
+          "navy": "Bleu nuit"
+        },
+        "thickness": "Épaisseur",
+        "empty": "Dessinez votre signature avant de l'enregistrer.",
+        "fullscreen": "Plein écran"
+      },
+      "type": {
+        "placeholder": "Votre nom",
+        "hint": "Choisissez le style qui vous ressemble.",
+        "empty": "Tapez votre nom."
+      },
+      "upload": {
+        "choose": "Choisir une photo ou un scan",
+        "hint": "Signez sur une feuille blanche, photographiez-la bien à plat. Le fond est retiré automatiquement.",
+        "threshold": "Détourage",
+        "thresholdHint": "Augmentez si le fond reste visible, diminuez si le trait disparaît.",
+        "before": "Avant",
+        "after": "Après",
+        "invalid": "Image illisible. Utilisez une photo JPG ou PNG."
+      },
+      "name": "Nom",
+      "namePlaceholders": {
+        "signature": "Signature officielle",
+        "initials": "Paraphe",
+        "stamp": "Cachet du cabinet"
+      },
+      "save": "Enregistrer",
+      "saving": "Enregistrement…"
+    }
+  },
+  "editor": {
+    "metaTitle": "Signer « {title} »",
+    "back": "Retour au document",
+    "tools": {
+      "title": "Ajouter",
+      "signature": "Signature",
+      "initials": "Paraphe",
+      "stamp": "Cachet",
+      "date": "Date",
+      "text": "Texte",
+      "checkbox": "Case",
+      "name": "Nom",
+      "mention": "Mention"
+    },
+    "placeHint": "Touchez la page à l'endroit voulu pour placer : {tool}",
+    "cancelPlace": "Annuler",
+    "undo": "Annuler",
+    "redo": "Rétablir",
+    "saved": "Brouillon enregistré",
+    "saving": "Enregistrement…",
+    "saveFailed": "Brouillon non enregistré",
+    "finalize": "Finaliser et signer",
+    "properties": {
+      "title": "Élément sélectionné",
+      "text": "Texte",
+      "mention": "Mention",
+      "checked": "Cochée",
+      "opacity": "Opacité",
+      "rotation": "Rotation",
+      "asset": "Image",
+      "repeat": "Répéter sur toutes les pages",
+      "repeated": "Copié sur {count, plural, one {# autre page} other {# autres pages}}.",
+      "duplicate": "Dupliquer",
+      "delete": "Supprimer",
+      "close": "Fermer"
+    },
+    "empty": "Choisissez un élément dans la barre d'outils, puis touchez la page pour le placer.",
+    "needAsset": {
+      "signature": "Créez d'abord votre signature.",
+      "initials": "Créez d'abord votre paraphe.",
+      "stamp": "Ajoutez d'abord le cachet de votre structure."
+    },
+    "fieldCount": "{count, plural, =0 {Aucun élément} one {# élément} other {# éléments}}",
+    "confirm": {
+      "title": "Finaliser et signer ?",
+      "body": "Une nouvelle version signée du document sera créée. L'original reste intact et consultable.",
+      "footer": "Incruster l'horodatage en bas des pages signées",
+      "footerHint": "Nom du signataire, date et heure, référence du document.",
+      "cta": "Signer le document",
+      "fields": "{count, plural, one {# élément sera apposé} other {# éléments seront apposés}} sur {pages, plural, one {# page} other {# pages}}."
+    },
+    "errors": {
+      "no_fields": "Ajoutez au moins une signature ou un élément.",
+      "read_only": "Votre compte est en lecture seule. Choisissez un plan pour signer.",
+      "quota_exceeded": "Vous avez atteint votre quota de documents signés ce mois-ci. Passez au plan Pro pour signer sans limite.",
+      "feature_not_in_plan": "Le cachet d'entreprise est inclus dans le plan Pro.",
+      "email_unverified": "Confirmez votre adresse e-mail avant de signer.",
+      "asset_not_found": "Une des images utilisées n'existe plus. Remplacez-la.",
+      "generic": "La signature a échoué. Réessayez."
+    },
+    "success": {
+      "title": "Document signé !",
+      "body": "Votre PDF signé et horodaté est prêt.",
+      "fingerprint": "Empreinte SHA-256",
+      "download": "Télécharger",
+      "print": "Imprimer",
+      "whatsapp": "WhatsApp",
+      "email": "E-mail",
+      "share": "Partager",
+      "view": "Voir le document",
+      "shareText": "Voici le document « {title} », signé avec QuickSign.",
+      "emailSubject": "Document signé : {title}"
     }
   }
 }

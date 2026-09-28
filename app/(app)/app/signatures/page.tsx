@@ -1,14 +1,28 @@
-import { PenLine } from "lucide-react";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { ComingSoon } from "@/components/app/coming-soon";
+import { Suspense } from "react";
+import { requireAccount } from "@/lib/auth/account";
+import { listSignatureAssets } from "./actions";
+import { SignaturesView } from "./signatures-view";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations("app.nav");
-  return { title: t("signatures") };
+  const t = await getTranslations("signatures");
+  return { title: t("metaTitle") };
 }
 
-export default async function Page() {
-  const t = await getTranslations("app.nav");
-  return <ComingSoon title={t("signatures")} icon={PenLine} />;
+export default async function SignaturesPage() {
+  const [account, assets] = await Promise.all([requireAccount(), listSignatureAssets()]);
+  const ent = account.entitlements;
+  return (
+    <div className="mx-auto max-w-6xl">
+      <Suspense>
+        <SignaturesView
+          assets={assets}
+          readOnly={ent.readOnly}
+          stampsAllowed={ent.features.stamps}
+          limit={ent.limits?.signatureAssets ?? null}
+        />
+      </Suspense>
+    </div>
+  );
 }
