@@ -353,6 +353,320 @@
     "required": "Ce champ est obligatoire.",
     "email": "Cette adresse e-mail ne semble pas valide.",
     "tooShort": "Trop court.",
-    "tooLong": "Trop long."
+    "tooLong": "Trop long.",
+    "phone": "Ce numéro de téléphone ne semble pas valide.",
+    "passwordPolicy": "8 caractères minimum, avec au moins une lettre et un chiffre.",
+    "acceptTerms": "Veuillez accepter les conditions pour continuer.",
+    "passwordMismatch": "Les deux mots de passe ne correspondent pas.",
+    "samePassword": "Choisissez un mot de passe différent de l'ancien."
+  },
+  "auth": {
+    "side": {
+      "title": "La signature électronique qui vous fait gagner des heures.",
+      "points": [
+        "6 jours d'essai, toutes les fonctionnalités Pro",
+        "Aucune carte bancaire demandée",
+        "Vos documents restent privés et chiffrés"
+      ],
+      "quote": "Signez depuis votre téléphone, où que vous soyez."
+    },
+    "or": "ou",
+    "google": "Continuer avec Google",
+    "googleError": "La connexion avec Google a échoué. Réessayez ou utilisez votre e-mail.",
+    "genericError": "Une erreur est survenue. Réessayez dans un instant.",
+    "rateLimited": "Trop de tentatives. Patientez quelques minutes avant de réessayer.",
+    "fields": {
+      "fullName": "Nom complet",
+      "fullNamePlaceholder": "Awa Nkeng",
+      "email": "Adresse e-mail",
+      "emailPlaceholder": "vous@exemple.cm",
+      "phone": "Téléphone",
+      "phoneHint": "Utilisé pour les rappels et, plus tard, la vérification par WhatsApp.",
+      "country": "Pays",
+      "password": "Mot de passe",
+      "newPassword": "Nouveau mot de passe",
+      "confirmPassword": "Confirmez le mot de passe",
+      "showPassword": "Afficher le mot de passe",
+      "hidePassword": "Masquer le mot de passe",
+      "acceptTerms": "J'accepte les <terms>conditions générales</terms> et la <privacy>politique de confidentialité</privacy>.",
+      "accountType": "Type de compte",
+      "orgName": "Nom de la structure",
+      "orgNamePlaceholder": "Cabinet Nkeng & Associés",
+      "orgSector": "Secteur d'activité",
+      "orgSectorPlaceholder": "Juridique, éducation, BTP…",
+      "city": "Ville",
+      "cityPlaceholder": "Douala"
+    },
+    "strength": {
+      "0": "Trop faible",
+      "1": "Faible",
+      "2": "Correct",
+      "3": "Bon",
+      "4": "Excellent"
+    },
+    "accountTypes": {
+      "individual": "Particulier",
+      "company": "Entreprise",
+      "firm": "Cabinet",
+      "school": "École",
+      "ngo": "ONG / Association",
+      "administration": "Administration"
+    },
+    "signUp": {
+      "metaTitle": "Créer un compte",
+      "title": "Créez votre compte",
+      "subtitle": "6 jours gratuits, sans carte bancaire.",
+      "steps": ["Compte", "Profil", "Confirmation"],
+      "profileTitle": "Parlez-nous de votre structure",
+      "profileSubtitle": "Facultatif — vous pourrez compléter plus tard.",
+      "continue": "Continuer",
+      "skip": "Passer cette étape",
+      "submit": "Créer mon compte",
+      "haveAccount": "Déjà un compte ?",
+      "emailTaken": "Un compte existe déjà avec cette adresse. Connectez-vous ou réinitialisez votre mot de passe.",
+      "checkEmailTitle": "Vérifiez votre boîte e-mail",
+      "checkEmailBody": "Nous avons envoyé un lien de confirmation à <email></email>. Cliquez dessus pour activer votre compte et démarrer vos 6 jours d'essai.",
+      "checkEmailTip": "Rien reçu ? Regardez dans les courriers indésirables, ou renvoyez l'e-mail.",
+      "resend": "Renvoyer l'e-mail",
+      "resent": "E-mail renvoyé.",
+      "resendWait": "Renvoyer dans {seconds} s",
+      "wrongEmail": "Modifier l'adresse"
+    },
+    "signIn": {
+      "metaTitle": "Connexion",
+      "title": "Bon retour parmi nous",
+      "subtitle": "Connectez-vous pour signer vos documents.",
+      "submit": "Se connecter",
+      "forgot": "Mot de passe oublié ?",
+      "noAccount": "Pas encore de compte ?",
+      "invalid": "Adresse e-mail ou mot de passe incorrect.",
+      "unconfirmed": "Votre adresse e-mail n'est pas encore confirmée. Consultez votre boîte de réception.",
+      "resendConfirmation": "Renvoyer l'e-mail de confirmation",
+      "linkInvalid": "Ce lien n'est plus valide (déjà utilisé ou expiré). Demandez-en un nouveau.",
+      "passwordUpdated": "Mot de passe mis à jour. Vous pouvez vous connecter.",
+      "signedOut": "Vous êtes déconnecté."
+    },
+    "forgot": {
+      "metaTitle": "Mot de passe oublié",
+      "title": "Mot de passe oublié",
+      "subtitle": "Indiquez votre adresse e-mail : nous vous enverrons un lien pour en choisir un nouveau.",
+      "submit": "Envoyer le lien",
+      "sentTitle": "Consultez votre boîte e-mail",
+      "sentBody": "Si un compte existe pour cette adresse, un lien de réinitialisation vient d'être envoyé. Il est valable une heure.",
+      "back": "Retour à la connexion"
+    },
+    "reset": {
+      "metaTitle": "Nouveau mot de passe",
+      "title": "Choisissez un nouveau mot de passe",
+      "subtitle": "Il remplacera l'ancien sur tous vos appareils.",
+      "submit": "Enregistrer le mot de passe",
+      "expired": "Votre lien a expiré. Demandez un nouveau lien de réinitialisation."
+    }
+  },
+  "app": {
+    "nav": {
+      "dashboard": "Tableau de bord",
+      "documents": "Documents",
+      "signatures": "Signatures et cachets",
+      "requests": "Demandes de signature",
+      "templates": "Modèles",
+      "team": "Équipe",
+      "assistant": "Assistant IA",
+      "billing": "Abonnement",
+      "settings": "Paramètres",
+      "home": "Accueil",
+      "sign": "Signer",
+      "more": "Plus",
+      "search": "Rechercher",
+      "profile": "Mon profil",
+      "mainNav": "Navigation de l'application",
+      "pro": "Pro",
+      "signaturesShort": "Signatures"
+    },
+    "palette": {
+      "placeholder": "Rechercher une page ou une action…",
+      "empty": "Aucun résultat.",
+      "pages": "Pages",
+      "actions": "Actions",
+      "toggleTheme": "Basculer thème sombre / clair",
+      "signOut": "Se déconnecter"
+    },
+    "trial": {
+      "badge": "Essai gratuit",
+      "daysLeft": "{days, plural, =0 {Dernier jour} one {# jour restant} other {# jours restants}}",
+      "cardTitle": "Essai Pro en cours",
+      "cardBody": "Profitez de toutes les fonctionnalités. Choisissez un plan quand vous êtes prêt.",
+      "choosePlan": "Choisir un plan",
+      "endingSoon": "Votre essai se termine {when}. Choisissez un plan pour continuer à signer sans interruption.",
+      "graceTitle": "Paiement en attente",
+      "grace": "Votre abonnement a expiré le {date}. Renouvelez avant le {graceEnd} pour ne pas passer en lecture seule.",
+      "renew": "Renouveler",
+      "expiredTitle": "Compte en lecture seule",
+      "expired": "Vous pouvez consulter et télécharger vos documents. Choisissez un plan pour signer à nouveau — rien n'a été supprimé.",
+      "upgrade": "Passer à un plan"
+    },
+    "greeting": {
+      "morning": "Bonjour",
+      "afternoon": "Bon après-midi",
+      "evening": "Bonsoir"
+    },
+    "dashboard": {
+      "metaTitle": "Tableau de bord",
+      "subtitle": "Que voulez-vous signer aujourd'hui ?",
+      "quick": {
+        "sign": "Signer un document",
+        "signHint": "PDF, Word ou photo",
+        "request": "Faire signer",
+        "requestHint": "Envoyer à d'autres personnes",
+        "import": "Importer",
+        "importHint": "Ajouter à vos documents"
+      },
+      "stats": {
+        "signedThisMonth": "Signés ce mois-ci",
+        "pending": "En attente de signature",
+        "quota": "Documents restants ce mois",
+        "unlimited": "Illimité"
+      },
+      "recent": "Documents récents",
+      "seeAll": "Tout voir",
+      "emptyTitle": "Aucun document pour l'instant",
+      "emptyBody": "Importez un PDF ou un Word : il sera signé en moins d'une minute.",
+      "emptyCta": "Importer un document",
+      "copilotTitle": "Astuce de l'assistant",
+      "copilotBody": "Ajoutez le cachet de votre structure une fois pour toutes : vous le poserez ensuite en un clic sur chaque document.",
+      "copilotCta": "Ajouter mon cachet",
+      "passwordUpdated": "Votre mot de passe a bien été modifié."
+    },
+    "welcome": {
+      "metaTitle": "Bienvenue",
+      "title": "Bienvenue, {name} !",
+      "titleNoName": "Bienvenue sur QuickSign !",
+      "subtitle": "Votre essai Pro de 6 jours est actif. Voici comment signer votre premier document en moins d'une minute.",
+      "steps": {
+        "signature": {
+          "title": "Créez votre signature",
+          "body": "Dessinez-la au doigt, tapez votre nom ou importez une photo."
+        },
+        "stamp": {
+          "title": "Ajoutez votre cachet",
+          "body": "Facultatif : le tampon de votre structure, prêt à poser."
+        },
+        "import": {
+          "title": "Importez un document",
+          "body": "PDF, Word ou photo : la conversion est automatique."
+        },
+        "sign": {
+          "title": "Signez-le",
+          "body": "Placez signature et cachet, puis téléchargez votre PDF signé."
+        }
+      },
+      "start": "C'est parti",
+      "later": "Explorer d'abord"
+    },
+    "comingSoon": {
+      "title": "Bientôt disponible",
+      "body": "Cette section arrive dans une prochaine mise à jour de QuickSign.",
+      "back": "Retour au tableau de bord"
+    },
+    "settings": {
+      "metaTitle": "Paramètres",
+      "title": "Paramètres",
+      "tabs": {
+        "profile": "Profil",
+        "organization": "Structure",
+        "billing": "Abonnement",
+        "security": "Sécurité",
+        "preferences": "Préférences",
+        "danger": "Zone sensible"
+      },
+      "saved": "Modifications enregistrées.",
+      "saveError": "L'enregistrement a échoué. Réessayez.",
+      "save": "Enregistrer",
+      "profile": {
+        "title": "Informations personnelles",
+        "avatar": "Photo de profil",
+        "avatarHint": "PNG, JPG ou WebP, 2 Mo maximum.",
+        "changeAvatar": "Changer la photo",
+        "removeAvatar": "Retirer",
+        "avatarError": "Image non valide ou trop lourde (2 Mo maximum).",
+        "email": "Adresse e-mail",
+        "emailHint": "Pour changer d'adresse, contactez le support.",
+        "timezone": "Fuseau horaire",
+        "language": "Langue",
+        "languageSoon": "L'anglais arrive bientôt."
+      },
+      "organization": {
+        "title": "Votre structure",
+        "subtitle": "Ces informations apparaissent sur vos documents et reçus.",
+        "address": "Adresse",
+        "footer": "Mention de pied de page par défaut",
+        "footerPlaceholder": "Cabinet Nkeng & Associés — RCCM … — Douala"
+      },
+      "billing": {
+        "title": "Votre abonnement",
+        "manage": "Gérer l'abonnement"
+      },
+      "security": {
+        "passwordTitle": "Mot de passe",
+        "passwordBody": "Recevez un lien par e-mail pour choisir un nouveau mot de passe.",
+        "passwordCta": "Changer mon mot de passe",
+        "passwordSent": "Un lien vient de vous être envoyé par e-mail.",
+        "sessionsTitle": "Appareils connectés",
+        "sessionsBody": "Déconnectez QuickSign de tous vos appareils (téléphones, ordinateurs), y compris celui-ci.",
+        "signOutAll": "Se déconnecter partout",
+        "twoFactorTitle": "Double authentification",
+        "twoFactorBody": "Une protection supplémentaire à la connexion. Disponible prochainement."
+      },
+      "preferences": {
+        "theme": "Thème",
+        "themeDark": "Sombre",
+        "themeLight": "Clair",
+        "notifications": "Notifications par e-mail",
+        "notificationsBody": "Rappels d'essai et d'abonnement, activité de vos demandes de signature."
+      },
+      "danger": {
+        "exportTitle": "Exporter mes données",
+        "exportBody": "Téléchargez un fichier contenant votre profil, vos documents et l'historique de vos signatures.",
+        "exportCta": "Exporter (JSON)",
+        "deleteTitle": "Supprimer mon compte",
+        "deleteBody": "Suppression définitive de votre compte, de vos documents et de vos signatures. Action irréversible.",
+        "deleteCta": "Supprimer mon compte",
+        "deleteConfirmTitle": "Supprimer définitivement votre compte ?",
+        "deleteConfirmBody": "Tapez SUPPRIMER pour confirmer. Vos documents et signatures seront effacés et ne pourront pas être récupérés.",
+        "deleteConfirmWord": "SUPPRIMER",
+        "deleteConfirmCta": "Supprimer définitivement",
+        "deleteError": "La suppression a échoué. Contactez le support."
+      }
+    },
+    "billing": {
+      "metaTitle": "Abonnement",
+      "title": "Abonnement",
+      "currentPlan": "Plan actuel",
+      "plans": {
+        "trial": "Essai Pro",
+        "essential": "Essentiel",
+        "pro": "Pro"
+      },
+      "status": {
+        "trial": "Essai en cours",
+        "active": "Actif",
+        "grace": "Paiement en attente",
+        "expired": "Expiré"
+      },
+      "trialEnds": "Fin de l'essai : {date}",
+      "renews": "Prochaine échéance : {date}",
+      "ends": "Se termine le : {date}",
+      "usage": "Utilisation ce mois-ci",
+      "documents": "Documents signés",
+      "signatures": "Signatures enregistrées",
+      "storage": "Stockage",
+      "ai": "Messages à l'assistant aujourd'hui",
+      "of": "{used} sur {total}",
+      "unlimited": "{used} · illimité",
+      "choose": "Choisir un plan",
+      "paymentSoon": "Le paiement par Mobile Money et carte sera activé très prochainement.",
+      "history": "Historique des paiements",
+      "noPayments": "Aucun paiement pour l'instant."
+    }
   }
 }

@@ -232,6 +232,28 @@ otp_length = 6
 # Number of seconds before the email OTP expires (defaults to 1 hour).
 otp_expiry = 3600
 
+
+# Modèles d'e-mails d'authentification (à reproduire dans le tableau de bord Supabase en production)
+[auth.email.template.confirmation]
+subject = "Confirmez votre adresse e-mail"
+content_path = "./supabase/templates/confirmation.html"
+
+[auth.email.template.recovery]
+subject = "Réinitialisation de votre mot de passe"
+content_path = "./supabase/templates/recovery.html"
+
+[auth.email.template.email_change]
+subject = "Confirmez votre nouvelle adresse e-mail"
+content_path = "./supabase/templates/email_change.html"
+
+[auth.email.template.magic_link]
+subject = "Votre lien de connexion QuickSign"
+content_path = "./supabase/templates/magic_link.html"
+
+[auth.email.template.invite]
+subject = "Vous êtes invité sur QuickSign"
+content_path = "./supabase/templates/invite.html"
+
 # Use a production-ready SMTP server
 # [auth.email.smtp]
 # enabled = true
@@ -318,6 +340,14 @@ max_frequency = "5s"
 # Use an external OAuth provider. The full list of providers are: `apple`, `azure`, `bitbucket`,
 # `discord`, `facebook`, `github`, `gitlab`, `google`, `keycloak`, `linkedin_oidc`, `notion`, `twitch`,
 # `twitter`, `x`, `slack`, `spotify`, `workos`, `zoom`.
+# Connexion Google : activée en production depuis le tableau de bord Supabase
+# (Authentication → Providers → Google). Localement, renseigner les variables puis passer à true.
+[auth.external.google]
+enabled = false
+client_id = "env(SUPABASE_AUTH_GOOGLE_CLIENT_ID)"
+secret = "env(SUPABASE_AUTH_GOOGLE_SECRET)"
+skip_nonce_check = false
+
 [auth.external.apple]
 enabled = false
 client_id = ""

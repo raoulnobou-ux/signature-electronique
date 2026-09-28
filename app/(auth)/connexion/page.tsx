@@ -1,16 +1,20 @@
-import Link from "next/link";
-import { Logo } from "@/components/brand/logo";
-import { Button } from "@/components/ui/button";
+import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
+import { SignInForm } from "./signin-form";
 
-// Page provisoire — remplacée par le parcours d'authentification (Phase 3).
-export default function Page() {
-  return (
-    <main className="flex min-h-dvh flex-col items-center justify-center gap-6 px-4 text-center">
-      <Logo />
-      <h1 className="font-display text-3xl font-semibold">Bientôt disponible</h1>
-      <Button asChild variant="secondary">
-        <Link href="/">Retour à l&apos;accueil</Link>
-      </Button>
-    </main>
-  );
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("auth.signIn");
+  return { title: t("metaTitle") };
+}
+
+export default async function SignInPage(props: PageProps<"/connexion">) {
+  const params = await props.searchParams;
+  const t = await getTranslations("auth.signIn");
+  const next = typeof params.next === "string" ? params.next : undefined;
+
+  let notice: { tone: "error" | "success"; text: string } | undefined;
+  if (params.erreur === "lien-invalide") notice = { tone: "error", text: t("linkInvalid") };
+  else if (params.deconnecte) notice = { tone: "success", text: t("signedOut") };
+
+  return <SignInForm next={next} initialNotice={notice} />;
 }

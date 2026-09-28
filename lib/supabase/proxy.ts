@@ -5,7 +5,7 @@ import { publicEnv } from "@/lib/env";
 /** Chemins de l'application qui exigent une session. */
 const PROTECTED_PREFIXES = ["/app"];
 /** Pages d'authentification : un utilisateur connecté est renvoyé vers l'application. */
-const AUTH_PAGES = ["/connexion", "/inscription"];
+const AUTH_PAGES = ["/connexion", "/inscription", "/mot-de-passe-oublie"];
 
 /**
  * Rafraîchit la session Supabase à chaque requête (cookies) et applique les redirections

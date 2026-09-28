@@ -56,11 +56,18 @@ export function PricingPlans({
   prices,
   defaultCurrency,
   headingLevel = 3,
+  checkout,
 }: {
   prices: PriceTable;
   defaultCurrency: Currency;
   /** Niveau des titres de plans : 2 sur la page Tarifs (sous le h1), 3 dans la landing. */
   headingLevel?: 2 | 3;
+  /** Dans l'application : action de souscription (sinon, lien vers l'inscription). */
+  checkout?: {
+    label: string;
+    disabled?: boolean;
+    onSelect?: (plan: PaidPlan, cycle: BillingCycle, currency: Currency) => void;
+  };
 }) {
   const PlanHeading = headingLevel === 2 ? "h2" : "h3";
   const t = useTranslations("landing.pricing");
@@ -156,12 +163,31 @@ export function PricingPlans({
                   })}
               </p>
 
-              <Button asChild size="lg" variant={pro ? "default" : "secondary"} className="mt-6">
-                <Link href={`/inscription?plan=${plan}`}>{t("cta")}</Link>
-              </Button>
-              <p className="mt-3 text-center text-xs text-muted-foreground">
-                {t("trialNote", { price: priceLabel })}
-              </p>
+              {checkout ? (
+                <Button
+                  size="lg"
+                  variant={pro ? "default" : "secondary"}
+                  className="mt-6"
+                  disabled={checkout.disabled}
+                  onClick={() => checkout.onSelect?.(plan, cycle, currency)}
+                >
+                  {checkout.label}
+                </Button>
+              ) : (
+                <>
+                  <Button
+                    asChild
+                    size="lg"
+                    variant={pro ? "default" : "secondary"}
+                    className="mt-6"
+                  >
+                    <Link href={`/inscription?plan=${plan}`}>{t("cta")}</Link>
+                  </Button>
+                  <p className="mt-3 text-center text-xs text-muted-foreground">
+                    {t("trialNote", { price: priceLabel })}
+                  </p>
+                </>
+              )}
 
               <ul className="mt-7 space-y-3 border-t border-border pt-7">
                 {features.map((feature, i) => (

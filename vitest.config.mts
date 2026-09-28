@@ -9,7 +9,21 @@ export default defineConfig({
     alias: { "server-only": new URL("./tests/unit/stubs/empty.ts", import.meta.url).pathname },
   },
   test: {
-    environment: "node",
-    include: ["tests/unit/**/*.test.ts", "tests/unit/**/*.test.tsx"],
+    projects: [
+      {
+        extends: true,
+        test: { name: "unit", environment: "node", include: ["tests/unit/**/*.test.{ts,tsx}"] },
+      },
+      {
+        extends: true,
+        // Nécessite Supabase local (npm run db:start) ; ignoré automatiquement sinon.
+        test: {
+          name: "integration",
+          environment: "node",
+          include: ["tests/integration/**/*.test.ts"],
+          testTimeout: 30_000,
+        },
+      },
+    ],
   },
 });

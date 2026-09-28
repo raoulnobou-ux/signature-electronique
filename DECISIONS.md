@@ -78,3 +78,25 @@ _Mesure (Lighthouse mobile, build de production) :_ performance 94, accessibilit
 **D26 — Textes juridiques provisoires.** CGU, confidentialité et mentions légales sont rédigées et marquées « version provisoire » ; les champs d'identification de la société sont à compléter et l'ensemble doit être relu par un juriste local avant l'ouverture publique (cf. SPEC §12).
 
 **D27 — Corbeille par date, pas par statut.** `documents.trashed_at` plutôt qu'un statut « jeté » : un document restauré retrouve son statut d'origine (brouillon, signé…).
+
+## Authentification et comptes (Phase 3)
+
+**D28 — L'étape « Profil » est envoyée avec l'inscription.** Comme la connexion exige un e-mail confirmé (D13), il n'y a pas encore de session à l'étape 2 : type de compte, structure, secteur et ville sont transmis dans les métadonnées de `signUp` et recopiés par le trigger. La photo/le logo se règlent ensuite dans les paramètres.
+
+**D29 — Liens d'e-mail en `token_hash` plutôt qu'en PKCE.** Un lien de confirmation ouvert dans l'application Gmail ou sur un autre appareil fonctionne quand même (`verifyOtp` côté serveur, route `/auth/confirm`). Le PKCE n'est utilisé que pour Google (même navigateur).
+
+**D30 — E-mail de bienvenue envoyé à la confirmation**, une seule fois (marquage atomique `welcome_email_sent_at`), aussi pour Google.
+
+**D31 — Limites de débit adaptées au partage d'IP.** Au Cameroun, de nombreux utilisateurs partagent une adresse IP (NAT des opérateurs mobiles, cybercafés, bureaux) : limites par IP larges (ex. 120 connexions / 10 min), limites par compte strictes (10 tentatives / 10 min, 3 e-mails de réinitialisation / heure).
+
+**D32 — Téléphone normalisé en E.164** (`libphonenumber-js`, métadonnées « min »), Cameroun +237 par défaut ; la liste complète des pays n'est rendue que côté navigateur (les noms localisés diffèrent entre Node et les navigateurs). Changer de numéro remet `phone_verified_at` à zéro.
+
+**D33 — Robustesse du mot de passe calculée localement** (règle : 8 caractères, lettres et chiffres ; jauge 0–4, mots courants pénalisés). Pas de zxcvbn (trop lourd pour mobile).
+
+**D34 — Droits chargés une fois par requête** (`getCurrentAccount`, mis en cache React) : profil, abonnement, limites (`plans_config`) et usage (`my_usage_snapshot`, une seule requête SQL). `guard(feature, quota)` protège chaque action serveur ; la RLS (`can_write`) bloque en plus toute écriture d'un compte expiré.
+
+**D35 — Onboarding en deux temps.** La page `/app/bienvenue` accueille par le prénom et présente les 4 étapes ; les étapes interactives (signature, cachet, import, signature du document) s'appuient sur l'éditeur livré en Phase 5.
+
+**D36 — Photos de profil dans un bucket public** (`avatars`), noms aléatoires non devinables, type vérifié par les octets, 2 Mo max. Les documents et signatures, eux, restent dans des buckets privés.
+
+**D37 — Suppression de compte immédiate** après confirmation écrite (« SUPPRIMER ») : fichiers purgés de tous les buckets puis utilisateur supprimé (cascade SQL). Export complet en JSON disponible avant.

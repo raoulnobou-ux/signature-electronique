@@ -80,6 +80,20 @@ Le schéma complet (tables, Row Level Security, buckets privés, trigger de cré
 - le journal d'audit est en ajout seul (toute modification est refusée par un trigger) ;
 - les fichiers sont dans des buckets privés, servis par URL signées temporaires.
 
+## Authentification
+
+- Inscription en deux étapes (compte, puis profil facultatif), connexion par e-mail ou Google, mot de passe oublié.
+- **Confirmation de l'e-mail obligatoire** avant la première connexion. Les liens des e-mails utilisent `token_hash` et la route `/auth/confirm` : ils fonctionnent même s'ils sont ouverts dans un autre navigateur ou sur un autre appareil que celui de l'inscription.
+- Modèles d'e-mails de marque : `supabase/templates/*.html` (appliqués automatiquement en local). **En production**, copier leur contenu dans Supabase → Authentication → Email Templates, et configurer un SMTP (Resend) dans Authentication → SMTP Settings.
+- URL à déclarer dans Supabase → Authentication → URL Configuration : _Site URL_ = l'URL de l'application ; _Redirect URLs_ = `https://<domaine>/**`.
+- Google : créer un identifiant OAuth (Google Cloud Console), l'activer dans Supabase, puis `NEXT_PUBLIC_AUTH_GOOGLE_ENABLED=true`.
+- Les appels d'authentification passent par des Server Actions (validation zod, limitation de débit par IP et par compte). Supabase voyant l'IP du serveur, relever en production ses propres limites (Authentication → Rate Limits) : nos limites applicatives prennent le relais.
+
+## Tests
+
+- `npm test` : tests unitaires (droits, dates d'essai, validations, détection de type de fichier) **et** tests d'intégration de la base (RLS, triggers) si Supabase local tourne.
+- `npm run test:e2e` : parcours complets dans Chromium (bureau et mobile), dont inscription → e-mail de confirmation (lu dans Mailpit) → essai de 6 jours. Nécessite Supabase local et un build (`npm run build`).
+
 ## Déploiement
 
 La procédure complète (Supabase, Gotenberg, Vercel, domaine, Resend, Flutterwave, Sentry, tâches planifiées) est détaillée dans la section 13 de `SPEC.md` et sera finalisée en Phase 10. En résumé :

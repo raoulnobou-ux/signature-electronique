@@ -23,6 +23,11 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
+  experimental: {
+    // Photos de profil (2 Mo max) envoyées par Server Action ; les documents, eux,
+    // partent directement vers le stockage via une URL signée.
+    serverActions: { bodySizeLimit: "3mb" },
+  },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },

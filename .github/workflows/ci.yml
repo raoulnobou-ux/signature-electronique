@@ -34,14 +34,27 @@ jobs:
       - run: npm run build
 
   database:
-    name: Migrations Supabase
+    name: Migrations et sécurité de la base (RLS)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
       - uses: supabase/setup-cli@v1
         with:
           version: latest
-      - name: Appliquer les migrations sur une base vierge
-        run: supabase db start
+      - name: Démarrer Supabase local (applique toutes les migrations)
+        run: supabase start -x studio,vector,logflare,imgproxy,edge-runtime,supavisor
       - name: Analyse statique du schéma
         run: supabase db lint --level warning
+      - name: Variables de la base locale
+        run: |
+          supabase status -o env \
+            --override-name api.url=NEXT_PUBLIC_SUPABASE_URL \
+            --override-name auth.anon_key=NEXT_PUBLIC_SUPABASE_ANON_KEY \
+            --override-name auth.service_role_key=SUPABASE_SERVICE_ROLE_KEY > .env.local
+      - name: Tests d'intégration (RLS, triggers, fonctions)
+        run: npx vitest run --project integration

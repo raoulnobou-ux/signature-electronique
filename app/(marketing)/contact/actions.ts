@@ -20,7 +20,7 @@ export async function sendContactMessage(input: unknown): Promise<ContactResult>
   if (data.website) return { ok: true };
 
   const ip = (await getClientIp()) ?? "unknown";
-  if (!(await rateLimit("contact", ip, 5, 3600))) return { ok: false, error: "rate_limited" };
+  if (!(await rateLimit("contact", ip, 10, 3600))) return { ok: false, error: "rate_limited" };
 
   const { error } = await createAdminClient()
     .from("contact_messages")
