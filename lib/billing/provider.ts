@@ -9,9 +9,11 @@ export interface CheckoutRequest {
   amount: number;
   currency: Currency;
   description: string;
-  customer: { email: string; name: string; phone: string | null };
-  /** URL de retour après paiement (le prestataire y ajoute ses paramètres). */
+  customer: { email: string; name: string; phone: string | null; city?: string | null };
+  /** URL de retour du navigateur après paiement. */
   redirectUrl: string;
+  /** URL de notification serveur à serveur (webhook). */
+  notifyUrl: string;
   meta: Record<string, string>;
 }
 
@@ -21,7 +23,7 @@ export interface VerifiedTransaction {
   transactionId: string;
   amount: number;
   currency: string;
-  /** Moyen de paiement (mobilemoneyfranco, card…), pour le reçu. */
+  /** Moyen de paiement (OMCM, MOMOCM, VISAM…), pour le reçu. */
   method: string | null;
   failureReason: string | null;
 }
@@ -36,8 +38,8 @@ export interface WebhookEvent {
 }
 
 /**
- * Couche d'abstraction des paiements : Flutterwave aujourd'hui, CinetPay ou Notch Pay
- * demain sans toucher au reste de l'application.
+ * Couche d'abstraction des paiements : CinetPay aujourd'hui ; un autre prestataire
+ * (Notch Pay, Flutterwave…) s'ajoute sans toucher au reste de l'application.
  */
 export interface PaymentProvider {
   readonly name: string;

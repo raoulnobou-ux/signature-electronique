@@ -27,11 +27,12 @@ const BRAND = [rgb(0.388, 0.4, 0.945), rgb(0.545, 0.361, 0.965), rgb(0.133, 0.82
 
 /** Libellé lisible du moyen de paiement renvoyé par le prestataire. */
 export function paymentMethodLabel(method: string | null | undefined): string {
+  // Codes CinetPay (OMCM, MOMOCM, VISAM…) et libellés du bac à sable.
   const m = (method ?? "").toLowerCase();
-  if (m.includes("mtn")) return "Mobile Money (MTN)";
-  if (m.includes("orange")) return "Orange Money";
-  if (m.includes("mobilemoney")) return "Mobile Money";
-  if (m.includes("card")) return "Carte bancaire";
+  if (m.includes("momo") || m.includes("mtn")) return "Mobile Money (MTN)";
+  if (m.startsWith("om") || m.includes("orange")) return "Orange Money";
+  if (m.includes("mobilemoney") || m.includes("wallet")) return "Mobile Money";
+  if (m.includes("card") || m.includes("visa") || m.includes("master")) return "Carte bancaire";
   return method || "—";
 }
 

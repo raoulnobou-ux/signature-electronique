@@ -125,7 +125,9 @@ test("Essentiel → Pro au prorata, puis annulation et reprise", async ({ page }
 });
 
 test("sécurité : webhook non configuré, tâche planifiée protégée, faux retour de paiement ignoré", async ({ request, page }) => {
-  expect((await request.post("/api/webhooks/flutterwave", { data: { event: "charge.completed" } })).status()).toBe(404);
+  // Sans clé CinetPay (bac à sable), l'URL de notification refuse tout ; elle répond au test de disponibilité.
+  expect((await request.post("/api/webhooks/cinetpay", { form: { cpm_trans_id: "QS-X" } })).status()).toBe(404);
+  expect((await request.get("/api/webhooks/cinetpay")).status()).toBe(200);
   expect((await request.get("/api/cron/billing")).status()).toBe(401);
   const cron = await request.get("/api/cron/billing", { headers: { Authorization: `Bearer ${process.env.CRON_SECRET}` } });
   expect(cron.status()).toBe(200);

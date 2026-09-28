@@ -115,6 +115,9 @@ export function DocumentsView({ documents, total, folders, tags, filters, readOn
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  // Deux transitions distinctes : une navigation (filtre, dossier) ne doit jamais être
+  // entremêlée avec une action serveur en cours, sinon elle peut être perdue.
+  const [navigating, startNavigation] = useTransition();
   const [pending, startTransition] = useTransition();
   const [layout, setLayout] = useState<"grid" | "list">("grid");
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -146,7 +149,7 @@ export function DocumentsView({ documents, total, folders, tags, filters, readOn
     }
     if (!("limite" in patch)) next.delete("limite");
     paramsRef.current = next;
-    startTransition(() =>
+    startNavigation(() =>
       router.replace(`${pathname}${next.size ? `?${next}` : ""}`, { scroll: false }),
     );
   };
@@ -391,7 +394,7 @@ export function DocumentsView({ documents, total, folders, tags, filters, readOn
           )}
 
           {/* Liste */}
-          <div className={cn("transition-opacity", pending && "opacity-60")}>
+          <div className={cn("transition-opacity", (pending || navigating) && "opacity-60")}>
             {documents.length === 0 ? (
               filters.trash ? (
                 <EmptyState
@@ -453,7 +456,7 @@ export function DocumentsView({ documents, total, folders, tags, filters, readOn
               <Button
                 variant="secondary"
                 onClick={() => setParams({ limite: String(filters.limit + 30) })}
-                loading={pending}
+                loading={navigating}
               >
                 {t("loadMore")}
               </Button>

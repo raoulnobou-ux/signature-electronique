@@ -744,7 +744,7 @@
       "sandbox": {
         "metaTitle": "Paiement de test",
         "title": "Paiement de test",
-        "notice": "Mode test : aucun argent réel n'est débité. En production, cette étape est remplacée par la page sécurisée de Flutterwave.",
+        "notice": "Mode test : aucun argent réel n'est débité. En production, cette étape est remplacée par la page sécurisée de CinetPay.",
         "method": "Moyen de paiement",
         "methods": {
           "mtn": "MTN Mobile Money",

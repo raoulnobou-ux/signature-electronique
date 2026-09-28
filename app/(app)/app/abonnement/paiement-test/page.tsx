@@ -18,7 +18,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t("metaTitle"), robots: { index: false } };
 }
 
-/** Checkout simulé (développement et tests) — n'existe pas quand Flutterwave est configuré. */
+/** Checkout simulé (développement et tests) — n'existe pas quand CinetPay est configuré. */
 export default async function SandboxCheckoutPage({ searchParams }: PageProps<"/app/abonnement/paiement-test">) {
   if (!getSandboxProvider()) notFound();
   const [account, t, params] = await Promise.all([

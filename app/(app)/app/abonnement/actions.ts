@@ -105,7 +105,8 @@ export async function startCheckout(input: z.input<typeof targetSchema>): Promis
   if (!(await rateLimit("checkout", account.userId, 10, 600))) return { ok: false, reason: "rate_limited" };
 
   const quote = await computeQuote(account, subscription, parsed.data);
-  const reference = `QS-${randomUUID()}`;
+  // Identifiant de transaction : lettres, chiffres et tirets uniquement (exigence CinetPay).
+  const reference = `QS-${randomUUID().replaceAll("-", "").slice(0, 24).toUpperCase()}`;
   const admin = createAdminClient();
   const { data: payment, error } = await admin
     .from("payments")
@@ -134,8 +135,14 @@ export async function startCheckout(input: z.input<typeof targetSchema>): Promis
       amount: quote.amount,
       currency: quote.currency,
       description: paymentDescription(quote.plan, quote.cycle, quote.kind),
-      customer: { email: account.email, name: account.profile.full_name, phone: account.profile.phone },
-      redirectUrl: `${publicEnv.NEXT_PUBLIC_APP_URL}/api/billing/return`,
+      customer: {
+        email: account.email,
+        name: account.profile.full_name,
+        phone: account.profile.phone,
+        city: account.profile.city,
+      },
+      redirectUrl: `${publicEnv.NEXT_PUBLIC_APP_URL}/api/billing/return?ref=${encodeURIComponent(reference)}`,
+      notifyUrl: `${publicEnv.NEXT_PUBLIC_APP_URL}/api/webhooks/cinetpay`,
       meta: { user_id: account.userId, payment_id: payment.id, kind: quote.kind },
     });
     await recordAudit({
@@ -222,7 +229,7 @@ export async function getReceiptUrl(paymentId: string): Promise<{ ok: true; url:
   return data ? { ok: true, url: data.signedUrl } : { ok: false, reason: "provider_error" };
 }
 
-/** Bac à sable local : simule la réponse de l'opérateur puis revient comme le ferait Flutterwave. */
+/** Bac à sable local : simule la réponse de l'opérateur puis revient comme le ferait CinetPay. */
 export async function completeSandboxPayment(input: {
   reference: string;
   outcome: string;

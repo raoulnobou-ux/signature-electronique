@@ -1,7 +1,7 @@
 import { createHmac } from "node:crypto";
 import { PDFDocument } from "pdf-lib";
 import { describe, expect, it, vi } from "vitest";
-import { FlutterwaveProvider, isAuthenticWebhook, mapStatus } from "@/lib/billing/flutterwave";
+import { CinetPayProvider, mapStatus, notificationToken, parseNotificationBody } from "@/lib/billing/cinetpay";
 import { quoteCheckout, roundAmount, type PriceTable, type QuoteSubscription } from "@/lib/billing/quote";
 import { paymentMethodLabel, renderReceipt } from "@/lib/billing/receipt";
 import { SandboxProvider } from "@/lib/billing/sandbox";
@@ -82,70 +82,124 @@ describe("rappels de renouvellement", () => {
   });
 });
 
-describe("Flutterwave", () => {
-  const body = JSON.stringify({ event: "charge.completed", data: { id: 4242, tx_ref: "QS-abc", status: "successful", amount: 5000, currency: "XAF" } });
+describe("CinetPay", () => {
+  const SECRET = "cle-secrete";
+  const notification: Record<string, string> = {
+    cpm_site_id: "105",
+    cpm_trans_id: "QS-ABC123",
+    cpm_trans_date: "2026-09-28 11:02:43",
+    cpm_amount: "5000",
+    cpm_currency: "XAF",
+    signature: "sig",
+    payment_method: "OMCM",
+    cel_phone_num: "690000000",
+    cpm_phone_prefixe: "237",
+    cpm_language: "fr",
+    cpm_version: "V4",
+    cpm_payment_config: "Single",
+    cpm_page_action: "Payment",
+    cpm_custom: "",
+    cpm_designation: "Abonnement",
+    cpm_error_message: "SUCCES",
+  };
+  const body = new URLSearchParams(notification).toString();
+  // Jeton calculé indépendamment : HMAC-SHA256 (hex) des champs concaténés dans l'ordre documenté.
+  const token = createHmac("sha256", SECRET).update(Object.values(notification).join("")).digest("hex");
 
-  it("authentifie les webhooks (HMAC ou verif-hash) et rejette le reste", () => {
-    const hmac = createHmac("sha256", "secret-hash").update(body).digest("base64");
-    expect(isAuthenticWebhook(new Headers({ "flutterwave-signature": hmac }), body, "secret-hash")).toBe(true);
-    expect(isAuthenticWebhook(new Headers({ "flutterwave-signature": hmac }), body + " ", "secret-hash")).toBe(false);
-    expect(isAuthenticWebhook(new Headers({ "verif-hash": "secret-hash" }), body, "secret-hash")).toBe(true);
-    expect(isAuthenticWebhook(new Headers({ "verif-hash": "autre" }), body, "secret-hash")).toBe(false);
-    expect(isAuthenticWebhook(new Headers(), body, "secret-hash")).toBe(false);
+  it("jeton x-token : HMAC-SHA256 des champs dans l'ordre de la documentation", () => {
+    expect(notificationToken(parseNotificationBody(body), SECRET)).toBe(token);
+    expect(parseNotificationBody(JSON.stringify(notification))).toEqual(notification);
   });
 
-  it("décode un webhook authentique avec une clé d'idempotence stable", () => {
-    const provider = new FlutterwaveProvider("sk", "secret-hash");
-    const event = provider.parseWebhook(new Headers({ "verif-hash": "secret-hash" }), body);
-    expect(event).toMatchObject({ key: "charge.completed:4242:successful", reference: "QS-abc", transactionId: "4242" });
-    expect(provider.parseWebhook(new Headers({ "verif-hash": "x" }), body)).toBeNull();
-    expect(new FlutterwaveProvider("sk", undefined).parseWebhook(new Headers({ "verif-hash": "" }), body)).toBeNull();
+  it("n'accepte que les notifications signées de notre site", () => {
+    const provider = new CinetPayProvider("api", "105", SECRET);
+    const event = provider.parseWebhook(new Headers({ "x-token": token }), body);
+    expect(event).toMatchObject({ reference: "QS-ABC123", transactionId: "QS-ABC123" });
+    expect(event!.key).toMatch(/^notify:QS-ABC123:/);
+    expect(provider.parseWebhook(new Headers({ "x-token": token }), body.replace("5000", "50"))).toBeNull();
+    expect(provider.parseWebhook(new Headers({ "x-token": "0".repeat(64) }), body)).toBeNull();
+    expect(provider.parseWebhook(new Headers(), body)).toBeNull();
+    expect(new CinetPayProvider("api", "999", SECRET).parseWebhook(new Headers({ "x-token": token }), body)).toBeNull();
+    expect(new CinetPayProvider("api", "105", undefined).parseWebhook(new Headers({ "x-token": token }), body)).toBeNull();
   });
 
-  it("revérifie la transaction par l'API (par identifiant, sinon par référence)", async () => {
-    const fetcher = vi.fn(async (url: string | URL | Request) => {
-      const u = String(url);
-      const data = { id: 4242, tx_ref: "QS-abc", amount: 5000, currency: "XAF", status: "successful", payment_type: "mobilemoneyfranco" };
-      return new Response(JSON.stringify({ status: "success", data }), { status: u.includes("/transactions/") ? 200 : 404 });
-    });
-    const provider = new FlutterwaveProvider("sk_test", "h", fetcher as unknown as typeof fetch);
-    const tx = await provider.verifyTransaction({ reference: "QS-abc", transactionId: "4242", expected: { amount: 1, currency: "XAF" } });
-    expect(tx).toMatchObject({ status: "successful", amount: 5000, currency: "XAF", method: "mobilemoneyfranco", transactionId: "4242" });
-    expect(String(fetcher.mock.calls[0]![0])).toBe("https://api.flutterwave.com/v3/transactions/4242/verify");
-    const headers = (fetcher.mock.calls[0] as unknown as [string, RequestInit])[1].headers as Record<string, string>;
-    expect(headers.Authorization).toBe("Bearer sk_test");
-
-    await provider.verifyTransaction({ reference: "QS-abc", transactionId: "sbx_forged", expected: { amount: 1, currency: "XAF" } });
-    expect(String(fetcher.mock.calls[1]![0])).toContain("verify_by_reference?tx_ref=QS-abc");
+  it("revérifie la transaction par l'API /payment/check", async () => {
+    const fetcher = vi.fn(async () =>
+      new Response(
+        JSON.stringify({
+          code: "00",
+          message: "SUCCES",
+          data: { amount: "5000", currency: "XAF", status: "ACCEPTED", payment_method: "MOMOCM", operator_id: "MP2609.1102" },
+        }),
+      ),
+    );
+    const provider = new CinetPayProvider("api-key", "105", SECRET, fetcher as unknown as typeof fetch);
+    const tx = await provider.verifyTransaction({ reference: "QS-ABC123", transactionId: null, expected: { amount: 1, currency: "XAF" } });
+    expect(tx).toMatchObject({ status: "successful", amount: 5000, currency: "XAF", method: "MOMOCM", transactionId: "MP2609.1102", reference: "QS-ABC123" });
+    const [url, init] = fetcher.mock.calls[0] as unknown as [string, RequestInit];
+    expect(url).toBe("https://api-checkout.cinetpay.com/v2/payment/check");
+    expect(JSON.parse(init.body as string)).toEqual({ apikey: "api-key", site_id: "105", transaction_id: "QS-ABC123" });
   });
 
-  it("transaction inconnue → null (paiement abandonné)", async () => {
-    const fetcher = vi.fn(async () => new Response(JSON.stringify({ status: "error", message: "No transaction was found" }), { status: 400 }));
-    const provider = new FlutterwaveProvider("sk", "h", fetcher as unknown as typeof fetch);
-    expect(await provider.verifyTransaction({ reference: "QS-x", transactionId: null, expected: { amount: 1, currency: "XAF" } })).toBeNull();
+  it("paiement refusé → échec ; transaction inconnue → null", async () => {
+    const refused = vi.fn(async () => new Response(JSON.stringify({ code: "627", message: "TRANSACTION_CANCEL", data: { amount: "5000", currency: "XAF", status: "REFUSED" } })));
+    const p1 = new CinetPayProvider("k", "105", SECRET, refused as unknown as typeof fetch);
+    expect(await p1.verifyTransaction({ reference: "QS-1", transactionId: null })).toMatchObject({ status: "failed", failureReason: "TRANSACTION_CANCEL" });
+    const unknown = vi.fn(async () => new Response(JSON.stringify({ code: "662", message: "WAITING_CUSTOMER_PAYMENT" })));
+    const p2 = new CinetPayProvider("k", "105", SECRET, unknown as unknown as typeof fetch);
+    expect(await p2.verifyTransaction({ reference: "QS-1", transactionId: null })).toBeNull();
   });
 
-  it("crée un checkout Mobile Money + carte en FCFA", async () => {
-    const fetcher = vi.fn(async () => new Response(JSON.stringify({ status: "success", data: { link: "https://checkout.flutterwave.com/v3/hosted/pay/abc" } })));
-    const provider = new FlutterwaveProvider("sk", "h", fetcher as unknown as typeof fetch);
-    const { url } = await provider.createCheckout({
+  it("crée un checkout Mobile Money + carte en FCFA, carte seule en dollars", async () => {
+    const fetcher = vi.fn(async () => new Response(JSON.stringify({ code: "201", message: "CREATED", data: { payment_token: "t", payment_url: "https://checkout.cinetpay.com/payment/t" } })));
+    const provider = new CinetPayProvider("api-key", "105", SECRET, fetcher as unknown as typeof fetch);
+    const request = {
       reference: "QS-1",
       amount: 5000,
-      currency: "XAF",
+      currency: "XAF" as const,
       description: "Abonnement Essentiel — mensuel",
-      customer: { email: "a@b.cm", name: "Awa", phone: "+237690000000" },
-      redirectUrl: "https://quicksign.app/api/billing/return",
+      customer: { email: "a@b.cm", name: "Awa Ngono Mballa", phone: "+237690000000", city: "Yaoundé" },
+      redirectUrl: "https://quicksign.app/api/billing/return?ref=QS-1",
+      notifyUrl: "https://quicksign.app/api/webhooks/cinetpay",
       meta: { user_id: "u" },
-    });
-    expect(url).toContain("flutterwave.com");
+    };
+    const { url } = await provider.createCheckout(request);
+    expect(url).toBe("https://checkout.cinetpay.com/payment/t");
     const sent = JSON.parse((fetcher.mock.calls[0] as unknown as [string, RequestInit])[1].body as string);
-    expect(sent).toMatchObject({ tx_ref: "QS-1", amount: 5000, currency: "XAF", payment_options: "mobilemoneyfranco,card", customer: { phonenumber: "+237690000000" } });
+    expect(sent).toMatchObject({
+      apikey: "api-key",
+      site_id: "105",
+      transaction_id: "QS-1",
+      amount: 5000,
+      currency: "XAF",
+      channels: "ALL",
+      notify_url: "https://quicksign.app/api/webhooks/cinetpay",
+      return_url: "https://quicksign.app/api/billing/return?ref=QS-1",
+      customer_name: "Awa",
+      customer_surname: "Ngono Mballa",
+      customer_city: "Yaoundé",
+      customer_country: "CM",
+    });
+    await provider.createCheckout({ ...request, currency: "USD", amount: 9 });
+    expect(JSON.parse((fetcher.mock.calls[1] as unknown as [string, RequestInit])[1].body as string).channels).toBe("CREDIT_CARD");
   });
 
-  it("statuts", () => {
-    expect(mapStatus("successful")).toBe("successful");
-    expect(mapStatus("failed")).toBe("failed");
-    expect(mapStatus("pending")).toBe("pending");
+  it("une erreur de CinetPay est remontée clairement", async () => {
+    const fetcher = vi.fn(async () => new Response(JSON.stringify({ code: "608", message: "MINIMUM_REQUIRED_FIELDS" }), { status: 400 }));
+    const provider = new CinetPayProvider("k", "105", SECRET, fetcher as unknown as typeof fetch);
+    await expect(
+      provider.createCheckout({ reference: "QS-1", amount: 1, currency: "XAF", description: "x", customer: { email: "a@b.cm", name: "", phone: null }, redirectUrl: "https://x", notifyUrl: "https://x", meta: {} }),
+    ).rejects.toThrow(/MINIMUM_REQUIRED_FIELDS/);
+  });
+
+  it("statuts et moyens de paiement", () => {
+    expect(mapStatus("ACCEPTED")).toBe("successful");
+    expect(mapStatus("REFUSED")).toBe("failed");
+    expect(mapStatus("EXPIRED")).toBe("failed");
+    expect(mapStatus("PENDING")).toBe("pending");
+    expect(paymentMethodLabel("OMCM")).toBe("Orange Money");
+    expect(paymentMethodLabel("MOMOCM")).toBe("Mobile Money (MTN)");
+    expect(paymentMethodLabel("VISAM")).toBe("Carte bancaire");
   });
 });
 

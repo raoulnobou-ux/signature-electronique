@@ -9,7 +9,7 @@ QuickSign est une application web (SaaS) de signature électronique pensée pour
 
 ## Stack
 
-Next.js 16 (App Router, TypeScript strict) · Tailwind CSS v4 + composants façon shadcn/ui (Radix UI) · Motion (Framer Motion) · Supabase (Postgres, Auth, Storage, RLS) · pdf.js / pdf-lib · Gotenberg (Word → PDF) · Claude (Anthropic) · Resend · Flutterwave · next-intl · TanStack Query · Vitest + Playwright.
+Next.js 16 (App Router, TypeScript strict) · Tailwind CSS v4 + composants façon shadcn/ui (Radix UI) · Motion (Framer Motion) · Supabase (Postgres, Auth, Storage, RLS) · pdf.js / pdf-lib · Gotenberg (Word → PDF) · Claude (Anthropic) · Resend · CinetPay · next-intl · TanStack Query · Vitest + Playwright.
 
 ## Prérequis
 
@@ -97,8 +97,8 @@ Le schéma complet (tables, Row Level Security, buckets privés, trigger de cré
 ## Abonnements et paiements
 
 - Page `/app/abonnement` : plan actuel, usage, choix du plan (mensuel/annuel, FCFA/USD), récapitulatif exact (prorata), historique et reçus PDF.
-- Prestataire : **Flutterwave** (Mobile Money MTN/Orange + carte). Renseigner `FLUTTERWAVE_SECRET_KEY`, `FLUTTERWAVE_PUBLIC_KEY` et `FLUTTERWAVE_WEBHOOK_HASH`, puis déclarer le webhook `https://<domaine>/api/webhooks/flutterwave` (Settings → Webhooks) avec le même « secret hash ». Commencer avec les clés de **test** Flutterwave.
-- Sans clé Flutterwave, `PAYMENTS_SANDBOX=true` active un paiement simulé (développement, tests e2e) ; jamais en production.
+- Prestataire : **CinetPay** (Mobile Money MTN/Orange + carte). Dans le back-office CinetPay (Intégrations), récupérer l'**API key**, le **Site ID** et la **clé secrète**, puis renseigner `CINETPAY_API_KEY`, `CINETPAY_SITE_ID` et `CINETPAY_SECRET_KEY`. L'URL de notification est envoyée à chaque paiement (`https://<domaine>/api/webhooks/cinetpay`) et le retour client arrive sur `/api/billing/return`.
+- Sans clé CinetPay, `PAYMENTS_SANDBOX=true` active un paiement simulé (développement, tests e2e) ; jamais en production.
 - Tâche planifiée quotidienne : `/api/cron/billing` (rappels J-5/J-2/J, fin d'essai, grâce de 3 jours, lecture seule), déclarée dans `vercel.json`.
 - Les prix se modifient dans la table `plans_config` sans redéployer.
 
@@ -118,7 +118,7 @@ Le schéma complet (tables, Row Level Security, buckets privés, trigger de cré
 
 ## Déploiement
 
-La procédure complète (Supabase, Gotenberg, Vercel, domaine, Resend, Flutterwave, Sentry, tâches planifiées) est détaillée dans la section 13 de `SPEC.md` et sera finalisée en Phase 10. En résumé :
+La procédure complète (Supabase, Gotenberg, Vercel, domaine, Resend, CinetPay, Sentry, tâches planifiées) est détaillée dans la section 13 de `SPEC.md` et sera finalisée en Phase 10. En résumé :
 
 1. Créer deux projets Supabase (préproduction et production), puis `supabase link --project-ref <ref>` et `supabase db push`.
 2. Déployer Gotenberg (image `gotenberg/gotenberg:8`) sur Railway, Render ou Fly.io, protégé par un jeton.

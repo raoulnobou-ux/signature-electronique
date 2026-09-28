@@ -64,7 +64,7 @@ Référence d'ambiance : Linear, Vercel, Arc, Stripe, Notion Calendar. Futuriste
 
 ## 4. Stack technique
 
-Next.js (App Router) + TypeScript strict · Tailwind + shadcn/ui + Framer Motion · lucide-react · Supabase (Postgres, Auth, Storage, RLS) · pdfjs-dist · pdf-lib · signature_pad · react-rnd ou dnd-kit · Gotenberg (Word → PDF), repli CloudConvert · API Anthropic (Claude, côté serveur, streaming) · Resend · Flutterwave · react-hook-form + zod · TanStack Query · Vitest + Playwright · Vercel · Sentry + Vercel Analytics · Vercel Cron ou pg_cron.
+Next.js (App Router) + TypeScript strict · Tailwind + shadcn/ui + Framer Motion · lucide-react · Supabase (Postgres, Auth, Storage, RLS) · pdfjs-dist · pdf-lib · signature_pad · react-rnd ou dnd-kit · Gotenberg (Word → PDF), repli CloudConvert · API Anthropic (Claude, côté serveur, streaming) · Resend · CinetPay · react-hook-form + zod · TanStack Query · Vitest + Playwright · Vercel · Sentry + Vercel Analytics · Vercel Cron ou pg_cron.
 
 Structure : `app/`, `components/`, `lib/`, `messages/`, `supabase/migrations/`, `tests/`, `SPEC.md`, `DECISIONS.md`, `README.md`, `.env.example`.
 
@@ -117,7 +117,7 @@ Structure : `app/`, `components/`, `lib/`, `messages/`, `supabase/migrations/`, 
 
 ## 10. Paiement
 
-Fondateur au Cameroun : FCFA (XAF) via Mobile Money + cartes internationales (Stripe indisponible au Cameroun). **Flutterwave** (checkout, abonnements, webhooks) ; vérifier la documentation à jour ; couche d'abstraction `PaymentProvider` (CinetPay, Notch Pay possibles).
+Fondateur au Cameroun : FCFA (XAF) via Mobile Money + cartes internationales (Stripe indisponible au Cameroun). **CinetPay** (checkout Mobile Money + carte, notifications) ; vérifier la documentation à jour ; couche d'abstraction `PaymentProvider` (Notch Pay, Flutterwave possibles).
 
 Parcours : choix du plan → mensuel/annuel → devise (XAF si +237) → checkout (Mobile Money / carte) → webhook vérifié (signature + revérification API) → activation, période, reçu. Récurrence : prélèvement auto si possible (cartes), sinon rappels J-5, J-2, J avec lien de paiement ; grâce de 3 jours, puis lecture seule. Reçus PDF numérotés.
 
@@ -135,7 +135,7 @@ Juridique : signature électronique **simple** avec valeur de preuve par la tra�
 
 ## 13. Déploiement
 
-Production et préproduction séparées (un projet Supabase chacune). Déploiement continu depuis `main`, aperçus par branche. Étapes : GitHub → Supabase (migrations, auth e-mail + Google, buckets) → Gotenberg (Railway/Render/Fly.io, jeton) → Vercel (variables) → domaine → Resend (SPF, DKIM, DMARC) → Flutterwave (webhook `/api/webhooks/flutterwave`, sandbox puis prod) → Sentry, Analytics, crons → test de bout en bout → ouverture. Variables : voir `.env.example`. Option PWA installable.
+Production et préproduction séparées (un projet Supabase chacune). Déploiement continu depuis `main`, aperçus par branche. Étapes : GitHub → Supabase (migrations, auth e-mail + Google, buckets) → Gotenberg (Railway/Render/Fly.io, jeton) → Vercel (variables) → domaine → Resend (SPF, DKIM, DMARC) → CinetPay (notification `/api/webhooks/cinetpay`, compte de test puis prod) → Sentry, Analytics, crons → test de bout en bout → ouverture. Variables : voir `.env.example`. Option PWA installable.
 
 ## 14. Feuille de route
 

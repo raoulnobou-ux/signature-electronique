@@ -5,15 +5,15 @@ import type { Json } from "@/lib/supabase/database.types";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 /**
- * Webhook Flutterwave (à déclarer dans le tableau de bord : Settings → Webhooks).
- * 1. authentification de la requête (secret hash) ;
- * 2. journal brut + idempotence (un même événement n'est traité qu'une fois) ;
+ * Notification CinetPay (notify_url, envoyée à chaque paiement) :
+ * 1. authentification par le jeton HMAC `x-token` (clé secrète) ;
+ * 2. journal brut + idempotence (une même notification n'est traitée qu'une fois) ;
  * 3. revérification de la transaction par l'API avant toute activation (settlePayment).
- * Une erreur renvoie 500 pour que Flutterwave réessaie ; l'événement reste rejouable.
+ * Une erreur renvoie 500 pour que CinetPay réessaie ; l'événement reste rejouable.
  */
 export async function POST(request: Request) {
   const provider = getPaymentProvider();
-  if (!provider || provider.name !== "flutterwave") {
+  if (!provider || provider.name !== "cinetpay") {
     return NextResponse.json({ error: "not_configured" }, { status: 404 });
   }
 
@@ -66,4 +66,9 @@ export async function POST(request: Request) {
       .eq("id", eventId!);
     return NextResponse.json({ error: "processing" }, { status: 500 });
   }
+}
+
+/** CinetPay vérifie la disponibilité de l'URL de notification par une simple requête GET. */
+export function GET() {
+  return NextResponse.json({ ok: true });
 }

@@ -13,10 +13,11 @@ const serverSchema = z.object({
   GOTENBERG_TOKEN: z.string().optional(),
   RESEND_API_KEY: z.string().optional(),
   EMAIL_FROM: z.string().default("QuickSign <bonjour@quicksign.app>"),
-  FLUTTERWAVE_PUBLIC_KEY: z.string().optional(),
-  FLUTTERWAVE_SECRET_KEY: z.string().optional(),
-  FLUTTERWAVE_WEBHOOK_HASH: z.string().optional(),
-  /** "true" : paiements simulés sans clé Flutterwave (dev, tests). Ignoré en production Vercel. */
+  CINETPAY_API_KEY: z.string().optional(),
+  CINETPAY_SITE_ID: z.string().optional(),
+  /** Clé secrète : authentifie les notifications (en-tête x-token). */
+  CINETPAY_SECRET_KEY: z.string().optional(),
+  /** "true" : paiements simulés sans clé CinetPay (dev, tests). Ignoré en production Vercel. */
   PAYMENTS_SANDBOX: z.enum(["true", "false"]).optional(),
   VERCEL_ENV: z.string().optional(),
   SENTRY_DSN: z.string().optional(),
