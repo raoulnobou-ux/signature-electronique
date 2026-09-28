@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { openPdf, renderPage } from "@/lib/pdf/client";
+import { cancelRender, openPdf, renderPage } from "@/lib/pdf/client";
 import { cn } from "@/lib/utils";
 
 export type PageSize = { width: number; height: number };
@@ -205,14 +205,17 @@ function PdfPage({
     const canvas = canvasRef.current;
     if (!canvas) return;
     const page = await pdf.getPage(index + 1);
-    await renderPage(page, canvas, width);
-    setRendered(true);
+    if (await renderPage(page, canvas, width)) setRendered(true);
   }, [pdf, index, width]);
 
   useEffect(() => {
     if (!near) return;
+    const canvas = canvasRef.current;
     const id = setTimeout(() => void draw(), 60); // regroupe les changements de zoom rapides
-    return () => clearTimeout(id);
+    return () => {
+      clearTimeout(id);
+      if (canvas) cancelRender(canvas);
+    };
   }, [near, draw]);
 
   return (

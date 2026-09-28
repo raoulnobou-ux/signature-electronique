@@ -176,7 +176,8 @@ export function DocumentsView({ documents, total, folders, tags, filters, readOn
         toast.success(success);
         setSelected(new Set());
         after?.();
-        router.refresh();
+        // Pas de router.refresh() : l'action appelle revalidatePath et renvoie déjà la page à jour.
+        // Un refresh en parallèle d'un changement de filtre pouvait réafficher l'ancienne liste.
       } else toast.error(t("toasts.error"));
     });
 

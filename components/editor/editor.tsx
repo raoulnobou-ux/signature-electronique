@@ -290,7 +290,7 @@ export function Editor({ document: doc, pdfUrl, initialFields, assets: initialAs
             <Redo2 />
           </Button>
         </Tooltip>
-        <Button size="sm" className="ml-1" disabled={fields.length === 0} onClick={() => setConfirmOpen(true)}>
+        <Button size="sm" className="ml-1" aria-label={t("finalize")} disabled={fields.length === 0} onClick={() => setConfirmOpen(true)}>
           <FileCheck2 /> <span className="hidden sm:inline">{t("finalize")}</span>
         </Button>
       </header>

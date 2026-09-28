@@ -1,6 +1,6 @@
 "use client";
 
-import type { PDFDocumentProxy, PDFPageProxy } from "pdfjs-dist";
+import type { PDFDocumentProxy, PDFPageProxy, RenderTask } from "pdfjs-dist";
 
 // Build « legacy » de pdf.js : polyfills inclus, fonctionne sur les navigateurs mobiles
 // plus anciens très répandus (la build standard exige des navigateurs très récents).
@@ -34,13 +34,23 @@ export async function openPdf(
   return task.promise;
 }
 
-/** Rend une page dans un canvas à la largeur CSS donnée (net sur écrans haute densité). */
+/** Rendu en cours par canevas : un nouveau rendu (zoom) annule le précédent. */
+const activeRenders = new WeakMap<HTMLCanvasElement, RenderTask>();
+
+const isCancelled = (error: unknown) =>
+  error instanceof Error && error.name === "RenderingCancelledException";
+
+/**
+ * Dessine une page dans un canevas à la largeur CSS voulue (netteté selon l'écran).
+ * Retourne false si le rendu a été annulé (zoom rapide, page démontée) — ce n'est pas une erreur.
+ */
 export async function renderPage(
   page: PDFPageProxy,
   canvas: HTMLCanvasElement,
   cssWidth: number,
   maxScale = 3,
-): Promise<void> {
+): Promise<boolean> {
+  cancelRender(canvas);
   const base = page.getViewport({ scale: 1 });
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
   const scale = Math.min(maxScale, (cssWidth * dpr) / base.width);
@@ -48,8 +58,23 @@ export async function renderPage(
   canvas.width = Math.floor(viewport.width);
   canvas.height = Math.floor(viewport.height);
   const context = canvas.getContext("2d");
-  if (!context) return;
-  await page.render({ canvas, canvasContext: context, viewport }).promise;
+  if (!context) return false;
+  const task = page.render({ canvas, canvasContext: context, viewport });
+  activeRenders.set(canvas, task);
+  try {
+    await task.promise;
+    return true;
+  } catch (error) {
+    if (isCancelled(error)) return false;
+    throw error;
+  } finally {
+    if (activeRenders.get(canvas) === task) activeRenders.delete(canvas);
+  }
+}
+
+export function cancelRender(canvas: HTMLCanvasElement) {
+  activeRenders.get(canvas)?.cancel();
+  activeRenders.delete(canvas);
 }
 
 /** Vignette JPEG de la première page (≈ 360 px de large, < 200 Ko). */

@@ -88,6 +88,12 @@ Le schéma complet (tables, Row Level Security, buckets privés, trigger de cré
 - Gotenberg en production : image `gotenberg/gotenberg:8` lancée avec `--api-enable-basic-auth`, variables `GOTENBERG_API_BASIC_AUTH_USERNAME=quicksign` et `GOTENBERG_API_BASIC_AUTH_PASSWORD=<GOTENBERG_TOKEN>`.
 - Tâche planifiée quotidienne : `/api/cron/purge-trash` (corbeille > 30 jours), déclarée dans `vercel.json`.
 
+## Signature
+
+- Bibliothèque `/app/signatures` : signatures et paraphes dessinés (lissage, épaisseur, couleur), tapés (6 écritures manuscrites libres OFL) ou importés en photo (fond retiré). PNG + SVG stockés dans le bucket privé `signatures`.
+- Éditeur `/app/documents/<id>/signer` : placement au toucher, déplacement, redimensionnement, rotation, opacité, guides d'alignement, annuler/rétablir (Ctrl+Z / Ctrl+Y), brouillon enregistré automatiquement (`placed_fields`).
+- Finalisation côté serveur (pdf-lib) : nouvelle version `v<n>.pdf`, SHA-256 avant/après, événement d'audit `document.signed`, compteur mensuel. L'original et les versions précédentes ne sont jamais modifiés.
+
 ## Authentification
 
 - Inscription en deux étapes (compte, puis profil facultatif), connexion par e-mail ou Google, mot de passe oublié.
@@ -99,7 +105,7 @@ Le schéma complet (tables, Row Level Security, buckets privés, trigger de cré
 
 ## Tests
 
-- `npm test` : tests unitaires (droits, dates d'essai, validations, détection de type de fichier) **et** tests d'intégration de la base (RLS, triggers) si Supabase local tourne.
+- `npm test` : tests unitaires (droits, dates d'essai, validations, détection de type de fichier, génération du PDF signé) **et** tests d'intégration de la base (RLS, triggers) si Supabase local tourne.
 - `npm run test:e2e` : parcours complets dans Chromium (bureau et mobile), dont inscription → e-mail de confirmation (lu dans Mailpit) → essai de 6 jours. Nécessite Supabase local et un build (`npm run build`).
 
 ## Déploiement

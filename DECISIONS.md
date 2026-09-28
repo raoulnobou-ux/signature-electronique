@@ -124,3 +124,21 @@ _Mesure (Lighthouse mobile, build de production) :_ performance 94, accessibilit
 **D47 — Filtres de la liste dans l'URL** (partageables, bouton retour), paramètres « voulus » gardés en mémoire pour éviter qu'une recherche différée n'écrase une navigation en cours sur réseau lent. Dates relatives calculées côté navigateur (pas d'écart d'hydratation).
 
 **D48 — Corbeille : purge automatique à 30 jours** par une tâche planifiée quotidienne (`/api/cron/purge-trash`, protégée par `CRON_SECRET`, déclarée dans `vercel.json`).
+
+## Signature et éditeur (Phase 5)
+
+**D49 — Positions en pourcentage de la page affichée.** Chaque élément est stocké en % (x, y, largeur, hauteur) de la page telle que l'utilisateur la voit : indépendant du zoom et de l'écran. Au moment de signer, une matrice de transformation gère la rotation de page (0/90/180/270), le décalage de la CropBox et la rotation propre de l'élément autour de son centre.
+
+**D50 — Le PDF signé est produit côté serveur**, jamais dans le navigateur : droits (quota mensuel, cachets réservés au Pro), images de la bibliothèque et fichier source sont relus depuis le stockage, ce qui empêche d'apposer une image qui n'appartient pas au compte. Le client n'envoie que la liste des éléments (validée par zod).
+
+**D51 — Chaque signature crée une nouvelle version** (`v1.pdf`, `v2.pdf`…) avec SHA-256 avant/après dans le journal d'audit. La mise à jour est conditionnelle sur `current_version` : deux finalisations simultanées ne peuvent pas écraser la même version.
+
+**D52 — Signatures stockées en PNG transparent et en SVG.** Le PNG est apposé sur le PDF (rendu identique partout) ; le SVG garde une version vectorielle pour les usages futurs (certificat, impression haute définition). Une seule signature et un seul paraphe « par défaut » par compte (index unique partiel).
+
+**D53 — Écritures manuscrites auto-hébergées** (6 polices sous licence OFL, woff2) : aucun appel externe, rendu identique sur réseau lent.
+
+**D54 — Texte apposé en Helvetica (police standard PDF)** : aucune police à embarquer, PDF léger. Les caractères non encodables sont remplacés proprement (le français est entièrement couvert).
+
+**D55 — Historique local et brouillon automatique.** Annuler/rétablir en mémoire (80 étapes) ; un geste (glisser, redimensionner) compte pour une seule étape. Le brouillon est enregistré 1 s après la dernière modification et restauré à la réouverture.
+
+**D56 — Rendus pdf.js annulables.** Chaque canevas garde son rendu en cours ; un zoom ou le démontage de la page l'annule proprement (l'annulation n'est pas une erreur). Après une action serveur, pas de `router.refresh()` en plus du `revalidatePath` : un rafraîchissement concurrent d'un changement de filtre pouvait réafficher l'ancienne liste.

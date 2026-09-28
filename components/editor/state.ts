@@ -114,7 +114,7 @@ export function defaultSize(type: FieldType, pageAspect: number, assetAspect?: n
     case "checkbox":
       return { w: 3, h: heightFor(3, 1) };
     case "date":
-      return { w: 32, h: 2.4 };
+      return { w: 36, h: 2.4 };
     case "name":
       return { w: 30, h: 2.4 };
     case "mention":
