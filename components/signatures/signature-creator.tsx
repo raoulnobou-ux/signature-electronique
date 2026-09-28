@@ -1,6 +1,6 @@
 "use client";
 
-import { Eraser, ImageUp, Keyboard, PenLine, Undo2 } from "lucide-react";
+import { Eraser, ImageUp, Keyboard, PenLine, Stamp, Undo2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type SignaturePadType from "signature_pad";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -21,6 +22,7 @@ import {
   trimCanvas,
   type TrimmedImage,
 } from "@/lib/images/signature";
+import { renderStampSvg, STAMP_COLORS, STAMP_PRESETS, STAMP_SHAPES, type StampOptions } from "@/lib/images/stamp";
 import { cn } from "@/lib/utils";
 
 const INKS = [
@@ -29,7 +31,7 @@ const INKS = [
   { key: "black", value: "#111827" },
 ] as const;
 
-type Method = "draw" | "type" | "upload";
+type Method = "draw" | "type" | "upload" | "generate";
 
 type Props = {
   open: boolean;
@@ -50,7 +52,7 @@ function CreatorDialog({ open, onOpenChange, type: initialType = "signature", al
   const t = useTranslations("signatures");
   const tc = useTranslations("signatures.creator");
   const [type, setType] = useState<AssetType>(initialType);
-  const [method, setMethod] = useState<Method>(initialType === "stamp" ? "upload" : "draw");
+  const [method, setMethod] = useState<Method>(initialType === "stamp" ? "generate" : "draw");
   const [ink, setInk] = useState<string>(INKS[0].value);
   const [name, setName] = useState("");
   const [saving, setSaving] = useState(false);
@@ -60,7 +62,9 @@ function CreatorDialog({ open, onOpenChange, type: initialType = "signature", al
   const save = async () => {
     const result = await getImage.current();
     if (!result) {
-      toast.error(method === "draw" ? tc("draw.empty") : method === "type" ? tc("type.empty") : tc("upload.invalid"));
+      toast.error(
+        method === "draw" ? tc("draw.empty") : method === "type" ? tc("type.empty") : method === "generate" ? tc("stamp.empty") : tc("upload.invalid"),
+      );
       return;
     }
     setSaving(true);
@@ -70,7 +74,7 @@ function CreatorDialog({ open, onOpenChange, type: initialType = "signature", al
       if (result.svg) form.append("svg", new Blob([result.svg], { type: "image/svg+xml" }), "signature.svg");
       form.append("name", name.trim() || tc(`namePlaceholders.${type}`));
       form.append("type", type);
-      form.append("method", method);
+      form.append("method", method === "generate" ? "generated" : method);
       form.append("width", String(result.image.width));
       form.append("height", String(result.image.height));
       const response = await createSignatureAsset(form);
@@ -119,7 +123,8 @@ function CreatorDialog({ open, onOpenChange, type: initialType = "signature", al
                     disabled={k === "stamp" && !stampsAllowed}
                     onClick={() => {
                       setType(k);
-                      if (k === "stamp") setMethod("upload");
+                      if (k === "stamp") setMethod("generate");
+                      else if (method === "generate") setMethod("draw");
                     }}
                     className={cn(
                       "h-9 cursor-pointer rounded-full px-4 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-40",
@@ -133,7 +138,16 @@ function CreatorDialog({ open, onOpenChange, type: initialType = "signature", al
             )}
 
             <Tabs value={method} onValueChange={(v) => setMethod(v as Method)}>
-              {type !== "stamp" && (
+              {type === "stamp" ? (
+                <TabsList>
+                  <TabsTrigger value="generate">
+                    <Stamp aria-hidden /> {tc("tabs.generate")}
+                  </TabsTrigger>
+                  <TabsTrigger value="upload">
+                    <ImageUp aria-hidden /> {tc("tabs.upload")}
+                  </TabsTrigger>
+                </TabsList>
+              ) : (
                 <TabsList>
                   <TabsTrigger value="draw">
                     <PenLine aria-hidden /> {tc("tabs.draw")}
@@ -155,9 +169,12 @@ function CreatorDialog({ open, onOpenChange, type: initialType = "signature", al
               <TabsContent value="upload">
                 {method === "upload" && <UploadPad register={(fn) => (getImage.current = fn)} />}
               </TabsContent>
+              <TabsContent value="generate">
+                {method === "generate" && <StampPad register={(fn) => (getImage.current = fn)} />}
+              </TabsContent>
             </Tabs>
 
-            {method !== "upload" && (
+            {(method === "draw" || method === "type") && (
               <div className="flex items-center gap-3">
                 <span className="text-sm text-muted-foreground">{tc("draw.color")}</span>
                 <div role="radiogroup" aria-label={tc("draw.color")} className="flex gap-2">
@@ -193,10 +210,10 @@ function CreatorDialog({ open, onOpenChange, type: initialType = "signature", al
   );
 }
 
-type Register = (fn: () => Promise<{ image: TrimmedImage; svg?: string } | null>) => void;
+export type Register = (fn: () => Promise<{ image: TrimmedImage; svg?: string } | null>) => void;
 
 /** Zone de dessin : trait lissé à épaisseur variable (signature_pad), lueur pendant le tracé. */
-function DrawPad({ ink, register, initials }: { ink: string; register: Register; initials: boolean }) {
+export function DrawPad({ ink, register, initials }: { ink: string; register: Register; initials: boolean }) {
   const tc = useTranslations("signatures.creator.draw");
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const padRef = useRef<SignaturePadType | null>(null);
@@ -318,9 +335,9 @@ function DrawPad({ ink, register, initials }: { ink: string; register: Register;
 }
 
 /** Nom tapé : aperçu instantané dans six écritures manuscrites. */
-function TypePad({ ink, register }: { ink: string; register: Register }) {
+export function TypePad({ ink, register, initialText = "" }: { ink: string; register: Register; initialText?: string }) {
   const tc = useTranslations("signatures.creator.type");
-  const [text, setText] = useState("");
+  const [text, setText] = useState(initialText);
   const [family, setFamily] = useState<string>(HANDWRITING_FONTS[0].family);
   const [ready, setReady] = useState(false);
 
@@ -443,6 +460,119 @@ function UploadPad({ register }: { register: Register }) {
           </label>
         </>
       )}
+    </div>
+  );
+}
+
+/** Convertit un SVG en image PNG haute définition (fond transparent, marges rognées). */
+async function rasterizeSvg(svg: string, scale = 3): Promise<TrimmedImage | null> {
+  const image = new Image();
+  image.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+  await image.decode();
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.round(image.naturalWidth * scale);
+  canvas.height = Math.round(image.naturalHeight * scale);
+  canvas.getContext("2d")!.drawImage(image, 0, 0, canvas.width, canvas.height);
+  return trimCanvas(canvas, 6);
+}
+
+/** Générateur de cachet : nom, fonction, ville, date → rond, ovale ou rectangulaire. */
+function StampPad({ register }: { register: Register }) {
+  const tc = useTranslations("signatures.creator.stamp");
+  const [options, setOptions] = useState<StampOptions>({ ...STAMP_PRESETS[0]!.options, organization: "", title: "", city: "", seed: 7 });
+  const [withDate, setWithDate] = useState(false);
+  const [today] = useState(() => new Intl.DateTimeFormat("fr-FR", { dateStyle: "short", timeZone: "Africa/Douala" }).format(new Date()));
+  const svg = useMemo(() => renderStampSvg({ ...options, date: withDate ? today : "" }), [options, withDate, today]);
+  const set = (patch: Partial<StampOptions>) => setOptions((o) => ({ ...o, ...patch }));
+
+  useEffect(() => {
+    register(async () => {
+      if (!options.organization.trim()) return null;
+      const image = await rasterizeSvg(svg);
+      return image ? { image, svg } : null;
+    });
+  }, [register, svg, options.organization]);
+
+  return (
+    <div className="grid gap-5 sm:grid-cols-[1fr_220px]">
+      <div className="space-y-3">
+        <div role="radiogroup" aria-label={tc("presets.label")} className="flex flex-wrap gap-2">
+          {STAMP_PRESETS.map((preset) => (
+            <button
+              key={preset.id}
+              type="button"
+              role="radio"
+              aria-checked={preset.options.shape === options.shape && preset.options.color === options.color && preset.options.ink === options.ink}
+              onClick={() => set(preset.options)}
+              className="cursor-pointer rounded-full border border-border px-3 py-1.5 text-xs font-medium aria-checked:border-brand-violet aria-checked:bg-accent"
+            >
+              {tc(`presets.${preset.id as "classic" | "official" | "oval" | "clean"}`)}
+            </button>
+          ))}
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="stamp-org">{tc("organization")}</Label>
+          <Input id="stamp-org" value={options.organization} maxLength={60} placeholder={tc("organizationPlaceholder")} onChange={(e) => set({ organization: e.target.value })} />
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="space-y-1.5">
+            <Label htmlFor="stamp-title">{tc("title")}</Label>
+            <Input id="stamp-title" value={options.title} maxLength={40} placeholder={tc("titlePlaceholder")} onChange={(e) => set({ title: e.target.value })} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="stamp-city">{tc("city")}</Label>
+            <Input id="stamp-city" value={options.city} maxLength={40} placeholder={tc("cityPlaceholder")} onChange={(e) => set({ city: e.target.value })} />
+          </div>
+        </div>
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
+          <div role="radiogroup" aria-label={tc("shape")} className="inline-flex rounded-full border border-border bg-secondary p-1">
+            {STAMP_SHAPES.map((shape) => (
+              <button
+                key={shape}
+                type="button"
+                role="radio"
+                aria-checked={options.shape === shape}
+                onClick={() => set({ shape })}
+                className={cn("h-8 cursor-pointer rounded-full px-3 text-xs font-medium", options.shape === shape ? "bg-background-elevated shadow-soft" : "text-muted-foreground")}
+              >
+                {tc(`shapes.${shape}`)}
+              </button>
+            ))}
+          </div>
+          <div role="radiogroup" aria-label={tc("color")} className="flex gap-2">
+            {(Object.keys(STAMP_COLORS) as (keyof typeof STAMP_COLORS)[]).map((color) => (
+              <button
+                key={color}
+                type="button"
+                role="radio"
+                aria-checked={options.color === color}
+                aria-label={tc(`colors.${color}`)}
+                onClick={() => set({ color })}
+                className={cn("size-7 cursor-pointer rounded-full ring-offset-2 ring-offset-popover", options.color === color && "ring-2 ring-ring")}
+                style={{ backgroundColor: STAMP_COLORS[color] }}
+              />
+            ))}
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-x-6 gap-y-2">
+          <label className="flex items-center gap-2 text-sm">
+            <Switch checked={withDate} onCheckedChange={setWithDate} aria-label={tc("includeDate")} /> {tc("includeDate")}
+          </label>
+          <label className="flex items-center gap-2 text-sm">
+            <Switch checked={Boolean(options.ink)} onCheckedChange={(ink) => set({ ink, seed: Math.floor(Math.random() * 900) + 1 })} aria-label={tc("ink")} />
+            {tc("ink")}
+          </label>
+        </div>
+      </div>
+      <figure className="flex items-center justify-center rounded-2xl border border-border bg-white p-3">
+        <div
+          data-testid="stamp-preview"
+          className="w-full [&>svg]:h-auto [&>svg]:w-full"
+          // SVG produit localement par renderStampSvg (textes échappés).
+          dangerouslySetInnerHTML={{ __html: svg }}
+        />
+        <figcaption className="sr-only">{tc("preview")}</figcaption>
+      </figure>
     </div>
   );
 }

@@ -8,6 +8,9 @@ import {
   FileSignature,
   Fingerprint,
   History,
+  Lock,
+  Radio,
+  Send,
 } from "lucide-react";
 import Link from "next/link";
 import { useFormatter, useTranslations } from "next-intl";
@@ -39,10 +42,17 @@ export function DocumentDetail({
   doc,
   pdfUrl,
   readOnly,
+  pendingRequestId,
+  canRequest,
+  extraActions,
 }: {
   doc: Detail;
   pdfUrl: string;
   readOnly: boolean;
+  /** Demande de signature en cours sur ce document (l'édition est alors bloquée). */
+  pendingRequestId: string | null;
+  canRequest: boolean;
+  extraActions?: React.ReactNode;
 }) {
   const t = useTranslations("documents");
   const format = useFormatter();
@@ -79,17 +89,34 @@ export function DocumentDetail({
             {doc.folderName && <span>· {doc.folderName}</span>}
           </div>
         </div>
-        <div className="flex shrink-0 gap-2">
+        <div className="flex shrink-0 flex-wrap gap-2">
           <Button variant="secondary" onClick={() => void download("pdf")}>
             <Download /> {t("actions.download")}
           </Button>
-          {!readOnly && !doc.trashed && (
+          {pendingRequestId ? (
             <Button asChild>
-              <Link href={`/app/documents/${doc.id}/signer`}>
-                <FileSignature /> {doc.status === "signed" ? t("actions.signAgain") : t("actions.sign")}
+              <Link href={`/app/demandes/${pendingRequestId}`}>
+                <Radio /> {t("actions.viewRequest")}
               </Link>
             </Button>
+          ) : (
+            !readOnly &&
+            !doc.trashed && (
+              <>
+                <Button asChild variant="secondary">
+                  <Link href={canRequest ? `/app/documents/${doc.id}/demande` : "/app/demandes"}>
+                    {canRequest ? <Send /> : <Lock />} {t("actions.request")}
+                  </Link>
+                </Button>
+                <Button asChild>
+                  <Link href={`/app/documents/${doc.id}/signer`}>
+                    <FileSignature /> {doc.status === "signed" ? t("actions.signAgain") : t("actions.sign")}
+                  </Link>
+                </Button>
+              </>
+            )
           )}
+          {extraActions}
         </div>
       </div>
 

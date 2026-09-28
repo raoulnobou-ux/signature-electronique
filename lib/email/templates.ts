@@ -169,3 +169,110 @@ export function subscriptionExpiredEmail({ fullName }: { fullName: string }) {
     }),
   };
 }
+
+// ---------------------------------------------------------------------------
+// Demandes de signature (Phase 7)
+// ---------------------------------------------------------------------------
+
+export function requestInvitationEmail({
+  signerName,
+  senderName,
+  documentTitle,
+  message,
+  link,
+  expiresAt,
+  reminder = false,
+}: {
+  signerName: string;
+  senderName: string;
+  documentTitle: string;
+  message: string | null;
+  link: string;
+  expiresAt: string | null;
+  reminder?: boolean;
+}) {
+  return {
+    subject: reminder
+      ? `Rappel : « ${documentTitle} » attend votre signature`
+      : `${senderName} vous invite à signer « ${documentTitle} »`,
+    ...renderEmail({
+      preheader: `Signature en ligne, sans compte, en moins d'une minute${expiresAt ? ` — avant le ${expiresAt}` : ""}.`,
+      title: reminder ? "Votre signature est toujours attendue" : "Un document attend votre signature",
+      paragraphs: [
+        greeting(signerName),
+        `${senderName} vous demande de signer le document « ${documentTitle} » avec QuickSign. Aucun compte n'est nécessaire : ouvrez le lien, lisez le document, puis signez avec le doigt ou la souris.`,
+        ...(message ? [`Message de ${senderName} : « ${message} »`] : []),
+        ...(expiresAt ? [`Ce lien est personnel et valable jusqu'au ${expiresAt}. Ne le transférez pas.`] : []),
+      ],
+      cta: { label: "Lire et signer le document", url: link },
+      footnote: "Vous recevez cet e-mail car quelqu'un a indiqué votre adresse pour signer un document. Si vous ne connaissez pas l'expéditeur, ignorez-le.",
+    }),
+  };
+}
+
+export function requestDeclinedEmail({
+  ownerName,
+  signerName,
+  documentTitle,
+  reason,
+  url,
+}: {
+  ownerName: string;
+  signerName: string;
+  documentTitle: string;
+  reason: string;
+  url: string;
+}) {
+  return {
+    subject: `${signerName} a refusé de signer « ${documentTitle} »`,
+    ...renderEmail({
+      preheader: `Motif : ${reason}`,
+      title: "Signature refusée",
+      paragraphs: [greeting(ownerName), `${signerName} a refusé de signer « ${documentTitle} ».`, `Motif indiqué : « ${reason} »`],
+      cta: { label: "Voir la demande", url },
+    }),
+  };
+}
+
+export function requestCompletedEmail({
+  name,
+  documentTitle,
+  signerCount,
+  verifyUrl,
+  downloadUrl,
+}: {
+  name: string;
+  documentTitle: string;
+  signerCount: number;
+  verifyUrl: string;
+  downloadUrl: string | null;
+}) {
+  return {
+    subject: `« ${documentTitle} » est signé par tous`,
+    ...renderEmail({
+      preheader: "Le document final et son certificat de signature sont joints.",
+      title: "Document entièrement signé",
+      paragraphs: [
+        greeting(name),
+        `Les ${signerCount} signataires ont signé « ${documentTitle} ». Le document final et le certificat de signature (chronologie, empreintes, adresses IP) sont joints à cet e-mail.`,
+        `Chacun peut vérifier l'authenticité du document à tout moment : ${verifyUrl}`,
+      ],
+      cta: downloadUrl ? { label: "Télécharger le document signé", url: downloadUrl } : { label: "Vérifier le document", url: verifyUrl },
+    }),
+  };
+}
+
+export function requestExpiredEmail({ ownerName, documentTitle, url }: { ownerName: string; documentTitle: string; url: string }) {
+  return {
+    subject: `Demande expirée : « ${documentTitle} »`,
+    ...renderEmail({
+      preheader: "Tous les signataires n'ont pas signé avant la date limite.",
+      title: "La demande de signature a expiré",
+      paragraphs: [
+        greeting(ownerName),
+        `La date limite de la demande « ${documentTitle} » est dépassée avant que tous les signataires aient signé. Vous pouvez créer une nouvelle demande depuis le document.`,
+      ],
+      cta: { label: "Voir la demande", url },
+    }),
+  };
+}

@@ -71,22 +71,19 @@ function reducer(state: State, action: Action): State {
   }
 }
 
-export function useEditorState(initial: EditorField[]) {
+export function useEditorState<F extends EditorField = EditorField>(initial: F[]) {
   const [state, dispatch] = useReducer(reducer, { past: [], present: initial, future: [], selectedId: null, revision: 0 });
 
-  const update = useCallback(
-    (fields: EditorField[], commit = true) => dispatch({ type: "set", fields, commit }),
-    [],
-  );
-  const commitFrom = useCallback((before: EditorField[]) => dispatch({ type: "commit", before }), []);
+  const update = useCallback((fields: F[], commit = true) => dispatch({ type: "set", fields, commit }), []);
+  const commitFrom = useCallback((before: F[]) => dispatch({ type: "commit", before }), []);
   const select = useCallback((id: string | null) => dispatch({ type: "select", id }), []);
   const undo = useCallback(() => dispatch({ type: "undo" }), []);
   const redo = useCallback(() => dispatch({ type: "redo" }), []);
 
   return {
-    fields: state.present,
+    fields: state.present as F[],
     selectedId: state.selectedId,
-    selected: state.present.find((f) => f.id === state.selectedId) ?? null,
+    selected: (state.present.find((f) => f.id === state.selectedId) ?? null) as F | null,
     canUndo: state.past.length > 0,
     canRedo: state.future.length > 0,
     revision: state.revision,

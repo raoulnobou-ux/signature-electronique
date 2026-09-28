@@ -25,10 +25,12 @@ export default async function SignerPage(props: PageProps<"/app/documents/[id]/s
   const supabase = await createClient();
   const { data: doc } = await supabase
     .from("documents")
-    .select("id, title, pdf_path, page_count, trashed_at, owner_id")
+    .select("id, title, pdf_path, page_count, trashed_at, owner_id, status")
     .eq("id", id)
     .maybeSingle();
   if (!doc || !doc.pdf_path || doc.trashed_at || doc.owner_id !== account.userId) notFound();
+  // Demande de signature en cours : le document est figé jusqu'à la fin de la demande.
+  if (doc.status === "pending") redirect(`/app/documents/${id}`);
 
   const [{ data: signed }, { data: draft }, assets] = await Promise.all([
     createAdminClient().storage.from("documents").createSignedUrl(doc.pdf_path, 3600),

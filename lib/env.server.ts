@@ -20,6 +20,8 @@ const serverSchema = z.object({
   /** "true" : paiements simulés sans clé CinetPay (dev, tests). Ignoré en production Vercel. */
   PAYMENTS_SANDBOX: z.enum(["true", "false"]).optional(),
   VERCEL_ENV: z.string().optional(),
+  /** Secret des liens de signature (sinon dérivé de la clé service Supabase). */
+  LINK_SECRET: z.string().min(32).optional(),
   SENTRY_DSN: z.string().optional(),
   CRON_SECRET: z.string().optional(),
 });

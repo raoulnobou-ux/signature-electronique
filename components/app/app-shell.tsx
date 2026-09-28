@@ -14,8 +14,8 @@ import { UserMenu } from "./user-menu";
 
 export function AppShell({ account, children }: { account: ShellAccount; children: ReactNode }) {
   const pathname = usePathname();
-  // Éditeur de signature : plein écran, sans barres de navigation.
-  if (pathname.endsWith("/signer")) {
+  // Éditeurs plein écran : signature, préparation d'une demande, signature en lot.
+  if (pathname.endsWith("/signer") || pathname.endsWith("/demande") || pathname.endsWith("/documents/lot")) {
     return (
       <main id="contenu" className="min-h-dvh">
         {children}

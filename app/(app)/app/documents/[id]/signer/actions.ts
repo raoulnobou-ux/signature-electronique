@@ -57,6 +57,7 @@ export type FinalizeError =
   | "already_signed"
   | "no_fields"
   | "asset_not_found"
+  | "request_pending"
   | "server";
 
 export type FinalizeResult =
@@ -92,6 +93,7 @@ export async function finalizeSignature(
     .eq("id", documentId)
     .maybeSingle();
   if (!doc || doc.owner_id !== account.userId || !doc.pdf_path || doc.trashed_at) return { ok: false, error: "not_found" };
+  if (doc.status === "pending") return { ok: false, error: "request_pending" };
   if (fields.some((f) => f.page >= (doc.page_count ?? 0))) return { ok: false, error: "invalid" };
 
   // Images : uniquement les actifs de l'utilisateur (ou partagés par son équipe, via la RLS).

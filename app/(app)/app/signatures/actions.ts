@@ -56,8 +56,14 @@ export async function createSignatureAsset(
   let svgText: string | null = null;
   if (svg instanceof File && svg.size > 0 && svg.size <= MAX_SVG) {
     svgText = await svg.text();
-    // SVG produit par la zone de dessin : on refuse tout script ou référence externe.
-    if (!svgText.trimStart().startsWith("<svg") || /<script|on\w+=|href=|<foreignObject/i.test(svgText)) svgText = null;
+    // SVG produit par l'application (dessin, cachet) : aucun script ni référence externe
+    // (seuls les liens internes « #… » du texte circulaire sont admis).
+    if (
+      !svgText.trimStart().startsWith("<svg") ||
+      /<script|\son\w+\s*=|<foreignObject|<image|<use/i.test(svgText) ||
+      /href\s*=\s*["'](?!#)/i.test(svgText)
+    )
+      svgText = null;
   }
 
   const admin = createAdminClient();

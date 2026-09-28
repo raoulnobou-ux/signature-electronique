@@ -1,7 +1,7 @@
 "use client";
 
 import { Check } from "lucide-react";
-import { useState, type PointerEvent as ReactPointerEvent } from "react";
+import { useState, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import type { PageSize } from "@/components/documents/pdf-viewer";
 import { isImageField } from "@/lib/pdf/fields";
 import { cn } from "@/lib/utils";
@@ -9,17 +9,19 @@ import { snap, type EditorField } from "./state";
 
 type Corner = "nw" | "ne" | "se" | "sw";
 
-type Props = {
+type Props<F extends EditorField> = {
   pageIndex: number;
   size: PageSize;
-  fields: EditorField[];
+  fields: F[];
   selectedId: string | null;
   assetUrls: Record<string, string>;
   armed: boolean;
   onPlace: (pageIndex: number, xPct: number, yPct: number) => void;
   onSelect: (id: string | null) => void;
   /** Changement en direct (pendant le geste) — au relâchement, `done` et l'état initial du champ. */
-  onChange: (field: EditorField, done: boolean, original?: EditorField) => void;
+  onChange: (field: F, done: boolean, original?: F) => void;
+  /** Contenu personnalisé d'un champ (zones d'une demande de signature, par exemple). */
+  renderContent?: (field: F) => ReactNode;
 };
 
 const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
@@ -29,11 +31,22 @@ const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(mi
  * par les coins (proportions conservées pour les images), guides d'alignement.
  * Les champs ont touch-action: none (pas de conflit avec le défilement de la page).
  */
-export function PageLayer({ pageIndex, size, fields, selectedId, assetUrls, armed, onPlace, onSelect, onChange }: Props) {
+export function PageLayer<F extends EditorField>({
+  pageIndex,
+  size,
+  fields,
+  selectedId,
+  assetUrls,
+  armed,
+  onPlace,
+  onSelect,
+  onChange,
+  renderContent,
+}: Props<F>) {
   const [guides, setGuides] = useState<{ x: number | null; y: number | null }>({ x: null, y: null });
   const pageFields = fields.filter((f) => f.page === pageIndex);
 
-  const startGesture = (event: ReactPointerEvent, field: EditorField, mode: "move" | Corner) => {
+  const startGesture = (event: ReactPointerEvent, field: F, mode: "move" | Corner) => {
     event.preventDefault();
     event.stopPropagation();
     onSelect(field.id);
@@ -57,7 +70,7 @@ export function PageLayer({ pageIndex, size, fields, selectedId, assetUrls, arme
       if (!moved && Math.abs(dx) + Math.abs(dy) < 0.3) return;
       moved = true;
       const f = start.field;
-      let next: EditorField;
+      let next: F;
       if (mode === "move") {
         const sx = snap(clamp(f.x + dx, 0, 100 - f.w), f.w, xTargets);
         const sy = snap(clamp(f.y + dy, 0, 100 - f.h), f.h, yTargets);
@@ -140,7 +153,9 @@ export function PageLayer({ pageIndex, size, fields, selectedId, assetUrls, arme
                 !isImageField(field.type) && !selected && "bg-brand-violet/[0.06]",
               )}
             />
-            {isImageField(field.type) ? (
+            {renderContent ? (
+              renderContent(field)
+            ) : isImageField(field.type) ? (
               // eslint-disable-next-line @next/next/no-img-element -- URL signée temporaire
               <img src={assetUrls[field.assetId!]} alt="" draggable={false} className="pointer-events-none size-full object-contain" />
             ) : field.type === "checkbox" ? (

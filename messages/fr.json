@@ -813,7 +813,9 @@
       "restore": "Restaurer",
       "deleteForever": "Supprimer définitivement",
       "deleteForeverConfirm": "Ces documents et leurs fichiers seront supprimés définitivement. Cette action est irréversible.",
-      "signAgain": "Ajouter une signature"
+      "signAgain": "Ajouter une signature",
+      "request": "Faire signer",
+      "viewRequest": "Suivre la demande en cours"
     },
     "toasts": {
       "trashed": "{count, plural, one {Document mis à la corbeille.} other {# documents mis à la corbeille.}}",
@@ -979,7 +981,8 @@
       "tabs": {
         "draw": "Dessiner",
         "type": "Taper",
-        "upload": "Importer"
+        "upload": "Importer",
+        "generate": "Générer"
       },
       "draw": {
         "hint": "Signez dans le cadre, au doigt ou à la souris.",
@@ -1017,7 +1020,39 @@
         "stamp": "Cachet du cabinet"
       },
       "save": "Enregistrer",
-      "saving": "Enregistrement…"
+      "saving": "Enregistrement…",
+      "stamp": {
+        "empty": "Indiquez le nom de votre structure.",
+        "organization": "Nom de la structure",
+        "organizationPlaceholder": "Cabinet Ngono & Associés",
+        "title": "Fonction",
+        "titlePlaceholder": "Le Directeur Général",
+        "city": "Ville",
+        "cityPlaceholder": "Douala — Cameroun",
+        "shape": "Forme",
+        "shapes": {
+          "round": "Rond",
+          "oval": "Ovale",
+          "rect": "Rectangle"
+        },
+        "color": "Couleur de l'encre",
+        "colors": {
+          "blue": "Bleu",
+          "red": "Rouge",
+          "green": "Vert",
+          "black": "Noir"
+        },
+        "includeDate": "Date du jour",
+        "ink": "Effet encre",
+        "preview": "Aperçu du cachet",
+        "presets": {
+          "label": "Modèles",
+          "classic": "Classique",
+          "official": "Officiel",
+          "oval": "Ovale rouge",
+          "clean": "Net"
+        }
+      }
     }
   },
   "editor": {
@@ -1093,5 +1128,281 @@
       "shareText": "Voici le document « {title} », signé avec QuickSign.",
       "emailSubject": "Document signé : {title}"
     }
+  },
+  "requests": {
+    "metaTitle": "Demandes de signature",
+    "status": {
+      "draft": "Brouillon",
+      "pending": "En cours",
+      "completed": "Terminée",
+      "declined": "Refusée",
+      "expired": "Expirée",
+      "canceled": "Annulée"
+    },
+    "signerStatus": {
+      "pending": "En attente de son tour",
+      "sent": "Invitation envoyée",
+      "opened": "Document ouvert",
+      "signed": "Signé",
+      "declined": "Refusé",
+      "expired": "Expiré"
+    },
+    "builder": {
+      "metaTitle": "Demander des signatures",
+      "back": "Retour au document",
+      "signerN": "Signataire {n}",
+      "steps": {
+        "signers": "Signataires",
+        "zones": "Zones",
+        "send": "Envoi"
+      },
+      "previous": "Précédent",
+      "next": "Suivant",
+      "send": "Envoyer la demande",
+      "sent": "Demande envoyée.",
+      "signersTitle": "Qui doit signer ?",
+      "signersHint": "Indiquez le nom et l'e-mail ou le numéro WhatsApp de chaque signataire. Aucun compte n'est nécessaire pour signer.",
+      "moveUp": "Monter",
+      "moveDown": "Descendre",
+      "remove": "Retirer ce signataire",
+      "name": "Nom complet",
+      "email": "E-mail",
+      "phone": "Téléphone (WhatsApp)",
+      "signerErrors": {
+        "name": "Indiquez le nom complet.",
+        "contact": "Indiquez un e-mail ou un numéro de téléphone.",
+        "email": "Adresse e-mail invalide."
+      },
+      "addSigner": "Ajouter un signataire",
+      "mode": "Ordre de signature",
+      "modes": {
+        "sequential": {
+          "title": "Dans l'ordre",
+          "hint": "Chacun reçoit le lien quand le précédent a signé."
+        },
+        "parallel": {
+          "title": "En même temps",
+          "hint": "Tout le monde reçoit le lien tout de suite."
+        }
+      },
+      "message": "Message (facultatif)",
+      "messagePlaceholder": "Bonjour, merci de signer le contrat avant vendredi.",
+      "deadline": "Date limite",
+      "days": "{count, plural, one {# jour} other {# jours}}",
+      "zonesFor": "Zones pour",
+      "needsSignature": "signature requise",
+      "tools": "Types de zone",
+      "placeHint": "Touchez la page pour placer « {tool} » pour {name}",
+      "zone": "Zone sélectionnée",
+      "page": "page {n}",
+      "assignedTo": "Attribuée à",
+      "textLabel": "Texte à remplir (indication)",
+      "textDefault": "À compléter",
+      "mention": "Mention",
+      "required": "Obligatoire",
+      "deleteZone": "Supprimer la zone",
+      "reviewTitle": "Tout est prêt",
+      "zonesCount": "{count, plural, one {# zone} other {# zones}}",
+      "singleSigner": "Un seul signataire",
+      "expires": "Le lien expire dans {count, plural, one {# jour} other {# jours}}.",
+      "delivery": "Les signataires avec un e-mail reçoivent le lien automatiquement ; pour WhatsApp, vous pourrez l'envoyer en un clic à l'étape suivante.",
+      "errors": {
+        "missing_fields": "Ajoutez au moins une zone de signature ou de paraphe pour {name}.",
+        "invalid_phone": "Le numéro de téléphone de {name} est invalide.",
+        "feature_not_in_plan": "Les demandes de signature sont incluses dans le plan Pro.",
+        "already_pending": "Une demande est déjà en cours pour ce document.",
+        "not_found": "Document introuvable.",
+        "read_only": "Votre compte est en lecture seule.",
+        "generic": "L'envoi a échoué. Réessayez."
+      }
+    },
+    "list": {
+      "title": "Demandes de signature",
+      "description": "Faites signer vos documents par plusieurs personnes, dans l'ordre ou en même temps.",
+      "empty": "Aucune demande pour l'instant.",
+      "emptyHint": "Ouvrez un document puis choisissez « Demander des signatures ».",
+      "openDocuments": "Choisir un document",
+      "progress": "{signed} / {total} signés",
+      "proTitle": "Faites signer vos partenaires en quelques clics",
+      "proText": "Signataires multiples, suivi en temps réel, relances, certificat de preuve vérifiable : disponible avec le plan Pro.",
+      "upgrade": "Passer au Pro",
+      "created": "Créée le {date}"
+    },
+    "detail": {
+      "metaTitle": "Suivi de la demande",
+      "back": "Toutes les demandes",
+      "sentBanner": "Demande envoyée ! Les signataires avec une adresse e-mail ont reçu leur lien. Envoyez les autres par WhatsApp ci-dessous.",
+      "signers": "Signataires",
+      "order": "Ordre",
+      "mode": {
+        "sequential": "Dans l'ordre",
+        "parallel": "En même temps"
+      },
+      "expires": "Expire le {date}",
+      "completedAt": "Terminée le {date}",
+      "copyLink": "Copier le lien",
+      "copied": "Lien copié.",
+      "whatsapp": "WhatsApp",
+      "remind": "Relancer",
+      "reminded": "Relance envoyée.",
+      "remindedLink": "Lien prêt : envoyez-le au signataire.",
+      "tooSoon": "Une relance a déjà été envoyée il y a moins d'une heure.",
+      "signedAt": "Signé le {date}",
+      "declinedReason": "Motif : « {reason} »",
+      "downloadSigned": "Télécharger le PDF signé",
+      "downloadCertificate": "Certificat de signature",
+      "verify": "Page de vérification",
+      "cancel": "Annuler la demande",
+      "cancelTitle": "Annuler cette demande ?",
+      "cancelBody": "Les liens envoyés ne fonctionneront plus. Les signatures déjà apposées restent dans l'historique du document.",
+      "cancelConfirm": "Annuler la demande",
+      "keep": "Garder",
+      "canceled": "Demande annulée.",
+      "timeline": "Journal",
+      "exportAudit": "Exporter le journal (CSV)",
+      "live": "Mise à jour automatique",
+      "events": {
+        "request_created": "Demande créée",
+        "request_invitation_sent": "Invitation envoyée",
+        "request_reminder_sent": "Relance envoyée",
+        "signer_opened": "Document ouvert",
+        "signer_signed": "Signé",
+        "signer_declined": "Refusé",
+        "request_completed": "Toutes les signatures réunies",
+        "request_canceled": "Demande annulée",
+        "request_expired": "Demande expirée"
+      },
+      "error": "Action impossible."
+    }
+  },
+  "templates": {
+    "metaTitle": "Modèles"
+  },
+  "team": {
+    "metaTitle": "Équipe"
+  },
+  "sign": {
+    "secure": "Lien personnel et sécurisé",
+    "hello": "Bonjour {name},",
+    "invite": "{sender} vous invite à signer « {title} »",
+    "steps": {
+      "read": "Lisez le document.",
+      "fill": "Touchez chaque zone surlignée pour la compléter.",
+      "sign": "Validez : c'est signé, sans rien imprimer."
+    },
+    "start": "Lire et signer",
+    "noAccount": "Aucun compte ni application à installer.",
+    "states": {
+      "waiting": {
+        "title": "Ce n'est pas encore votre tour",
+        "body": "{sender} a demandé une signature dans un ordre précis. Vous recevrez un nouveau message dès que ce sera à vous."
+      },
+      "signed": {
+        "title": "Merci, c'est signé !",
+        "body": "Votre signature est enregistrée. Vous recevrez le document final et son certificat par e-mail dès que tous les signataires auront signé."
+      },
+      "completed": {
+        "title": "Document entièrement signé",
+        "body": "Tous les signataires ont signé. Téléchargez le document final et son certificat de signature."
+      },
+      "declined": {
+        "title": "Signature refusée",
+        "body": "Vous avez refusé de signer ce document. {sender} a été prévenu(e)."
+      },
+      "expired": {
+        "title": "Ce lien a expiré",
+        "body": "La date limite de signature est dépassée. Contactez {sender} pour recevoir un nouveau lien."
+      },
+      "canceled": {
+        "title": "Demande annulée",
+        "body": "{sender} a annulé cette demande de signature."
+      },
+      "closed": {
+        "title": "Demande close",
+        "body": "Cette demande de signature n'est plus active."
+      },
+      "invalid": {
+        "title": "Lien invalide",
+        "body": "Ce lien de signature n'existe pas ou n'est plus valable. Vérifiez qu'il est complet ou demandez-en un nouveau."
+      },
+      "ready": {
+        "title": "",
+        "body": ""
+      }
+    },
+    "download": "Télécharger le document signé",
+    "certificate": "Certificat de signature",
+    "remaining": "{count, plural, one {# zone à compléter} other {# zones à compléter}}",
+    "allDone": "Tout est complété.",
+    "decline": "Refuser",
+    "finish": "Terminer et signer",
+    "next": "Zone suivante",
+    "tapHere": "{field} — touchez ici",
+    "fieldTodo": "{field} à compléter",
+    "fieldDone": "{field} complété",
+    "textHint": "Saisissez le texte demandé.",
+    "ok": "Valider",
+    "confirmTitle": "Signer le document ?",
+    "confirmBody": "Votre signature sera apposée sur le document. Cette action est définitive.",
+    "consent": "J'ai lu le document et j'accepte de le signer par voie électronique.",
+    "evidence": "Pour la preuve, QuickSign enregistre la date et l'heure, votre adresse IP, votre appareil et l'empreinte du document avant et après votre signature.",
+    "back": "Retour",
+    "signNow": "Signer maintenant",
+    "declineTitle": "Refuser de signer ?",
+    "declineBody": "Indiquez brièvement le motif : il sera transmis à l'expéditeur.",
+    "declineReason": "Motif du refus",
+    "declineConfirm": "Refuser de signer",
+    "padSignature": "Votre signature",
+    "padInitials": "Vos initiales",
+    "padHint": "Dessinez avec le doigt ou la souris, ou tapez votre nom.",
+    "usePad": "Utiliser",
+    "errors": {
+      "consent": "Cochez la case d'acceptation pour signer.",
+      "invalid": "Demande invalide. Rechargez la page.",
+      "not_ready": "Ce document ne peut plus être signé avec ce lien.",
+      "missing_signature": "Ajoutez votre signature.",
+      "missing_initials": "Ajoutez vos initiales.",
+      "missing_value": "Complétez toutes les zones obligatoires.",
+      "server": "La signature n'a pas pu être enregistrée. Réessayez.",
+      "rate_limited": "Trop de tentatives. Patientez quelques minutes.",
+      "decline": "Le refus n'a pas pu être enregistré."
+    }
+  },
+  "verify": {
+    "metaTitle": "Vérifier un document signé",
+    "title": "Vérifier un document signé",
+    "intro": "Déposez un PDF signé avec QuickSign : nous vérifions qu'il n'a pas été modifié depuis sa signature.",
+    "drop": "Déposez le PDF ici ou touchez pour le choisir",
+    "privacy": "Le fichier reste sur votre appareil : seule son empreinte SHA-256 est comparée.",
+    "match": {
+      "final": "Authentique : ce fichier est l'exemplaire final, signé par tous.",
+      "original": "Ce fichier est le document original, avant signature.",
+      "intermediate": "Ce fichier est une version intermédiaire (toutes les signatures n'y figurent pas encore)."
+    },
+    "found": "Document reconnu : « {title} »",
+    "foundDetail": "Version {version}, enregistrée le {date}. Il n'a pas été modifié depuis.",
+    "seeRequest": "Voir les signataires",
+    "nomatch": "Aucune correspondance",
+    "nomatchHint": "Ce fichier ne correspond à aucun document signé avec QuickSign, ou il a été modifié après sa signature.",
+    "learnMore": "Comment fonctionne la vérification ?",
+    "completedTitle": "Document signé et vérifiable",
+    "statusTitle": "Demande de signature",
+    "status": {
+      "completed": "Signé par tous",
+      "pending": "En cours de signature",
+      "declined": "Refusé",
+      "expired": "Expiré",
+      "canceled": "Annulé"
+    },
+    "sender": "Émis par",
+    "created": "Demande créée le",
+    "completed": "Signé par tous le",
+    "finalHash": "Empreinte finale (SHA-256)",
+    "originalHash": "Empreinte d'origine",
+    "signers": "Signataires",
+    "signedAt": "Signé le {date}",
+    "notSigned": "Non signé",
+    "checkTitle": "Vérifier votre exemplaire",
+    "checkIntro": "Déposez votre fichier PDF : son empreinte est comparée à celles enregistrées pour ce document."
   }
 }

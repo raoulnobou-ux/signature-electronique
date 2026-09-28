@@ -24,6 +24,13 @@ export default async function DocumentPage(props: PageProps<"/app/documents/[id]
     .maybeSingle();
   if (!doc || !doc.pdf_path) notFound();
 
+  const { data: pendingRequest } = await supabase
+    .from("signature_requests")
+    .select("id")
+    .eq("document_id", id)
+    .eq("status", "pending")
+    .maybeSingle();
+
   // URL signée valable 30 min : le temps de lire le document tranquillement.
   const { data: signed } = await createAdminClient()
     .storage.from("documents")
@@ -33,6 +40,8 @@ export default async function DocumentPage(props: PageProps<"/app/documents/[id]
   return (
     <DocumentDetail
       readOnly={account.entitlements.readOnly}
+      pendingRequestId={pendingRequest?.id ?? null}
+      canRequest={account.entitlements.features.multi_signers && doc.owner_id === account.userId}
       pdfUrl={signed.signedUrl}
       doc={{
         id: doc.id,

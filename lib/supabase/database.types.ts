@@ -679,51 +679,81 @@ export type Database = {
       };
       request_signers: {
         Row: {
+          consented_at: string | null;
           created_at: string;
           declined_reason: string | null;
           email: string | null;
           id: string;
+          invited_at: string | null;
           ip: unknown;
+          last_reminded_at: string | null;
           name: string;
+          opened_at: string | null;
           order_index: number;
           phone: string | null;
+          reminder_count: number;
           request_id: string;
+          sha256_after: string | null;
+          sha256_before: string | null;
+          signature_path: string | null;
           signed_at: string | null;
+          signed_version: number | null;
           status: string;
           token_expires_at: string | null;
           token_hash: string;
+          token_version: number;
           user_agent: string | null;
         };
         Insert: {
+          consented_at?: string | null;
           created_at?: string;
           declined_reason?: string | null;
           email?: string | null;
           id?: string;
+          invited_at?: string | null;
           ip?: unknown;
+          last_reminded_at?: string | null;
           name: string;
+          opened_at?: string | null;
           order_index?: number;
           phone?: string | null;
+          reminder_count?: number;
           request_id: string;
+          sha256_after?: string | null;
+          sha256_before?: string | null;
+          signature_path?: string | null;
           signed_at?: string | null;
+          signed_version?: number | null;
           status?: string;
           token_expires_at?: string | null;
           token_hash: string;
+          token_version?: number;
           user_agent?: string | null;
         };
         Update: {
+          consented_at?: string | null;
           created_at?: string;
           declined_reason?: string | null;
           email?: string | null;
           id?: string;
+          invited_at?: string | null;
           ip?: unknown;
+          last_reminded_at?: string | null;
           name?: string;
+          opened_at?: string | null;
           order_index?: number;
           phone?: string | null;
+          reminder_count?: number;
           request_id?: string;
+          sha256_after?: string | null;
+          sha256_before?: string | null;
+          signature_path?: string | null;
           signed_at?: string | null;
+          signed_version?: number | null;
           status?: string;
           token_expires_at?: string | null;
           token_hash?: string;
+          token_version?: number;
           user_agent?: string | null;
         };
         Relationships: [
@@ -791,37 +821,58 @@ export type Database = {
       };
       signature_requests: {
         Row: {
+          canceled_at: string | null;
+          certificate_path: string | null;
           completed_at: string | null;
           created_at: string;
           document_id: string;
           expires_at: string | null;
+          final_sha256: string | null;
+          final_version: number | null;
           id: string;
           message: string | null;
           mode: string;
+          original_sha256: string | null;
           owner_id: string;
+          sender_name: string | null;
           status: string;
+          title: string | null;
         };
         Insert: {
+          canceled_at?: string | null;
+          certificate_path?: string | null;
           completed_at?: string | null;
           created_at?: string;
           document_id: string;
           expires_at?: string | null;
+          final_sha256?: string | null;
+          final_version?: number | null;
           id?: string;
           message?: string | null;
           mode: string;
+          original_sha256?: string | null;
           owner_id: string;
+          sender_name?: string | null;
           status?: string;
+          title?: string | null;
         };
         Update: {
+          canceled_at?: string | null;
+          certificate_path?: string | null;
           completed_at?: string | null;
           created_at?: string;
           document_id?: string;
           expires_at?: string | null;
+          final_sha256?: string | null;
+          final_version?: number | null;
           id?: string;
           message?: string | null;
           mode?: string;
+          original_sha256?: string | null;
           owner_id?: string;
+          sender_name?: string | null;
           status?: string;
+          title?: string | null;
         };
         Relationships: [
           {
@@ -914,6 +965,50 @@ export type Database = {
         };
         Relationships: [];
       };
+      team_invitations: {
+        Row: {
+          accepted_at: string | null;
+          created_at: string;
+          email: string;
+          expires_at: string;
+          id: string;
+          invited_by: string | null;
+          role: string;
+          team_id: string;
+          token_hash: string;
+        };
+        Insert: {
+          accepted_at?: string | null;
+          created_at?: string;
+          email: string;
+          expires_at: string;
+          id?: string;
+          invited_by?: string | null;
+          role: string;
+          team_id: string;
+          token_hash: string;
+        };
+        Update: {
+          accepted_at?: string | null;
+          created_at?: string;
+          email?: string;
+          expires_at?: string;
+          id?: string;
+          invited_by?: string | null;
+          role?: string;
+          team_id?: string;
+          token_hash?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "team_invitations_team_id_fkey";
+            columns: ["team_id"];
+            isOneToOne: false;
+            referencedRelation: "teams";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       team_members: {
         Row: {
           created_at: string;
@@ -970,30 +1065,48 @@ export type Database = {
       templates: {
         Row: {
           created_at: string;
+          description: string | null;
           fields: NonNullable<Json>;
           id: string;
           name: string;
           owner_id: string;
+          page_count: number | null;
+          pdf_path: string | null;
+          roles: NonNullable<Json>;
           source_document_id: string | null;
           team_id: string | null;
+          updated_at: string;
+          use_count: number;
         };
         Insert: {
           created_at?: string;
+          description?: string | null;
           fields?: NonNullable<Json>;
           id?: string;
           name: string;
           owner_id: string;
+          page_count?: number | null;
+          pdf_path?: string | null;
+          roles?: NonNullable<Json>;
           source_document_id?: string | null;
           team_id?: string | null;
+          updated_at?: string;
+          use_count?: number;
         };
         Update: {
           created_at?: string;
+          description?: string | null;
           fields?: NonNullable<Json>;
           id?: string;
           name?: string;
           owner_id?: string;
+          page_count?: number | null;
+          pdf_path?: string | null;
+          roles?: NonNullable<Json>;
           source_document_id?: string | null;
           team_id?: string | null;
+          updated_at?: string;
+          use_count?: number;
         };
         Relationships: [
           {
@@ -1060,6 +1173,20 @@ export type Database = {
       };
       is_team_admin: { Args: { p_team_id: string }; Returns: boolean };
       is_team_member: { Args: { p_team_id: string }; Returns: boolean };
+      my_team_sponsor: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          cancel_at_period_end: boolean;
+          current_period_end: string;
+          owner_id: string;
+          plan: string;
+          scheduled_plan: string;
+          scheduled_plan_at: string;
+          status: string;
+          team_id: string;
+          team_name: string;
+        }[];
+      };
       my_usage_snapshot: { Args: Record<PropertyKey, never>; Returns: Json };
       owns_document: { Args: { p_document_id: string }; Returns: boolean };
       purge_rate_limit_hits: { Args: Record<PropertyKey, never>; Returns: undefined };
@@ -1067,6 +1194,36 @@ export type Database = {
         Args: { p_older_than?: string };
         Returns: {
           bucket_path: string;
+        }[];
+      };
+      subscription_allows_write: {
+        Args: { p_cancel: boolean; p_end: string; p_plan: string; p_status: string };
+        Returns: boolean;
+      };
+      team_activity: {
+        Args: { p_limit?: number; p_team_id: string };
+        Returns: {
+          actor_id: string;
+          actor_name: string;
+          created_at: string;
+          document_id: string;
+          document_title: string;
+          event_type: string;
+          id: number;
+        }[];
+      };
+      team_sponsor: {
+        Args: { p_user_id: string };
+        Returns: {
+          cancel_at_period_end: boolean;
+          current_period_end: string;
+          owner_id: string;
+          plan: string;
+          scheduled_plan: string;
+          scheduled_plan_at: string;
+          status: string;
+          team_id: string;
+          team_name: string;
         }[];
       };
     };
