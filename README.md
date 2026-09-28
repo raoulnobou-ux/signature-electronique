@@ -28,7 +28,7 @@ npm run db:start          # affiche l'URL et les clés locales
 cp .env.example .env.local
 # → reporter NEXT_PUBLIC_SUPABASE_ANON_KEY et SUPABASE_SERVICE_ROLE_KEY affichées par db:start
 
-# 3. Conversion Word → PDF (facultatif en local)
+# 3. Conversion Word → PDF (Gotenberg, protégé par GOTENBERG_TOKEN)
 docker compose up -d gotenberg
 
 # 4. Lancer l'application
@@ -79,6 +79,14 @@ Le schéma complet (tables, Row Level Security, buckets privés, trigger de cré
 - abonnements, paiements, journal d'audit et compteurs d'usage ne sont écrits que par le serveur ;
 - le journal d'audit est en ajout seul (toute modification est refusée par un trigger) ;
 - les fichiers sont dans des buckets privés, servis par URL signées temporaires.
+
+## Documents
+
+- Formats : PDF, Word (.doc, .docx, .odt, .rtf), photos (JPEG, PNG, WebP). 25 Mo maximum (`NEXT_PUBLIC_MAX_UPLOAD_MB`).
+- Import : glisser-déposer, sélection de fichiers, scanner (appareil photo, détection et redressement de la feuille), lien public (Google Drive, Dropbox, OneDrive).
+- Stockage privé `documents/<utilisateur>/<document>/` : original, PDF de travail, vignette, versions signées.
+- Gotenberg en production : image `gotenberg/gotenberg:8` lancée avec `--api-enable-basic-auth`, variables `GOTENBERG_API_BASIC_AUTH_USERNAME=quicksign` et `GOTENBERG_API_BASIC_AUTH_PASSWORD=<GOTENBERG_TOKEN>`.
+- Tâche planifiée quotidienne : `/api/cron/purge-trash` (corbeille > 30 jours), déclarée dans `vercel.json`.
 
 ## Authentification
 

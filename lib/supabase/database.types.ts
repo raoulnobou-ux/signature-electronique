@@ -263,6 +263,7 @@ export type Database = {
           size_bytes: number;
           status: string;
           team_id: string | null;
+          thumbnail_path: string | null;
           title: string;
           trashed_at: string | null;
           updated_at: string;
@@ -283,6 +284,7 @@ export type Database = {
           size_bytes?: number;
           status?: string;
           team_id?: string | null;
+          thumbnail_path?: string | null;
           title: string;
           trashed_at?: string | null;
           updated_at?: string;
@@ -303,6 +305,7 @@ export type Database = {
           size_bytes?: number;
           status?: string;
           team_id?: string | null;
+          thumbnail_path?: string | null;
           title?: string;
           trashed_at?: string | null;
           updated_at?: string;
@@ -326,6 +329,7 @@ export type Database = {
       };
       folders: {
         Row: {
+          color: string;
           created_at: string;
           id: string;
           name: string;
@@ -333,6 +337,7 @@ export type Database = {
           parent_id: string | null;
         };
         Insert: {
+          color?: string;
           created_at?: string;
           id?: string;
           name: string;
@@ -340,6 +345,7 @@ export type Database = {
           parent_id?: string | null;
         };
         Update: {
+          color?: string;
           created_at?: string;
           id?: string;
           name?: string;
@@ -1023,6 +1029,12 @@ export type Database = {
       my_usage_snapshot: { Args: Record<PropertyKey, never>; Returns: Json };
       owns_document: { Args: { p_document_id: string }; Returns: boolean };
       purge_rate_limit_hits: { Args: Record<PropertyKey, never>; Returns: undefined };
+      purge_trashed_documents: {
+        Args: { p_older_than?: string };
+        Returns: {
+          bucket_path: string;
+        }[];
+      };
     };
     Enums: {
       [_ in never]: never;

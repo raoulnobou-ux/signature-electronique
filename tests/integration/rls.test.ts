@@ -150,3 +150,39 @@ describe.skipIf(!hasLocalDb)("sécurité des données (RLS)", () => {
     expect(error).not.toBeNull();
   });
 });
+
+describe.skipIf(!hasLocalDb)("journal d'audit et suppression", () => {
+  it("supprimer un document conserve son historique d'audit", async () => {
+    const owner = await userClient("carol");
+    const { data: doc } = await owner.client
+      .from("documents")
+      .insert({
+        owner_id: owner.id,
+        title: "À supprimer",
+        original_path: `${owner.id}/d.pdf`,
+        original_type: "pdf",
+        original_name: "d.pdf",
+      })
+      .select("id")
+      .single();
+    await admin()
+      .from("audit_events")
+      .insert({
+        document_id: doc!.id,
+        actor_type: "user",
+        actor_id: owner.id,
+        event_type: "document.imported",
+      });
+    await owner.client
+      .from("documents")
+      .update({ trashed_at: new Date().toISOString() })
+      .eq("id", doc!.id);
+    const { error } = await owner.client.from("documents").delete().eq("id", doc!.id);
+    expect(error).toBeNull();
+    const { data: events } = await admin()
+      .from("audit_events")
+      .select("event_type")
+      .eq("document_id", doc!.id);
+    expect(events).toEqual([{ event_type: "document.imported" }]);
+  });
+});

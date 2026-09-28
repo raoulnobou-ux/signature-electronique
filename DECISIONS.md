@@ -100,3 +100,27 @@ _Mesure (Lighthouse mobile, build de production) :_ performance 94, accessibilit
 **D36 — Photos de profil dans un bucket public** (`avatars`), noms aléatoires non devinables, type vérifié par les octets, 2 Mo max. Les documents et signatures, eux, restent dans des buckets privés.
 
 **D37 — Suppression de compte immédiate** après confirmation écrite (« SUPPRIMER ») : fichiers purgés de tous les buckets puis utilisateur supprimé (cascade SQL). Export complet en JSON disponible avant.
+
+## Documents (Phase 4)
+
+**D38 — Envoi direct navigateur → stockage.** Le serveur vérifie droits et quota de stockage puis délivre une URL d'envoi signée ; le fichier part directement vers Supabase Storage (XHR, barre de progression réelle), sans passer par la limite de taille des fonctions serverless. Le serveur finalise ensuite : lecture du fichier, vérification du type réel, conversion, empreinte, création du document.
+
+**D39 — Type réel vérifié par les octets**, jamais par l'extension : PDF, JPEG, PNG, DOCX/ODT (archive ZIP inspectée), DOC (OLE), RTF. Les PDF chiffrés ou corrompus sont refusés avec un message clair. Analyse antivirus : non intégrée à ce stade (pas de service gratuit fiable sans infrastructure dédiée) ; l'architecture permet d'ajouter un appel ClamAV à la finalisation.
+
+**D40 — Conversion Word → PDF derrière une interface `DocumentConverter`**, implémentée par Gotenberg (authentification basique : utilisateur `quicksign`, mot de passe `GOTENBERG_TOKEN`). CloudConvert pourra être branché sans toucher au reste. L'original est toujours conservé.
+
+**D41 — Version 0 = PDF de travail.** Chaque document a une version 0 (original PDF, ou PDF issu de la conversion) avec son SHA-256 ; les versions signées s'ajoutent ensuite (Phase 5), l'original n'est jamais modifié.
+
+**D42 — Vignettes générées dans le navigateur** (première page rendue par pdf.js, JPEG ≈ 20 Ko) puis envoyées au serveur : pas de moteur de rendu PDF côté serveur.
+
+**D43 — pdf.js en build « legacy ».** La build standard de pdf.js 6 exige des navigateurs très récents (API `Map.getOrInsertComputed`) ; la build legacy embarque les polyfills et fonctionne sur les téléphones Android plus anciens, très répandus. Worker, CMaps et polices standard sont copiés dans `public/pdfjs/<version>/` à l'installation.
+
+**D44 — Scanner intégré sans dépendance.** Détection de la feuille (seuil d'Otsu + plus grande zone claire), coins ajustables au doigt, redressement par homographie, mode « document » (niveaux automatiques). Plusieurs pages → un PDF assemblé dans le navigateur. Les photos sont réduites à 2480 px (A4 à 300 dpi) avant envoi.
+
+**D45 — Import par lien protégé contre la SSRF** : seuls http/https, pas d'identifiants dans l'URL, IP littérales et noms locaux refusés, résolution DNS contrôlée au moment de la connexion (anti-rebinding), redirections suivies manuellement et revérifiées, 25 Mo et 20 s maximum. Liens Google Drive / Dropbox / OneDrive convertis en téléchargement direct.
+
+**D46 — Le journal d'audit survit aux documents.** Pas de clé étrangère depuis `audit_events` : la suppression définitive d'un document conserve sa trace (sinon « on delete set null » modifierait des lignes immuables).
+
+**D47 — Filtres de la liste dans l'URL** (partageables, bouton retour), paramètres « voulus » gardés en mémoire pour éviter qu'une recherche différée n'écrase une navigation en cours sur réseau lent. Dates relatives calculées côté navigateur (pas d'écart d'hydratation).
+
+**D48 — Corbeille : purge automatique à 30 jours** par une tâche planifiée quotidienne (`/api/cron/purge-trash`, protégée par `CRON_SECRET`, déclarée dans `vercel.json`).

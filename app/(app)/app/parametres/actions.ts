@@ -136,13 +136,11 @@ export async function uploadAvatar(formData: FormData): Promise<SettingsResult> 
 
   const admin = createAdminClient();
   const path = `${user.id}/${randomUUID()}.${type === "jpeg" ? "jpg" : type}`;
-  const { error: uploadError } = await admin.storage
-    .from("avatars")
-    .upload(path, bytes, {
-      contentType: IMAGE_MIME[type],
-      cacheControl: "31536000",
-      upsert: false,
-    });
+  const { error: uploadError } = await admin.storage.from("avatars").upload(path, bytes, {
+    contentType: IMAGE_MIME[type],
+    cacheControl: "31536000",
+    upsert: false,
+  });
   if (uploadError) return { ok: false, error: "server" };
 
   const { data: publicUrl } = admin.storage.from("avatars").getPublicUrl(path);

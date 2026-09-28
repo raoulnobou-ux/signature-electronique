@@ -2,12 +2,19 @@
 # Supabase se lance à part : `npm run db:start` (Supabase CLI).
 services:
   # Conversion Word/ODT → PDF (LibreOffice). Exposé sur http://127.0.0.1:3001
+  # Protégé par authentification basique, comme en production :
+  # utilisateur « quicksign », mot de passe = GOTENBERG_TOKEN.
   gotenberg:
     image: gotenberg/gotenberg:8
     ports:
       - "127.0.0.1:3001:3000"
+    environment:
+      GOTENBERG_API_BASIC_AUTH_USERNAME: quicksign
+      GOTENBERG_API_BASIC_AUTH_PASSWORD: ${GOTENBERG_TOKEN:-local-gotenberg-token}
     command:
       - "gotenberg"
+      - "--api-enable-basic-auth"
       - "--api-timeout=60s"
+      - "--api-body-limit=30MB"
       - "--libreoffice-restart-after=50"
     restart: unless-stopped
