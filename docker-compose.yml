@@ -1,0 +1,13 @@
+# Services annexes pour le développement local.
+# Supabase se lance à part : `npm run db:start` (Supabase CLI).
+services:
+  # Conversion Word/ODT → PDF (LibreOffice). Exposé sur http://127.0.0.1:3001
+  gotenberg:
+    image: gotenberg/gotenberg:8
+    ports:
+      - "127.0.0.1:3001:3000"
+    command:
+      - "gotenberg"
+      - "--api-timeout=60s"
+      - "--libreoffice-restart-after=50"
+    restart: unless-stopped

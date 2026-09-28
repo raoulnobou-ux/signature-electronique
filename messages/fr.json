@@ -1,0 +1,17 @@
+{
+  "common": {
+    "appName": "QuickSign",
+    "tagline": "Signez, faites signer, terminé. En 30 secondes.",
+    "startTrial": "Essayer gratuitement 6 jours",
+    "signIn": "Se connecter",
+    "signUp": "Créer un compte",
+    "signOut": "Se déconnecter",
+    "continue": "Continuer",
+    "back": "Retour",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "close": "Fermer",
+    "loading": "Chargement…",
+    "toggleTheme": "Changer de thème"
+  }
+}

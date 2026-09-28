@@ -1,0 +1,264 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/* Le thème sombre est piloté par la classe .dark posée par next-themes. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ==========================================================================
+   Tokens de design — QuickSign
+   Sombre profond par défaut ; le mode clair redéfinit les mêmes variables.
+   ========================================================================== */
+
+:root {
+  --radius: 14px;
+
+  /* Couleurs de marque (identiques dans les deux thèmes) */
+  --brand-indigo: #6366f1;
+  --brand-violet: #8b5cf6;
+  --brand-cyan: #22d3ee;
+  --brand-gradient: linear-gradient(120deg, #6366f1 0%, #8b5cf6 50%, #22d3ee 100%);
+
+  /* Thème clair */
+  --background: #f6f7fb;
+  --background-elevated: #ffffff;
+  --foreground: #0b0f1a;
+  --muted: #eef0f6;
+  --muted-foreground: #525b70;
+  --card: rgb(255 255 255 / 0.72);
+  --card-border: rgb(15 23 42 / 0.08);
+  --popover: #ffffff;
+  --border: rgb(15 23 42 / 0.1);
+  --input: rgb(15 23 42 / 0.14);
+  --primary: #4f46e5;
+  --primary-foreground: #ffffff;
+  --secondary: rgb(15 23 42 / 0.05);
+  --secondary-foreground: #0b0f1a;
+  --accent: rgb(99 102 241 / 0.1);
+  --accent-foreground: #3730a3;
+  --ring: #6366f1;
+  --destructive: #e11d48;
+  --success: #059669;
+  --warning: #d97706;
+  --glow: rgb(99 102 241 / 0.25);
+  --grid-dot: rgb(15 23 42 / 0.09);
+  --shadow-color: 222 47% 11%;
+}
+
+.dark {
+  --background: #07090f;
+  --background-elevated: #0c0f19;
+  --foreground: #e8ebf4;
+  --muted: #10131f;
+  --muted-foreground: #939bb0;
+  --card: rgb(255 255 255 / 0.035);
+  --card-border: rgb(255 255 255 / 0.08);
+  --popover: #0e1120;
+  --border: rgb(255 255 255 / 0.08);
+  --input: rgb(255 255 255 / 0.12);
+  --primary: #6366f1;
+  --primary-foreground: #ffffff;
+  --secondary: rgb(255 255 255 / 0.06);
+  --secondary-foreground: #e8ebf4;
+  --accent: rgb(129 140 248 / 0.14);
+  --accent-foreground: #c7d2fe;
+  --ring: #818cf8;
+  --destructive: #fb7185;
+  --success: #34d399;
+  --warning: #fbbf24;
+  --glow: rgb(129 140 248 / 0.35);
+  --grid-dot: rgb(255 255 255 / 0.07);
+  --shadow-color: 230 60% 2%;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-background-elevated: var(--background-elevated);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-card: var(--card);
+  --color-card-border: var(--card-border);
+  --color-popover: var(--popover);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-ring: var(--ring);
+  --color-destructive: var(--destructive);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-brand-indigo: var(--brand-indigo);
+  --color-brand-violet: var(--brand-violet);
+  --color-brand-cyan: var(--brand-cyan);
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display:
+    var(--font-space-grotesk), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  --radius-sm: calc(var(--radius) - 6px);
+  --radius-md: calc(var(--radius) - 4px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+
+  --shadow-soft:
+    0 1px 2px hsl(var(--shadow-color) / 0.12), 0 8px 24px -8px hsl(var(--shadow-color) / 0.25);
+  --shadow-lift:
+    0 2px 4px hsl(var(--shadow-color) / 0.14), 0 22px 48px -16px hsl(var(--shadow-color) / 0.45);
+
+  --animate-blob: blob 26s ease-in-out infinite;
+  --animate-shimmer: shimmer 1.8s linear infinite;
+  --animate-float: float 7s ease-in-out infinite;
+
+  @keyframes blob {
+    0%,
+    100% {
+      transform: translate3d(0, 0, 0) scale(1);
+    }
+    33% {
+      transform: translate3d(6%, -8%, 0) scale(1.08);
+    }
+    66% {
+      transform: translate3d(-6%, 5%, 0) scale(0.95);
+    }
+  }
+  @keyframes shimmer {
+    from {
+      background-position: 200% 0;
+    }
+    to {
+      background-position: -200% 0;
+    }
+  }
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-8px);
+    }
+  }
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    font-feature-settings: "cv11", "ss01";
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
+
+  ::selection {
+    background: rgb(99 102 241 / 0.35);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+}
+
+/* ==========================================================================
+   Utilitaires de la direction artistique
+   ========================================================================== */
+
+@utility bg-brand-gradient {
+  background-image: var(--brand-gradient);
+}
+
+@utility text-gradient {
+  background-image: var(--brand-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Carte en verre dépoli avec bordure lumineuse fine */
+@utility glass {
+  background-color: var(--card);
+  border: 1px solid var(--card-border);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+}
+
+/* Bordure dégradée (via masque) — pour les éléments mis en avant */
+@utility gradient-border {
+  position: relative;
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+    border-radius: inherit;
+    background: var(--brand-gradient);
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+}
+
+@utility glow {
+  box-shadow:
+    0 0 0 1px var(--glow),
+    0 8px 32px -6px var(--glow);
+}
+
+/* Grille de points subtile (fond de la landing) */
+@utility bg-dot-grid {
+  background-image: radial-gradient(var(--grid-dot) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+@utility skeleton-shimmer {
+  background: linear-gradient(90deg, var(--secondary) 25%, var(--accent) 50%, var(--secondary) 75%);
+  background-size: 200% 100%;
+  animation: var(--animate-shimmer);
+}
+
+/* Espace pour la barre de navigation mobile et l'encoche des téléphones */
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* ==========================================================================
+   Mouvement réduit : on coupe les animations décoratives
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
