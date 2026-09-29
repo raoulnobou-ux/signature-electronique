@@ -561,8 +561,8 @@ function UploadPad({ register }: { register: Register }) {
             <figure className="space-y-1.5">
               <figcaption className="text-xs text-muted-foreground">{tc("after")}</figcaption>
               <div className="h-36 rounded-xl border border-border bg-[repeating-conic-gradient(#e5e7eb_0_25%,#fff_0_50%)] bg-[length:16px_16px]">
-                {/* eslint-disable-next-line @next/next/no-img-element -- aperçu local */}
                 {after && (
+                  // eslint-disable-next-line @next/next/no-img-element -- aperçu local
                   <img src={after} alt={tc("after")} className="size-full object-contain p-2" />
                 )}
               </div>
