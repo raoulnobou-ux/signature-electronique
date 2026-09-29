@@ -6,7 +6,11 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
-import { createDocumentFromTemplate, deleteTemplate, setTemplateShared } from "@/app/(app)/app/modeles/actions";
+import {
+  createDocumentFromTemplate,
+  deleteTemplate,
+  setTemplateShared,
+} from "@/app/(app)/app/modeles/actions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,7 +22,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -37,7 +46,13 @@ export type TemplateCard = {
   updatedAt: string;
 };
 
-export function TemplatesView({ templates, inTeam }: { templates: TemplateCard[]; inTeam: boolean }) {
+export function TemplatesView({
+  templates,
+  inTeam,
+}: {
+  templates: TemplateCard[];
+  inTeam: boolean;
+}) {
   const t = useTranslations("templates");
   const router = useRouter();
   const [pending, start] = useTransition();
@@ -48,7 +63,10 @@ export function TemplatesView({ templates, inTeam }: { templates: TemplateCard[]
   const launch = (tpl: TemplateCard, vars: Record<string, string>) =>
     start(async () => {
       const result = await createDocumentFromTemplate(tpl.id, vars);
-      if (!result.ok) return void toast.error(t(result.error === "missing_variable" ? "errors.missingVariable" : "errors.generic"));
+      if (!result.ok)
+        return void toast.error(
+          t(result.error === "missing_variable" ? "errors.missingVariable" : "errors.generic"),
+        );
       setUsing(null);
       toast.success(t("created"));
       router.push(`/app/documents/${result.documentId}/demande?modele=${tpl.id}`);
@@ -70,7 +88,10 @@ export function TemplatesView({ templates, inTeam }: { templates: TemplateCard[]
     <>
       <ul className="grid gap-4 sm:grid-cols-2" data-testid="template-list">
         {templates.map((tpl) => (
-          <li key={tpl.id} className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-5">
+          <li
+            key={tpl.id}
+            className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-5"
+          >
             <div className="flex items-start gap-3">
               <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-accent text-accent-foreground">
                 <LayoutTemplate className="size-5" aria-hidden />
@@ -84,7 +105,11 @@ export function TemplatesView({ templates, inTeam }: { templates: TemplateCard[]
               {tpl.mine && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon-sm" aria-label={t("actions", { name: tpl.name })}>
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      aria-label={t("actions", { name: tpl.name })}
+                    >
                       <MoreHorizontal />
                     </Button>
                   </DropdownMenuTrigger>
@@ -114,7 +139,9 @@ export function TemplatesView({ templates, inTeam }: { templates: TemplateCard[]
                 </DropdownMenu>
               )}
             </div>
-            {tpl.description && <p className="line-clamp-2 text-sm text-muted-foreground">{tpl.description}</p>}
+            {tpl.description && (
+              <p className="line-clamp-2 text-sm text-muted-foreground">{tpl.description}</p>
+            )}
             <div className="flex flex-wrap gap-1.5">
               {tpl.roles.map((role) => (
                 <Badge key={role} variant="muted">
@@ -154,7 +181,13 @@ export function TemplatesView({ templates, inTeam }: { templates: TemplateCard[]
                   {v.label}
                   {v.required && " *"}
                 </Label>
-                <Input id={`var-${v.id}`} maxLength={200} required={v.required} value={values[v.id] ?? ""} onChange={(e) => setValues((x) => ({ ...x, [v.id]: e.target.value }))} />
+                <Input
+                  id={`var-${v.id}`}
+                  maxLength={200}
+                  required={v.required}
+                  value={values[v.id] ?? ""}
+                  onChange={(e) => setValues((x) => ({ ...x, [v.id]: e.target.value }))}
+                />
               </div>
             ))}
           </form>

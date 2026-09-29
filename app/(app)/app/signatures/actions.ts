@@ -48,11 +48,19 @@ export async function createSignatureAsset(
   const meta = metaSchema.safeParse(Object.fromEntries(formData));
   const png = formData.get("png");
   const svg = formData.get("svg");
-  if (!meta.success || !(png instanceof File) || png.size === 0 || png.size > MAX_PNG) return { ok: false, error: "invalid" };
+  if (!meta.success || !(png instanceof File) || png.size === 0 || png.size > MAX_PNG)
+    return { ok: false, error: "invalid" };
 
   // Les cachets sont une fonctionnalité Pro ; les signatures/paraphes comptent dans la limite du plan.
-  const access = await guard(meta.data.type === "stamp" ? "stamps" : "sign", meta.data.type === "stamp" ? undefined : { kind: "signatureAssets" });
-  if (!access.ok) return { ok: false, error: access.reason === "quota_exceeded" ? "limit_reached" : access.reason };
+  const access = await guard(
+    meta.data.type === "stamp" ? "stamps" : "sign",
+    meta.data.type === "stamp" ? undefined : { kind: "signatureAssets" },
+  );
+  if (!access.ok)
+    return {
+      ok: false,
+      error: access.reason === "quota_exceeded" ? "limit_reached" : access.reason,
+    };
   const userId = access.account.userId;
 
   const bytes = new Uint8Array(await png.arrayBuffer());
@@ -76,10 +84,16 @@ export async function createSignatureAsset(
   const imagePath = `${userId}/${id}.png`;
   const svgPath = svgText ? `${userId}/${id}.svg` : null;
 
-  const { error: uploadError } = await admin.storage.from("signatures").upload(imagePath, bytes, { contentType: "image/png" });
+  const { error: uploadError } = await admin.storage
+    .from("signatures")
+    .upload(imagePath, bytes, { contentType: "image/png" });
   if (uploadError) return { ok: false, error: "server" };
   if (svgPath && svgText) {
-    await admin.storage.from("signatures").upload(svgPath, new Blob([svgText], { type: "image/svg+xml" }), { contentType: "image/svg+xml" });
+    await admin.storage
+      .from("signatures")
+      .upload(svgPath, new Blob([svgText], { type: "image/svg+xml" }), {
+        contentType: "image/svg+xml",
+      });
   }
 
   const { count } = await admin
@@ -164,7 +178,11 @@ export async function setAssetShared(id: string, shared: boolean): Promise<{ ok:
   const owned = await ownAsset(id);
   if (!owned || owned.asset.type !== "stamp") return { ok: false };
   const admin = createAdminClient();
-  const { data: member } = await admin.from("team_members").select("team_id").eq("user_id", owned.userId).maybeSingle();
+  const { data: member } = await admin
+    .from("team_members")
+    .select("team_id")
+    .eq("user_id", owned.userId)
+    .maybeSingle();
   if (shared && !member) return { ok: false };
   const { error } = await owned.supabase
     .from("signature_assets")
@@ -172,7 +190,12 @@ export async function setAssetShared(id: string, shared: boolean): Promise<{ ok:
     .eq("id", id);
   if (error) return { ok: false };
   if (shared) {
-    await recordAudit({ actorType: "user", actorId: owned.userId, eventType: "asset.shared", metadata: { asset_id: id } });
+    await recordAudit({
+      actorType: "user",
+      actorId: owned.userId,
+      eventType: "asset.shared",
+      metadata: { asset_id: id },
+    });
   }
   revalidatePath("/app/signatures");
   return { ok: true };
@@ -187,7 +210,12 @@ async function ownAsset(id: string) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return null;
-  const { data } = await supabase.from("signature_assets").select("*").eq("id", id).eq("owner_id", user.id).maybeSingle();
+  const { data } = await supabase
+    .from("signature_assets")
+    .select("*")
+    .eq("id", id)
+    .eq("owner_id", user.id)
+    .maybeSingle();
   return data ? { supabase, asset: data, userId: user.id } : null;
 }
 
@@ -195,7 +223,10 @@ export async function renameSignatureAsset(id: string, name: string): Promise<{ 
   const parsed = z.string().trim().min(1).max(80).safeParse(name);
   const found = await ownAsset(id);
   if (!parsed.success || !found) return { ok: false };
-  const { error } = await found.supabase.from("signature_assets").update({ name: parsed.data }).eq("id", id);
+  const { error } = await found.supabase
+    .from("signature_assets")
+    .update({ name: parsed.data })
+    .eq("id", id);
   revalidatePath("/app/signatures");
   return { ok: !error };
 }
@@ -210,7 +241,10 @@ export async function setDefaultSignatureAsset(id: string): Promise<{ ok: boolea
     .eq("owner_id", found.userId)
     .eq("type", found.asset.type)
     .eq("is_default", true);
-  const { error } = await found.supabase.from("signature_assets").update({ is_default: true }).eq("id", id);
+  const { error } = await found.supabase
+    .from("signature_assets")
+    .update({ is_default: true })
+    .eq("id", id);
   revalidatePath("/app/signatures");
   return { ok: !error };
 }
@@ -234,23 +268,35 @@ export async function deleteSignatureAsset(id: string): Promise<{ ok: boolean }>
       .order("created_at")
       .limit(1)
       .maybeSingle();
-    if (next) await supabase.from("signature_assets").update({ is_default: true }).eq("id", next.id);
+    if (next)
+      await supabase.from("signature_assets").update({ is_default: true }).eq("id", next.id);
   }
   revalidatePath("/app/signatures");
   return { ok: true };
 }
 
-export async function duplicateSignatureAsset(id: string): Promise<{ ok: boolean; error?: CreateError }> {
+export async function duplicateSignatureAsset(
+  id: string,
+): Promise<{ ok: boolean; error?: CreateError }> {
   const found = await ownAsset(id);
   if (!found) return { ok: false };
   const { asset } = found;
-  const access = await guard(asset.type === "stamp" ? "stamps" : "sign", asset.type === "stamp" ? undefined : { kind: "signatureAssets" });
-  if (!access.ok) return { ok: false, error: access.reason === "quota_exceeded" ? "limit_reached" : access.reason };
+  const access = await guard(
+    asset.type === "stamp" ? "stamps" : "sign",
+    asset.type === "stamp" ? undefined : { kind: "signatureAssets" },
+  );
+  if (!access.ok)
+    return {
+      ok: false,
+      error: access.reason === "quota_exceeded" ? "limit_reached" : access.reason,
+    };
 
   const admin = createAdminClient();
   const newId = randomUUID();
   const imagePath = `${found.userId}/${newId}.png`;
-  const { error: copyError } = await admin.storage.from("signatures").copy(asset.image_path, imagePath);
+  const { error: copyError } = await admin.storage
+    .from("signatures")
+    .copy(asset.image_path, imagePath);
   if (copyError) return { ok: false, error: "server" };
   const { error } = await admin.from("signature_assets").insert({
     id: newId,

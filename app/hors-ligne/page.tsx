@@ -21,7 +21,9 @@ export default function OfflinePage() {
         </div>
         <div className="space-y-2" lang="en">
           <h2 className="font-display text-lg font-semibold">No connection</h2>
-          <p className="text-sm text-muted-foreground">Check your network, then try again. Your documents are safe.</p>
+          <p className="text-sm text-muted-foreground">
+            Check your network, then try again. Your documents are safe.
+          </p>
         </div>
         <ReloadButton />
       </div>

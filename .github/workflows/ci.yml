@@ -58,3 +58,46 @@ jobs:
             --override-name auth.service_role_key=SUPABASE_SERVICE_ROLE_KEY > .env.local
       - name: Tests d'intégration (RLS, triggers, fonctions)
         run: npx vitest run --project integration
+
+  e2e:
+    name: Parcours de bout en bout (Playwright)
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Supabase local et conversion Word (Gotenberg)
+        run: |
+          supabase start -x studio,vector,logflare,imgproxy,edge-runtime,supavisor
+          docker compose up -d gotenberg
+      - name: Variables de test (assistant et paiements simulés)
+        run: |
+          supabase status -o env \
+            --override-name api.url=NEXT_PUBLIC_SUPABASE_URL \
+            --override-name auth.anon_key=NEXT_PUBLIC_SUPABASE_ANON_KEY \
+            --override-name auth.service_role_key=SUPABASE_SERVICE_ROLE_KEY > .env.local
+          {
+            echo "NEXT_PUBLIC_APP_URL=http://localhost:3000"
+            echo "GOTENBERG_URL=http://127.0.0.1:3001"
+            echo "GOTENBERG_TOKEN=local-gotenberg-token"
+            echo "AI_MOCK=true"
+            echo "PAYMENTS_SANDBOX=true"
+            echo "CRON_SECRET=ci-cron-secret-0123456789"
+            echo "LINK_SECRET=ci-link-secret-0123456789-0123456789-0123456789"
+          } >> .env.local
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-traces
+          path: test-results/
+          retention-days: 7

@@ -47,7 +47,12 @@ export default async function RequestsPage() {
         }
       />
       {!allowed && !requests?.length ? (
-        <ProUpsell icon={Send} title={t("list.proTitle")} text={t("list.proText")} cta={t("list.upgrade")} />
+        <ProUpsell
+          icon={Send}
+          title={t("list.proTitle")}
+          text={t("list.proText")}
+          cta={t("list.upgrade")}
+        />
       ) : !requests?.length ? (
         <EmptyState icon={Send} title={t("list.empty")} description={t("list.emptyHint")} />
       ) : (
@@ -64,14 +69,23 @@ export default async function RequestsPage() {
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-semibold">{r.title}</p>
                     <p className="text-xs text-muted-foreground">
-                      {t("list.created", { date: format.dateTime(new Date(r.created_at), { dateStyle: "medium" }) })}
+                      {t("list.created", {
+                        date: format.dateTime(new Date(r.created_at), { dateStyle: "medium" }),
+                      })}
                     </p>
                   </div>
                   <div className="w-full space-y-1 sm:w-40">
                     <Progress value={total ? (signed / total) * 100 : 0} />
-                    <p className="text-xs text-muted-foreground tabular-nums">{t("list.progress", { signed, total })}</p>
+                    <p className="text-xs text-muted-foreground tabular-nums">
+                      {t("list.progress", { signed, total })}
+                    </p>
                   </div>
-                  <Badge variant={REQUEST_STATUS_VARIANT[r.status as keyof typeof REQUEST_STATUS_VARIANT] ?? "muted"}>
+                  <Badge
+                    variant={
+                      REQUEST_STATUS_VARIANT[r.status as keyof typeof REQUEST_STATUS_VARIANT] ??
+                      "muted"
+                    }
+                  >
                     {t(`status.${r.status as keyof typeof REQUEST_STATUS_VARIANT}`)}
                   </Badge>
                 </Link>

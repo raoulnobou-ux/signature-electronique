@@ -142,12 +142,11 @@ Le schéma complet (tables, Row Level Security, buckets privés, trigger de cré
 
 ## Déploiement
 
-La procédure complète (Supabase, Gotenberg, Vercel, domaine, Resend, CinetPay, Sentry, tâches planifiées) est détaillée dans la section 13 de `SPEC.md` et sera finalisée en Phase 10. En résumé :
+Le guide complet, étape par étape, est dans [`docs/DEPLOIEMENT.md`](docs/DEPLOIEMENT.md) : Supabase (production et préproduction), Gotenberg (`deploy/gotenberg/`, Fly.io ou Render), Vercel (variables, tâches planifiées, région Paris), domaine et Resend (SPF/DKIM/DMARC), CinetPay, Sentry, test final.
 
-1. Créer deux projets Supabase (préproduction et production), puis `supabase link --project-ref <ref>` et `supabase db push`.
-2. Déployer Gotenberg (image `gotenberg/gotenberg:8`) sur Railway, Render ou Fly.io, protégé par un jeton.
-3. Importer le dépôt dans Vercel, renseigner les variables de `.env.example`.
-4. Configurer l'URL du site et les URL de redirection dans Supabase → Authentication → URL Configuration.
+- `npm run deploy:check -- .env.production` : vérifie les variables de production (secrets, modes de test désactivés, HTTPS).
+- `npm run smoke -- https://<domaine>` : test rapide d'un déploiement (pages, en-têtes de sécurité, santé, webhooks, PWA).
+- `GET /api/health` : état de la base et de la conversion Word (détail de la configuration avec `Authorization: Bearer <CRON_SECRET>`).
 
 ## Validité juridique
 

@@ -2,7 +2,10 @@
 
 import { useEffect, useSyncExternalStore } from "react";
 
-type InstallPromptEvent = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }> };
+type InstallPromptEvent = Event & {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: string }>;
+};
 
 // Invite d'installation mémorisée dès qu'elle arrive (avant même l'ouverture d'un menu).
 let deferred: InstallPromptEvent | null = null;

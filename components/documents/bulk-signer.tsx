@@ -19,11 +19,19 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import { finalizeSignature, type FinalizeResult } from "@/app/(app)/app/documents/[id]/signer/actions";
+import {
+  finalizeSignature,
+  type FinalizeResult,
+} from "@/app/(app)/app/documents/[id]/signer/actions";
 import type { AssetType, SignatureAsset } from "@/app/(app)/app/signatures/actions";
 import { PdfViewer, type PageSize } from "@/components/documents/pdf-viewer";
 import { PageLayer } from "@/components/editor/page-layer";
-import { defaultSize, newFieldId, useEditorState, type EditorField } from "@/components/editor/state";
+import {
+  defaultSize,
+  newFieldId,
+  useEditorState,
+  type EditorField,
+} from "@/components/editor/state";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Switch } from "@/components/ui/switch";
@@ -31,7 +39,10 @@ import { isImageField, MENTIONS, type FieldType } from "@/lib/pdf/fields";
 import { cn } from "@/lib/utils";
 
 type Doc = { id: string; title: string; pageCount: number };
-type Outcome = { status: "waiting" | "signing" | "done" | "error"; result?: Extract<FinalizeResult, { ok: true }> };
+type Outcome = {
+  status: "waiting" | "signing" | "done" | "error";
+  result?: Extract<FinalizeResult, { ok: true }>;
+};
 
 const TOOLS: { type: FieldType; icon: LucideIcon }[] = [
   { type: "signature", icon: PenLine },
@@ -73,7 +84,10 @@ export function BulkSigner({
   const [zipping, setZipping] = useState(false);
 
   const assetUrls = useMemo(() => Object.fromEntries(assets.map((a) => [a.id, a.url])), [assets]);
-  const defaultAsset = (type: AssetType) => assets.find((a) => a.type === type && a.isDefault) ?? assets.find((a) => a.type === type) ?? null;
+  const defaultAsset = (type: AssetType) =>
+    assets.find((a) => a.type === type && a.isDefault) ??
+    assets.find((a) => a.type === type) ??
+    null;
   const firstLast = documents[0]!.pageCount - 1;
   const started = Object.keys(outcomes).length > 0;
   const done = documents.filter((d) => outcomes[d.id]?.status === "done");
@@ -83,7 +97,11 @@ export function BulkSigner({
     const size = sizes[page];
     if (!size) return;
     const asset = isImageField(armed) ? defaultAsset(armed as AssetType) : null;
-    const { w, h } = defaultSize(armed, size.width / size.height, asset?.width && asset.height ? asset.width / asset.height : undefined);
+    const { w, h } = defaultSize(
+      armed,
+      size.width / size.height,
+      asset?.width && asset.height ? asset.width / asset.height : undefined,
+    );
     const field: EditorField = {
       id: newFieldId(),
       page,
@@ -95,7 +113,14 @@ export function BulkSigner({
       opacity: 1,
       type: armed,
       assetId: asset?.id ?? null,
-      value: armed === "date" ? defaults.dateLabel : armed === "name" ? defaults.name : armed === "mention" ? MENTIONS[0]! : null,
+      value:
+        armed === "date"
+          ? defaults.dateLabel
+          : armed === "name"
+            ? defaults.name
+            : armed === "mention"
+              ? MENTIONS[0]!
+              : null,
     };
     update([...fields, field]);
     select(field.id);
@@ -109,11 +134,17 @@ export function BulkSigner({
       setOutcomes((o) => ({ ...o, [doc.id]: { status: "signing" } }));
       const mapped = fields.map((f) => ({
         ...f,
-        page: lastPage && f.page === firstLast ? doc.pageCount - 1 : Math.min(f.page, doc.pageCount - 1),
+        page:
+          lastPage && f.page === firstLast
+            ? doc.pageCount - 1
+            : Math.min(f.page, doc.pageCount - 1),
       }));
       try {
         const result = await finalizeSignature(doc.id, mapped, { timestampFooter: footer });
-        setOutcomes((o) => ({ ...o, [doc.id]: result.ok ? { status: "done", result } : { status: "error" } }));
+        setOutcomes((o) => ({
+          ...o,
+          [doc.id]: result.ok ? { status: "done", result } : { status: "error" },
+        }));
       } catch {
         setOutcomes((o) => ({ ...o, [doc.id]: { status: "error" } }));
       }
@@ -131,7 +162,8 @@ export function BulkSigner({
         const result = outcomes[doc.id]!.result!;
         const blob = await (await fetch(result.downloadUrl)).blob();
         let name = result.fileName;
-        for (let i = 2; names.has(name); i++) name = result.fileName.replace(/\.pdf$/, ` (${i}).pdf`);
+        for (let i = 2; names.has(name); i++)
+          name = result.fileName.replace(/\.pdf$/, ` (${i}).pdf`);
         names.add(name);
         zip.file(name, blob);
       }
@@ -160,8 +192,12 @@ export function BulkSigner({
       onPlace={place}
       onSelect={select}
       onChange={(field, isDone, original) => {
-        update(fields.map((f) => (f.id === field.id ? field : f)), false);
-        if (isDone && original) editor.commitFrom(fields.map((f) => (f.id === original.id ? original : f)));
+        update(
+          fields.map((f) => (f.id === field.id ? field : f)),
+          false,
+        );
+        if (isDone && original)
+          editor.commitFrom(fields.map((f) => (f.id === original.id ? original : f)));
       }}
     />
   );
@@ -175,7 +211,9 @@ export function BulkSigner({
           </Link>
         </Button>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold">{t("title", { count: documents.length })}</p>
+          <p className="truncate text-sm font-semibold">
+            {t("title", { count: documents.length })}
+          </p>
           <p className="text-xs text-muted-foreground">{t("hint")}</p>
         </div>
         {!started && (
@@ -189,14 +227,27 @@ export function BulkSigner({
         <div className="flex-1 overflow-y-auto px-4 py-8">
           <div className="mx-auto max-w-2xl space-y-6">
             <div className="space-y-2">
-              <h1 className="font-display text-2xl font-semibold">{running ? t("signing") : t("finished", { count: done.length })}</h1>
-              <Progress value={(documents.filter((d) => ["done", "error"].includes(outcomes[d.id]?.status ?? "")).length / documents.length) * 100} />
+              <h1 className="font-display text-2xl font-semibold">
+                {running ? t("signing") : t("finished", { count: done.length })}
+              </h1>
+              <Progress
+                value={
+                  (documents.filter((d) => ["done", "error"].includes(outcomes[d.id]?.status ?? ""))
+                    .length /
+                    documents.length) *
+                  100
+                }
+              />
             </div>
             <ul className="space-y-2" data-testid="bulk-results">
               {documents.map((doc) => {
                 const status = outcomes[doc.id]?.status ?? "waiting";
                 return (
-                  <li key={doc.id} data-status={status} className="flex items-center gap-3 rounded-2xl border border-border p-3 text-sm">
+                  <li
+                    key={doc.id}
+                    data-status={status}
+                    className="flex items-center gap-3 rounded-2xl border border-border p-3 text-sm"
+                  >
                     {status === "done" ? (
                       <CheckCircle2 className="size-5 text-success" aria-hidden />
                     ) : status === "error" ? (
@@ -244,7 +295,9 @@ export function BulkSigner({
                     }}
                     className={cn(
                       "flex shrink-0 cursor-pointer items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-40",
-                      armed === type ? "bg-brand-gradient text-white" : "text-muted-foreground hover:bg-secondary",
+                      armed === type
+                        ? "bg-brand-gradient text-white"
+                        : "text-muted-foreground hover:bg-secondary",
                     )}
                   >
                     <Icon className="size-4" aria-hidden /> {tTools(type)}
@@ -292,10 +345,18 @@ export function BulkSigner({
           <div className="relative min-h-0 min-w-0 flex-1">
             {armed && (
               <div className="absolute inset-x-0 top-12 z-20 flex justify-center px-3">
-                <div className="glass rounded-full bg-popover px-4 py-1.5 text-sm shadow-lift">{t("placeHint", { tool: tTools(armed) })}</div>
+                <div className="rounded-full glass bg-popover px-4 py-1.5 text-sm shadow-lift">
+                  {t("placeHint", { tool: tTools(armed) })}
+                </div>
               </div>
             )}
-            <PdfViewer source={pdfUrl} className="h-full" maxPageWidth={900} renderOverlay={renderOverlay} onLoaded={({ sizes: s }) => setSizes(s)} />
+            <PdfViewer
+              source={pdfUrl}
+              className="h-full"
+              maxPageWidth={900}
+              renderOverlay={renderOverlay}
+              onLoaded={({ sizes: s }) => setSizes(s)}
+            />
           </div>
         </div>
       )}

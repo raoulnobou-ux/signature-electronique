@@ -45,9 +45,16 @@ export class SandboxProvider implements PaymentProvider {
     transactionId: string | null;
     expected: { amount: number; currency: string };
   }): Promise<VerifiedTransaction | null> {
-    const match = /^sbx_(successful|failed)_(mtn|orange|card)_([0-9a-f]{32})$/.exec(transactionId ?? "");
+    const match = /^sbx_(successful|failed)_(mtn|orange|card)_([0-9a-f]{32})$/.exec(
+      transactionId ?? "",
+    );
     if (!match) return null;
-    const [, outcome, method, signature] = match as unknown as [string, SandboxOutcome, SandboxMethod, string];
+    const [, outcome, method, signature] = match as unknown as [
+      string,
+      SandboxOutcome,
+      SandboxMethod,
+      string,
+    ];
     const expectedSig = Buffer.from(sign(this.secret, reference, outcome, method));
     if (!timingSafeEqual(expectedSig, Buffer.from(signature))) return null;
     return {

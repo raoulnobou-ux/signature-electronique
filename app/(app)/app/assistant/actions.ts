@@ -93,16 +93,14 @@ export async function createDocumentFromDraft(input: {
     await admin.storage.from("documents").remove([path]);
     return { ok: false };
   }
-  await admin
-    .from("document_versions")
-    .insert({
-      document_id: documentId,
-      version: 0,
-      file_path: path,
-      sha256,
-      created_by: userId,
-      note: "Rédigé avec l'assistant",
-    });
+  await admin.from("document_versions").insert({
+    document_id: documentId,
+    version: 0,
+    file_path: path,
+    sha256,
+    created_by: userId,
+    note: "Rédigé avec l'assistant",
+  });
   await recordAudit({
     documentId,
     actorType: "user",

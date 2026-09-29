@@ -11,10 +11,18 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function RequestPage(props: PageProps<"/app/demandes/[id]">) {
-  const [{ id }, searchParams] = await Promise.all([props.params, props.searchParams, requireAccount()]);
+  const [{ id }, searchParams] = await Promise.all([
+    props.params,
+    props.searchParams,
+    requireAccount(),
+  ]);
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
   const supabase = await createClient();
-  const { data: request } = await supabase.from("signature_requests").select("*").eq("id", id).maybeSingle();
+  const { data: request } = await supabase
+    .from("signature_requests")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
   if (!request) notFound();
   const [{ data: signers }, { data: events }] = await Promise.all([
     supabase.from("request_signers").select("*").eq("request_id", id).order("order_index"),
@@ -55,7 +63,8 @@ export default async function RequestPage(props: PageProps<"/app/demandes/[id]">
         id: e.id,
         at: e.created_at,
         type: e.event_type,
-        actor: e.actor_label ?? ((e.metadata as { signer_name?: string } | null)?.signer_name ?? null),
+        actor:
+          e.actor_label ?? (e.metadata as { signer_name?: string } | null)?.signer_name ?? null,
       }))}
     />
   );

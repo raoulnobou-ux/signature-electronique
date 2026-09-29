@@ -5,7 +5,12 @@ import { recordAudit } from "@/lib/audit";
 import { sniffFileType } from "@/lib/files/sniff";
 import { rateLimit } from "@/lib/rate-limit";
 import { getClientIp, getUserAgent } from "@/lib/request";
-import { declineSignerRequest, loadSignerContext, submitSignerSignature, type SubmitError } from "@/lib/requests/service";
+import {
+  declineSignerRequest,
+  loadSignerContext,
+  submitSignerSignature,
+  type SubmitError,
+} from "@/lib/requests/service";
 import { hashToken } from "@/lib/requests/tokens";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -52,7 +57,8 @@ async function readPng(value: FormDataEntryValue | null): Promise<Uint8Array | n
   return sniffFileType(bytes.subarray(0, 16)) === "png" ? bytes : "invalid";
 }
 
-export type SignResult = { ok: true; completed: boolean } | { ok: false; error: SubmitError | "consent" | "rate_limited" };
+export type SignResult =
+  { ok: true; completed: boolean } | { ok: false; error: SubmitError | "consent" | "rate_limited" };
 
 /** Signature par le signataire : images PNG + valeurs des zones + consentement explicite. */
 export async function submitSigned(formData: FormData): Promise<SignResult> {
@@ -62,7 +68,9 @@ export async function submitSigned(formData: FormData): Promise<SignResult> {
   const signature = await readPng(formData.get("signature"));
   const initials = await readPng(formData.get("initials"));
   if (signature === "invalid" || initials === "invalid") return { ok: false, error: "invalid" };
-  const values = z.record(z.string().max(64), z.string().max(200)).safeParse(JSON.parse(String(formData.get("values") ?? "{}")));
+  const values = z
+    .record(z.string().max(64), z.string().max(200))
+    .safeParse(JSON.parse(String(formData.get("values") ?? "{}")));
   if (!values.success) return { ok: false, error: "invalid" };
 
   return submitSignerSignature(token, {
@@ -77,6 +85,9 @@ export async function submitSigned(formData: FormData): Promise<SignResult> {
 export async function declineSigning(token: string, reason: string): Promise<{ ok: boolean }> {
   const parsed = z.string().trim().min(3).max(500).safeParse(reason);
   if (!parsed.success || (await limited("sign-decline", token, 5))) return { ok: false };
-  const ok = await declineSignerRequest(token, parsed.data, { ip: await getClientIp(), userAgent: await getUserAgent() });
+  const ok = await declineSignerRequest(token, parsed.data, {
+    ip: await getClientIp(),
+    userAgent: await getUserAgent(),
+  });
   return { ok };
 }

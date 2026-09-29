@@ -14,7 +14,11 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function TemplatesPage() {
-  const [account, t, supabase] = await Promise.all([requireAccount(), getTranslations("templates"), createClient()]);
+  const [account, t, supabase] = await Promise.all([
+    requireAccount(),
+    getTranslations("templates"),
+    createClient(),
+  ]);
   const allowed = account.entitlements.features.templates;
   const [{ data: templates }, { data: membership }] = await Promise.all([
     supabase.from("templates").select("*").order("updated_at", { ascending: false }).limit(200),
@@ -25,7 +29,12 @@ export default async function TemplatesPage() {
     <div className="mx-auto max-w-5xl">
       <PageHeader title={t("title")} description={t("description")} />
       {!allowed ? (
-        <ProUpsell icon={LayoutTemplate} title={t("proTitle")} text={t("proText")} cta={t("upgrade")} />
+        <ProUpsell
+          icon={LayoutTemplate}
+          title={t("proTitle")}
+          text={t("proText")}
+          cta={t("upgrade")}
+        />
       ) : (
         <TemplatesView
           inTeam={Boolean(membership)}
@@ -39,7 +48,13 @@ export default async function TemplatesPage() {
               pageCount: tpl.page_count ?? 0,
               roles: roles.success ? roles.data.map((r) => r.label) : [],
               variables: fields.success
-                ? fields.data.filter((f) => f.variable).map((f) => ({ id: f.id, label: f.value || t("variable"), required: f.required }))
+                ? fields.data
+                    .filter((f) => f.variable)
+                    .map((f) => ({
+                      id: f.id,
+                      label: f.value || t("variable"),
+                      required: f.required,
+                    }))
                 : [],
               zones: fields.success ? fields.data.length : 0,
               useCount: tpl.use_count,

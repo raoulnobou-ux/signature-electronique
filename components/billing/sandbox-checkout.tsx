@@ -14,7 +14,15 @@ const METHODS = [
   { id: "card", icon: CreditCard },
 ] as const;
 
-export function SandboxCheckout({ reference, amountLabel, cardOnly }: { reference: string; amountLabel: string; cardOnly: boolean }) {
+export function SandboxCheckout({
+  reference,
+  amountLabel,
+  cardOnly,
+}: {
+  reference: string;
+  amountLabel: string;
+  cardOnly: boolean;
+}) {
   const t = useTranslations("app.billing");
   const methods = cardOnly ? METHODS.filter((m) => m.id === "card") : METHODS;
   const [method, setMethod] = useState<(typeof METHODS)[number]["id"]>(methods[0]!.id);

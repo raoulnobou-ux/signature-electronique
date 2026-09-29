@@ -31,7 +31,9 @@ export function trimCanvas(source: HTMLCanvasElement, padding = 8): TrimmedImage
   const out = document.createElement("canvas");
   out.width = maxX - minX + 1;
   out.height = maxY - minY + 1;
-  out.getContext("2d")!.drawImage(source, minX, minY, out.width, out.height, 0, 0, out.width, out.height);
+  out
+    .getContext("2d")!
+    .drawImage(source, minX, minY, out.width, out.height, 0, 0, out.width, out.height);
   return { canvas: out, width: out.width, height: out.height };
 }
 
@@ -58,7 +60,9 @@ export function removeBackground(canvas: HTMLCanvasElement, threshold: number): 
 }
 
 export function canvasToPngBlob(canvas: HTMLCanvasElement): Promise<Blob> {
-  return new Promise((resolve, reject) => canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("png"))), "image/png"));
+  return new Promise((resolve, reject) =>
+    canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("png"))), "image/png"),
+  );
 }
 
 /** Six polices manuscrites, chargées uniquement à l'ouverture de l'onglet « Taper ». */
@@ -76,7 +80,11 @@ let fontsPromise: Promise<void> | null = null;
 export function loadHandwritingFonts(): Promise<void> {
   fontsPromise ??= Promise.all(
     HANDWRITING_FONTS.map(async ({ family, file }) => {
-      const face = new FontFace(`QS ${family}`, `url(/fonts/handwriting/${file}.woff2) format("woff2")`, { display: "swap" });
+      const face = new FontFace(
+        `QS ${family}`,
+        `url(/fonts/handwriting/${file}.woff2) format("woff2")`,
+        { display: "swap" },
+      );
       await face.load();
       document.fonts.add(face);
     }),
@@ -85,7 +93,11 @@ export function loadHandwritingFonts(): Promise<void> {
 }
 
 /** Rendu d'un nom en écriture manuscrite → canvas haute définition recadré. */
-export function renderTypedSignature(text: string, family: string, color: string): TrimmedImage | null {
+export function renderTypedSignature(
+  text: string,
+  family: string,
+  color: string,
+): TrimmedImage | null {
   const size = 180;
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d")!;

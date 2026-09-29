@@ -20,7 +20,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 /** « Enregistrer comme modèle » depuis la fiche d'un document (Pro). */
-export function SaveAsTemplateButton({ documentId, defaultName }: { documentId: string; defaultName: string }) {
+export function SaveAsTemplateButton({
+  documentId,
+  defaultName,
+}: {
+  documentId: string;
+  defaultName: string;
+}) {
   const t = useTranslations("templates");
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -49,11 +55,21 @@ export function SaveAsTemplateButton({ documentId, defaultName }: { documentId: 
           <div className="space-y-3">
             <div className="space-y-1.5">
               <Label htmlFor="tpl-name">{t("name")}</Label>
-              <Input id="tpl-name" value={name} maxLength={120} onChange={(e) => setName(e.target.value)} />
+              <Input
+                id="tpl-name"
+                value={name}
+                maxLength={120}
+                onChange={(e) => setName(e.target.value)}
+              />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="tpl-description">{t("descriptionLabel")}</Label>
-              <Input id="tpl-description" value={description} maxLength={500} onChange={(e) => setDescription(e.target.value)} />
+              <Input
+                id="tpl-description"
+                value={description}
+                maxLength={500}
+                onChange={(e) => setDescription(e.target.value)}
+              />
             </div>
           </div>
           <DialogFooter>

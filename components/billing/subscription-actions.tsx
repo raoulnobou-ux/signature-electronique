@@ -53,9 +53,14 @@ export function SubscriptionActions({
     });
 
   const notes: string[] = [];
-  const isDowngrade = scheduledPlan === "essential" && scheduledPlanAt && Math.abs(new Date(scheduledPlanAt).getTime() - new Date(periodEnd).getTime()) < 1000;
+  const isDowngrade =
+    scheduledPlan === "essential" &&
+    scheduledPlanAt &&
+    Math.abs(new Date(scheduledPlanAt).getTime() - new Date(periodEnd).getTime()) < 1000;
   if (scheduledPlan && scheduledPlanAt && !isDowngrade) {
-    notes.push(t("manage.switchNote", { plan: t(`plans.${scheduledPlan}`), date: date(scheduledPlanAt) }));
+    notes.push(
+      t("manage.switchNote", { plan: t(`plans.${scheduledPlan}`), date: date(scheduledPlanAt) }),
+    );
   }
   if (isDowngrade) notes.push(t("manage.downgradeNote", { date: date(scheduledPlanAt!) }));
   if (cancelAtPeriodEnd) notes.push(t("manage.canceledNote", { date: date(periodEnd) }));
@@ -65,29 +70,52 @@ export function SubscriptionActions({
   return (
     <div className="space-y-3">
       {notes.map((note) => (
-        <p key={note} className="flex items-center gap-2 rounded-xl bg-secondary/60 px-3 py-2 text-sm">
+        <p
+          key={note}
+          className="flex items-center gap-2 rounded-xl bg-secondary/60 px-3 py-2 text-sm"
+        >
           <CalendarClock className="size-4 shrink-0 text-muted-foreground" aria-hidden /> {note}
         </p>
       ))}
       {paid && (
         <div className="flex flex-wrap gap-2">
           {cancelAtPeriodEnd ? (
-            <Button variant="secondary" size="sm" loading={pending} onClick={() => run(() => setCancelAtPeriodEnd(false))}>
+            <Button
+              variant="secondary"
+              size="sm"
+              loading={pending}
+              onClick={() => run(() => setCancelAtPeriodEnd(false))}
+            >
               {t("manage.resume")}
             </Button>
           ) : (
             <>
               {plan === "pro" && !scheduledPlan && (
-                <Button variant="secondary" size="sm" disabled={pending} onClick={() => run(() => setScheduledDowngrade(true))}>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  disabled={pending}
+                  onClick={() => run(() => setScheduledDowngrade(true))}
+                >
                   {t("manage.downgrade")}
                 </Button>
               )}
               {isDowngrade && (
-                <Button variant="secondary" size="sm" disabled={pending} onClick={() => run(() => setScheduledDowngrade(false))}>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  disabled={pending}
+                  onClick={() => run(() => setScheduledDowngrade(false))}
+                >
                   {t("manage.undoDowngrade")}
                 </Button>
               )}
-              <Button variant="ghost" size="sm" className="text-destructive" onClick={() => setConfirmCancel(true)}>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-destructive"
+                onClick={() => setConfirmCancel(true)}
+              >
                 {t("manage.cancel")}
               </Button>
             </>
@@ -99,13 +127,19 @@ export function SubscriptionActions({
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{t("manage.cancelTitle")}</DialogTitle>
-            <DialogDescription>{t("manage.cancelBody", { date: date(periodEnd) })}</DialogDescription>
+            <DialogDescription>
+              {t("manage.cancelBody", { date: date(periodEnd) })}
+            </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <DialogClose asChild>
               <Button variant="ghost">{t("manage.keep")}</Button>
             </DialogClose>
-            <Button variant="destructive" loading={pending} onClick={() => run(() => setCancelAtPeriodEnd(true))}>
+            <Button
+              variant="destructive"
+              loading={pending}
+              onClick={() => run(() => setCancelAtPeriodEnd(true))}
+            >
               {t("manage.cancelConfirm")}
             </Button>
           </DialogFooter>

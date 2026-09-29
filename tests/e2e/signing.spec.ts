@@ -12,7 +12,11 @@ async function drawSignature(page: Page) {
   await page.mouse.move(box.x + 30, box.y + box.height * 0.6);
   await page.mouse.down();
   for (let i = 0; i <= 30; i++) {
-    await page.mouse.move(box.x + 30 + i * ((box.width - 60) / 30), box.y + box.height * 0.6 - Math.sin(i / 3) * 35, { steps: 2 });
+    await page.mouse.move(
+      box.x + 30 + i * ((box.width - 60) / 30),
+      box.y + box.height * 0.6 - Math.sin(i / 3) * 35,
+      { steps: 2 },
+    );
   }
   await page.mouse.up();
 }
@@ -34,7 +38,9 @@ test("créer sa signature (dessin et texte), la gérer dans la bibliothèque", a
   await page.getByLabel("Nom").fill("Signature officielle");
   await page.getByRole("button", { name: "Enregistrer" }).click();
   await expect(page.getByText("Enregistré dans votre bibliothèque.").first()).toBeVisible();
-  await expect(page.getByRole("img", { name: "Signature officielle" })).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByRole("img", { name: "Signature officielle" })).toBeVisible({
+    timeout: 10_000,
+  });
 
   // Paraphe tapé dans une écriture manuscrite
   await page.getByRole("button", { name: "Paraphe", exact: true }).click();
@@ -44,7 +50,11 @@ test("créer sa signature (dessin et texte), la gérer dans la bibliothèque", a
   await page.getByRole("button", { name: "Enregistrer" }).click();
   await expect(page.getByRole("img", { name: "Paraphe" })).toBeVisible({ timeout: 10_000 });
 
-  const { data } = await adminClient().from("signature_assets").select("type, method, is_default, svg_path").eq("owner_id", user.id).order("created_at");
+  const { data } = await adminClient()
+    .from("signature_assets")
+    .select("type, method, is_default, svg_path")
+    .eq("owner_id", user.id)
+    .order("created_at");
   expect(data).toMatchObject([
     { type: "signature", method: "draw", is_default: true },
     { type: "initials", method: "type", is_default: true },
@@ -83,7 +93,9 @@ test("signer un document : placer, déplacer, dater, finaliser, télécharger", 
   const before = (await signature.boundingBox())!;
   await page.mouse.move(before.x + before.width / 2, before.y + before.height / 2);
   await page.mouse.down();
-  await page.mouse.move(before.x + before.width / 2 - 120, before.y + before.height / 2 - 40, { steps: 8 });
+  await page.mouse.move(before.x + before.width / 2 - 120, before.y + before.height / 2 - 40, {
+    steps: 8,
+  });
   await page.mouse.up();
   const after = (await signature.boundingBox())!;
   expect(after.x).toBeLessThan(before.x - 80);
@@ -99,30 +111,52 @@ test("signer un document : placer, déplacer, dater, finaliser, télécharger", 
 
   // Brouillon enregistré automatiquement
   await expect(page.getByText("Brouillon enregistré")).toBeVisible({ timeout: 10_000 });
-  const { count: draftCount } = await adminClient().from("placed_fields").select("id", { count: "exact", head: true }).eq("document_id", documentId);
+  const { count: draftCount } = await adminClient()
+    .from("placed_fields")
+    .select("id", { count: "exact", head: true })
+    .eq("document_id", documentId);
   expect(draftCount).toBe(2);
 
   // Finaliser
   await page.getByRole("button", { name: /Finaliser et signer/ }).click();
   await expect(page.getByRole("dialog")).toContainText("2 éléments seront apposés sur 1 page");
   await page.getByRole("button", { name: "Signer le document" }).click();
-  await expect(page.getByRole("heading", { name: "Document signé !" })).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByRole("heading", { name: "Document signé !" })).toBeVisible({
+    timeout: 30_000,
+  });
 
   // Vérifications côté serveur
-  const { data: doc } = await adminClient().from("documents").select("status, current_version, sha256, pdf_path").eq("id", documentId).single();
+  const { data: doc } = await adminClient()
+    .from("documents")
+    .select("status, current_version, sha256, pdf_path")
+    .eq("id", documentId)
+    .single();
   expect(doc).toMatchObject({ status: "signed", current_version: 1 });
   await expect(page.getByText(doc!.sha256!)).toBeVisible();
-  const { data: versions } = await adminClient().from("document_versions").select("version").eq("document_id", documentId).order("version");
+  const { data: versions } = await adminClient()
+    .from("document_versions")
+    .select("version")
+    .eq("document_id", documentId)
+    .order("version");
   expect(versions!.map((v) => v.version)).toEqual([0, 1]);
-  const { data: usage } = await adminClient().from("usage_counters").select("documents_signed").eq("user_id", user.id);
+  const { data: usage } = await adminClient()
+    .from("usage_counters")
+    .select("documents_signed")
+    .eq("user_id", user.id);
   expect(usage![0]!.documents_signed).toBe(1);
-  const { data: audit } = await adminClient().from("audit_events").select("event_type, metadata").eq("document_id", documentId).eq("event_type", "document.signed");
+  const { data: audit } = await adminClient()
+    .from("audit_events")
+    .select("event_type, metadata")
+    .eq("document_id", documentId)
+    .eq("event_type", "document.signed");
   expect(audit).toHaveLength(1);
 
   // Le PDF téléchargé est signé, 2 pages, métadonnées QuickSign
   const link = page.getByRole("link", { name: "Télécharger" });
   const href = (await link.getAttribute("href"))!;
-  const pdf = await PDFDocument.load(new Uint8Array(await (await fetch(href)).arrayBuffer()), { updateMetadata: false });
+  const pdf = await PDFDocument.load(new Uint8Array(await (await fetch(href)).arrayBuffer()), {
+    updateMetadata: false,
+  });
   expect(pdf.getPageCount()).toBe(2);
   expect(pdf.getProducer()).toBe("QuickSign");
   expect(errors).toEqual([]);
@@ -133,7 +167,10 @@ test("un compte en lecture seule ne peut pas ouvrir l'éditeur ni signer", async
   await signInAs(page, user.email);
   await importDocument(page, "annonce.pdf");
   const documentId = page.url().split("/").pop()!;
-  await adminClient().from("subscriptions").update({ current_period_end: new Date(Date.now() - 60_000).toISOString() }).eq("user_id", user.id);
+  await adminClient()
+    .from("subscriptions")
+    .update({ current_period_end: new Date(Date.now() - 60_000).toISOString() })
+    .eq("user_id", user.id);
   await page.goto(`/app/documents/${documentId}/signer`);
   await expect(page).toHaveURL(new RegExp(`/app/documents/${documentId}$`));
   await expect(page.locator(`a[href$="/${documentId}/signer"]`)).toHaveCount(0);

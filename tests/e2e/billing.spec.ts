@@ -19,20 +19,33 @@ async function choosePlan(page: Page, buttonName: string | RegExp) {
   await expect(page.getByTestId("checkout-amount")).toBeVisible({ timeout: 10_000 });
 }
 
-async function payInSandbox(page: Page, method: "MTN Mobile Money" | "Orange Money" | "Carte bancaire", succeed = true) {
-  await page.getByRole("dialog").getByRole("button", { name: /^Payer/ }).click();
+async function payInSandbox(
+  page: Page,
+  method: "MTN Mobile Money" | "Orange Money" | "Carte bancaire",
+  succeed = true,
+) {
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: /^Payer/ })
+    .click();
   await page.waitForURL(/\/paiement-test\?ref=QS-/);
   await page.getByRole("radio", { name: method }).click();
   await page.getByRole("button", { name: succeed ? /^Payer/ : "Simuler un échec" }).click();
   await page.waitForURL(/\/app\/abonnement\?paiement=/);
 }
 
-test("essai → Essentiel payé par Mobile Money → reçu PDF, jours d'essai conservés", async ({ page }) => {
+test("essai → Essentiel payé par Mobile Money → reçu PDF, jours d'essai conservés", async ({
+  page,
+}) => {
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
   const user = await createConfirmedUser("paie-essai");
   await signInAs(page, user.email);
-  const { data: before } = await adminClient().from("subscriptions").select("current_period_end").eq("user_id", user.id).single();
+  const { data: before } = await adminClient()
+    .from("subscriptions")
+    .select("current_period_end")
+    .eq("user_id", user.id)
+    .single();
 
   await choosePlan(page, "Choisir Essentiel");
   await expect(page.getByTestId("checkout-amount")).toHaveText(/5\s000\sFCFA/);
@@ -45,10 +58,22 @@ test("essai → Essentiel payé par Mobile Money → reçu PDF, jours d'essai co
   await expect(history).toContainText("Abonnement Essentiel — mensuel");
   await expect(history).toContainText("Payé");
 
-  const { data: sub } = await adminClient().from("subscriptions").select("*").eq("user_id", user.id).single();
-  expect(sub).toMatchObject({ status: "active", plan: "trial", scheduled_plan: "essential", currency: "XAF" });
+  const { data: sub } = await adminClient()
+    .from("subscriptions")
+    .select("*")
+    .eq("user_id", user.id)
+    .single();
+  expect(sub).toMatchObject({
+    status: "active",
+    plan: "trial",
+    scheduled_plan: "essential",
+    currency: "XAF",
+  });
   expect(sub.scheduled_plan_at).toBe(before!.current_period_end);
-  const { data: payments } = await adminClient().from("payments").select("status, receipt_path, payment_method").eq("user_id", user.id);
+  const { data: payments } = await adminClient()
+    .from("payments")
+    .select("status, receipt_path, payment_method")
+    .eq("user_id", user.id);
   expect(payments).toMatchObject([{ status: "successful", payment_method: "mobilemoney_mtn" }]);
   expect(payments![0]!.receipt_path).toMatch(/\.pdf$/);
 
@@ -62,7 +87,9 @@ test("essai → Essentiel payé par Mobile Money → reçu PDF, jours d'essai co
   expect(errors).toEqual([]);
 });
 
-test("compte expiré en lecture seule → paiement Pro → accès rétabli immédiatement", async ({ page }) => {
+test("compte expiré en lecture seule → paiement Pro → accès rétabli immédiatement", async ({
+  page,
+}) => {
   const user = await createConfirmedUser("paie-expire");
   await setSubscription(user.id, { status: "expired", current_period_end: iso(-8 * DAY) });
   await signInAs(page, user.email);
@@ -75,7 +102,11 @@ test("compte expiré en lecture seule → paiement Pro → accès rétabli immé
 
   await expect(page.getByText("Paiement confirmé")).toBeVisible();
   await expect(page.getByText("Lecture seule")).toHaveCount(0);
-  const { data: sub } = await adminClient().from("subscriptions").select("plan, status").eq("user_id", user.id).single();
+  const { data: sub } = await adminClient()
+    .from("subscriptions")
+    .select("plan, status")
+    .eq("user_id", user.id)
+    .single();
   expect(sub).toEqual({ plan: "pro", status: "active" });
 });
 
@@ -87,7 +118,11 @@ test("paiement refusé par l'opérateur → message clair, rien n'est activé", 
   await payInSandbox(page, "MTN Mobile Money", false);
   await expect(page.getByText("Le paiement n'a pas abouti")).toBeVisible();
   await expect(page.getByTestId("payment-history")).toContainText("Échoué");
-  const { data: sub } = await adminClient().from("subscriptions").select("status").eq("user_id", user.id).single();
+  const { data: sub } = await adminClient()
+    .from("subscriptions")
+    .select("status")
+    .eq("user_id", user.id)
+    .single();
   expect(sub!.status).toBe("expired");
 });
 
@@ -110,7 +145,11 @@ test("Essentiel → Pro au prorata, puis annulation et reprise", async ({ page }
   await expect(page.getByRole("dialog")).toContainText("au prorata");
   await payInSandbox(page, "Carte bancaire");
   await expect(page.getByText("Paiement confirmé")).toBeVisible();
-  const { data: sub } = await adminClient().from("subscriptions").select("plan, current_period_end").eq("user_id", user.id).single();
+  const { data: sub } = await adminClient()
+    .from("subscriptions")
+    .select("plan, current_period_end")
+    .eq("user_id", user.id)
+    .single();
   expect(sub!.plan).toBe("pro");
   expect(new Date(sub!.current_period_end).getTime()).toBe(new Date(end).getTime());
 
@@ -120,16 +159,27 @@ test("Essentiel → Pro au prorata, puis annulation et reprise", async ({ page }
   await expect(page.getByText(/Abonnement annulé : accès complet jusqu'au/)).toBeVisible();
   await page.getByRole("button", { name: "Reprendre l'abonnement" }).click();
   await expect(page.getByText(/Abonnement annulé/)).toHaveCount(0);
-  const { data: resumed } = await adminClient().from("subscriptions").select("cancel_at_period_end").eq("user_id", user.id).single();
+  const { data: resumed } = await adminClient()
+    .from("subscriptions")
+    .select("cancel_at_period_end")
+    .eq("user_id", user.id)
+    .single();
   expect(resumed!.cancel_at_period_end).toBe(false);
 });
 
-test("sécurité : webhook non configuré, tâche planifiée protégée, faux retour de paiement ignoré", async ({ request, page }) => {
+test("sécurité : webhook non configuré, tâche planifiée protégée, faux retour de paiement ignoré", async ({
+  request,
+  page,
+}) => {
   // Sans clé CinetPay (bac à sable), l'URL de notification refuse tout ; elle répond au test de disponibilité.
-  expect((await request.post("/api/webhooks/cinetpay", { form: { cpm_trans_id: "QS-X" } })).status()).toBe(404);
+  expect(
+    (await request.post("/api/webhooks/cinetpay", { form: { cpm_trans_id: "QS-X" } })).status(),
+  ).toBe(404);
   expect((await request.get("/api/webhooks/cinetpay")).status()).toBe(200);
   expect((await request.get("/api/cron/billing")).status()).toBe(401);
-  const cron = await request.get("/api/cron/billing", { headers: { Authorization: `Bearer ${process.env.CRON_SECRET}` } });
+  const cron = await request.get("/api/cron/billing", {
+    headers: { Authorization: `Bearer ${process.env.CRON_SECRET}` },
+  });
   expect(cron.status()).toBe(200);
   expect(await cron.json()).toHaveProperty("reminders");
 
@@ -138,11 +188,20 @@ test("sécurité : webhook non configuré, tâche planifiée protégée, faux re
   await setSubscription(user.id, { status: "expired", current_period_end: iso(-DAY) });
   await signInAs(page, user.email);
   await choosePlan(page, "Choisir Pro");
-  await page.getByRole("dialog").getByRole("button", { name: /^Payer/ }).click();
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: /^Payer/ })
+    .click();
   await page.waitForURL(/\/paiement-test\?ref=QS-/);
   const ref = new URL(page.url()).searchParams.get("ref")!;
-  await page.goto(`/api/billing/return?status=successful&tx_ref=${ref}&transaction_id=sbx_successful_mtn_${"0".repeat(32)}`);
+  await page.goto(
+    `/api/billing/return?status=successful&tx_ref=${ref}&transaction_id=sbx_successful_mtn_${"0".repeat(32)}`,
+  );
   await expect(page).toHaveURL(/paiement=attente/);
-  const { data: sub } = await adminClient().from("subscriptions").select("status").eq("user_id", user.id).single();
+  const { data: sub } = await adminClient()
+    .from("subscriptions")
+    .select("status")
+    .eq("user_id", user.id)
+    .single();
   expect(sub!.status).toBe("expired");
 });

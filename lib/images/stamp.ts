@@ -32,7 +32,10 @@ export interface StampOptions {
   seed?: number;
 }
 
-export const STAMP_PRESETS: { id: string; options: Omit<StampOptions, "organization" | "title" | "city" | "date"> }[] = [
+export const STAMP_PRESETS: {
+  id: string;
+  options: Omit<StampOptions, "organization" | "title" | "city" | "date">;
+}[] = [
   { id: "classic", options: { shape: "round", color: "blue", ink: true } },
   { id: "official", options: { shape: "rect", color: "blue", ink: true } },
   { id: "oval", options: { shape: "oval", color: "red", ink: true } },
@@ -69,7 +72,12 @@ function inkFilter(seed: number): string {
 </filter>`;
 }
 
-function centerLines(lines: { text: string; size: number; weight: number }[], cx: number, cy: number, color: string): string {
+function centerLines(
+  lines: { text: string; size: number; weight: number }[],
+  cx: number,
+  cy: number,
+  color: string,
+): string {
   const gap = 4;
   const total = lines.reduce((sum, l) => sum + l.size, 0) + gap * (lines.length - 1);
   let y = cy - total / 2;
@@ -127,7 +135,9 @@ ${centerLines(lines, w / 2, h / 2, color)}
   const topSize = fitFontSize(organization, arc, 21, 9);
   const bottomSize = fitFontSize(city, arc * 0.7, 17, 9);
   const center = [
-    ...(title ? [{ text: title, size: fitFontSize(title, (rx - band) * 1.7, 17), weight: 700 }] : []),
+    ...(title
+      ? [{ text: title, size: fitFontSize(title, (rx - band) * 1.7, 17), weight: 700 }]
+      : []),
     ...(date ? [{ text: date, size: 13, weight: 500 }] : []),
   ];
   const separators = city
@@ -147,9 +157,13 @@ ${centerLines(lines, w / 2, h / 2, color)}
 <text font-size="${topSize}" font-weight="700" fill="${color}"><textPath href="#stamp-top" startOffset="50%" text-anchor="middle">${escapeXml(organization)}</textPath></text>
 ${city ? `<text font-size="${bottomSize}" font-weight="600" fill="${color}"><textPath href="#stamp-bottom" startOffset="50%" text-anchor="middle">${escapeXml(city)}</textPath></text>` : ""}
 ${separators}
-${center.length ? `<line x1="${cx - (rx - band) * 0.62}" y1="${cy - 30}" x2="${cx + (rx - band) * 0.62}" y2="${cy - 30}" stroke="${color}" stroke-width="1.5"/>
+${
+  center.length
+    ? `<line x1="${cx - (rx - band) * 0.62}" y1="${cy - 30}" x2="${cx + (rx - band) * 0.62}" y2="${cy - 30}" stroke="${color}" stroke-width="1.5"/>
 <line x1="${cx - (rx - band) * 0.62}" y1="${cy + 32}" x2="${cx + (rx - band) * 0.62}" y2="${cy + 32}" stroke="${color}" stroke-width="1.5"/>
-${centerLines(center, cx, cy, color)}` : ""}
+${centerLines(center, cx, cy, color)}`
+    : ""
+}
 </g>
 </svg>`;
 }

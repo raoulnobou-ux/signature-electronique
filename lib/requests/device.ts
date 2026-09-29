@@ -5,7 +5,9 @@ export function describeDevice(userAgent: string | null | undefined): string {
   const os = /Android/i.test(ua)
     ? "Android"
     : /iPhone|iPad|iPod/i.test(ua)
-      ? /iPad/i.test(ua) ? "iPad" : "iPhone"
+      ? /iPad/i.test(ua)
+        ? "iPad"
+        : "iPhone"
       : /Windows/i.test(ua)
         ? "Windows"
         : /Mac OS X|Macintosh/i.test(ua)

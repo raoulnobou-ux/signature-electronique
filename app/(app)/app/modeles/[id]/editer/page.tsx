@@ -18,9 +18,15 @@ export default async function EditTemplatePage(props: PageProps<"/app/modeles/[i
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
   if (!account.entitlements.features.templates) redirect("/app/modeles");
   const supabase = await createClient();
-  const { data: template } = await supabase.from("templates").select("*").eq("id", id).maybeSingle();
+  const { data: template } = await supabase
+    .from("templates")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
   if (!template || template.owner_id !== account.userId || !template.pdf_path) notFound();
-  const { data: signed } = await createAdminClient().storage.from("documents").createSignedUrl(template.pdf_path, 3600);
+  const { data: signed } = await createAdminClient()
+    .storage.from("documents")
+    .createSignedUrl(template.pdf_path, 3600);
   if (!signed) notFound();
 
   const roles = templateRoleSchema.array().safeParse(template.roles);
@@ -32,7 +38,11 @@ export default async function EditTemplatePage(props: PageProps<"/app/modeles/[i
       template={{ id: template.id, name: template.name }}
       preset={{
         mode: template.mode as "sequential" | "parallel",
-        signers: (roles.success && roles.data.length ? roles.data : [{ label: "" }]).map((r) => ({ name: r.label, email: "", phone: "" })),
+        signers: (roles.success && roles.data.length ? roles.data : [{ label: "" }]).map((r) => ({
+          name: r.label,
+          email: "",
+          phone: "",
+        })),
         fields: (fields.success ? fields.data : []).map((f): BuilderField => ({
           id: f.id,
           page: f.page,

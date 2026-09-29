@@ -7,17 +7,36 @@ import { displayToPdf, fieldMatrix, stampPdf, type PageGeometry } from "@/lib/pd
 const A4 = { x: 0, y: 0, width: 595.28, height: 841.89 };
 
 function field(partial: Partial<Field>): Field {
-  return { id: "f", page: 0, x: 10, y: 10, w: 20, h: 5, rotation: 0, opacity: 1, type: "text", value: "Lu et approuvé", ...partial };
+  return {
+    id: "f",
+    page: 0,
+    x: 10,
+    y: 10,
+    w: 20,
+    h: 5,
+    rotation: 0,
+    opacity: 1,
+    type: "text",
+    value: "Lu et approuvé",
+    ...partial,
+  };
 }
 
 /** Texte extrait avec pdf.js, avec position PDF (coin bas-gauche de la ligne). */
 async function extractText(bytes: Uint8Array, pageIndex = 0) {
   const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
-  const doc = await pdfjs.getDocument({ data: bytes.slice(), useWorkerFetch: false, isEvalSupported: false } as never).promise;
+  const doc = await pdfjs.getDocument({
+    data: bytes.slice(),
+    useWorkerFetch: false,
+    isEvalSupported: false,
+  } as never).promise;
   const page = await doc.getPage(pageIndex + 1);
   const content = await page.getTextContent();
   return content.items
-    .filter((i): i is typeof i & { str: string; transform: number[] } => "str" in i && i.str.trim().length > 0)
+    .filter(
+      (i): i is typeof i & { str: string; transform: number[] } =>
+        "str" in i && i.str.trim().length > 0,
+    )
     .map((i) => ({ text: i.str, x: i.transform[4]!, y: i.transform[5]! }));
 }
 
@@ -40,13 +59,21 @@ describe("coordonnées des champs", () => {
     expect(displayToPdf(shifted, 1, 1)).toEqual({ x: 650, y: 30 });
   });
 
-  it.each([90, 180, 270])("page tournée à %i° : les quatre coins affichés tombent sur les coins de la page", (rotation) => {
-    const g: PageGeometry = { box: { x: 0, y: 0, width: 600, height: 800 }, rotation };
-    const corners = [displayToPdf(g, 0, 0), displayToPdf(g, 1, 0), displayToPdf(g, 1, 1), displayToPdf(g, 0, 1)]
-      .map((p) => `${Math.round(p.x)},${Math.round(p.y)}`)
-      .sort();
-    expect(corners).toEqual(["0,0", "0,800", "600,0", "600,800"]);
-  });
+  it.each([90, 180, 270])(
+    "page tournée à %i° : les quatre coins affichés tombent sur les coins de la page",
+    (rotation) => {
+      const g: PageGeometry = { box: { x: 0, y: 0, width: 600, height: 800 }, rotation };
+      const corners = [
+        displayToPdf(g, 0, 0),
+        displayToPdf(g, 1, 0),
+        displayToPdf(g, 1, 1),
+        displayToPdf(g, 0, 1),
+      ]
+        .map((p) => `${Math.round(p.x)},${Math.round(p.y)}`)
+        .sort();
+      expect(corners).toEqual(["0,0", "0,800", "600,0", "600,800"]);
+    },
+  );
 
   it("une rotation du champ conserve son centre", () => {
     const straight = fieldMatrix(geo, { x: 40, y: 40, w: 20, h: 10, rotation: 0 });
@@ -63,12 +90,17 @@ describe("coordonnées des champs", () => {
 describe("génération du PDF signé", () => {
   async function blankPdf(rotation = 0, pages = 1) {
     const doc = await PDFDocument.create();
-    for (let i = 0; i < pages; i++) doc.addPage([A4.width, A4.height]).setRotation(degrees(rotation));
+    for (let i = 0; i < pages; i++)
+      doc.addPage([A4.width, A4.height]).setRotation(degrees(rotation));
     return doc.save();
   }
 
   it("incruste le texte à l'endroit choisi (page droite)", async () => {
-    const out = await stampPdf(await blankPdf(), [field({ x: 60, y: 80, w: 30, h: 3, value: "Lu et approuvé" })], { images: new Map() });
+    const out = await stampPdf(
+      await blankPdf(),
+      [field({ x: 60, y: 80, w: 30, h: 3, value: "Lu et approuvé" })],
+      { images: new Map() },
+    );
     const [item] = await extractText(out);
     expect(item?.text).toBe("Lu et approuvé");
     expect(item!.x).toBeCloseTo(0.6 * A4.width, 0);
@@ -78,7 +110,11 @@ describe("génération du PDF signé", () => {
   });
 
   it("place correctement le texte sur une page affichée en paysage (rotation 90°)", async () => {
-    const out = await stampPdf(await blankPdf(90), [field({ x: 5, y: 5, w: 40, h: 4, value: "Bon pour accord" })], { images: new Map() });
+    const out = await stampPdf(
+      await blankPdf(90),
+      [field({ x: 5, y: 5, w: 40, h: 4, value: "Bon pour accord" })],
+      { images: new Map() },
+    );
     const [item] = await extractText(out);
     expect(item?.text).toBe("Bon pour accord");
     // Coin haut-gauche affiché d'une page tournée de 90° = coin bas-gauche de la page non tournée.
@@ -90,8 +126,23 @@ describe("génération du PDF signé", () => {
   it("appose une signature PNG sur plusieurs pages et conserve le nombre de pages", async () => {
     const png = new Uint8Array(readFileSync("tests/e2e/fixtures/avatar.png"));
     const assetId = "3f0c9d1e-6c2a-4f5e-9a8b-1c2d3e4f5a6b";
-    const fields = [0, 1, 2].map((page) => field({ id: `s${page}`, page, type: "signature", assetId, value: null, x: 70, y: 85, w: 20, h: 8 }));
-    const out = await stampPdf(await blankPdf(0, 3), fields, { images: new Map([[assetId, png]]), footer: "Signé avec QuickSign le 28 septembre 2026" });
+    const fields = [0, 1, 2].map((page) =>
+      field({
+        id: `s${page}`,
+        page,
+        type: "signature",
+        assetId,
+        value: null,
+        x: 70,
+        y: 85,
+        w: 20,
+        h: 8,
+      }),
+    );
+    const out = await stampPdf(await blankPdf(0, 3), fields, {
+      images: new Map([[assetId, png]]),
+      footer: "Signé avec QuickSign le 28 septembre 2026",
+    });
     const doc = await PDFDocument.load(out, { updateMetadata: false });
     expect(doc.getPageCount()).toBe(3);
     expect(doc.getProducer()).toBe("QuickSign");
@@ -113,7 +164,9 @@ describe("génération du PDF signé", () => {
   });
 
   it("remplace les caractères non pris en charge sans échouer", async () => {
-    const out = await stampPdf(await blankPdf(), [field({ value: "Awa 😀 Nkeng — œuvre" })], { images: new Map() });
+    const out = await stampPdf(await blankPdf(), [field({ value: "Awa 😀 Nkeng — œuvre" })], {
+      images: new Map(),
+    });
     const [item] = await extractText(out);
     expect(item?.text).toContain("Awa");
     expect(item?.text).toContain("œuvre");
@@ -128,6 +181,8 @@ describe("validation des champs", () => {
   });
 
   it("formate la date à la française avec la ville", () => {
-    expect(formatSignatureDate(new Date("2026-09-28T10:00:00Z"), "Africa/Douala", "Douala")).toBe("28 septembre 2026, Douala");
+    expect(formatSignatureDate(new Date("2026-09-28T10:00:00Z"), "Africa/Douala", "Douala")).toBe(
+      "28 septembre 2026, Douala",
+    );
   });
 });

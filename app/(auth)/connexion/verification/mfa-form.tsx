@@ -34,7 +34,13 @@ export function MfaForm({ next }: { next?: string }) {
             const result = await verifyLoginCode(code, next);
             // En cas de succès, le serveur redirige.
             if (!result || result.ok) return;
-            setError(result.error === "rate_limited" ? t("rateLimited") : result.error === "expired" ? t("expired") : t("invalid"));
+            setError(
+              result.error === "rate_limited"
+                ? t("rateLimited")
+                : result.error === "expired"
+                  ? t("expired")
+                  : t("invalid"),
+            );
             setCode("");
           });
         }}
@@ -54,17 +60,30 @@ export function MfaForm({ next }: { next?: string }) {
           />
         </div>
         {error && (
-          <p role="alert" className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          <p
+            role="alert"
+            className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive"
+          >
             {error}
           </p>
         )}
-        <Button type="submit" size="lg" className="w-full" loading={pending} disabled={code.length !== 6}>
+        <Button
+          type="submit"
+          size="lg"
+          className="w-full"
+          loading={pending}
+          disabled={code.length !== 6}
+        >
           {t("submit")}
         </Button>
       </form>
       <div className="space-y-3 text-center text-sm text-muted-foreground">
         <p>{t("help")}</p>
-        <button type="button" className="cursor-pointer font-medium text-accent-foreground hover:underline" onClick={() => signOut()}>
+        <button
+          type="button"
+          className="cursor-pointer font-medium text-accent-foreground hover:underline"
+          onClick={() => signOut()}
+        >
           {t("signOut")}
         </button>
       </div>

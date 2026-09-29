@@ -18,7 +18,9 @@ export default async function VerifyPage() {
         <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-brand-gradient text-white shadow-lift">
           <ShieldCheck className="size-7" aria-hidden />
         </div>
-        <h1 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">{t("title")}</h1>
+        <h1 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">
+          {t("title")}
+        </h1>
         <p className="text-muted-foreground">{t("intro")}</p>
       </div>
       <ClientMessages namespaces={["verify"]}>

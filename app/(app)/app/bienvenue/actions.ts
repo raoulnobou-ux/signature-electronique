@@ -3,7 +3,9 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
-export async function completeOnboarding(destination: "/app" | "/app/signatures?nouvelle=signature") {
+export async function completeOnboarding(
+  destination: "/app" | "/app/signatures?nouvelle=signature",
+) {
   const supabase = await createClient();
   const {
     data: { user },

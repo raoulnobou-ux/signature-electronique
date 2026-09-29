@@ -14,7 +14,13 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function SignaturesPage() {
   const [account, assets] = await Promise.all([requireAccount(), listSignatureAssets()]);
   const ent = account.entitlements;
-  const { data: membership } = await (await createClient()).from("team_members").select("team_id").eq("user_id", account.userId).maybeSingle();
+  const { data: membership } = await (
+    await createClient()
+  )
+    .from("team_members")
+    .select("team_id")
+    .eq("user_id", account.userId)
+    .maybeSingle();
   return (
     <div className="mx-auto max-w-6xl">
       <Suspense>

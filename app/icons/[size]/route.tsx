@@ -16,20 +16,22 @@ export async function GET(_request: Request, ctx: RouteContext<"/icons/[size]">)
   // Zone de sécurité des icônes maskable : l'emblème occupe ~70 % au centre.
   const inner = maskable ? Math.round(size * 0.7) : size;
   return new ImageResponse(
-    (
-      <div
-        style={{
-          width: size,
-          height: size,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          background: maskable ? "#07090F" : "transparent",
-        }}
-      >
-        <LogoGlyph size={inner} />
-      </div>
-    ),
-    { width: size, height: size, headers: { "Cache-Control": "public, max-age=604800, immutable" } },
+    <div
+      style={{
+        width: size,
+        height: size,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: maskable ? "#07090F" : "transparent",
+      }}
+    >
+      <LogoGlyph size={inner} />
+    </div>,
+    {
+      width: size,
+      height: size,
+      headers: { "Cache-Control": "public, max-age=604800, immutable" },
+    },
   );
 }

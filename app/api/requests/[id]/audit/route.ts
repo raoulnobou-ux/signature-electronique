@@ -12,9 +12,14 @@ const csvCell = (value: unknown) => {
 /** Journal d'audit d'une demande (propriétaire uniquement, via la RLS), au format CSV. */
 export async function GET(_request: Request, ctx: RouteContext<"/api/requests/[id]/audit">) {
   const { id } = await ctx.params;
-  if (!/^[0-9a-f-]{36}$/i.test(id)) return NextResponse.json({ error: "not_found" }, { status: 404 });
+  if (!/^[0-9a-f-]{36}$/i.test(id))
+    return NextResponse.json({ error: "not_found" }, { status: 404 });
   const supabase = await createClient();
-  const { data: request } = await supabase.from("signature_requests").select("id, title").eq("id", id).maybeSingle();
+  const { data: request } = await supabase
+    .from("signature_requests")
+    .select("id, title")
+    .eq("id", id)
+    .maybeSingle();
   if (!request) return NextResponse.json({ error: "not_found" }, { status: 404 });
   const { data: events } = await supabase
     .from("audit_events")
@@ -22,9 +27,25 @@ export async function GET(_request: Request, ctx: RouteContext<"/api/requests/[i
     .eq("request_id", id)
     .order("created_at");
 
-  const header = ["date_utc", "evenement", "type_acteur", "acteur", "adresse_ip", "appareil", "details"];
+  const header = [
+    "date_utc",
+    "evenement",
+    "type_acteur",
+    "acteur",
+    "adresse_ip",
+    "appareil",
+    "details",
+  ];
   const rows = (events ?? []).map((e) =>
-    [e.created_at, e.event_type, e.actor_type, e.actor_label, e.ip, e.user_agent ? describeDevice(e.user_agent) : "", e.metadata]
+    [
+      e.created_at,
+      e.event_type,
+      e.actor_type,
+      e.actor_label,
+      e.ip,
+      e.user_agent ? describeDevice(e.user_agent) : "",
+      e.metadata,
+    ]
       .map(csvCell)
       .join(","),
   );

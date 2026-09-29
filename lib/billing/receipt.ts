@@ -36,11 +36,27 @@ export function paymentMethodLabel(method: string | null | undefined): string {
   return method || "—";
 }
 
-function text(page: PDFPage, font: PDFFont, value: string, x: number, y: number, size: number, color = INK) {
+function text(
+  page: PDFPage,
+  font: PDFFont,
+  value: string,
+  x: number,
+  y: number,
+  size: number,
+  color = INK,
+) {
   page.drawText(encodableText(font, value), { x, y, size, font, color });
 }
 
-function rightText(page: PDFPage, font: PDFFont, value: string, right: number, y: number, size: number, color = INK) {
+function rightText(
+  page: PDFPage,
+  font: PDFFont,
+  value: string,
+  right: number,
+  y: number,
+  size: number,
+  color = INK,
+) {
   const safe = encodableText(font, value);
   page.drawText(safe, { x: right - font.widthOfTextAtSize(safe, size), y, size, font, color });
 }
@@ -57,7 +73,9 @@ export async function renderReceipt(data: ReceiptData): Promise<Uint8Array> {
 
   // Bandeau dégradé (trois bandes) et logo.
   const bandWidth = width / 3;
-  BRAND.forEach((color, i) => page.drawRectangle({ x: i * bandWidth, y: height - 8, width: bandWidth + 1, height: 8, color }));
+  BRAND.forEach((color, i) =>
+    page.drawRectangle({ x: i * bandWidth, y: height - 8, width: bandWidth + 1, height: 8, color }),
+  );
   page.drawRectangle({ x: left, y: height - 78, width: 30, height: 30, color: BRAND[0] });
   text(page, bold, "Q", left + 9.5, height - 69, 16, rgb(1, 1, 1));
   text(page, bold, data.seller.name, left + 40, height - 68, 18);
@@ -85,14 +103,28 @@ export async function renderReceipt(data: ReceiptData): Promise<Uint8Array> {
 
   // Tableau
   y = height - 320;
-  page.drawRectangle({ x: left, y: y - 8, width: right - left, height: 26, color: rgb(0.965, 0.969, 0.984) });
+  page.drawRectangle({
+    x: left,
+    y: y - 8,
+    width: right - left,
+    height: 26,
+    color: rgb(0.965, 0.969, 0.984),
+  });
   text(page, bold, "Description", left + 12, y, 10, MUTED);
   rightText(page, bold, "Montant", right - 12, y, 10, MUTED);
   y -= 36;
   text(page, bold, data.description, left + 12, y, 12);
   rightText(page, bold, formatMoney(data.amount, data.currency), right - 12, y, 12);
   y -= 16;
-  text(page, regular, `Période du ${formatLongDate(data.periodStart)} au ${formatLongDate(data.periodEnd)}`, left + 12, y, 10, MUTED);
+  text(
+    page,
+    regular,
+    `Période du ${formatLongDate(data.periodStart)} au ${formatLongDate(data.periodEnd)}`,
+    left + 12,
+    y,
+    10,
+    MUTED,
+  );
   y -= 22;
   page.drawLine({ start: { x: left, y }, end: { x: right, y }, thickness: 1, color: LINE });
   y -= 26;
@@ -112,8 +144,24 @@ export async function renderReceipt(data: ReceiptData): Promise<Uint8Array> {
     y -= 18;
   }
 
-  text(page, regular, "Merci pour votre confiance. Ce reçu atteste du paiement de votre abonnement QuickSign.", left, 90, 9, MUTED);
-  text(page, regular, "Conservez-le pour votre comptabilité. Aucune donnée de carte n'est conservée par QuickSign.", left, 76, 9, MUTED);
+  text(
+    page,
+    regular,
+    "Merci pour votre confiance. Ce reçu atteste du paiement de votre abonnement QuickSign.",
+    left,
+    90,
+    9,
+    MUTED,
+  );
+  text(
+    page,
+    regular,
+    "Conservez-le pour votre comptabilité. Aucune donnée de carte n'est conservée par QuickSign.",
+    left,
+    76,
+    9,
+    MUTED,
+  );
 
   pdf.setTitle(`Reçu ${data.number}`);
   pdf.setAuthor(data.seller.name);

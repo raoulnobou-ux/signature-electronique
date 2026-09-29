@@ -72,9 +72,18 @@ function reducer(state: State, action: Action): State {
 }
 
 export function useEditorState<F extends EditorField = EditorField>(initial: F[]) {
-  const [state, dispatch] = useReducer(reducer, { past: [], present: initial, future: [], selectedId: null, revision: 0 });
+  const [state, dispatch] = useReducer(reducer, {
+    past: [],
+    present: initial,
+    future: [],
+    selectedId: null,
+    revision: 0,
+  });
 
-  const update = useCallback((fields: F[], commit = true) => dispatch({ type: "set", fields, commit }), []);
+  const update = useCallback(
+    (fields: F[], commit = true) => dispatch({ type: "set", fields, commit }),
+    [],
+  );
   const commitFrom = useCallback((before: F[]) => dispatch({ type: "commit", before }), []);
   const select = useCallback((id: string | null) => dispatch({ type: "select", id }), []);
   const undo = useCallback(() => dispatch({ type: "undo" }), []);
@@ -98,7 +107,11 @@ export function useEditorState<F extends EditorField = EditorField>(initial: F[]
 export const newFieldId = () => crypto.randomUUID().slice(0, 12);
 
 /** Taille par défaut (en % de la page affichée) selon le type d'élément. */
-export function defaultSize(type: FieldType, pageAspect: number, assetAspect?: number): { w: number; h: number } {
+export function defaultSize(
+  type: FieldType,
+  pageAspect: number,
+  assetAspect?: number,
+): { w: number; h: number } {
   // pageAspect = largeur / hauteur de la page affichée ; assetAspect = largeur / hauteur de l'image.
   const heightFor = (w: number, aspect: number) => (w * pageAspect) / aspect;
   switch (type) {

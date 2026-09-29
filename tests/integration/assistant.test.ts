@@ -34,13 +34,11 @@ describe.skipIf(!hasLocalDb)("assistant : isolation des conversations (base rée
     expect((await paul.client.from("ai_conversations").select("id")).data).toEqual([]);
 
     // Pas d'écriture directe : l'historique n'est écrit que par l'API (quota, contrôle).
-    const forged = await awa.client
-      .from("ai_messages")
-      .insert({
-        conversation_id: conversation!.id,
-        role: "assistant",
-        content: [{ type: "text", text: "faux" }],
-      });
+    const forged = await awa.client.from("ai_messages").insert({
+      conversation_id: conversation!.id,
+      role: "assistant",
+      content: [{ type: "text", text: "faux" }],
+    });
     expect(forged.error).not.toBeNull();
     expect((await awa.client.from("ai_faq_cache").select("key")).data).toEqual([]);
 

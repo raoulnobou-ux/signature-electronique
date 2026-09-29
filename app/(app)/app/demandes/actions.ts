@@ -33,22 +33,28 @@ export type CreateRequestError =
 /** Crée la demande, les liens personnels et les zones, puis invite le(s) premier(s) signataire(s). */
 export async function createSignatureRequest(
   input: z.input<typeof createSchema>,
-): Promise<{ ok: true; requestId: string } | { ok: false; error: CreateRequestError; signer?: number }> {
+): Promise<
+  { ok: true; requestId: string } | { ok: false; error: CreateRequestError; signer?: number }
+> {
   const parsed = createSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: "invalid" };
   const data = parsed.data;
   const access = await guard("multi_signers");
   if (!access.ok) return { ok: false, error: access.reason };
   const { account } = access;
-  if (!(await rateLimit("request-create", account.userId, 30, 3600))) return { ok: false, error: "invalid" };
+  if (!(await rateLimit("request-create", account.userId, 30, 3600)))
+    return { ok: false, error: "invalid" };
 
   // Chaque signataire doit avoir au moins une zone de signature ou de paraphe.
   for (let i = 0; i < data.signers.length; i++) {
-    if (!data.fields.some((f) => f.signer === i && (f.type === "signature" || f.type === "initials"))) {
+    if (
+      !data.fields.some((f) => f.signer === i && (f.type === "signature" || f.type === "initials"))
+    ) {
       return { ok: false, error: "missing_fields", signer: i };
     }
   }
-  if (data.fields.some((f) => f.signer >= data.signers.length)) return { ok: false, error: "invalid" };
+  if (data.fields.some((f) => f.signer >= data.signers.length))
+    return { ok: false, error: "invalid" };
 
   const signers = [];
   for (const [index, s] of data.signers.entries()) {
@@ -63,9 +69,11 @@ export async function createSignatureRequest(
     .select("id, owner_id, title, pdf_path, page_count, status, sha256, trashed_at")
     .eq("id", data.documentId)
     .maybeSingle();
-  if (!doc || doc.owner_id !== account.userId || !doc.pdf_path || doc.trashed_at) return { ok: false, error: "not_found" };
+  if (!doc || doc.owner_id !== account.userId || !doc.pdf_path || doc.trashed_at)
+    return { ok: false, error: "not_found" };
   if (doc.status === "pending") return { ok: false, error: "already_pending" };
-  if (data.fields.some((f) => f.page >= (doc.page_count ?? 0))) return { ok: false, error: "invalid" };
+  if (data.fields.some((f) => f.page >= (doc.page_count ?? 0)))
+    return { ok: false, error: "invalid" };
 
   const requestId = randomUUID();
   const expiresAt = new Date(Date.now() + data.expiresInDays * 86_400_000).toISOString();
@@ -132,10 +140,19 @@ export async function createSignatureRequest(
     actorId: account.userId,
     actorLabel: account.profile.full_name || account.email,
     eventType: "request.created",
-    metadata: { mode: data.mode, signers: signers.length, fields: data.fields.length, expires_at: expiresAt },
+    metadata: {
+      mode: data.mode,
+      signers: signers.length,
+      fields: data.fields.length,
+      expires_at: expiresAt,
+    },
   });
 
-  const { data: request } = await admin.from("signature_requests").select("*").eq("id", requestId).single();
+  const { data: request } = await admin
+    .from("signature_requests")
+    .select("*")
+    .eq("id", requestId)
+    .single();
   if (request) await inviteNextSigners(admin, request);
 
   revalidatePath("/app/demandes");
@@ -163,7 +180,12 @@ export type LinkResult =
   | { ok: true; link: string; emailed: boolean; whatsapp: string | null }
   | { ok: false; error: "not_found" | "not_pending" | "too_soon" };
 
-function whatsappUrl(phone: string | null, name: string, title: string, link: string): string | null {
+function whatsappUrl(
+  phone: string | null,
+  name: string,
+  title: string,
+  link: string,
+): string | null {
   if (!phone) return null;
   const text = `Bonjour ${name}, merci de signer « ${title} » en ligne (sans compte, depuis votre téléphone) : ${link}`;
   return `https://wa.me/${phone.replace(/\D/g, "")}?text=${encodeURIComponent(text)}`;
@@ -173,13 +195,19 @@ function whatsappUrl(phone: string | null, name: string, title: string, link: st
 export async function getSignerLink(signerId: string): Promise<LinkResult> {
   const owned = await ownedSigner(signerId);
   if (!owned) return { ok: false, error: "not_found" };
-  if (owned.request.status !== "pending" || owned.signer.status === "signed") return { ok: false, error: "not_pending" };
+  if (owned.request.status !== "pending" || owned.signer.status === "signed")
+    return { ok: false, error: "not_pending" };
   const link = signerLink(owned.signer.id, owned.signer.token_version);
   return {
     ok: true,
     link,
     emailed: false,
-    whatsapp: whatsappUrl(owned.signer.phone, owned.signer.name, owned.request.title ?? "le document", link),
+    whatsapp: whatsappUrl(
+      owned.signer.phone,
+      owned.signer.name,
+      owned.request.title ?? "le document",
+      link,
+    ),
   };
 }
 
@@ -188,13 +216,25 @@ export async function remindSigner(signerId: string): Promise<LinkResult> {
   const owned = await ownedSigner(signerId);
   if (!owned) return { ok: false, error: "not_found" };
   const { signer, request, account } = owned;
-  if (request.status !== "pending" || !["sent", "opened"].includes(signer.status)) return { ok: false, error: "not_pending" };
-  if (signer.last_reminded_at && Date.now() - new Date(signer.last_reminded_at).getTime() < 3600_000) {
+  if (request.status !== "pending" || !["sent", "opened"].includes(signer.status))
+    return { ok: false, error: "not_pending" };
+  if (
+    signer.last_reminded_at &&
+    Date.now() - new Date(signer.last_reminded_at).getTime() < 3600_000
+  ) {
     return { ok: false, error: "too_soon" };
   }
-  const { link, emailed } = await inviteSigner(createAdminClient(), signer, request, { reminder: true, actorId: account.userId });
+  const { link, emailed } = await inviteSigner(createAdminClient(), signer, request, {
+    reminder: true,
+    actorId: account.userId,
+  });
   revalidatePath(`/app/demandes/${request.id}`);
-  return { ok: true, link, emailed, whatsapp: whatsappUrl(signer.phone, signer.name, request.title ?? "le document", link) };
+  return {
+    ok: true,
+    link,
+    emailed,
+    whatsapp: whatsappUrl(signer.phone, signer.name, request.title ?? "le document", link),
+  };
 }
 
 export async function cancelSignatureRequest(requestId: string): Promise<{ ok: boolean }> {
@@ -208,7 +248,9 @@ export async function cancelSignatureRequest(requestId: string): Promise<{ ok: b
 }
 
 /** Liens temporaires du document final et du certificat (propriétaire). */
-export async function getRequestFiles(requestId: string): Promise<{ ok: true; document: string | null; certificate: string | null } | { ok: false }> {
+export async function getRequestFiles(
+  requestId: string,
+): Promise<{ ok: true; document: string | null; certificate: string | null } | { ok: false }> {
   if (!z.uuid().safeParse(requestId).success) return { ok: false };
   const account = await getCurrentAccount();
   if (!account) return { ok: false };
@@ -220,15 +262,29 @@ export async function getRequestFiles(requestId: string): Promise<{ ok: true; do
     .eq("owner_id", account.userId)
     .maybeSingle();
   if (!request) return { ok: false };
-  const { data: doc } = await admin.from("documents").select("pdf_path, title").eq("id", request.document_id).single();
-  const name = (request.title ?? doc?.title ?? "document").replace(/[\\/:*?"<>|]/g, "").slice(0, 120);
+  const { data: doc } = await admin
+    .from("documents")
+    .select("pdf_path, title")
+    .eq("id", request.document_id)
+    .single();
+  const name = (request.title ?? doc?.title ?? "document")
+    .replace(/[\\/:*?"<>|]/g, "")
+    .slice(0, 120);
   const [document, certificate] = await Promise.all([
     request.status === "completed" && doc?.pdf_path
-      ? admin.storage.from("documents").createSignedUrl(doc.pdf_path, 300, { download: `${name} (signé).pdf` })
+      ? admin.storage
+          .from("documents")
+          .createSignedUrl(doc.pdf_path, 300, { download: `${name} (signé).pdf` })
       : Promise.resolve({ data: null }),
     request.certificate_path
-      ? admin.storage.from("certificates").createSignedUrl(request.certificate_path, 300, { download: `Certificat - ${name}.pdf` })
+      ? admin.storage
+          .from("certificates")
+          .createSignedUrl(request.certificate_path, 300, { download: `Certificat - ${name}.pdf` })
       : Promise.resolve({ data: null }),
   ]);
-  return { ok: true, document: document.data?.signedUrl ?? null, certificate: certificate.data?.signedUrl ?? null };
+  return {
+    ok: true,
+    document: document.data?.signedUrl ?? null,
+    certificate: certificate.data?.signedUrl ?? null,
+  };
 }

@@ -165,14 +165,12 @@ describe.skipIf(!hasLocalDb)("journal d'audit et suppression", () => {
       })
       .select("id")
       .single();
-    await admin()
-      .from("audit_events")
-      .insert({
-        document_id: doc!.id,
-        actor_type: "user",
-        actor_id: owner.id,
-        event_type: "document.imported",
-      });
+    await admin().from("audit_events").insert({
+      document_id: doc!.id,
+      actor_type: "user",
+      actor_id: owner.id,
+      event_type: "document.imported",
+    });
     await owner.client
       .from("documents")
       .update({ trashed_at: new Date().toISOString() })

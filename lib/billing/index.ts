@@ -15,7 +15,11 @@ let cached: PaymentProvider | null | undefined;
 export function getPaymentProvider(): PaymentProvider | null {
   if (cached !== undefined) return cached;
   if (serverEnv.CINETPAY_API_KEY && serverEnv.CINETPAY_SITE_ID) {
-    cached = new CinetPayProvider(serverEnv.CINETPAY_API_KEY, serverEnv.CINETPAY_SITE_ID, serverEnv.CINETPAY_SECRET_KEY);
+    cached = new CinetPayProvider(
+      serverEnv.CINETPAY_API_KEY,
+      serverEnv.CINETPAY_SITE_ID,
+      serverEnv.CINETPAY_SECRET_KEY,
+    );
   } else if (serverEnv.PAYMENTS_SANDBOX === "true" && serverEnv.VERCEL_ENV !== "production") {
     cached = new SandboxProvider(serverEnv.SUPABASE_SERVICE_ROLE_KEY);
   } else {

@@ -2,7 +2,10 @@
  * Politique de sécurité du contenu (CSP) stricte, avec un nonce par requête : seuls les
  * scripts émis par Next.js pour cette réponse s'exécutent (aucun script injecté).
  */
-export function buildCsp(nonce: string, env: { supabaseUrl: string; appUrl: string; dev: boolean }): string {
+export function buildCsp(
+  nonce: string,
+  env: { supabaseUrl: string; appUrl: string; dev: boolean },
+): string {
   const supabase = new URL(env.supabaseUrl);
   const supabaseWs = `${supabase.protocol === "https:" ? "wss:" : "ws:"}//${supabase.host}`;
   const directives: Record<string, string[]> = {

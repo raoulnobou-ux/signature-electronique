@@ -339,14 +339,12 @@ export function DrawPad({
     pad.penColor = ink;
     pad.minWidth = thickness * 0.45;
     pad.maxWidth = thickness * 1.5;
-    const data = pad
-      .toData()
-      .map((group) => ({
-        ...group,
-        penColor: ink,
-        minWidth: thickness * 0.45,
-        maxWidth: thickness * 1.5,
-      }));
+    const data = pad.toData().map((group) => ({
+      ...group,
+      penColor: ink,
+      minWidth: thickness * 0.45,
+      maxWidth: thickness * 1.5,
+    }));
     pad.clear();
     pad.fromData(data);
   }, [ink, thickness]);

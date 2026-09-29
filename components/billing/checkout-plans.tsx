@@ -44,7 +44,12 @@ export function CheckoutPlans({
   const format = useFormatter();
   const locale = useLocale();
   const [selection, setSelection] = useState<Selection | null>(null);
-  const [quote, setQuote] = useState<{ quote: Quote; startsAt: string; endsAt: string; deferred: boolean } | null>(null);
+  const [quote, setQuote] = useState<{
+    quote: Quote;
+    startsAt: string;
+    endsAt: string;
+    deferred: boolean;
+  } | null>(null);
   const [loadingQuote, startQuote] = useTransition();
   const [paying, startPaying] = useTransition();
 
@@ -52,7 +57,8 @@ export function CheckoutPlans({
   const labelFor = (p: PaidPlan) => {
     if (state === "active" && plan === p) return t("labels.renew", { plan: planName(p) });
     if (state === "active" && plan === "essential" && p === "pro") return t("labels.upgrade");
-    if (state === "active" && plan === "pro" && p === "essential") return t("labels.switch", { plan: planName(p) });
+    if (state === "active" && plan === "pro" && p === "essential")
+      return t("labels.switch", { plan: planName(p) });
     return t("labels.choose", { plan: planName(p) });
   };
 
@@ -92,12 +98,20 @@ export function CheckoutPlans({
         checkout={{ label: t("choose"), labelFor, disabled: !available, onSelect: select }}
       />
 
-      <Dialog open={selection !== null} onOpenChange={(open) => !open && !paying && setSelection(null)}>
+      <Dialog
+        open={selection !== null}
+        onOpenChange={(open) => !open && !paying && setSelection(null)}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{t("checkout.title")}</DialogTitle>
             <DialogDescription>
-              {q ? t("checkout.plan", { plan: planName(q.plan), cycle: t(`checkout.cycles.${q.cycle}`) }) : " "}
+              {q
+                ? t("checkout.plan", {
+                    plan: planName(q.plan),
+                    cycle: t(`checkout.cycles.${q.cycle}`),
+                  })
+                : " "}
             </DialogDescription>
           </DialogHeader>
 
@@ -116,24 +130,34 @@ export function CheckoutPlans({
                       {formatMoney(q.fullPrice, q.currency, locale)}
                     </span>
                   )}
-                  <span data-testid="checkout-amount" className="font-display text-3xl font-semibold tabular-nums">
+                  <span
+                    data-testid="checkout-amount"
+                    className="font-display text-3xl font-semibold tabular-nums"
+                  >
                     {formatMoney(q.amount, q.currency, locale)}
                   </span>
                 </span>
               </div>
               <p className="text-sm">
                 {q.kind === "upgrade"
-                  ? t("checkout.prorata", { date: format.dateTime(periodEnd!, { dateStyle: "long" }) })
+                  ? t("checkout.prorata", {
+                      date: format.dateTime(periodEnd!, { dateStyle: "long" }),
+                    })
                   : quote.deferred
-                    ? t("checkout.startsLater", { date: format.dateTime(new Date(quote.startsAt), { dateStyle: "long" }) })
-                    : t("checkout.startsNow", { date: format.dateTime(periodEnd!, { dateStyle: "long" }) })}
+                    ? t("checkout.startsLater", {
+                        date: format.dateTime(new Date(quote.startsAt), { dateStyle: "long" }),
+                      })
+                    : t("checkout.startsNow", {
+                        date: format.dateTime(periodEnd!, { dateStyle: "long" }),
+                      })}
               </p>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li className="flex gap-2">
                   <Smartphone className="mt-0.5 size-4 shrink-0" aria-hidden /> {t("methodsNote")}
                 </li>
                 <li className="flex gap-2">
-                  <ShieldCheck className="mt-0.5 size-4 shrink-0 text-success" aria-hidden /> {t("checkout.secure")}
+                  <ShieldCheck className="mt-0.5 size-4 shrink-0 text-success" aria-hidden />{" "}
+                  {t("checkout.secure")}
                 </li>
               </ul>
             </div>
@@ -146,7 +170,10 @@ export function CheckoutPlans({
               </Button>
             </DialogClose>
             <Button onClick={pay} loading={paying} disabled={!q || loadingQuote}>
-              <Lock /> {q ? t("checkout.pay", { amount: formatMoney(q.amount, q.currency, locale) }) : t("choose")}
+              <Lock />{" "}
+              {q
+                ? t("checkout.pay", { amount: formatMoney(q.amount, q.currency, locale) })
+                : t("choose")}
             </Button>
           </DialogFooter>
         </DialogContent>

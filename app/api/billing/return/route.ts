@@ -4,7 +4,12 @@ import { publicEnv } from "@/lib/env";
 import { rateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/request";
 
-const RESULT = { successful: "succes", failed: "echec", pending: "attente", unknown: "attente" } as const;
+const RESULT = {
+  successful: "succes",
+  failed: "echec",
+  pending: "attente",
+  unknown: "attente",
+} as const;
 
 /**
  * Retour du navigateur après le checkout (GET, ou POST de formulaire selon le prestataire).
@@ -38,7 +43,9 @@ async function settleAndRedirect(reference: string | null, transactionId: string
 
   let outcome: keyof typeof RESULT = "pending";
   try {
-    outcome = (await settlePayment({ reference, transactionId: transactionId?.slice(0, 120) ?? null })).outcome;
+    outcome = (
+      await settlePayment({ reference, transactionId: transactionId?.slice(0, 120) ?? null })
+    ).outcome;
   } catch (error) {
     console.error("[billing] retour de paiement", error);
   }

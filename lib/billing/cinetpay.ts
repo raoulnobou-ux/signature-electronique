@@ -67,7 +67,9 @@ export function parseNotificationBody(rawBody: string): Record<string, string> {
   if (trimmed.startsWith("{")) {
     try {
       const json = JSON.parse(trimmed) as Record<string, unknown>;
-      return Object.fromEntries(Object.entries(json).map(([k, v]) => [k, v == null ? "" : String(v)]));
+      return Object.fromEntries(
+        Object.entries(json).map(([k, v]) => [k, v == null ? "" : String(v)]),
+      );
     } catch {
       return {};
     }
@@ -98,42 +100,58 @@ export class CinetPayProvider implements PaymentProvider {
       body: JSON.stringify({ apikey: this.apiKey, site_id: this.siteId, ...payload }),
       signal: AbortSignal.timeout(20_000),
     });
-    const body = (await response.json().catch(() => null)) as { code?: string; message?: string; data?: T } | null;
+    const body = (await response.json().catch(() => null)) as {
+      code?: string;
+      message?: string;
+      data?: T;
+    } | null;
     return { status: response.status, body };
   }
 
   async createCheckout(req: CheckoutRequest): Promise<{ url: string }> {
     const [firstName, ...rest] = (req.customer.name || req.customer.email).trim().split(/\s+/);
-    const { status, body } = await this.post<{ payment_url?: string; payment_token?: string }>("/payment", {
-      transaction_id: req.reference,
-      amount: req.amount,
-      currency: req.currency,
-      description: req.description,
-      notify_url: req.notifyUrl,
-      return_url: req.redirectUrl,
-      channels: CHANNELS[req.currency],
-      lang: "fr",
-      metadata: JSON.stringify(req.meta),
-      // Informations client (obligatoires pour le paiement par carte).
-      customer_id: req.meta.user_id ?? "",
-      customer_name: firstName ?? "",
-      customer_surname: rest.join(" ") || (firstName ?? ""),
-      customer_email: req.customer.email,
-      customer_phone_number: req.customer.phone ?? "",
-      customer_address: req.customer.city ?? "Douala",
-      customer_city: req.customer.city ?? "Douala",
-      customer_country: "CM",
-      customer_state: "CM",
-      customer_zip_code: "00000",
-    });
+    const { status, body } = await this.post<{ payment_url?: string; payment_token?: string }>(
+      "/payment",
+      {
+        transaction_id: req.reference,
+        amount: req.amount,
+        currency: req.currency,
+        description: req.description,
+        notify_url: req.notifyUrl,
+        return_url: req.redirectUrl,
+        channels: CHANNELS[req.currency],
+        lang: "fr",
+        metadata: JSON.stringify(req.meta),
+        // Informations client (obligatoires pour le paiement par carte).
+        customer_id: req.meta.user_id ?? "",
+        customer_name: firstName ?? "",
+        customer_surname: rest.join(" ") || (firstName ?? ""),
+        customer_email: req.customer.email,
+        customer_phone_number: req.customer.phone ?? "",
+        customer_address: req.customer.city ?? "Douala",
+        customer_city: req.customer.city ?? "Douala",
+        customer_country: "CM",
+        customer_state: "CM",
+        customer_zip_code: "00000",
+      },
+    );
     const url = body?.data?.payment_url;
     if (body?.code !== "201" || !url || !/^https:\/\//.test(url)) {
-      throw new PaymentProviderError(`CinetPay ${status}: ${body?.message ?? "réponse invalide"}`, body);
+      throw new PaymentProviderError(
+        `CinetPay ${status}: ${body?.message ?? "réponse invalide"}`,
+        body,
+      );
     }
     return { url };
   }
 
-  async verifyTransaction({ reference }: { reference: string; transactionId: string | null; expected?: unknown }): Promise<VerifiedTransaction | null> {
+  async verifyTransaction({
+    reference,
+  }: {
+    reference: string;
+    transactionId: string | null;
+    expected?: unknown;
+  }): Promise<VerifiedTransaction | null> {
     const { body } = await this.post<CheckData>("/payment/check", { transaction_id: reference });
     const data = body?.data;
     if (!data?.status) {

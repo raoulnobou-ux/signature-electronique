@@ -27,15 +27,32 @@ export interface Verification {
 export async function getVerification(requestId: string): Promise<Verification | null> {
   if (!/^[0-9a-f-]{36}$/i.test(requestId)) return null;
   const admin = createAdminClient();
-  const { data: request } = await admin.from("signature_requests").select("*").eq("id", requestId).maybeSingle();
+  const { data: request } = await admin
+    .from("signature_requests")
+    .select("*")
+    .eq("id", requestId)
+    .maybeSingle();
   if (!request || request.status === "draft") return null;
   const [{ data: signers }, { data: versions }] = await Promise.all([
-    admin.from("request_signers").select("name, email, status, signed_at, order_index").eq("request_id", requestId).order("order_index"),
-    admin.from("document_versions").select("version, sha256").eq("document_id", request.document_id).order("version"),
+    admin
+      .from("request_signers")
+      .select("name, email, status, signed_at, order_index")
+      .eq("request_id", requestId)
+      .order("order_index"),
+    admin
+      .from("document_versions")
+      .select("version, sha256")
+      .eq("document_id", request.document_id)
+      .order("version"),
   ]);
   const hashes: Verification["hashes"] = (versions ?? []).map((v) => ({
     sha256: v.sha256,
-    kind: v.sha256 === request.final_sha256 ? "final" : v.sha256 === request.original_sha256 ? "original" : "intermediate",
+    kind:
+      v.sha256 === request.final_sha256
+        ? "final"
+        : v.sha256 === request.original_sha256
+          ? "original"
+          : "intermediate",
   }));
   return {
     requestId,
@@ -46,7 +63,12 @@ export async function getVerification(requestId: string): Promise<Verification |
     completedAt: request.completed_at,
     finalSha256: request.final_sha256,
     originalSha256: request.original_sha256,
-    signers: (signers ?? []).map((s) => ({ name: s.name, email: maskEmail(s.email), status: s.status, signedAt: s.signed_at })),
+    signers: (signers ?? []).map((s) => ({
+      name: s.name,
+      email: maskEmail(s.email),
+      status: s.status,
+      signedAt: s.signed_at,
+    })),
     hashes,
   };
 }
@@ -54,7 +76,14 @@ export async function getVerification(requestId: string): Promise<Verification |
 /** Recherche d'un fichier par son empreinte (page /verify) : divulgation minimale. */
 export async function findByHash(sha256: string): Promise<
   | { found: false }
-  | { found: true; title: string; version: number; createdAt: string; requestId: string | null; signed: boolean }
+  | {
+      found: true;
+      title: string;
+      version: number;
+      createdAt: string;
+      requestId: string | null;
+      signed: boolean;
+    }
 > {
   if (!/^[0-9a-f]{64}$/.test(sha256)) return { found: false };
   const admin = createAdminClient();

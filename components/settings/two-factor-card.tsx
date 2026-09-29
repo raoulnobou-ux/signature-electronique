@@ -14,13 +14,29 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 type Enrollment = { factorId: string; qrCode: string; secret: string };
 
-function CodeInput({ id, value, onChange, label }: { id: string; value: string; onChange: (v: string) => void; label: string }) {
+function CodeInput({
+  id,
+  value,
+  onChange,
+  label,
+}: {
+  id: string;
+  value: string;
+  onChange: (v: string) => void;
+  label: string;
+}) {
   return (
     <div className="space-y-2">
       <Label htmlFor={id}>{label}</Label>
@@ -49,7 +65,11 @@ export function TwoFactorCard({ enabled }: { enabled: boolean }) {
   const [error, setError] = useState<string | null>(null);
 
   const message = (e: MfaError) =>
-    e === "invalid_code" ? t("twoFactorInvalid") : e === "rate_limited" ? t("twoFactorRateLimited") : t("twoFactorError");
+    e === "invalid_code"
+      ? t("twoFactorInvalid")
+      : e === "rate_limited"
+        ? t("twoFactorRateLimited")
+        : t("twoFactorError");
 
   const close = () => {
     setEnrollment(null);
@@ -63,7 +83,8 @@ export function TwoFactorCard({ enabled }: { enabled: boolean }) {
       <CardHeader>
         <div className="flex items-center justify-between gap-3">
           <CardTitle className="flex items-center gap-2">
-            <ShieldCheck className="size-5 text-accent-foreground" aria-hidden /> {t("twoFactorTitle")}
+            <ShieldCheck className="size-5 text-accent-foreground" aria-hidden />{" "}
+            {t("twoFactorTitle")}
           </CardTitle>
           <Badge variant={enabled ? "success" : "outline"} data-testid="mfa-status">
             {enabled ? t("twoFactorOn") : t("twoFactorOff")}
@@ -115,21 +136,39 @@ export function TwoFactorCard({ enabled }: { enabled: boolean }) {
             >
               {/* QR code fourni par Supabase (image SVG en data URL). */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={enrollment.qrCode} alt="" className="mx-auto size-44 rounded-xl bg-white p-2" data-testid="mfa-qr" />
+              <img
+                src={enrollment.qrCode}
+                alt=""
+                className="mx-auto size-44 rounded-xl bg-white p-2"
+                data-testid="mfa-qr"
+              />
               <div className="space-y-1 text-center">
                 <p className="text-xs text-muted-foreground">{t("twoFactorSecret")}</p>
-                <code className="block rounded-lg bg-secondary px-3 py-2 font-mono text-sm break-all select-all" data-testid="mfa-secret">
+                <code
+                  className="block rounded-lg bg-secondary px-3 py-2 font-mono text-sm break-all select-all"
+                  data-testid="mfa-secret"
+                >
                   {enrollment.secret}
                 </code>
               </div>
               <p className="text-sm">{t("twoFactorEnterCode")}</p>
-              <CodeInput id="mfa-enroll-code" value={code} onChange={setCode} label={t("twoFactorCode")} />
+              <CodeInput
+                id="mfa-enroll-code"
+                value={code}
+                onChange={setCode}
+                label={t("twoFactorCode")}
+              />
               {error && (
                 <p role="alert" className="text-sm text-destructive">
                   {error}
                 </p>
               )}
-              <Button type="submit" className="w-full" loading={pending} disabled={code.length !== 6}>
+              <Button
+                type="submit"
+                className="w-full"
+                loading={pending}
+                disabled={code.length !== 6}
+              >
                 {t("twoFactorConfirm")}
               </Button>
             </form>
@@ -157,13 +196,24 @@ export function TwoFactorCard({ enabled }: { enabled: boolean }) {
               });
             }}
           >
-            <CodeInput id="mfa-disable-code" value={code} onChange={setCode} label={t("twoFactorCode")} />
+            <CodeInput
+              id="mfa-disable-code"
+              value={code}
+              onChange={setCode}
+              label={t("twoFactorCode")}
+            />
             {error && (
               <p role="alert" className="text-sm text-destructive">
                 {error}
               </p>
             )}
-            <Button type="submit" variant="destructive" className="w-full" loading={pending} disabled={code.length !== 6}>
+            <Button
+              type="submit"
+              variant="destructive"
+              className="w-full"
+              loading={pending}
+              disabled={code.length !== 6}
+            >
               {t("twoFactorDisable")}
             </Button>
           </form>

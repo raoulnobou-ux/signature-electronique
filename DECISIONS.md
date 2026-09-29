@@ -197,7 +197,7 @@ _Mesure (Lighthouse mobile, build de production) :_ performance 94, accessibilit
 
 **D80 — Outils stricts et validés deux fois.** Schémas JSON fermés (`strict: true`, tous les champs requis) et paramètres diffusés au fil de l'eau (`eager_input_streaming`) ; chaque entrée est revalidée par Zod avant exécution (erreur renvoyée au modèle sinon). Les outils lisent via le client Supabase **de l'utilisateur** (RLS) : aucune donnée d'un autre compte n'est accessible. Essentiel : seul l'outil de visite guidée ; Pro : recherche, zones, demande, rédaction, relances, certificat.
 
-**D81 — Aucune action irréversible par l'assistant.** Il *propose* (zones, brouillon de demande, document rédigé, relance) sous forme de cartes ; l'utilisateur confirme lui-même (écran de préparation prérempli, bouton « Créer le PDF », bouton « Relancer »). Le brouillon de demande passe par le `sessionStorage` du navigateur, jamais envoyé seul.
+**D81 — Aucune action irréversible par l'assistant.** Il _propose_ (zones, brouillon de demande, document rédigé, relance) sous forme de cartes ; l'utilisateur confirme lui-même (écran de préparation prérempli, bouton « Créer le PDF », bouton « Relancer »). Le brouillon de demande passe par le `sessionStorage` du navigateur, jamais envoyé seul.
 
 **D82 — Documents envoyés uniquement sur action explicite** (bouton « Analyser », pièce jointe). Le PDF est transmis tel quel (≤ 20 Mo) avec un relevé des lignes positionnées (pdf.js côté serveur) qui permet de placer les zones au bon endroit ; seules les zones du document joint sont acceptées. L'historique stocke une référence (`document_ref` vers la version figée) réinsérée à l'identique à chaque tour : historique en ajout seul, cache de prompt efficace, pas de copie du document en base.
 

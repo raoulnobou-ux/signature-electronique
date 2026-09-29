@@ -32,7 +32,9 @@ export type BillingError =
 
 type Fail = { ok: false; reason: BillingError };
 
-async function loadContext(): Promise<{ account: Account; subscription: Awaited<ReturnType<typeof readSubscription>> } | Fail> {
+async function loadContext(): Promise<
+  { account: Account; subscription: Awaited<ReturnType<typeof readSubscription>> } | Fail
+> {
   const account = await getCurrentAccount();
   if (!account) return { ok: false, reason: "unauthenticated" };
   // Un compte expiré doit pouvoir payer : pas de garde « lecture seule » ici.
@@ -41,11 +43,19 @@ async function loadContext(): Promise<{ account: Account; subscription: Awaited<
 }
 
 async function readSubscription(userId: string) {
-  const { data } = await createAdminClient().from("subscriptions").select("*").eq("user_id", userId).single();
+  const { data } = await createAdminClient()
+    .from("subscriptions")
+    .select("*")
+    .eq("user_id", userId)
+    .single();
   return data;
 }
 
-async function computeQuote(account: Account, subscription: NonNullable<Awaited<ReturnType<typeof readSubscription>>>, target: z.infer<typeof targetSchema>): Promise<Quote> {
+async function computeQuote(
+  account: Account,
+  subscription: NonNullable<Awaited<ReturnType<typeof readSubscription>>>,
+  target: z.infer<typeof targetSchema>,
+): Promise<Quote> {
   return quoteCheckout(
     {
       state: account.entitlements.state,
@@ -74,7 +84,10 @@ export async function getCheckoutQuote(
   const quote = await computeQuote(ctx.account, ctx.subscription, parsed.data);
   const end = new Date(ctx.subscription.current_period_end);
   const startsAt =
-    quote.kind !== "upgrade" && ctx.account.entitlements.state !== "expired" && ctx.account.entitlements.state !== "grace" && end > new Date()
+    quote.kind !== "upgrade" &&
+    ctx.account.entitlements.state !== "expired" &&
+    ctx.account.entitlements.state !== "grace" &&
+    end > new Date()
       ? end
       : new Date();
   // Même règle que complete_payment : +1 mois / +1 an, ou fin de période inchangée (upgrade).
@@ -93,7 +106,9 @@ export async function getCheckoutQuote(
 }
 
 /** Crée le paiement (en attente) et renvoie l'URL du checkout du prestataire. */
-export async function startCheckout(input: z.input<typeof targetSchema>): Promise<{ ok: true; url: string } | Fail> {
+export async function startCheckout(
+  input: z.input<typeof targetSchema>,
+): Promise<{ ok: true; url: string } | Fail> {
   const parsed = targetSchema.safeParse(input);
   if (!parsed.success) return { ok: false, reason: "invalid" };
   const ctx = await loadContext();
@@ -102,7 +117,8 @@ export async function startCheckout(input: z.input<typeof targetSchema>): Promis
   if (!subscription) return { ok: false, reason: "invalid" };
   const provider = getPaymentProvider();
   if (!provider) return { ok: false, reason: "payments_unavailable" };
-  if (!(await rateLimit("checkout", account.userId, 10, 600))) return { ok: false, reason: "rate_limited" };
+  if (!(await rateLimit("checkout", account.userId, 10, 600)))
+    return { ok: false, reason: "rate_limited" };
 
   const quote = await computeQuote(account, subscription, parsed.data);
   // Identifiant de transaction : lettres, chiffres et tirets uniquement (exigence CinetPay).
@@ -149,12 +165,22 @@ export async function startCheckout(input: z.input<typeof targetSchema>): Promis
       actorType: "user",
       actorId: account.userId,
       eventType: "billing.checkout_started",
-      metadata: { payment_id: payment.id, plan: quote.plan, cycle: quote.cycle, kind: quote.kind, amount: quote.amount, currency: quote.currency },
+      metadata: {
+        payment_id: payment.id,
+        plan: quote.plan,
+        cycle: quote.cycle,
+        kind: quote.kind,
+        amount: quote.amount,
+        currency: quote.currency,
+      },
     });
     return { ok: true, url };
   } catch (err) {
     console.error("[billing] checkout", err);
-    await admin.from("payments").update({ status: "failed", failure_reason: "checkout_error" }).eq("id", payment.id);
+    await admin
+      .from("payments")
+      .update({ status: "failed", failure_reason: "checkout_error" })
+      .eq("id", payment.id);
     return { ok: false, reason: "provider_error" };
   }
 }
@@ -162,7 +188,11 @@ export async function startCheckout(input: z.input<typeof targetSchema>): Promis
 async function paidSubscriptionContext() {
   const ctx = await loadContext();
   if ("ok" in ctx) return ctx;
-  if (!ctx.subscription || ctx.subscription.plan === "trial" || ctx.account.entitlements.state !== "active") {
+  if (
+    !ctx.subscription ||
+    ctx.subscription.plan === "trial" ||
+    ctx.account.entitlements.state !== "active"
+  ) {
     return { ok: false, reason: "not_allowed" } as Fail;
   }
   return { account: ctx.account, subscription: ctx.subscription };
@@ -238,7 +268,11 @@ export async function completeSandboxPayment(input: {
   const sandbox = getSandboxProvider();
   if (!sandbox) return { ok: false, reason: "payments_unavailable" };
   const parsed = z
-    .object({ reference: z.string().max(80), outcome: z.enum(SANDBOX_OUTCOMES), method: z.enum(SANDBOX_METHODS) })
+    .object({
+      reference: z.string().max(80),
+      outcome: z.enum(SANDBOX_OUTCOMES),
+      method: z.enum(SANDBOX_METHODS),
+    })
     .safeParse(input);
   if (!parsed.success) return { ok: false, reason: "invalid" };
   const account = await getCurrentAccount();
@@ -250,7 +284,11 @@ export async function completeSandboxPayment(input: {
     .eq("user_id", account.userId)
     .single();
   if (!payment) return { ok: false, reason: "not_allowed" };
-  const txId = sandbox.transactionId(parsed.data.reference, parsed.data.outcome, parsed.data.method);
+  const txId = sandbox.transactionId(
+    parsed.data.reference,
+    parsed.data.outcome,
+    parsed.data.method,
+  );
   const url = new URL("/api/billing/return", publicEnv.NEXT_PUBLIC_APP_URL);
   url.searchParams.set("status", parsed.data.outcome);
   url.searchParams.set("tx_ref", parsed.data.reference);

@@ -65,7 +65,14 @@ export function quoteCheckout(
     const ratio = total > 0 ? Math.min(1, Math.max(0, left / total)) : 1;
     const difference = prices.pro[currency][cycle] - prices.essential[currency][cycle];
     const amount = Math.max(MIN_AMOUNT[currency], roundAmount(difference * ratio, currency));
-    return { kind: "upgrade", plan: "pro", cycle, currency, amount, fullPrice: prices.pro[currency][cycle] };
+    return {
+      kind: "upgrade",
+      plan: "pro",
+      cycle,
+      currency,
+      amount,
+      fullPrice: prices.pro[currency][cycle],
+    };
   }
 
   const price = prices[target.plan][target.currency][target.cycle];

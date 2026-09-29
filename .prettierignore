@@ -8,3 +8,6 @@ public
 playwright-report
 test-results
 .github
+
+# Modèles Go (Supabase) : syntaxe {{ }} dans les attributs
+supabase/templates/

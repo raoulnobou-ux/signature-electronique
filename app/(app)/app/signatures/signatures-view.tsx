@@ -1,6 +1,19 @@
 "use client";
 
-import { Copy, Lock, MoreHorizontal, PenLine, Pencil, Plus, Share2, Stamp, Star, Trash2, Type, Users } from "lucide-react";
+import {
+  Copy,
+  Lock,
+  MoreHorizontal,
+  PenLine,
+  Pencil,
+  Plus,
+  Share2,
+  Stamp,
+  Star,
+  Trash2,
+  Type,
+  Users,
+} from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
@@ -60,7 +73,9 @@ export function SignaturesView({
   const router = useRouter();
   const searchParams = useSearchParams();
   const requested = searchParams.get("nouvelle") as AssetType | null;
-  const [creator, setCreator] = useState<AssetType | null>(requested && ["signature", "initials", "stamp"].includes(requested) ? requested : null);
+  const [creator, setCreator] = useState<AssetType | null>(
+    requested && ["signature", "initials", "stamp"].includes(requested) ? requested : null,
+  );
   const [renaming, setRenaming] = useState<SignatureAsset | null>(null);
   const [deleting, setDeleting] = useState<SignatureAsset | null>(null);
   const [pending, startTransition] = useTransition();
@@ -93,7 +108,9 @@ export function SignaturesView({
 
       {limit !== null && (
         <div className="mb-8 max-w-sm space-y-1.5">
-          <p className="text-sm text-muted-foreground">{t("limit", { used: personal, max: limit })}</p>
+          <p className="text-sm text-muted-foreground">
+            {t("limit", { used: personal, max: limit })}
+          </p>
           <Progress value={(personal / limit) * 100} />
         </div>
       )}
@@ -105,8 +122,12 @@ export function SignaturesView({
           return (
             <section key={type} aria-labelledby={`section-${type}`}>
               <div className="mb-4 flex items-center justify-between gap-3">
-                <h2 id={`section-${type}`} className="flex items-center gap-2 font-display text-xl font-semibold">
-                  <Icon className="size-5 text-accent-foreground" aria-hidden /> {t(`sections.${type}`)}
+                <h2
+                  id={`section-${type}`}
+                  className="flex items-center gap-2 font-display text-xl font-semibold"
+                >
+                  <Icon className="size-5 text-accent-foreground" aria-hidden />{" "}
+                  {t(`sections.${type}`)}
                   {type === "stamp" && <Badge variant="brand">Pro</Badge>}
                 </h2>
                 {!readOnly && !locked && (
@@ -131,10 +152,17 @@ export function SignaturesView({
               ) : (
                 <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
                   {list.map((asset) => (
-                    <li key={asset.id} className="group glass relative overflow-hidden rounded-2xl transition-shadow hover:shadow-lift">
+                    <li
+                      key={asset.id}
+                      className="group relative overflow-hidden rounded-2xl glass transition-shadow hover:shadow-lift"
+                    >
                       <div className="flex h-32 items-center justify-center bg-white p-4">
                         {/* eslint-disable-next-line @next/next/no-img-element -- URL signée temporaire */}
-                        <img src={asset.url} alt={asset.name} className="max-h-full max-w-full object-contain" />
+                        <img
+                          src={asset.url}
+                          alt={asset.name}
+                          className="max-h-full max-w-full object-contain"
+                        />
                       </div>
                       {asset.shared && (
                         <Badge variant="default" className="absolute top-2 right-2">
@@ -149,30 +177,55 @@ export function SignaturesView({
                       <div className="flex items-center gap-1 p-3">
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-sm font-medium">{asset.name}</p>
-                          <p className="text-xs text-muted-foreground">{t(`methods.${asset.method}`)}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {t(`methods.${asset.method}`)}
+                          </p>
                         </div>
                         {!readOnly && asset.mine && (
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon-sm" aria-label={`Actions — ${asset.name}`}>
+                              <Button
+                                variant="ghost"
+                                size="icon-sm"
+                                aria-label={`Actions — ${asset.name}`}
+                              >
                                 <MoreHorizontal />
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               {!asset.isDefault && (
-                                <DropdownMenuItem onSelect={() => run(() => setDefaultSignatureAsset(asset.id), t("toasts.defaultSet"))}>
+                                <DropdownMenuItem
+                                  onSelect={() =>
+                                    run(
+                                      () => setDefaultSignatureAsset(asset.id),
+                                      t("toasts.defaultSet"),
+                                    )
+                                  }
+                                >
                                   <Star /> {t("setDefault")}
                                 </DropdownMenuItem>
                               )}
                               <DropdownMenuItem onSelect={() => setRenaming(asset)}>
                                 <Pencil /> {t("rename")}
                               </DropdownMenuItem>
-                              <DropdownMenuItem onSelect={() => run(() => duplicateSignatureAsset(asset.id), t("toasts.duplicated"))}>
+                              <DropdownMenuItem
+                                onSelect={() =>
+                                  run(
+                                    () => duplicateSignatureAsset(asset.id),
+                                    t("toasts.duplicated"),
+                                  )
+                                }
+                              >
                                 <Copy /> {t("duplicate")}
                               </DropdownMenuItem>
                               {inTeam && asset.type === "stamp" && (
                                 <DropdownMenuItem
-                                  onSelect={() => run(() => setAssetShared(asset.id, !asset.shared), asset.shared ? t("toasts.unshared") : t("toasts.shared"))}
+                                  onSelect={() =>
+                                    run(
+                                      () => setAssetShared(asset.id, !asset.shared),
+                                      asset.shared ? t("toasts.unshared") : t("toasts.shared"),
+                                    )
+                                  }
                                 >
                                   <Share2 /> {asset.shared ? t("unshare") : t("share")}
                                 </DropdownMenuItem>
@@ -217,10 +270,21 @@ export function SignaturesView({
             onSubmit={(e) => {
               e.preventDefault();
               const name = new FormData(e.currentTarget).get("name") as string;
-              if (renaming) run(() => renameSignatureAsset(renaming.id, name), t("toasts.renamed"), () => setRenaming(null));
+              if (renaming)
+                run(
+                  () => renameSignatureAsset(renaming.id, name),
+                  t("toasts.renamed"),
+                  () => setRenaming(null),
+                );
             }}
           >
-            <Input name="name" defaultValue={renaming?.name} maxLength={80} autoFocus aria-label={t("rename")} />
+            <Input
+              name="name"
+              defaultValue={renaming?.name}
+              maxLength={80}
+              autoFocus
+              aria-label={t("rename")}
+            />
             <DialogFooter>
               <Button type="submit" loading={pending}>
                 {t("rename")}
@@ -234,7 +298,9 @@ export function SignaturesView({
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{t("delete")}</DialogTitle>
-            <DialogDescription>{deleting && t("deleteConfirm", { name: deleting.name })}</DialogDescription>
+            <DialogDescription>
+              {deleting && t("deleteConfirm", { name: deleting.name })}
+            </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <DialogClose asChild>
@@ -243,7 +309,14 @@ export function SignaturesView({
             <Button
               variant="destructive"
               loading={pending}
-              onClick={() => deleting && run(() => deleteSignatureAsset(deleting.id), t("toasts.deleted"), () => setDeleting(null))}
+              onClick={() =>
+                deleting &&
+                run(
+                  () => deleteSignatureAsset(deleting.id),
+                  t("toasts.deleted"),
+                  () => setDeleting(null),
+                )
+              }
             >
               <Trash2 /> {t("delete")}
             </Button>

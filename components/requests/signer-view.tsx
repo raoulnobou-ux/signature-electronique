@@ -51,7 +51,16 @@ export type SignerField = {
   required: boolean;
 };
 
-export type SignerViewState = "ready" | "waiting" | "signed" | "completed" | "declined" | "expired" | "canceled" | "closed" | "invalid";
+export type SignerViewState =
+  | "ready"
+  | "waiting"
+  | "signed"
+  | "completed"
+  | "declined"
+  | "expired"
+  | "canceled"
+  | "closed"
+  | "invalid";
 
 type Props = {
   token: string;
@@ -100,7 +109,12 @@ export function SignerView(props: Props) {
       ) : (
         <main className="flex flex-1 items-center justify-center px-4 py-10">
           <div className="w-full max-w-lg space-y-6 text-center">
-            <StatusScreen {...props} state={state} completed={completed} onStart={() => setStarted(true)} />
+            <StatusScreen
+              {...props}
+              state={state}
+              completed={completed}
+              onStart={() => setStarted(true)}
+            />
           </div>
         </main>
       )}
@@ -135,18 +149,32 @@ function StatusScreen({
 
   return (
     <>
-      <div className={cn("mx-auto flex size-16 items-center justify-center rounded-2xl text-white shadow-lift", success ? "bg-success" : state === "ready" ? "bg-brand-gradient" : "bg-secondary text-muted-foreground")}>
+      <div
+        className={cn(
+          "mx-auto flex size-16 items-center justify-center rounded-2xl text-white shadow-lift",
+          success
+            ? "bg-success"
+            : state === "ready"
+              ? "bg-brand-gradient"
+              : "bg-secondary text-muted-foreground",
+        )}
+      >
         <Icon className="size-8" aria-hidden />
       </div>
       {state === "ready" ? (
         <>
           <div className="space-y-2">
             <p className="text-sm text-muted-foreground">{t("hello", { name: signerName })}</p>
-            <h1 className="font-display text-2xl font-semibold text-balance">{t("invite", { sender: senderName, title })}</h1>
+            <h1 className="font-display text-2xl font-semibold text-balance">
+              {t("invite", { sender: senderName, title })}
+            </h1>
           </div>
           {message && (
             <blockquote className="rounded-2xl border border-border bg-card p-4 text-left text-sm italic">
-              « {message} »<footer className="mt-2 text-xs text-muted-foreground not-italic">— {senderName}</footer>
+              « {message} »
+              <footer className="mt-2 text-xs text-muted-foreground not-italic">
+                — {senderName}
+              </footer>
             </blockquote>
           )}
           <ol className="space-y-2 text-left text-sm text-muted-foreground">
@@ -220,20 +248,25 @@ function SigningWorkspace({
     if (f.type === "checkbox") return !f.required || values[f.id] === "true";
     return true;
   };
-  const interactive = fields.filter((f) => ["signature", "initials", "text", "checkbox"].includes(f.type));
+  const interactive = fields.filter((f) =>
+    ["signature", "initials", "text", "checkbox"].includes(f.type),
+  );
   const remaining = interactive.filter((f) => !isDone(f));
   const ready = remaining.length === 0;
 
   const activate = (field: SignerField) => {
     if (field.type === "signature" || field.type === "initials") setPad(field.type);
     else if (field.type === "text") setEditing(field);
-    else if (field.type === "checkbox") setValues((v) => ({ ...v, [field.id]: v[field.id] === "true" ? "false" : "true" }));
+    else if (field.type === "checkbox")
+      setValues((v) => ({ ...v, [field.id]: v[field.id] === "true" ? "false" : "true" }));
   };
 
   const goToNext = () => {
     const next = remaining[0];
     if (!next) return;
-    document.querySelector(`[data-field-id="${next.id}"]`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+    document
+      .querySelector(`[data-field-id="${next.id}"]`)
+      ?.scrollIntoView({ behavior: "smooth", block: "center" });
   };
 
   const submit = () =>
@@ -268,7 +301,8 @@ function SigningWorkspace({
           const done = isDone(f);
           const auto = !["signature", "initials", "text", "checkbox"].includes(f.type);
           const fontPx = (f.h / 100) * size.height * 0.62;
-          const img = f.type === "signature" ? signature?.url : f.type === "initials" ? initials?.url : null;
+          const img =
+            f.type === "signature" ? signature?.url : f.type === "initials" ? initials?.url : null;
           return (
             <button
               key={f.id}
@@ -277,7 +311,13 @@ function SigningWorkspace({
               data-field-type={f.type}
               disabled={auto}
               onClick={() => activate(f)}
-              aria-label={auto ? `${tTools(f.type)} : ${f.value ?? ""}` : done ? t("fieldDone", { field: tTools(f.type) }) : t("fieldTodo", { field: tTools(f.type) })}
+              aria-label={
+                auto
+                  ? `${tTools(f.type)} : ${f.value ?? ""}`
+                  : done
+                    ? t("fieldDone", { field: tTools(f.type) })
+                    : t("fieldTodo", { field: tTools(f.type) })
+              }
               className={cn(
                 "absolute flex items-center justify-center overflow-hidden rounded-[3px] text-[#131722] transition",
                 auto
@@ -296,16 +336,24 @@ function SigningWorkspace({
                   {values[f.id] === "true" && <Check strokeWidth={3.5} className="size-4/5" />}
                 </span>
               ) : f.type === "text" && values[f.id] ? (
-                <span className="w-full truncate px-0.5 text-left" style={{ fontSize: fontPx, fontFamily: "Helvetica, Arial, sans-serif" }}>
+                <span
+                  className="w-full truncate px-0.5 text-left"
+                  style={{ fontSize: fontPx, fontFamily: "Helvetica, Arial, sans-serif" }}
+                >
                   {values[f.id]}
                 </span>
               ) : auto ? (
-                <span className="w-full truncate px-0.5 text-left opacity-70" style={{ fontSize: fontPx, fontFamily: "Helvetica, Arial, sans-serif" }}>
+                <span
+                  className="w-full truncate px-0.5 text-left opacity-70"
+                  style={{ fontSize: fontPx, fontFamily: "Helvetica, Arial, sans-serif" }}
+                >
                   {f.value}
                 </span>
               ) : (
                 <span className="px-1 text-[11px] font-semibold text-brand-violet">
-                  {f.type === "text" ? f.value || tTools("text") : t("tapHere", { field: tTools(f.type) })}
+                  {f.type === "text"
+                    ? f.value || tTools("text")
+                    : t("tapHere", { field: tTools(f.type) })}
                 </span>
               )}
             </button>
@@ -320,7 +368,12 @@ function SigningWorkspace({
         <p className="truncate font-semibold">{title}</p>
       </div>
       <div className="relative min-h-0 flex-1">
-        <PdfViewer source={pdfUrl} className="h-[calc(100dvh-10.5rem)]" maxPageWidth={900} renderOverlay={renderOverlay} />
+        <PdfViewer
+          source={pdfUrl}
+          className="h-[calc(100dvh-10.5rem)]"
+          maxPageWidth={900}
+          renderOverlay={renderOverlay}
+        />
       </div>
       <div className="sticky bottom-0 flex flex-wrap items-center gap-2 border-t border-border bg-popover px-4 py-3 pb-safe shadow-lift">
         <p className="flex-1 text-sm" aria-live="polite">
@@ -380,7 +433,12 @@ function SigningWorkspace({
             <DialogDescription>{t("confirmBody")}</DialogDescription>
           </DialogHeader>
           <label className="flex items-start gap-3 rounded-2xl border border-border p-4 text-sm">
-            <Checkbox checked={consent} onCheckedChange={(v) => setConsent(v === true)} aria-label={t("consent")} className="mt-0.5" />
+            <Checkbox
+              checked={consent}
+              onCheckedChange={(v) => setConsent(v === true)}
+              aria-label={t("consent")}
+              className="mt-0.5"
+            />
             <span>{t("consent")}</span>
           </label>
           <p className="flex gap-2 text-xs text-muted-foreground">
@@ -416,7 +474,12 @@ function SigningWorkspace({
             <DialogClose asChild>
               <Button variant="ghost">{t("back")}</Button>
             </DialogClose>
-            <Button variant="destructive" disabled={reason.trim().length < 3} loading={pending} onClick={decline}>
+            <Button
+              variant="destructive"
+              disabled={reason.trim().length < 3}
+              loading={pending}
+              onClick={decline}
+            >
               {t("declineConfirm")}
             </Button>
           </DialogFooter>
@@ -480,11 +543,21 @@ function PadDialog({
               </TabsTrigger>
             </TabsList>
             <TabsContent value="draw">
-              {method === "draw" && <DrawPad ink={INK} initials={kind === "initials"} register={(fn) => (getImage.current = fn)} />}
+              {method === "draw" && (
+                <DrawPad
+                  ink={INK}
+                  initials={kind === "initials"}
+                  register={(fn) => (getImage.current = fn)}
+                />
+              )}
             </TabsContent>
             <TabsContent value="type">
               {method === "type" && (
-                <TypePad ink={INK} initialText={kind === "initials" ? initialsText : signerName} register={(fn) => (getImage.current = fn)} />
+                <TypePad
+                  ink={INK}
+                  initialText={kind === "initials" ? initialsText : signerName}
+                  register={(fn) => (getImage.current = fn)}
+                />
               )}
             </TabsContent>
           </Tabs>

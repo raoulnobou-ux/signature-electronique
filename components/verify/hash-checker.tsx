@@ -21,7 +21,11 @@ type Outcome =
  * Dépôt d'un fichier : son empreinte SHA-256 est calculée localement (le fichier ne quitte
  * pas l'appareil), puis comparée aux empreintes connues.
  */
-export function HashChecker({ known }: { known?: { sha256: string; kind: "original" | "intermediate" | "final" }[] }) {
+export function HashChecker({
+  known,
+}: {
+  known?: { sha256: string; kind: "original" | "intermediate" | "final" }[];
+}) {
   const t = useTranslations("verify");
   const format = useFormatter();
   const input = useRef<HTMLInputElement>(null);
@@ -62,7 +66,11 @@ export function HashChecker({ known }: { known?: { sha256: string; kind: "origin
         }}
         className="flex w-full cursor-pointer flex-col items-center gap-3 rounded-3xl border-2 border-dashed border-border px-6 py-10 text-center transition-colors hover:border-brand-violet hover:bg-accent/40"
       >
-        {busy ? <Loader2 className="size-8 animate-spin text-brand-violet" aria-hidden /> : <Upload className="size-8 text-brand-violet" aria-hidden />}
+        {busy ? (
+          <Loader2 className="size-8 animate-spin text-brand-violet" aria-hidden />
+        ) : (
+          <Upload className="size-8 text-brand-violet" aria-hidden />
+        )}
         <span className="font-semibold">{t("drop")}</span>
         <span className="text-sm text-muted-foreground">{t("privacy")}</span>
       </button>
@@ -80,7 +88,10 @@ export function HashChecker({ known }: { known?: { sha256: string; kind: "origin
           role="status"
           data-testid="verify-result"
           data-ok={ok ? "true" : "false"}
-          className={cn("flex gap-3 rounded-2xl border p-4", ok ? "border-success/30 bg-success/10" : "border-destructive/30 bg-destructive/10")}
+          className={cn(
+            "flex gap-3 rounded-2xl border p-4",
+            ok ? "border-success/30 bg-success/10" : "border-destructive/30 bg-destructive/10",
+          )}
         >
           {ok ? (
             <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-success" aria-hidden />
@@ -88,18 +99,26 @@ export function HashChecker({ known }: { known?: { sha256: string; kind: "origin
             <ShieldAlert className="mt-0.5 size-5 shrink-0 text-destructive" aria-hidden />
           )}
           <div className="min-w-0 space-y-1 text-sm">
-            {outcome.kind === "match" && <p className="font-semibold">{t(`match.${outcome.label}`)}</p>}
+            {outcome.kind === "match" && (
+              <p className="font-semibold">{t(`match.${outcome.label}`)}</p>
+            )}
             {outcome.kind === "found" && (
               <>
                 <p className="font-semibold">{t("found", { title: outcome.title })}</p>
                 <p className="text-muted-foreground">
                   {t("foundDetail", {
                     version: outcome.version,
-                    date: format.dateTime(new Date(outcome.createdAt), { dateStyle: "long", timeStyle: "short" }),
+                    date: format.dateTime(new Date(outcome.createdAt), {
+                      dateStyle: "long",
+                      timeStyle: "short",
+                    }),
                   })}
                 </p>
                 {outcome.requestId && (
-                  <Link href={`/verify/${outcome.requestId}`} className="inline-flex items-center gap-1 font-medium text-accent-foreground underline">
+                  <Link
+                    href={`/verify/${outcome.requestId}`}
+                    className="inline-flex items-center gap-1 font-medium text-accent-foreground underline"
+                  >
                     <FileSearch className="size-4" aria-hidden /> {t("seeRequest")}
                   </Link>
                 )}
@@ -111,7 +130,9 @@ export function HashChecker({ known }: { known?: { sha256: string; kind: "origin
                 <p className="text-muted-foreground">{t("nomatchHint")}</p>
               </>
             )}
-            {hash && <p className="font-mono text-xs break-all text-muted-foreground">SHA-256 : {hash}</p>}
+            {hash && (
+              <p className="font-mono text-xs break-all text-muted-foreground">SHA-256 : {hash}</p>
+            )}
           </div>
         </div>
       )}

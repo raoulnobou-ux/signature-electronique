@@ -9,7 +9,11 @@ import { MAX_SIGNERS, REQUEST_FIELD_TYPES } from "@/lib/requests/fields";
 export const templateFieldSchema = z
   .object({
     id: z.string().min(1).max(64),
-    signer: z.number().int().min(0).max(MAX_SIGNERS - 1),
+    signer: z
+      .number()
+      .int()
+      .min(0)
+      .max(MAX_SIGNERS - 1),
     page: z.number().int().min(0).max(4999),
     x: z.number().min(0).max(100),
     y: z.number().min(0).max(100),

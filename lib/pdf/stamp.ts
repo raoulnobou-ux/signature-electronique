@@ -49,7 +49,10 @@ export function displayToPdf(geo: PageGeometry, fx: number, fy: number): { x: nu
  * largeur `width`, hauteur `height` — sur la page PDF, en tenant compte de la rotation
  * du champ (sens horaire à l'écran, autour de son centre) et de celle de la page.
  */
-export function fieldMatrix(geo: PageGeometry, field: Pick<Field, "x" | "y" | "w" | "h" | "rotation">) {
+export function fieldMatrix(
+  geo: PageGeometry,
+  field: Pick<Field, "x" | "y" | "w" | "h" | "rotation">,
+) {
   const size = displaySize(geo);
   const width = (field.w / 100) * size.width;
   const height = (field.h / 100) * size.height;
@@ -109,7 +112,13 @@ function fitFontSize(font: PDFFont, text: string, width: number, height: number)
   return Math.max(4, size);
 }
 
-function drawField(page: PDFPage, geo: PageGeometry, field: Field, font: PDFFont, image?: PDFImage) {
+function drawField(
+  page: PDFPage,
+  geo: PageGeometry,
+  field: Field,
+  font: PDFFont,
+  image?: PDFImage,
+) {
   const { matrix, width, height } = fieldMatrix(geo, field);
   page.pushOperators(pushGraphicsState(), concatTransformationMatrix(...matrix));
 
@@ -117,16 +126,42 @@ function drawField(page: PDFPage, geo: PageGeometry, field: Field, font: PDFFont
     page.drawImage(image, { x: 0, y: 0, width, height, opacity: field.opacity });
   } else if (field.type === "checkbox") {
     const s = Math.min(width, height);
-    page.drawRectangle({ x: 0, y: 0, width: s, height: s, borderColor: INK, borderWidth: s * 0.08 });
+    page.drawRectangle({
+      x: 0,
+      y: 0,
+      width: s,
+      height: s,
+      borderColor: INK,
+      borderWidth: s * 0.08,
+    });
     if (field.value === "true") {
-      page.drawLine({ start: { x: s * 0.2, y: s * 0.52 }, end: { x: s * 0.42, y: s * 0.28 }, thickness: s * 0.12, color: INK, opacity: field.opacity });
-      page.drawLine({ start: { x: s * 0.42, y: s * 0.28 }, end: { x: s * 0.82, y: s * 0.76 }, thickness: s * 0.12, color: INK, opacity: field.opacity });
+      page.drawLine({
+        start: { x: s * 0.2, y: s * 0.52 },
+        end: { x: s * 0.42, y: s * 0.28 },
+        thickness: s * 0.12,
+        color: INK,
+        opacity: field.opacity,
+      });
+      page.drawLine({
+        start: { x: s * 0.42, y: s * 0.28 },
+        end: { x: s * 0.82, y: s * 0.76 },
+        thickness: s * 0.12,
+        color: INK,
+        opacity: field.opacity,
+      });
     }
   } else {
     const text = encodableText(font, (field.value ?? "").trim());
     if (text) {
       const size = fitFontSize(font, text, width, height);
-      page.drawText(text, { x: 0, y: (height - size * 0.72) / 2, size, font, color: INK, opacity: field.opacity });
+      page.drawText(text, {
+        x: 0,
+        y: (height - size * 0.72) / 2,
+        size,
+        font,
+        color: INK,
+        opacity: field.opacity,
+      });
     }
   }
   page.pushOperators(popGraphicsState());
@@ -136,7 +171,11 @@ function drawField(page: PDFPage, geo: PageGeometry, field: Field, font: PDFFont
  * Incruste les champs dans le PDF, sans toucher au contenu existant (ajout de calques).
  * Renvoie le nouveau PDF et le nombre de champs appliqués.
  */
-export async function stampPdf(source: Uint8Array, fields: Field[], options: StampOptions): Promise<Uint8Array> {
+export async function stampPdf(
+  source: Uint8Array,
+  fields: Field[],
+  options: StampOptions,
+): Promise<Uint8Array> {
   const pdf = await PDFDocument.load(source, { updateMetadata: false });
   const pages = pdf.getPages();
   const font = await pdf.embedFont(StandardFonts.Helvetica);
@@ -185,7 +224,13 @@ export async function stampPdf(source: Uint8Array, fields: Field[], options: Sta
       const fontSize = Math.min(6.5, fitFontSize(font, text, width, 9));
       const textWidth = font.widthOfTextAtSize(text, fontSize);
       page.pushOperators(pushGraphicsState(), concatTransformationMatrix(...matrix));
-      page.drawText(text, { x: (width - textWidth) / 2, y: 1, size: fontSize, font, color: rgb(0.35, 0.38, 0.45) });
+      page.drawText(text, {
+        x: (width - textWidth) / 2,
+        y: 1,
+        size: fontSize,
+        font,
+        color: rgb(0.35, 0.38, 0.45),
+      });
       page.pushOperators(popGraphicsState());
     }
   }
@@ -201,4 +246,3 @@ export async function stampPdf(source: Uint8Array, fields: Field[], options: Sta
 
   return pdf.save({ useObjectStreams: true });
 }
-

@@ -1,0 +1,14 @@
+# Blueprint Render (optionnel) : service Gotenberg pour la conversion Word → PDF.
+# Render → New → Blueprint → ce dépôt. Renseigner GOTENBERG_API_BASIC_AUTH_PASSWORD (= GOTENBERG_TOKEN).
+services:
+  - type: web
+    name: quicksign-gotenberg
+    runtime: docker
+    dockerfilePath: ./deploy/gotenberg/Dockerfile
+    dockerContext: ./deploy/gotenberg
+    region: frankfurt
+    plan: standard
+    healthCheckPath: /health
+    envVars:
+      - key: GOTENBERG_API_BASIC_AUTH_PASSWORD
+        sync: false

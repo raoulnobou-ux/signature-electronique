@@ -25,7 +25,12 @@ export async function POST(request: Request) {
   const admin = createAdminClient();
   const { data: inserted, error: insertError } = await admin
     .from("payment_events")
-    .insert({ provider: provider.name, event_key: event.key, event_type: event.type, payload: (event.payload ?? {}) as NonNullable<Json> })
+    .insert({
+      provider: provider.name,
+      event_key: event.key,
+      event_type: event.type,
+      payload: (event.payload ?? {}) as NonNullable<Json>,
+    })
     .select("id")
     .single();
 
@@ -47,12 +52,18 @@ export async function POST(request: Request) {
   }
 
   if (!event.reference) {
-    await admin.from("payment_events").update({ processed_at: new Date().toISOString() }).eq("id", eventId!);
+    await admin
+      .from("payment_events")
+      .update({ processed_at: new Date().toISOString() })
+      .eq("id", eventId!);
     return NextResponse.json({ received: true, ignored: true });
   }
 
   try {
-    const result = await settlePayment({ reference: event.reference, transactionId: event.transactionId });
+    const result = await settlePayment({
+      reference: event.reference,
+      transactionId: event.transactionId,
+    });
     await admin
       .from("payment_events")
       .update({ processed_at: new Date().toISOString(), error: null })

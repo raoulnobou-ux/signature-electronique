@@ -18,7 +18,12 @@ import { useRouter } from "next/navigation";
 import { useFormatter, useTranslations } from "next-intl";
 import { useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
-import { cancelSignatureRequest, getRequestFiles, getSignerLink, remindSigner } from "@/app/(app)/app/demandes/actions";
+import {
+  cancelSignatureRequest,
+  getRequestFiles,
+  getSignerLink,
+  remindSigner,
+} from "@/app/(app)/app/demandes/actions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,7 +36,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { SIGNER_COLORS } from "@/lib/requests/fields";
-import { REQUEST_STATUS_VARIANT, SIGNER_STATUS_VARIANT, type RequestStatus, type SignerStatus } from "./status";
+import {
+  REQUEST_STATUS_VARIANT,
+  SIGNER_STATUS_VARIANT,
+  type RequestStatus,
+  type SignerStatus,
+} from "./status";
 
 type Signer = {
   id: string;
@@ -73,7 +83,9 @@ const KNOWN_EVENTS = [
   "request.canceled",
   "request.expired",
 ] as const;
-type EventKey = { [K in (typeof KNOWN_EVENTS)[number]]: K extends `${infer A}.${infer B}` ? `${A}_${B}` : never }[(typeof KNOWN_EVENTS)[number]];
+type EventKey = {
+  [K in (typeof KNOWN_EVENTS)[number]]: K extends `${infer A}.${infer B}` ? `${A}_${B}` : never;
+}[(typeof KNOWN_EVENTS)[number]];
 
 export function RequestTracking({ justSent, request, signers, events }: Props) {
   const t = useTranslations("requests");
@@ -82,7 +94,8 @@ export function RequestTracking({ justSent, request, signers, events }: Props) {
   const [pending, start] = useTransition();
   const [confirmCancel, setConfirmCancel] = useState(false);
   const live = request.status === "pending";
-  const date = (iso: string) => format.dateTime(new Date(iso), { dateStyle: "medium", timeStyle: "short" });
+  const date = (iso: string) =>
+    format.dateTime(new Date(iso), { dateStyle: "medium", timeStyle: "short" });
 
   // Suivi en direct : actualisation discrète tant que la demande est en cours.
   useEffect(() => {
@@ -107,7 +120,8 @@ export function RequestTracking({ justSent, request, signers, events }: Props) {
   const remind = (signer: Signer) =>
     start(async () => {
       const result = await remindSigner(signer.id);
-      if (result.ok) toast.success(result.emailed ? t("detail.reminded") : t("detail.remindedLink"));
+      if (result.ok)
+        toast.success(result.emailed ? t("detail.reminded") : t("detail.remindedLink"));
       else toast.error(result.error === "too_soon" ? t("detail.tooSoon") : t("detail.error"));
       router.refresh();
     });
@@ -141,7 +155,9 @@ export function RequestTracking({ justSent, request, signers, events }: Props) {
           <div className="min-w-0 space-y-1">
             <h1 className="font-display text-3xl font-semibold tracking-tight">{request.title}</h1>
             <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
-              <Badge variant={REQUEST_STATUS_VARIANT[status] ?? "muted"}>{t(`status.${status}`)}</Badge>
+              <Badge variant={REQUEST_STATUS_VARIANT[status] ?? "muted"}>
+                {t(`status.${status}`)}
+              </Badge>
               <span>{t(`detail.mode.${request.mode}`)}</span>
               {request.completedAt ? (
                 <span>{t("detail.completedAt", { date: date(request.completedAt) })}</span>
@@ -162,7 +178,11 @@ export function RequestTracking({ justSent, request, signers, events }: Props) {
                   <Download /> {t("detail.downloadSigned")}
                 </Button>
                 {request.hasCertificate && (
-                  <Button variant="secondary" onClick={() => download("certificate")} disabled={pending}>
+                  <Button
+                    variant="secondary"
+                    onClick={() => download("certificate")}
+                    disabled={pending}
+                  >
                     <Award /> {t("detail.downloadCertificate")}
                   </Button>
                 )}
@@ -174,15 +194,23 @@ export function RequestTracking({ justSent, request, signers, events }: Props) {
               </>
             )}
             {live && (
-              <Button variant="ghost" className="text-destructive" onClick={() => setConfirmCancel(true)}>
+              <Button
+                variant="ghost"
+                className="text-destructive"
+                onClick={() => setConfirmCancel(true)}
+              >
                 <XCircle /> {t("detail.cancel")}
               </Button>
             )}
           </div>
         </div>
         {justSent && live && (
-          <p role="status" className="flex gap-2 rounded-2xl border border-success/30 bg-success/10 p-4 text-sm">
-            <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-success" aria-hidden /> {t("detail.sentBanner")}
+          <p
+            role="status"
+            className="flex gap-2 rounded-2xl border border-success/30 bg-success/10 p-4 text-sm"
+          >
+            <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-success" aria-hidden />{" "}
+            {t("detail.sentBanner")}
           </p>
         )}
       </div>
@@ -196,7 +224,11 @@ export function RequestTracking({ justSent, request, signers, events }: Props) {
             const sStatus = s.status as SignerStatus;
             const actionable = live && s.status !== "signed" && s.status !== "declined";
             return (
-              <li key={s.id} className="rounded-2xl border border-border bg-card p-4" data-status={s.status}>
+              <li
+                key={s.id}
+                className="rounded-2xl border border-border bg-card p-4"
+                data-status={s.status}
+              >
                 <div className="flex flex-wrap items-center gap-3">
                   <span
                     className="flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
@@ -206,24 +238,51 @@ export function RequestTracking({ justSent, request, signers, events }: Props) {
                   </span>
                   <div className="min-w-0 flex-1">
                     <p className="font-semibold">{s.name}</p>
-                    <p className="truncate text-xs text-muted-foreground">{[s.email, s.phone].filter(Boolean).join(" · ")}</p>
+                    <p className="truncate text-xs text-muted-foreground">
+                      {[s.email, s.phone].filter(Boolean).join(" · ")}
+                    </p>
                   </div>
-                  <Badge variant={SIGNER_STATUS_VARIANT[sStatus] ?? "muted"}>{t(`signerStatus.${sStatus}`)}</Badge>
+                  <Badge variant={SIGNER_STATUS_VARIANT[sStatus] ?? "muted"}>
+                    {t(`signerStatus.${sStatus}`)}
+                  </Badge>
                 </div>
-                {s.signedAt && <p className="mt-2 text-xs text-muted-foreground">{t("detail.signedAt", { date: date(s.signedAt) })}</p>}
-                {s.declinedReason && <p className="mt-2 text-sm text-destructive">{t("detail.declinedReason", { reason: s.declinedReason })}</p>}
+                {s.signedAt && (
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    {t("detail.signedAt", { date: date(s.signedAt) })}
+                  </p>
+                )}
+                {s.declinedReason && (
+                  <p className="mt-2 text-sm text-destructive">
+                    {t("detail.declinedReason", { reason: s.declinedReason })}
+                  </p>
+                )}
                 {actionable && (s.status !== "pending" || request.mode === "parallel") && (
                   <div className="mt-3 flex flex-wrap gap-2">
-                    <Button size="sm" variant="secondary" disabled={pending} onClick={() => copy(s)}>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      disabled={pending}
+                      onClick={() => copy(s)}
+                    >
                       <Copy /> {t("detail.copyLink")}
                     </Button>
                     {s.phone && (
-                      <Button size="sm" variant="secondary" disabled={pending} onClick={() => whatsapp(s)}>
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        disabled={pending}
+                        onClick={() => whatsapp(s)}
+                      >
                         <MessageCircle /> {t("detail.whatsapp")}
                       </Button>
                     )}
                     {(s.status === "sent" || s.status === "opened") && (
-                      <Button size="sm" variant="ghost" disabled={pending} onClick={() => remind(s)}>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        disabled={pending}
+                        onClick={() => remind(s)}
+                      >
                         <Mail /> {t("detail.remind")}
                       </Button>
                     )}
@@ -249,7 +308,10 @@ export function RequestTracking({ justSent, request, signers, events }: Props) {
         <ol className="space-y-2 border-l border-border pl-4">
           {events.map((e) => (
             <li key={e.id} className="relative text-sm">
-              <span className="absolute top-1.5 -left-[21px] size-2 rounded-full bg-brand-violet" aria-hidden />
+              <span
+                className="absolute top-1.5 -left-[21px] size-2 rounded-full bg-brand-violet"
+                aria-hidden
+              />
               <span className="font-medium">
                 {KNOWN_EVENTS.includes(e.type as (typeof KNOWN_EVENTS)[number])
                   ? t(`detail.events.${e.type.replace(".", "_") as EventKey}`)

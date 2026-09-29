@@ -43,7 +43,10 @@ export function PageLayer<F extends EditorField>({
   onChange,
   renderContent,
 }: Props<F>) {
-  const [guides, setGuides] = useState<{ x: number | null; y: number | null }>({ x: null, y: null });
+  const [guides, setGuides] = useState<{ x: number | null; y: number | null }>({
+    x: null,
+    y: null,
+  });
   const pageFields = fields.filter((f) => f.page === pageIndex);
 
   const startGesture = (event: ReactPointerEvent, field: F, mode: "move" | Corner) => {
@@ -113,12 +116,28 @@ export function PageLayer<F extends EditorField>({
         if (e.target !== e.currentTarget) return;
         if (armed) {
           const rect = e.currentTarget.getBoundingClientRect();
-          onPlace(pageIndex, ((e.clientX - rect.left) / rect.width) * 100, ((e.clientY - rect.top) / rect.height) * 100);
+          onPlace(
+            pageIndex,
+            ((e.clientX - rect.left) / rect.width) * 100,
+            ((e.clientY - rect.top) / rect.height) * 100,
+          );
         } else onSelect(null);
       }}
     >
-      {guides.x !== null && <div aria-hidden className="pointer-events-none absolute inset-y-0 w-px bg-brand-cyan" style={{ left: `${guides.x}%` }} />}
-      {guides.y !== null && <div aria-hidden className="pointer-events-none absolute inset-x-0 h-px bg-brand-cyan" style={{ top: `${guides.y}%` }} />}
+      {guides.x !== null && (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-y-0 w-px bg-brand-cyan"
+          style={{ left: `${guides.x}%` }}
+        />
+      )}
+      {guides.y !== null && (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 h-px bg-brand-cyan"
+          style={{ top: `${guides.y}%` }}
+        />
+      )}
 
       {pageFields.map((field) => {
         const selected = field.id === selectedId;
@@ -149,7 +168,9 @@ export function PageLayer<F extends EditorField>({
             <div
               className={cn(
                 "absolute inset-0 rounded-[3px] ring-offset-0 transition-shadow",
-                selected ? "ring-2 ring-brand-violet shadow-[0_0_0_4px_rgb(139_92_246/0.18)]" : "ring-1 ring-brand-violet/0 group-hover:ring-brand-violet/60",
+                selected
+                  ? "shadow-[0_0_0_4px_rgb(139_92_246/0.18)] ring-2 ring-brand-violet"
+                  : "ring-1 ring-brand-violet/0 group-hover:ring-brand-violet/60",
                 !isImageField(field.type) && !selected && "bg-brand-violet/[0.06]",
               )}
             />
@@ -157,15 +178,26 @@ export function PageLayer<F extends EditorField>({
               renderContent(field)
             ) : isImageField(field.type) ? (
               // eslint-disable-next-line @next/next/no-img-element -- URL signée temporaire
-              <img src={assetUrls[field.assetId!]} alt="" draggable={false} className="pointer-events-none size-full object-contain" />
+              <img
+                src={assetUrls[field.assetId!]}
+                alt=""
+                draggable={false}
+                className="pointer-events-none size-full object-contain"
+              />
             ) : field.type === "checkbox" ? (
               <div className="pointer-events-none flex size-full items-center justify-center rounded-[2px] border-2 border-slate-900 text-slate-900">
-                {field.value === "true" && <Check strokeWidth={3.5} style={{ width: "80%", height: "80%" }} />}
+                {field.value === "true" && (
+                  <Check strokeWidth={3.5} style={{ width: "80%", height: "80%" }} />
+                )}
               </div>
             ) : (
               <div
                 className="pointer-events-none flex size-full items-center overflow-hidden whitespace-nowrap text-[#131722]"
-                style={{ fontSize: fontPx, fontFamily: "Helvetica, Arial, sans-serif", lineHeight: 1 }}
+                style={{
+                  fontSize: fontPx,
+                  fontFamily: "Helvetica, Arial, sans-serif",
+                  lineHeight: 1,
+                }}
               >
                 {field.value}
               </div>

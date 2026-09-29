@@ -23,7 +23,12 @@ async function drawSignature(page: Page) {
   const box = (await canvas.boundingBox())!;
   await page.mouse.move(box.x + 30, box.y + box.height * 0.6);
   await page.mouse.down();
-  for (let i = 0; i <= 20; i++) await page.mouse.move(box.x + 30 + i * ((box.width - 60) / 20), box.y + box.height * 0.6 - Math.sin(i / 2) * 30, { steps: 2 });
+  for (let i = 0; i <= 20; i++)
+    await page.mouse.move(
+      box.x + 30 + i * ((box.width - 60) / 20),
+      box.y + box.height * 0.6 - Math.sin(i / 2) * 30,
+      { steps: 2 },
+    );
   await page.mouse.up();
   await page.getByRole("button", { name: "Enregistrer" }).click();
   await expect(page.getByRole("dialog")).toBeHidden({ timeout: 10_000 });
@@ -43,7 +48,11 @@ test("générateur de cachet : rond, texte circulaire, enregistré en PNG + SVG"
   await page.getByRole("radio", { name: "Rond" }).click();
   await page.getByRole("button", { name: "Enregistrer" }).click();
   await expect(page.getByRole("dialog")).toBeHidden({ timeout: 10_000 });
-  const { data } = await adminClient().from("signature_assets").select("type, method, svg_path").eq("owner_id", user.id).single();
+  const { data } = await adminClient()
+    .from("signature_assets")
+    .select("type, method, svg_path")
+    .eq("owner_id", user.id)
+    .single();
   expect(data).toMatchObject({ type: "stamp", method: "generated" });
   expect(data!.svg_path).toMatch(/\.svg$/);
 });
@@ -89,7 +98,11 @@ test("modèle : rôles, champ variable, création en un clic puis envoi", async 
   await page.getByRole("button", { name: "Envoyer la demande" }).first().click();
   await expect(page).toHaveURL(/\/app\/demandes\//, { timeout: 20_000 });
 
-  const { data: template } = await adminClient().from("templates").select("use_count").eq("owner_id", user.id).single();
+  const { data: template } = await adminClient()
+    .from("templates")
+    .select("use_count")
+    .eq("owner_id", user.id)
+    .single();
   expect(template!.use_count).toBe(1);
   const { data: versions } = await adminClient()
     .from("document_versions")
@@ -126,7 +139,10 @@ test("signature en lot : 2 documents, un placement, archive ZIP", async ({ page 
   const zip = await JSZip.loadAsync(await readFile(await (await download).path()));
   expect(Object.keys(zip.files)).toHaveLength(2);
 
-  const { data: docs } = await adminClient().from("documents").select("status, current_version").in("id", [first, second]);
+  const { data: docs } = await adminClient()
+    .from("documents")
+    .select("status, current_version")
+    .in("id", [first, second]);
   expect(docs!.every((d) => d.status === "signed" && d.current_version === 1)).toBe(true);
 });
 
@@ -134,7 +150,13 @@ test("équipe : création, invitation, adhésion et plan Pro partagé", async ({
   test.setTimeout(120_000);
   const owner = await createConfirmedUser("team-owner", "Awa Ngono");
   const member = await createConfirmedUser("team-member", "Bruno Etoa");
-  await adminClient().from("subscriptions").update({ status: "expired", current_period_end: new Date(Date.now() - 86_400_000).toISOString() }).eq("user_id", member.id);
+  await adminClient()
+    .from("subscriptions")
+    .update({
+      status: "expired",
+      current_period_end: new Date(Date.now() - 86_400_000).toISOString(),
+    })
+    .eq("user_id", member.id);
 
   await signInAs(page, owner.email);
   await page.goto("/app/equipe");
@@ -162,7 +184,9 @@ test("équipe : création, invitation, adhésion et plan Pro partagé", async ({
   await expect(memberPage).toHaveURL(/\/app\/equipe$/);
   await expect(memberPage.getByTestId("team-members")).toContainText("Awa Ngono");
   await memberPage.goto("/app/abonnement");
-  await expect(memberPage.getByText("Plan Pro inclus grâce à votre équipe « Cabinet Test »")).toBeVisible();
+  await expect(
+    memberPage.getByText("Plan Pro inclus grâce à votre équipe « Cabinet Test »"),
+  ).toBeVisible();
   await expect(memberPage.getByText("Lecture seule")).toHaveCount(0);
   await context.close();
 

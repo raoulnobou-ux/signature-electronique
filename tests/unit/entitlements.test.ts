@@ -195,7 +195,12 @@ describe("fin de période et grâce", () => {
 
 describe("annulation et changements de plan programmés (Phase 6)", () => {
   it("une annulation (statut actif) s'arrête net à la fin de la période, sans grâce", () => {
-    const s = sub({ plan: "essential", status: "active", currentPeriodEnd: at(1), cancelAtPeriodEnd: true });
+    const s = sub({
+      plan: "essential",
+      status: "active",
+      currentPeriodEnd: at(1),
+      cancelAtPeriodEnd: true,
+    });
     expect(getEntitlements({ subscription: s, usage: noUsage, now: NOW }).state).toBe("active");
     const after = getEntitlements({ subscription: s, usage: noUsage, now: at(1.5) });
     expect(after.state).toBe("expired");
@@ -210,7 +215,9 @@ describe("annulation et changements de plan programmés (Phase 6)", () => {
       scheduledPlan: "essential",
       scheduledPlanAt: at(5),
     });
-    expect(getEntitlements({ subscription: s, usage: noUsage, now: at(4) }).effectivePlan).toBe("pro");
+    expect(getEntitlements({ subscription: s, usage: noUsage, now: at(4) }).effectivePlan).toBe(
+      "pro",
+    );
     const later = getEntitlements({ subscription: s, usage: noUsage, now: at(6) });
     expect(later.effectivePlan).toBe("essential");
     expect(later.features.stamps).toBe(false);
@@ -224,7 +231,11 @@ describe("annulation et changements de plan programmés (Phase 6)", () => {
       scheduledPlan: "essential",
       scheduledPlanAt: at(4),
     });
-    expect(getEntitlements({ subscription: s, usage: noUsage, now: NOW }).effectivePlan).toBe("pro");
-    expect(getEntitlements({ subscription: s, usage: noUsage, now: at(4) }).effectivePlan).toBe("essential");
+    expect(getEntitlements({ subscription: s, usage: noUsage, now: NOW }).effectivePlan).toBe(
+      "pro",
+    );
+    expect(getEntitlements({ subscription: s, usage: noUsage, now: at(4) }).effectivePlan).toBe(
+      "essential",
+    );
   });
 });
