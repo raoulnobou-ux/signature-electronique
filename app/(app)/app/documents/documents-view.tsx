@@ -203,7 +203,7 @@ export function DocumentsView({ documents, total, folders, tags, filters, readOn
         description={filters.trash ? t("trashHint") : t("subtitle")}
         actions={
           !filters.trash && !readOnly ? (
-            <Button onClick={() => setParams({ importer: "1" })}>
+            <Button data-tour="import" onClick={() => setParams({ importer: "1" })}>
               <Upload /> {t("import")}
             </Button>
           ) : undefined

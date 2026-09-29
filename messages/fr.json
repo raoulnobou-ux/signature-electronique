@@ -187,7 +187,12 @@
           "tab": "Administrations",
           "title": "Services publics et collectivités",
           "description": "Notes de service, courriers et annonces signés et diffusés plus vite, avec un historique clair de qui a signé quoi et quand.",
-          "examples": ["Note de service", "Courrier officiel", "Annonce", "Décision interne"]
+          "examples": [
+            "Note de service",
+            "Courrier officiel",
+            "Annonce",
+            "Décision interne"
+          ]
         }
       ]
     },
@@ -416,7 +421,11 @@
       "metaTitle": "Créer un compte",
       "title": "Créez votre compte",
       "subtitle": "6 jours gratuits, sans carte bancaire.",
-      "steps": ["Compte", "Profil", "Confirmation"],
+      "steps": [
+        "Compte",
+        "Profil",
+        "Confirmation"
+      ],
       "profileTitle": "Parlez-nous de votre structure",
       "profileSubtitle": "Facultatif — vous pourrez compléter plus tard.",
       "continue": "Continuer",
@@ -1571,5 +1580,88 @@
     "notSigned": "Non signé",
     "checkTitle": "Vérifier votre exemplaire",
     "checkIntro": "Déposez votre fichier PDF : son empreinte est comparée à celles enregistrées pour ce document."
+  },
+  "assistant": {
+    "metaTitle": "Assistant IA",
+    "title": "QuickSign Copilot",
+    "subtitle": "Votre assistant de signature",
+    "open": "Ouvrir l'assistant",
+    "close": "Fermer l'assistant",
+    "newConversation": "Nouvelle conversation",
+    "history": "Historique",
+    "fullPage": "Ouvrir en plein écran",
+    "emptyTitle": "Bonjour {name}, comment puis-je vous aider ?",
+    "emptyHint": "Posez une question sur QuickSign, ou joignez un document pour l'analyser.",
+    "placeholder": "Posez votre question…",
+    "send": "Envoyer",
+    "stop": "Arrêter",
+    "thinking": "Réflexion…",
+    "you": "Vous",
+    "tools": {
+      "show_in_app": "Je vous montre où cliquer…",
+      "find_document": "Recherche dans vos documents…",
+      "get_document_details": "Lecture des informations du document…",
+      "propose_signature_zones": "Repérage des zones de signature…",
+      "prepare_signature_request": "Préparation de la demande…",
+      "draft_document": "Rédaction du document…",
+      "list_pending_signatures": "Vérification des signatures en attente…",
+      "explain_certificate": "Lecture du certificat…"
+    },
+    "attach": "Joindre « {title} »",
+    "attached": "Document joint : {title}",
+    "detach": "Retirer le document",
+    "attachHint": "Le document n'est transmis à l'assistant que si vous le joignez.",
+    "attachPro": "L'analyse de documents est incluse dans le plan Pro.",
+    "analyze": "Analyser avec l'assistant",
+    "quick": {
+      "summarize": "Résumer",
+      "key-info": "Points clés",
+      "risks": "Points d'attention",
+      "zones": "Zones de signature",
+      "translate": "Traduire en anglais"
+    },
+    "suggestions": {
+      "how-sign": "Signer mon premier document",
+      "how-import-word": "Importer un Word",
+      "plans": "Essentiel ou Pro ?",
+      "legal": "Valeur légale au Cameroun",
+      "request": "Faire signer à plusieurs",
+      "stamp": "Créer mon cachet"
+    },
+    "remaining": "{count, plural, =0 {Plus de message aujourd'hui} one {# message restant aujourd'hui} other {# messages restants aujourd'hui}}",
+    "disclaimer": "L'assistant peut se tromper et ne remplace pas un conseil juridique.",
+    "noHistory": "Aucune conversation pour l'instant.",
+    "delete": "Supprimer la conversation",
+    "deleted": "Conversation supprimée.",
+    "errors": {
+      "not_configured": "L'assistant n'est pas encore activé sur cette installation.",
+      "quota": "Vous avez utilisé vos 20 messages du jour (plan Essentiel). Revenez demain, ou passez au Pro pour un usage illimité.",
+      "rate_limited": "Trop de messages en peu de temps. Patientez une minute.",
+      "refusal": "Je ne peux pas répondre à cette demande.",
+      "read_only": "Votre compte est en lecture seule : l'assistant est suspendu. Réactivez un plan pour l'utiliser.",
+      "feature_not_in_plan": "Cette fonction de l'assistant est incluse dans le plan Pro.",
+      "invalid": "Message invalide.",
+      "server": "L'assistant n'a pas pu répondre. Réessayez.",
+      "network": "Connexion interrompue. Réessayez."
+    },
+    "actions": {
+      "showAgain": "Montrer à nouveau",
+      "zonesDetail": "{count, plural, one {# zone} other {# zones}} · pages {pages}",
+      "useZones": "Préparer une demande avec ces zones",
+      "requestDraft": "Brouillon de demande : {count, plural, one {# signataire} other {# signataires}}",
+      "openDraft": "Ouvrir et vérifier le brouillon",
+      "confirmHint": "Rien n'est envoyé tant que vous n'avez pas confirmé.",
+      "expand": "Tout afficher",
+      "collapse": "Réduire",
+      "createPdf": "Créer le PDF",
+      "openDocument": "Ouvrir le document",
+      "created": "Document créé.",
+      "error": "Action impossible.",
+      "remind": "Relancer",
+      "reminded": "Relance envoyée.",
+      "remindedLink": "Lien prêt : envoyez-le au signataire.",
+      "tooSoon": "Déjà relancé il y a moins d'une heure."
+    },
+    "paletteAsk": "Demander à l'assistant : « {query} »"
   }
 }

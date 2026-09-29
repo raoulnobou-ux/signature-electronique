@@ -84,7 +84,7 @@ export function SignaturesView({
         description={t("subtitle")}
         actions={
           !readOnly && (
-            <Button onClick={() => setCreator("signature")}>
+            <Button data-tour="new-signature" onClick={() => setCreator("signature")}>
               <Plus /> {t("create")}
             </Button>
           )

@@ -373,3 +373,23 @@
 @utility animate-write-in {
   animation: write-in 1.1s cubic-bezier(0.65, 0, 0.35, 1) both;
 }
+
+/* Visite guidée de l'assistant : élément mis en évidence quelques secondes. */
+@keyframes tour-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgb(139 92 246 / 0.7);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgb(139 92 246 / 0);
+  }
+}
+
+.tour-highlight {
+  position: relative;
+  z-index: 45;
+  border-radius: 12px;
+  outline: 2px solid var(--brand-violet);
+  outline-offset: 3px;
+  animation: tour-pulse 1.2s ease-out 3;
+}

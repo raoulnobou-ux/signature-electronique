@@ -23,6 +23,8 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
+  // pdf.js lit le texte des PDF côté serveur (assistant) : chargé tel quel, non empaqueté.
+  serverExternalPackages: ["pdfjs-dist"],
   experimental: {
     // Photos de profil (2 Mo max) envoyées par Server Action ; les documents, eux,
     // partent directement vers le stockage via une URL signée.

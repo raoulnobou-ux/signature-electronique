@@ -104,6 +104,13 @@ Le schéma complet (tables, Row Level Security, buckets privés, trigger de cré
 - **Équipe** `/app/equipe` : 5 places, rôles, invitations par e-mail (`/invitation/<jeton>`), cachets et modèles partagés, journal d'activité ; les membres bénéficient du plan Pro du propriétaire.
 - Tâche planifiée quotidienne `/api/cron/requests` (expiration, relances automatiques). Variable `LINK_SECRET` (secret des liens de signature).
 
+## Assistant IA (QuickSign Copilot)
+
+- Bulle en bas à droite, page `/app/assistant`, palette Ctrl/Cmd + K (« Demander à l'assistant »), bouton « Analyser avec l'assistant » sur un document (Pro).
+- Modèle Claude `claude-opus-5-5` (SDK `@anthropic-ai/sdk`) : renseigner `ANTHROPIC_API_KEY` (console.anthropic.com → API Keys). Le repli automatique en cas de refus du filtre de sécurité (`fallbacks: "default"`) est activé.
+- Essentiel : questions d'usage et visites guidées, 20 messages/jour. Pro : analyse de documents (résumé, points clés, points d'attention, zones de signature, traduction), rédaction, préparation de demandes, relances — toujours confirmées par l'utilisateur.
+- Sans clé, `AI_MOCK=true` active un assistant simulé (développement, tests e2e) ; jamais en production.
+
 ## Abonnements et paiements
 
 - Page `/app/abonnement` : plan actuel, usage, choix du plan (mensuel/annuel, FCFA/USD), récapitulatif exact (prorata), historique et reçus PDF.
@@ -123,7 +130,7 @@ Le schéma complet (tables, Row Level Security, buckets privés, trigger de cré
 
 ## Tests
 
-- `npm test` : tests unitaires (droits, dates d'essai, validations, détection de type de fichier, génération du PDF signé) **et** tests d'intégration de la base (RLS, triggers) si Supabase local tourne.
+- `npm test` : tests unitaires (droits, dates d'essai, validations, détection de type de fichier, génération du PDF signé, outils et boucle de l'assistant) **et** tests d'intégration de la base (RLS, triggers) si Supabase local tourne.
 - `npm run test:e2e` : parcours complets dans Chromium (bureau et mobile), dont inscription → e-mail de confirmation (lu dans Mailpit) → essai de 6 jours. Nécessite Supabase local et un build (`npm run build`).
 
 ## Déploiement

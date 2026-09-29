@@ -12,4 +12,9 @@ export type ShellAccount = {
   trialDaysRemaining: number | null;
   periodEndsAt: string;
   graceEndsAt: string | null;
+  readOnly: boolean;
+  /** Assistant : outils avancés (analyse de documents, actions) — plan Pro. */
+  aiAdvanced: boolean;
+  /** Messages à l'assistant restants aujourd'hui (null = illimité). */
+  aiRemaining: number | null;
 };

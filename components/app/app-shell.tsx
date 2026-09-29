@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
+import { AssistantProvider } from "@/components/assistant/assistant-context";
+import { AssistantLauncher } from "@/components/assistant/assistant-launcher";
 import { LogoMark } from "@/components/brand/logo";
 import { AccessBanner } from "./access-banner";
 import { AppSidebar } from "./app-sidebar";
@@ -15,13 +17,26 @@ import { UserMenu } from "./user-menu";
 export function AppShell({ account, children }: { account: ShellAccount; children: ReactNode }) {
   const pathname = usePathname();
   // Éditeurs plein écran : signature, préparation d'une demande, signature en lot.
-  if (pathname.endsWith("/signer") || pathname.endsWith("/demande") || pathname.endsWith("/documents/lot") || pathname.endsWith("/editer")) {
-    return (
-      <main id="contenu" className="min-h-dvh">
-        {children}
-      </main>
-    );
-  }
+  const fullscreen =
+    pathname.endsWith("/signer") ||
+    pathname.endsWith("/demande") ||
+    pathname.endsWith("/documents/lot") ||
+    pathname.endsWith("/editer");
+  return (
+    <AssistantProvider pro={account.aiAdvanced} initialRemaining={account.aiRemaining}>
+      {fullscreen ? (
+        <main id="contenu" className="min-h-dvh">
+          {children}
+        </main>
+      ) : (
+        <ShellFrame account={account}>{children}</ShellFrame>
+      )}
+      <AssistantLauncher userName={account.name} fullscreenRoute={fullscreen} />
+    </AssistantProvider>
+  );
+}
+
+function ShellFrame({ account, children }: { account: ShellAccount; children: ReactNode }) {
   return (
     <div className="flex min-h-dvh">
       <AppSidebar account={account} />

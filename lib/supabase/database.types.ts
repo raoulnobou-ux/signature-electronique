@@ -28,19 +28,43 @@ export type Database = {
           created_at: string;
           id: string;
           title: string;
+          updated_at: string;
           user_id: string;
         };
         Insert: {
           created_at?: string;
           id?: string;
           title?: string;
+          updated_at?: string;
           user_id: string;
         };
         Update: {
           created_at?: string;
           id?: string;
           title?: string;
+          updated_at?: string;
           user_id?: string;
+        };
+        Relationships: [];
+      };
+      ai_faq_cache: {
+        Row: {
+          answer: string;
+          created_at: string;
+          hits: number;
+          key: string;
+        };
+        Insert: {
+          answer: string;
+          created_at?: string;
+          hits?: number;
+          key: string;
+        };
+        Update: {
+          answer?: string;
+          created_at?: string;
+          hits?: number;
+          key?: string;
         };
         Relationships: [];
       };

@@ -16,10 +16,12 @@ export function MobileTabBar() {
   const [moreOpen, setMoreOpen] = useState(false);
 
   const tabs = [
-    { href: "/app", label: t("home"), icon: LayoutDashboard },
-    { href: "/app/documents", label: t("documents"), icon: FileText },
+    { key: "dashboard", href: "/app", label: t("home"), icon: LayoutDashboard },
+    { key: "documents", href: "/app/documents", label: t("documents"), icon: FileText },
   ];
-  const tabsRight = [{ href: "/app/signatures", label: t("signaturesShort"), icon: PenLine }];
+  const tabsRight = [
+    { key: "signatures", href: "/app/signatures", label: t("signaturesShort"), icon: PenLine },
+  ];
   const extra = [...NAV_ITEMS.slice(3), ...SECONDARY_NAV];
 
   const tabClass = (active: boolean) =>
@@ -35,10 +37,11 @@ export function MobileTabBar() {
         className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 pb-safe lg:hidden"
       >
         <div className="flex h-16 items-stretch px-2">
-          {tabs.map(({ href, label, icon: Icon }) => (
+          {tabs.map(({ key, href, label, icon: Icon }) => (
             <Link
               key={href}
               href={href}
+              data-tour={key}
               className={tabClass(isActive(pathname, href))}
               aria-current={isActive(pathname, href) ? "page" : undefined}
             >
@@ -55,10 +58,11 @@ export function MobileTabBar() {
               <Plus className="size-6" strokeWidth={2.5} aria-hidden />
             </Link>
           </div>
-          {tabsRight.map(({ href, label, icon: Icon }) => (
+          {tabsRight.map(({ key, href, label, icon: Icon }) => (
             <Link
               key={href}
               href={href}
+              data-tour={key}
               className={tabClass(isActive(pathname, href))}
               aria-current={isActive(pathname, href) ? "page" : undefined}
             >
@@ -69,6 +73,7 @@ export function MobileTabBar() {
           <button
             type="button"
             onClick={() => setMoreOpen(true)}
+            data-tour="more"
             className={cn(tabClass(false), "cursor-pointer")}
           >
             <Menu className="size-5" aria-hidden />

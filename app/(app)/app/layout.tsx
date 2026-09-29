@@ -24,10 +24,13 @@ export default async function AppLayout({ children }: LayoutProps<"/app">) {
     trialDaysRemaining: ent.trialDaysRemaining,
     periodEndsAt: ent.periodEndsAt.toISOString(),
     graceEndsAt: ent.graceEndsAt?.toISOString() ?? null,
+    readOnly: ent.readOnly,
+    aiAdvanced: ent.features.ai_advanced,
+    aiRemaining: ent.remaining.aiMessagesToday,
   };
 
   return (
-    <ClientMessages namespaces={["app", "auth", "documents", "signatures", "editor", "requests", "templates", "team"]}>
+    <ClientMessages namespaces={["app", "auth", "documents", "signatures", "editor", "requests", "templates", "team", "assistant"]}>
       <AppShellProviders>
         <AppShell account={shellAccount}>{children}</AppShell>
       </AppShellProviders>

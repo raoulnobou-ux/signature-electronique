@@ -9,6 +9,8 @@ import { z } from "zod";
 const serverSchema = z.object({
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(20),
   ANTHROPIC_API_KEY: z.string().optional(),
+  /** "true" : assistant simulé sans clé Anthropic (dev, tests e2e). Ignoré en production Vercel. */
+  AI_MOCK: z.enum(["true", "false"]).optional(),
   GOTENBERG_URL: z.url().optional(),
   GOTENBERG_TOKEN: z.string().optional(),
   RESEND_API_KEY: z.string().optional(),

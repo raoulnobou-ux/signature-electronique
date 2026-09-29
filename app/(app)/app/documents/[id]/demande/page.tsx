@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
+import { AssistantRequestBuilder } from "@/components/assistant/assistant-request-builder";
 import { RequestBuilder, type BuilderPreset } from "@/components/requests/request-builder";
 import { templatePreset } from "../../../modeles/actions";
 import { requireAccount } from "@/lib/auth/account";
@@ -35,12 +36,28 @@ export default async function NewRequestPage(props: PageProps<"/app/documents/[i
       .maybeSingle();
     redirect(pending ? `/app/demandes/${pending.id}` : `/app/documents/${id}`);
   }
-  const { data: signed } = await createAdminClient().storage.from("documents").createSignedUrl(doc.pdf_path, 3600);
+  const { data: signed } = await createAdminClient()
+    .storage.from("documents")
+    .createSignedUrl(doc.pdf_path, 3600);
   if (!signed) notFound();
 
+  const searchParams = await props.searchParams;
+  // Demande préparée par l'assistant : zones et signataires lus dans le navigateur.
+  if (searchParams.assistant === "1") {
+    return (
+      <AssistantRequestBuilder
+        document={{ id: doc.id, title: doc.title }}
+        pdfUrl={signed.signedUrl}
+      />
+    );
+  }
+
   // Demande préparée depuis un modèle : rôles et zones préremplis.
-  const templateId = (await props.searchParams).modele;
-  const fromTemplate = typeof templateId === "string" && /^[0-9a-f-]{36}$/i.test(templateId) ? await templatePreset(templateId) : null;
+  const templateId = searchParams.modele;
+  const fromTemplate =
+    typeof templateId === "string" && /^[0-9a-f-]{36}$/i.test(templateId)
+      ? await templatePreset(templateId)
+      : null;
   const preset: BuilderPreset | undefined = fromTemplate
     ? {
         mode: fromTemplate.mode,
@@ -64,6 +81,10 @@ export default async function NewRequestPage(props: PageProps<"/app/documents/[i
     : undefined;
 
   return (
-    <RequestBuilder document={{ id: doc.id, title: doc.title }} pdfUrl={signed.signedUrl} preset={preset} />
+    <RequestBuilder
+      document={{ id: doc.id, title: doc.title }}
+      pdfUrl={signed.signedUrl}
+      preset={preset}
+    />
   );
 }
