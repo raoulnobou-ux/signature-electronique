@@ -220,3 +220,11 @@ _Mesure (Lighthouse mobile, build de production) :_ performance 94, accessibilit
 **D90 — PWA sobre et sûre.** Manifeste (icônes générées, raccourcis), service worker qui ne met **jamais** en cache les pages de l'application, les API ou les documents : seulement les fichiers statiques versionnés et une page hors ligne bilingue. « Installer l'application » dans le menu du compte quand le navigateur le propose. Pas de notifications push à ce stade.
 
 **D91 — Audit.** `npm audit --omit=dev` : 0 vulnérabilité. Toutes les routes API vérifiées (session, secret de cron, signature de webhook ou RLS). Lighthouse mobile landing ≈ 93 (a11y, bonnes pratiques, SEO 100) ; tarifs 97 ; connexion 93.
+
+## Mise en ligne (Phase 10)
+
+**D92 — Supabase : production et préproduction en région Paris (eu-west-3)**, la plus proche du Cameroun ; Vercel en `cdg1` (Paris) pour limiter la latence base ↔ application. Schéma appliqué par migrations versionnées puis vérifié par empreinte (tables, politiques, colonnes, index, buckets identiques au local).
+
+**D93 — Durcissement après les conseils de sécurité Supabase** : aucune fonction `SECURITY DEFINER` appelable sans connexion (PostgreSQL accorde EXECUTE à PUBLIC par défaut) ; `team_sponsor` réservée au serveur ; fonctions de déclencheur non appelables via l'API ; `search_path` figé partout ; index sur toutes les clés étrangères. Restent volontairement : les tables sans politique (réservées au serveur) et les fonctions utilisées par les politiques RLS pour les utilisateurs connectés.
+
+**D94 — Outils d'exploitation** : `/api/health`, `npm run deploy:check`, `npm run smoke`, erreurs vers Sentry sans SDK ni donnée personnelle, Gotenberg empaqueté (`deploy/gotenberg`) pour Fly.io ou Render.

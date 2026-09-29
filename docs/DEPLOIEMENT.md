@@ -16,6 +16,8 @@ openssl rand -base64 32   # → GOTENBERG_TOKEN (conversion Word)
 
 ## 1. Supabase — base de données, authentification, fichiers
 
+> **Déjà fait (29 septembre 2026)** : projets `quicksign-prod` (réf. `xwefjsfietaidkxlydue`, https://xwefjsfietaidkxlydue.supabase.co) et `quicksign-preprod` (réf. `qxmghxqtlwilkstxpsln`, https://qxmghxqtlwilkstxpsln.supabase.co), région Paris, avec toutes les migrations (13) appliquées et vérifiées (schéma identique au local, conseils de sécurité Supabase traités). Il reste à faire les points 3 à 10 ci-dessous dans le tableau de bord.
+
 1. https://supabase.com/dashboard → **New project** : `quicksign-prod`, région **West EU (Paris)**, mot de passe fort (à conserver). Créer aussi `quicksign-preprod` pour les essais.
 2. Appliquer le schéma (toutes les migrations de `supabase/migrations/`) :
    ```bash
