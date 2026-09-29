@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Menu } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -14,6 +15,7 @@ type MobileNavProps = {
 };
 
 export function MobileNav({ links, signedIn, labels }: MobileNavProps) {
+  const tc = useTranslations("common");
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
 
@@ -32,7 +34,7 @@ export function MobileNav({ links, signedIn, labels }: MobileNavProps) {
             </div>
           </SheetTitle>
         </div>
-        <nav aria-label="Navigation mobile" className="flex flex-col gap-1 p-3">
+        <nav aria-label={tc("mobileNav")} className="flex flex-col gap-1 p-3">
           {links.map((link) => (
             <Link
               key={link.href}

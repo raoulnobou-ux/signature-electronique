@@ -1,4 +1,5 @@
 import { cva, type VariantProps } from "class-variance-authority";
+import { useTranslations } from "next-intl";
 import type { ComponentProps } from "react";
 import { cn } from "@/lib/utils";
 
@@ -33,24 +34,24 @@ function Badge({ className, variant, dot, children, ...props }: BadgeProps) {
 
 /** Statuts de documents et de signataires, avec couleur et libellé cohérents partout. */
 const STATUS_STYLES = {
-  draft: { variant: "muted", label: "Brouillon" },
-  pending: { variant: "warning", label: "En attente" },
-  sent: { variant: "default", label: "Envoyé" },
-  opened: { variant: "default", label: "Ouvert" },
-  signed: { variant: "success", label: "Signé" },
-  completed: { variant: "success", label: "Terminé" },
-  declined: { variant: "danger", label: "Refusé" },
-  expired: { variant: "outline", label: "Expiré" },
-  canceled: { variant: "outline", label: "Annulé" },
-} as const satisfies Record<string, { variant: NonNullable<BadgeProps["variant"]>; label: string }>;
+  draft: "muted",
+  pending: "warning",
+  sent: "default",
+  opened: "default",
+  signed: "success",
+  completed: "success",
+  declined: "danger",
+  expired: "outline",
+  canceled: "outline",
+} as const satisfies Record<string, NonNullable<BadgeProps["variant"]>>;
 
 type Status = keyof typeof STATUS_STYLES;
 
 function StatusBadge({ status, className }: { status: Status; className?: string }) {
-  const style = STATUS_STYLES[status];
+  const t = useTranslations("common.status");
   return (
-    <Badge variant={style.variant} dot className={className}>
-      {style.label}
+    <Badge variant={STATUS_STYLES[status]} dot className={className}>
+      {t(status)}
     </Badge>
   );
 }

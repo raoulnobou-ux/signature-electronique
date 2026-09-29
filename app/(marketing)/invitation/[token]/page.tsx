@@ -9,7 +9,10 @@ import { getCurrentAccount } from "@/lib/auth/account";
 import { hashToken } from "@/lib/requests/tokens";
 import { createAdminClient } from "@/lib/supabase/admin";
 
-export const metadata: Metadata = { title: "Invitation d'équipe", robots: { index: false }, referrer: "no-referrer" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("team.invitation");
+  return { title: t("metaTitle"), robots: { index: false }, referrer: "no-referrer" };
+}
 
 /** Lien d'invitation reçu par e-mail : connexion (ou inscription) puis acceptation. */
 export default async function InvitationPage(props: PageProps<"/invitation/[token]">) {

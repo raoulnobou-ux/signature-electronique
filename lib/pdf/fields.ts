@@ -4,7 +4,16 @@ import { z } from "zod";
  * Champs posés sur un document. Positions et tailles en POURCENTAGE de la page
  * telle qu'elle est affichée (après rotation) : rendu identique sur tous les écrans.
  */
-export const FIELD_TYPES = ["signature", "initials", "stamp", "date", "text", "checkbox", "name", "mention"] as const;
+export const FIELD_TYPES = [
+  "signature",
+  "initials",
+  "stamp",
+  "date",
+  "text",
+  "checkbox",
+  "name",
+  "mention",
+] as const;
 export type FieldType = (typeof FIELD_TYPES)[number];
 
 export const IMAGE_FIELD_TYPES: readonly FieldType[] = ["signature", "initials", "stamp"];
@@ -32,10 +41,38 @@ export type Field = z.infer<typeof fieldSchema>;
 export const fieldsSchema = z.array(fieldSchema).max(500);
 
 /** Mentions proposées dans l'éditeur. */
-export const MENTIONS = ["Lu et approuvé", "Bon pour accord", "Pour accord", "Certifié conforme", "Vu et vérifié"];
+export const MENTIONS = [
+  "Lu et approuvé",
+  "Bon pour accord",
+  "Pour accord",
+  "Certifié conforme",
+  "Vu et vérifié",
+];
+export const MENTIONS_EN = [
+  "Read and approved",
+  "Approved",
+  "Agreed",
+  "Certified true copy",
+  "Seen and verified",
+];
 
-/** « 28 septembre 2026, Douala » dans le fuseau de l'utilisateur. */
-export function formatSignatureDate(date: Date, timeZone: string, city?: string | null): string {
-  const formatted = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", year: "numeric", timeZone }).format(date);
+/** Mentions manuscrites usuelles dans la langue de l'interface. */
+export function mentionsFor(locale: string): string[] {
+  return locale === "en" ? MENTIONS_EN : MENTIONS;
+}
+
+/** « 28 septembre 2026, Douala » (ou « 28 September 2026, Douala ») dans le fuseau de l'utilisateur. */
+export function formatSignatureDate(
+  date: Date,
+  timeZone: string,
+  city?: string | null,
+  locale = "fr",
+): string {
+  const formatted = new Intl.DateTimeFormat(locale === "en" ? "en-GB" : "fr-FR", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone,
+  }).format(date);
   return city ? `${formatted}, ${city}` : formatted;
 }

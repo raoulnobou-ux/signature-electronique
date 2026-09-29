@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="fr">
+<html lang="{{ if eq .Data.locale "en" }}en{{ else }}fr{{ end }}">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="color-scheme" content="light" />
-    <title>Réinitialisez votre mot de passe</title>
+    <title>{{ if eq .Data.locale "en" }}Reset your password{{ else }}Réinitialisez votre mot de passe{{ end }}</title>
   </head>
   <body
     style="
@@ -22,7 +22,7 @@
     "
   >
     <span style="display: none; max-height: 0; overflow: hidden; opacity: 0"
-      >Choisissez un nouveau mot de passe pour votre compte QuickSign.</span
+      >{{ if eq .Data.locale "en" }}Choose a new password for your QuickSign account.{{ else }}Choisissez un nouveau mot de passe pour votre compte QuickSign.{{ end }}</span
     >
     <table
       role="presentation"
@@ -86,13 +86,13 @@
             <tr>
               <td style="padding: 16px 32px 32px">
                 <h1 style="margin: 0 0 18px; font-size: 22px; line-height: 1.3; color: #0b0f1a">
-                  Réinitialisez votre mot de passe
+                  {{ if eq .Data.locale "en" }}Reset your password{{ else }}Réinitialisez votre mot de passe{{ end }}
                 </h1>
                 <p style="margin: 0 0 16px; font-size: 15px; line-height: 1.6; color: #334155">
-                  Vous avez demandé à réinitialiser le mot de passe de votre compte QuickSign.
+                  {{ if eq .Data.locale "en" }}You asked to reset the password of your QuickSign account.{{ else }}Vous avez demandé à réinitialiser le mot de passe de votre compte QuickSign.{{ end }}
                 </p>
                 <p style="margin: 0 0 16px; font-size: 15px; line-height: 1.6; color: #334155">
-                  Ce lien est valable une heure et ne peut servir qu'une fois.
+                  {{ if eq .Data.locale "en" }}This link is valid for one hour and can only be used once.{{ else }}Ce lien est valable une heure et ne peut servir qu'une fois.{{ end }}
                 </p>
                 <table
                   role="presentation"
@@ -119,13 +119,13 @@
                           text-decoration: none;
                           border-radius: 12px;
                         "
-                        >Choisir un nouveau mot de passe</a
+                        >{{ if eq .Data.locale "en" }}Choose a new password{{ else }}Choisir un nouveau mot de passe{{ end }}</a
                       >
                     </td>
                   </tr>
                 </table>
                 <p style="margin: 12px 0 0; font-size: 12px; line-height: 1.5; color: #94a3b8">
-                  Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :<br /><a
+                  {{ if eq .Data.locale "en" }}If the button doesn't work, copy this link into your browser:{{ else }}Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :{{ end }}<br /><a
                     href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next=/reinitialiser-mot-de-passe"
                     style="color: #6366f1; word-break: break-all"
                     >{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash
@@ -144,8 +144,7 @@
                   color: #94a3b8;
                 "
               >
-                Vous n'êtes pas à l'origine de cette demande ? Ignorez cet e-mail : votre mot de
-                passe reste inchangé.<br />QuickSign — Signez, faites signer, terminé.
+                {{ if eq .Data.locale "en" }}Didn't request this? Ignore this email: your password stays unchanged.{{ else }}Vous n'êtes pas à l'origine de cette demande ? Ignorez cet e-mail : votre mot de passe reste inchangé.{{ end }}<br />{{ if eq .Data.locale "en" }}QuickSign — Sign, get it signed, done.{{ else }}QuickSign — Signez, faites signer, terminé.{{ end }}
               </td>
             </tr>
           </table>

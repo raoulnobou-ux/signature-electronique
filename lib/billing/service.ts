@@ -9,9 +9,17 @@ import {
   subscriptionExpiredEmail,
   trialEndedEmail,
   trialEndingEmail,
+  planName,
 } from "@/lib/email/templates";
-import { GRACE_PERIOD_DAYS, isPaidPlan, type BillingCycle, type Currency, type PaidPlan } from "@/lib/entitlements/plans";
+import {
+  GRACE_PERIOD_DAYS,
+  isPaidPlan,
+  type BillingCycle,
+  type Currency,
+  type PaidPlan,
+} from "@/lib/entitlements/plans";
 import { formatLongDate, formatMoney } from "@/lib/format";
+import { toLocale, type Locale } from "@/i18n/config";
 import { siteConfig } from "@/lib/site";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getPaymentProvider } from ".";
@@ -30,13 +38,24 @@ export function paymentDescription(plan: PaidPlan, cycle: BillingCycle, kind: st
 type Admin = ReturnType<typeof createAdminClient>;
 
 async function profileOf(admin: Admin, userId: string) {
-  const { data } = await admin.from("profiles").select("email, full_name, org_name").eq("id", userId).single();
+  const { data } = await admin
+    .from("profiles")
+    .select("email, full_name, org_name, locale")
+    .eq("id", userId)
+    .single();
   return data;
 }
 
 /** Réserve une notification ; false si elle a déjà été envoyée (idempotence des rappels). */
-async function claimNotice(admin: Admin, userId: string, kind: string, reference: string): Promise<boolean> {
-  const { error } = await admin.from("billing_notices").insert({ user_id: userId, kind, reference });
+async function claimNotice(
+  admin: Admin,
+  userId: string,
+  kind: string,
+  reference: string,
+): Promise<boolean> {
+  const { error } = await admin
+    .from("billing_notices")
+    .insert({ user_id: userId, kind, reference });
   if (!error) return true;
   if (error.code !== "23505") console.error("[billing] notice", kind, error);
   return false;
@@ -47,12 +66,19 @@ async function notify(
   userId: string,
   kind: string,
   reference: string,
-  build: (profile: { email: string; full_name: string }) => { subject: string; html: string; text: string },
+  build: (profile: { email: string; full_name: string; locale: Locale }) => {
+    subject: string;
+    html: string;
+    text: string;
+  },
 ): Promise<boolean> {
   const profile = await profileOf(admin, userId);
   if (!profile?.email) return false;
   if (!(await claimNotice(admin, userId, kind, reference))) return false;
-  await sendEmail({ to: profile.email, ...build(profile) });
+  await sendEmail({
+    to: profile.email,
+    ...build({ ...profile, locale: toLocale(profile.locale) }),
+  });
   return true;
 }
 
@@ -60,7 +86,10 @@ async function notify(
  * Génère (ou régénère) le reçu PDF numéroté d'un paiement réussi, le range dans le
  * bucket privé `receipts` et, à la première émission, l'envoie par e-mail.
  */
-export async function issueReceipt(paymentId: string, { email }: { email: boolean }): Promise<void> {
+export async function issueReceipt(
+  paymentId: string,
+  { email }: { email: boolean },
+): Promise<void> {
   const admin = createAdminClient();
   const { data: payment } = await admin.from("payments").select("*").eq("id", paymentId).single();
   if (!payment || payment.status !== "successful" || !payment.receipt_number) return;
@@ -100,17 +129,24 @@ export async function issueReceipt(paymentId: string, { email }: { email: boolea
   await admin.from("payments").update({ receipt_path: path }).eq("id", payment.id);
 
   if (email && profile?.email) {
+    const locale = toLocale(profile.locale);
     const message = paymentSucceededEmail({
       fullName: profile.full_name,
-      planLabel: PLAN_LABELS[payment.plan],
-      amount: formatMoney(Number(payment.amount), currency),
-      periodEnd: formatLongDate(new Date(payment.period_end ?? Date.now())),
+      planLabel: planName(payment.plan, locale),
+      amount: formatMoney(Number(payment.amount), currency, locale),
+      periodEnd: formatLongDate(new Date(payment.period_end ?? Date.now()), locale),
       receiptNumber: payment.receipt_number,
+      locale,
     });
     await sendEmail({
       to: profile.email,
       ...message,
-      attachments: [{ filename: `Recu-${payment.receipt_number}.pdf`, content: Buffer.from(bytes).toString("base64") }],
+      attachments: [
+        {
+          filename: `Recu-${payment.receipt_number}.pdf`,
+          content: Buffer.from(bytes).toString("base64"),
+        },
+      ],
     });
   }
 }
@@ -160,7 +196,11 @@ export async function settlePayment(input: {
       console.error("[billing] montant ou devise incorrects", tx, expected);
       await admin
         .from("payments")
-        .update({ status: "failed", failure_reason: "amount_mismatch", provider_tx_id: tx.transactionId })
+        .update({
+          status: "failed",
+          failure_reason: "amount_mismatch",
+          provider_tx_id: tx.transactionId,
+        })
         .eq("id", payment.id)
         .neq("status", "successful");
       return { outcome: "failed", userId };
@@ -194,7 +234,11 @@ export async function settlePayment(input: {
   if (tx.status === "failed") {
     const { data: updated } = await admin
       .from("payments")
-      .update({ status: "failed", failure_reason: tx.failureReason, provider_tx_id: tx.transactionId })
+      .update({
+        status: "failed",
+        failure_reason: tx.failureReason,
+        provider_tx_id: tx.transactionId,
+      })
       .eq("id", payment.id)
       .in("status", ["pending", "cancelled"])
       .select("id");
@@ -208,8 +252,9 @@ export async function settlePayment(input: {
       await notify(admin, userId, "payment_failed", payment.id, (p) =>
         paymentFailedEmail({
           fullName: p.full_name,
-          amount: formatMoney(expected.amount, expected.currency),
+          amount: formatMoney(expected.amount, expected.currency, p.locale),
           reason: tx.failureReason,
+          locale: p.locale,
         }),
       );
     }
@@ -264,7 +309,11 @@ export async function runBillingCron(now = new Date()): Promise<BillingCronSumma
     const end = new Date(sub.current_period_end);
     if (
       await notify(admin, sub.user_id, "trial_ending", sub.current_period_end, (p) =>
-        trialEndingEmail({ fullName: p.full_name, endDate: formatLongDate(end) }),
+        trialEndingEmail({
+          fullName: p.full_name,
+          endDate: formatLongDate(end, p.locale),
+          locale: p.locale,
+        }),
       )
     )
       summary.trialEnding++;
@@ -280,7 +329,7 @@ export async function runBillingCron(now = new Date()): Promise<BillingCronSumma
   for (const sub of ended ?? []) {
     summary.trialEnded++;
     await notify(admin, sub.user_id, "trial_ended", sub.current_period_end, (p) =>
-      trialEndedEmail({ fullName: p.full_name }),
+      trialEndedEmail({ fullName: p.full_name, locale: p.locale }),
     );
   }
 
@@ -310,11 +359,17 @@ export async function runBillingCron(now = new Date()): Promise<BillingCronSumma
     .lte("current_period_end", new Date(now.getTime() + 5 * DAY).toISOString())
     .limit(LIMIT);
   if (renewing?.length) {
-    const { data: prices } = await admin.from("plans_config").select("plan, currency, monthly_price, yearly_price");
+    const { data: prices } = await admin
+      .from("plans_config")
+      .select("plan, currency, monthly_price, yearly_price");
     for (const sub of renewing) {
       const end = new Date(sub.current_period_end);
       const bucket = reminderBucket(end, now);
-      const plan = isPaidPlan(sub.scheduled_plan) ? sub.scheduled_plan : isPaidPlan(sub.plan) ? sub.plan : null;
+      const plan = isPaidPlan(sub.scheduled_plan)
+        ? sub.scheduled_plan
+        : isPaidPlan(sub.plan)
+          ? sub.plan
+          : null;
       if (bucket === null || !plan) continue;
       const currency = (sub.currency ?? "XAF") as Currency;
       const cycle = (sub.billing_cycle ?? "monthly") as BillingCycle;
@@ -324,10 +379,11 @@ export async function runBillingCron(now = new Date()): Promise<BillingCronSumma
         await notify(admin, sub.user_id, `renewal_${bucket}`, sub.current_period_end, (p) =>
           renewalReminderEmail({
             fullName: p.full_name,
-            planLabel: PLAN_LABELS[plan],
-            endDate: formatLongDate(end),
+            planLabel: planName(plan, p.locale),
+            endDate: formatLongDate(end, p.locale),
             daysLeft: bucket,
-            price: formatMoney(price, currency),
+            price: formatMoney(price, currency, p.locale),
+            locale: p.locale,
           }),
         )
       )
@@ -348,7 +404,11 @@ export async function runBillingCron(now = new Date()): Promise<BillingCronSumma
     summary.grace++;
     const graceEnd = new Date(new Date(sub.current_period_end).getTime() + GRACE_PERIOD_DAYS * DAY);
     await notify(admin, sub.user_id, "grace", sub.current_period_end, (p) =>
-      graceStartedEmail({ fullName: p.full_name, graceEnd: formatLongDate(graceEnd) }),
+      graceStartedEmail({
+        fullName: p.full_name,
+        graceEnd: formatLongDate(graceEnd, p.locale),
+        locale: p.locale,
+      }),
     );
   }
 
@@ -377,7 +437,7 @@ export async function runBillingCron(now = new Date()): Promise<BillingCronSumma
   for (const sub of expiredRows) {
     summary.expired++;
     await notify(admin, sub.user_id, "expired", sub.current_period_end, (p) =>
-      subscriptionExpiredEmail({ fullName: p.full_name }),
+      subscriptionExpiredEmail({ fullName: p.full_name, locale: p.locale }),
     );
   }
 

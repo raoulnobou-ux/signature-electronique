@@ -52,6 +52,7 @@ function NavLink({
 }
 
 export function AppSidebar({ account }: { account: ShellAccount }) {
+  const tc = useTranslations("common");
   const pathname = usePathname();
   const t = useTranslations("app.nav");
   // Le badge « Pro » n'est utile que si l'utilisateur n'a pas (ou plus) accès au Pro.
@@ -60,7 +61,7 @@ export function AppSidebar({ account }: { account: ShellAccount }) {
   return (
     <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col border-r border-border bg-background-elevated/40 lg:flex">
       <div className="flex h-16 items-center px-5">
-        <Link href="/app" aria-label="QuickSign — tableau de bord">
+        <Link href="/app" aria-label={tc("dashboardLink")}>
           <Logo />
         </Link>
       </div>

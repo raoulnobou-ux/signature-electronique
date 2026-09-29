@@ -1,11 +1,12 @@
 "use client";
 
-import { CreditCard, LogOut, Moon, Settings, Sun } from "lucide-react";
+import { CreditCard, Download, LogOut, Moon, Settings, Sun } from "lucide-react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import { useTransition } from "react";
 import { signOut } from "@/app/(auth)/actions";
+import { useInstallPrompt } from "@/components/pwa/pwa";
 import { Avatar } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -22,6 +23,7 @@ export function UserMenu({ account }: { account: ShellAccount }) {
   const tCommon = useTranslations("common");
   const { resolvedTheme, setTheme } = useTheme();
   const [pending, startTransition] = useTransition();
+  const install = useInstallPrompt();
 
   return (
     <DropdownMenu>
@@ -50,6 +52,11 @@ export function UserMenu({ account }: { account: ShellAccount }) {
         <DropdownMenuItem onSelect={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}>
           {resolvedTheme === "dark" ? <Sun /> : <Moon />} {tCommon("toggleTheme")}
         </DropdownMenuItem>
+        {install && (
+          <DropdownMenuItem onSelect={() => void install()}>
+            <Download /> {tCommon("installApp")}
+          </DropdownMenuItem>
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem
           destructive

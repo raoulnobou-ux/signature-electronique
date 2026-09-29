@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import { PageHeader } from "@/components/app/page-header";
 import { SubscriptionOverview } from "@/components/billing/subscription-overview";
 import { requireAccount } from "@/lib/auth/account";
+import { createClient } from "@/lib/supabase/server";
 import type { AccountType } from "@/lib/validation/auth";
 import { SettingsView, type SettingsProfile } from "./settings-view";
 
@@ -14,7 +15,13 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function SettingsPage() {
-  const [account, t] = await Promise.all([requireAccount(), getTranslations("app.settings")]);
+  const [account, t, supabase] = await Promise.all([
+    requireAccount(),
+    getTranslations("app.settings"),
+    createClient(),
+  ]);
+  const { data: factors } = await supabase.auth.mfa.listFactors();
+  const twoFactorEnabled = Boolean(factors?.totp.some((f) => f.status === "verified"));
   const p = account.profile;
   const phone = p.phone ? parsePhoneNumberFromString(p.phone) : undefined;
 
@@ -38,7 +45,11 @@ export default async function SettingsPage() {
     <div className="mx-auto max-w-5xl">
       <PageHeader title={t("title")} />
       <Suspense>
-        <SettingsView profile={profile} billing={<SubscriptionOverview account={account} />} />
+        <SettingsView
+          profile={profile}
+          billing={<SubscriptionOverview account={account} />}
+          twoFactorEnabled={twoFactorEnabled}
+        />
       </Suspense>
     </div>
   );

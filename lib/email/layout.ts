@@ -1,3 +1,4 @@
+import type { Locale } from "@/i18n/config";
 import { siteConfig } from "@/lib/site";
 
 export type EmailContent = {
@@ -24,7 +25,11 @@ export function escapeHtml(value: string): string {
  * Gabarit d'e-mail de marque : HTML en tableaux et styles en ligne (compatibilité
  * Gmail / Outlook / clients mobiles), plus une version texte brut.
  */
-export function renderEmail(content: EmailContent): { html: string; text: string } {
+export function renderEmail(
+  content: EmailContent,
+  locale: Locale = "fr",
+): { html: string; text: string } {
+  const en = locale === "en";
   const paragraphs = content.paragraphs
     .map(
       (p) =>
@@ -38,11 +43,11 @@ export function renderEmail(content: EmailContent): { html: string; text: string
           <a href="${escapeHtml(content.cta.url)}" style="display:inline-block;padding:14px 26px;font-size:15px;font-weight:600;color:#ffffff;text-decoration:none;border-radius:12px;">${escapeHtml(content.cta.label)}</a>
         </td></tr>
       </table>
-      <p style="margin:12px 0 0;font-size:12px;line-height:1.5;color:#94a3b8;">Si le bouton ne fonctionne pas, copiez ce lien : <br><a href="${escapeHtml(content.cta.url)}" style="color:#6366F1;word-break:break-all;">${escapeHtml(content.cta.url)}</a></p>`
+      <p style="margin:12px 0 0;font-size:12px;line-height:1.5;color:#94a3b8;">${en ? "If the button doesn't work, copy this link:" : "Si le bouton ne fonctionne pas, copiez ce lien :"} <br><a href="${escapeHtml(content.cta.url)}" style="color:#6366F1;word-break:break-all;">${escapeHtml(content.cta.url)}</a></p>`
     : "";
 
   const html = `<!doctype html>
-<html lang="fr">
+<html lang="${locale}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -68,7 +73,7 @@ export function renderEmail(content: EmailContent): { html: string; text: string
       </td></tr>
       <tr><td style="padding:20px 32px;border-top:1px solid #eef0f6;font-size:12px;line-height:1.6;color:#94a3b8;">
         ${content.footnote ? `${escapeHtml(content.footnote)}<br>` : ""}
-        QuickSign — ${escapeHtml(siteConfig.tagline)}<br>
+        QuickSign — ${escapeHtml(en ? "Sign, get it signed, done. In 30 seconds." : siteConfig.tagline)}<br>
         <a href="${siteConfig.url}" style="color:#94a3b8;">${siteConfig.url.replace(/^https?:\/\//, "")}</a>
       </td></tr>
     </table>
@@ -81,7 +86,7 @@ export function renderEmail(content: EmailContent): { html: string; text: string
     content.title,
     "",
     ...content.paragraphs.flatMap((p) => [p, ""]),
-    content.cta ? `${content.cta.label} : ${content.cta.url}` : "",
+    content.cta ? `${content.cta.label}${en ? ":" : " :"} ${content.cta.url}` : "",
     "",
     content.footnote ?? "",
     `QuickSign — ${siteConfig.url}`,

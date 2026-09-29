@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { X } from "lucide-react";
 import { Dialog as DialogPrimitive } from "radix-ui";
 import type { ComponentProps } from "react";
@@ -36,6 +37,7 @@ function DialogContent({
   hideClose,
   ...props
 }: DialogContentProps) {
+  const tc = useTranslations("common");
   return (
     <DialogPrimitive.Portal>
       <DialogOverlay />
@@ -55,7 +57,7 @@ function DialogContent({
         {!hideClose && (
           <DialogPrimitive.Close
             className="absolute top-4 right-4 inline-flex size-9 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-            aria-label="Fermer"
+            aria-label={tc("close")}
           >
             <X className="size-4" />
           </DialogPrimitive.Close>

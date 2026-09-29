@@ -1,6 +1,6 @@
 import { CalendarClock, Sparkles } from "lucide-react";
 import Link from "next/link";
-import { getFormatter, getTranslations } from "next-intl/server";
+import { getFormatter, getLocale, getTranslations } from "next-intl/server";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -18,7 +18,11 @@ export async function SubscriptionOverview({
   account: Account;
   compact?: boolean;
 }) {
-  const [t, format] = await Promise.all([getTranslations("app.billing"), getFormatter()]);
+  const [t, format, locale] = await Promise.all([
+    getTranslations("app.billing"),
+    getFormatter(),
+    getLocale(),
+  ]);
   const ent = account.entitlements;
   const planLabel = ent.state === "trial" ? t("plans.trial") : t(`plans.${ent.subscriptionPlan}`);
   const stateVariant = {
@@ -61,13 +65,18 @@ export async function SubscriptionOverview({
             </div>
             <Button asChild variant={ent.state === "active" ? "secondary" : "default"}>
               <Link href="/app/abonnement#plans">
-                <Sparkles /> {ent.state === "active" && ent.subscriptionPlan !== "trial" ? t("renew") : t("choose")}
+                <Sparkles />{" "}
+                {ent.state === "active" && ent.subscriptionPlan !== "trial"
+                  ? t("renew")
+                  : t("choose")}
               </Link>
             </Button>
           </div>
 
           {account.sponsor && (
-            <p className="rounded-xl bg-accent px-3 py-2 text-sm text-accent-foreground">{t("sponsored", { team: account.sponsor.teamName })}</p>
+            <p className="rounded-xl bg-accent px-3 py-2 text-sm text-accent-foreground">
+              {t("sponsored", { team: account.sponsor.teamName })}
+            </p>
           )}
           {ent.state === "trial" && ent.trialDaysRemaining !== null ? (
             <div className="space-y-2">
@@ -123,8 +132,8 @@ export async function SubscriptionOverview({
                 <span>{t("storage")}</span>
                 <span className="text-muted-foreground tabular-nums">
                   {t("of", {
-                    used: formatBytes(account.usage.storageBytesUsed),
-                    total: formatBytes(ent.limits.storageBytes),
+                    used: formatBytes(account.usage.storageBytesUsed, locale),
+                    total: formatBytes(ent.limits.storageBytes, locale),
                   })}
                 </span>
               </div>

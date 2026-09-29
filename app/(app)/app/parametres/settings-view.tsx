@@ -13,12 +13,16 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { changeLocale } from "@/app/actions/locale";
+import { LOCALE_NAMES } from "@/components/locale-switcher";
+import { locales } from "@/i18n/config";
 import { useTheme } from "next-themes";
 import { useRef, useState, useTransition, type ReactNode } from "react";
 import { toast } from "sonner";
 import { FormField } from "@/components/auth/form-field";
 import { PhoneInput } from "@/components/auth/phone-input";
+import { TwoFactorCard } from "@/components/settings/two-factor-card";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -79,9 +83,11 @@ type Tab = (typeof TABS)[number];
 export function SettingsView({
   profile,
   billing,
+  twoFactorEnabled,
 }: {
   profile: SettingsProfile;
   billing: ReactNode;
+  twoFactorEnabled: boolean;
 }) {
   const t = useTranslations("app.settings");
   const router = useRouter();
@@ -127,7 +133,7 @@ export function SettingsView({
           {billing}
         </TabsContent>
         <TabsContent value="securite" className="mt-0">
-          <SecurityTab />
+          <SecurityTab twoFactorEnabled={twoFactorEnabled} />
         </TabsContent>
         <TabsContent value="preferences" className="mt-0">
           <PreferencesTab profile={profile} />
@@ -167,6 +173,8 @@ function ProfileTab({ profile }: { profile: SettingsProfile }) {
   const [country, setCountry] = useState<CountryCode>(profile.phoneCountry ?? DEFAULT_COUNTRY);
   const [phone, setPhone] = useState(profile.phoneNational);
   const [timezone, setTimezone] = useState(profile.timezone);
+  const locale = useLocale();
+  const [switching, switchLocale] = useTransition();
   const timezones =
     typeof Intl.supportedValuesOf === "function"
       ? Intl.supportedValuesOf("timeZone")
@@ -273,10 +281,21 @@ function ProfileTab({ profile }: { profile: SettingsProfile }) {
             <FormField id="language" label={t("profile.language")} hint={t("profile.languageSoon")}>
               <select
                 id="language"
-                disabled
-                className="h-11 w-full rounded-xl border border-input bg-background-elevated/60 px-3 text-base opacity-60 sm:text-sm"
+                value={locale}
+                disabled={switching}
+                onChange={(e) =>
+                  switchLocale(async () => {
+                    await changeLocale(e.target.value);
+                    router.refresh();
+                  })
+                }
+                className="h-11 w-full rounded-xl border border-input bg-background-elevated/60 px-3 text-base sm:text-sm"
               >
-                <option>Français</option>
+                {locales.map((l) => (
+                  <option key={l} value={l} lang={l}>
+                    {LOCALE_NAMES[l]}
+                  </option>
+                ))}
               </select>
             </FormField>
           </div>
@@ -384,7 +403,7 @@ function OrganizationTab({ profile }: { profile: SettingsProfile }) {
   );
 }
 
-function SecurityTab() {
+function SecurityTab({ twoFactorEnabled }: { twoFactorEnabled: boolean }) {
   const t = useTranslations("app.settings.security");
   const tAuth = useTranslations("auth");
   const [pending, startTransition] = useTransition();
@@ -431,13 +450,7 @@ function SecurityTab() {
           </Button>
         </CardContent>
       </Card>
-      <Card className="opacity-70">
-        <CardHeader>
-          <CardTitle>{t("twoFactorTitle")}</CardTitle>
-          <CardDescription>{t("twoFactorBody")}</CardDescription>
-        </CardHeader>
-        <CardContent />
-      </Card>
+      <TwoFactorCard enabled={twoFactorEnabled} />
     </div>
   );
 }

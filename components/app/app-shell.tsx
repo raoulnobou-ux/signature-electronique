@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
@@ -37,13 +38,14 @@ export function AppShell({ account, children }: { account: ShellAccount; childre
 }
 
 function ShellFrame({ account, children }: { account: ShellAccount; children: ReactNode }) {
+  const tc = useTranslations("common");
   return (
     <div className="flex min-h-dvh">
       <AppSidebar account={account} />
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-30 border-b border-border bg-background/90 md:bg-background/70 md:backdrop-blur-xl">
           <div className="flex h-14 items-center justify-between gap-3 px-4 sm:px-6 lg:h-16">
-            <Link href="/app" className="lg:hidden" aria-label="QuickSign — tableau de bord">
+            <Link href="/app" className="lg:hidden" aria-label={tc("dashboardLink")}>
               <LogoMark className="size-8" />
             </Link>
             <CommandPalette />

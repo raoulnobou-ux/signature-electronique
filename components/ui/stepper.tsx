@@ -1,4 +1,5 @@
 import { Check } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 
 type StepperProps = {
@@ -10,8 +11,9 @@ type StepperProps = {
 
 /** Indicateur d'étapes : barre de progression + libellés (inscription, onboarding). */
 function Stepper({ steps, current, className }: StepperProps) {
+  const tc = useTranslations("common");
   return (
-    <ol className={cn("flex w-full items-center gap-2", className)} aria-label="Progression">
+    <ol className={cn("flex w-full items-center gap-2", className)} aria-label={tc("progress")}>
       {steps.map((label, index) => {
         const done = index < current;
         const active = index === current;

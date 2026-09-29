@@ -18,7 +18,8 @@ const MAX_BULK = 20;
 /** Signature en lot (Pro) : jusqu'à 20 documents sélectionnés dans la liste. */
 export default async function BulkSignPage(props: PageProps<"/app/documents/lot">) {
   const [account, params] = await Promise.all([requireAccount(), props.searchParams]);
-  if (account.entitlements.readOnly || !account.entitlements.features.bulk_sign) redirect("/app/documents");
+  if (account.entitlements.readOnly || !account.entitlements.features.bulk_sign)
+    redirect("/app/documents");
   const ids = (typeof params.ids === "string" ? params.ids.split(",") : [])
     .filter((id) => /^[0-9a-f-]{36}$/i.test(id))
     .slice(0, MAX_BULK);
@@ -32,7 +33,11 @@ export default async function BulkSignPage(props: PageProps<"/app/documents/lot"
   // Ordre de la sélection ; documents en cours de demande ou à la corbeille écartés.
   const usable = ids
     .map((id) => docs?.find((d) => d.id === id))
-    .filter((d): d is NonNullable<typeof d> => Boolean(d && d.owner_id === account.userId && d.pdf_path && !d.trashed_at && d.status !== "pending"));
+    .filter((d): d is NonNullable<typeof d> =>
+      Boolean(
+        d && d.owner_id === account.userId && d.pdf_path && !d.trashed_at && d.status !== "pending",
+      ),
+    );
   if (usable.length === 0) redirect("/app/documents");
 
   const [{ data: signed }, assets] = await Promise.all([
@@ -49,7 +54,12 @@ export default async function BulkSignPage(props: PageProps<"/app/documents/lot"
       stampsAllowed={account.entitlements.features.stamps}
       defaults={{
         name: account.profile.full_name,
-        dateLabel: formatSignatureDate(new Date(), account.profile.timezone, account.profile.city),
+        dateLabel: formatSignatureDate(
+          new Date(),
+          account.profile.timezone,
+          account.profile.city,
+          account.profile.locale,
+        ),
       }}
     />
   );

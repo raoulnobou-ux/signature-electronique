@@ -9,7 +9,9 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { listSignatureAssets } from "../../../signatures/actions";
 
-export async function generateMetadata(props: PageProps<"/app/documents/[id]/signer">): Promise<Metadata> {
+export async function generateMetadata(
+  props: PageProps<"/app/documents/[id]/signer">,
+): Promise<Metadata> {
   const { id } = await props.params;
   const [supabase, t] = await Promise.all([createClient(), getTranslations("editor")]);
   const { data } = await supabase.from("documents").select("title").eq("id", id).maybeSingle();
@@ -34,7 +36,12 @@ export default async function SignerPage(props: PageProps<"/app/documents/[id]/s
 
   const [{ data: signed }, { data: draft }, assets] = await Promise.all([
     createAdminClient().storage.from("documents").createSignedUrl(doc.pdf_path, 3600),
-    supabase.from("placed_fields").select("*").eq("document_id", id).is("request_signer_id", null).order("created_at"),
+    supabase
+      .from("placed_fields")
+      .select("*")
+      .eq("document_id", id)
+      .is("request_signer_id", null)
+      .order("created_at"),
     listSignatureAssets(),
   ]);
   if (!signed) notFound();
@@ -57,12 +64,19 @@ export default async function SignerPage(props: PageProps<"/app/documents/[id]/s
     <Editor
       document={{ id: doc.id, title: doc.title, pageCount: doc.page_count ?? 1 }}
       pdfUrl={signed.signedUrl}
-      initialFields={initialFields.filter((f) => !f.assetId || assets.some((a) => a.id === f.assetId))}
+      initialFields={initialFields.filter(
+        (f) => !f.assetId || assets.some((a) => a.id === f.assetId),
+      )}
       assets={assets}
       stampsAllowed={account.entitlements.features.stamps}
       defaults={{
         name: account.profile.full_name,
-        dateLabel: formatSignatureDate(new Date(), account.profile.timezone, account.profile.city),
+        dateLabel: formatSignatureDate(
+          new Date(),
+          account.profile.timezone,
+          account.profile.city,
+          account.profile.locale,
+        ),
       }}
     />
   );

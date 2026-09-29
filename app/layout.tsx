@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
+import { headers } from "next/headers";
 import { getLocale } from "next-intl/server";
 import { AppProviders } from "@/components/providers/app-providers";
 import { ClientMessages } from "@/components/providers/client-messages";
@@ -20,23 +21,35 @@ const spaceGrotesk = localFont({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  metadataBase: new URL(siteConfig.url),
-  title: {
-    default: "QuickSign — Signez, faites signer, terminé.",
-    template: "%s · QuickSign",
-  },
-  description: siteConfig.description,
-  applicationName: "QuickSign",
-  openGraph: {
-    type: "website",
-    siteName: "QuickSign",
-    locale: "fr_CM",
-    title: "QuickSign — Signez, faites signer, terminé. En 30 secondes.",
-    description: siteConfig.description,
-  },
-  twitter: { card: "summary_large_image" },
-};
+const EN_DESCRIPTION =
+  "Sign your Word and PDF documents in seconds, with your signature and your organization's stamp. Built for Cameroon and French-speaking Africa.";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const en = (await getLocale()) === "en";
+  const description = en ? EN_DESCRIPTION : siteConfig.description;
+  return {
+    metadataBase: new URL(siteConfig.url),
+    title: {
+      default: en
+        ? "QuickSign — Sign, get it signed, done."
+        : "QuickSign — Signez, faites signer, terminé.",
+      template: "%s · QuickSign",
+    },
+    description,
+    applicationName: "QuickSign",
+    openGraph: {
+      type: "website",
+      siteName: "QuickSign",
+      locale: en ? "en_CM" : "fr_CM",
+      alternateLocale: en ? "fr_CM" : "en_CM",
+      title: en
+        ? "QuickSign — Sign, get it signed, done. In 30 seconds."
+        : "QuickSign — Signez, faites signer, terminé. En 30 secondes.",
+      description,
+    },
+    twitter: { card: "summary_large_image" },
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: [
@@ -49,7 +62,10 @@ export const viewport: Viewport = {
 };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
-  const locale = await getLocale();
+  const [locale, nonce] = await Promise.all([
+    getLocale(),
+    headers().then((h) => h.get("x-nonce") ?? undefined),
+  ]);
   return (
     <html
       lang={locale}
@@ -58,7 +74,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-dvh">
         <ClientMessages>
-          <AppProviders>{children}</AppProviders>
+          <AppProviders nonce={nonce}>{children}</AppProviders>
         </ClientMessages>
       </body>
     </html>

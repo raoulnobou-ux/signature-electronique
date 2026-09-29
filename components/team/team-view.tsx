@@ -1,6 +1,16 @@
 "use client";
 
-import { Crown, LogOut, Mail, MoreHorizontal, Shield, Trash2, UserPlus, Users, X } from "lucide-react";
+import {
+  Crown,
+  LogOut,
+  Mail,
+  MoreHorizontal,
+  Shield,
+  Trash2,
+  UserPlus,
+  Users,
+  X,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useFormatter, useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
@@ -26,7 +36,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
@@ -38,9 +53,22 @@ type TeamData = {
   role: Role;
   seatLimit: number;
   currentUserId: string;
-  members: { userId: string; role: Role; name: string; email: string; avatarUrl: string | null; joinedAt: string }[];
+  members: {
+    userId: string;
+    role: Role;
+    name: string;
+    email: string;
+    avatarUrl: string | null;
+    joinedAt: string;
+  }[];
   invitations: { id: string; email: string; role: "admin" | "member"; expiresAt: string }[];
-  activity: { id: number; at: string; type: string; actor: string | null; document: string | null }[];
+  activity: {
+    id: number;
+    at: string;
+    type: string;
+    actor: string | null;
+    document: string | null;
+  }[];
 };
 
 const ACTIVITY = [
@@ -55,7 +83,9 @@ const ACTIVITY = [
   "team.member_removed",
   "asset.shared",
 ] as const;
-type ActivityKey = { [K in (typeof ACTIVITY)[number]]: K extends `${infer A}.${infer B}` ? `${A}_${B}` : never }[(typeof ACTIVITY)[number]];
+type ActivityKey = {
+  [K in (typeof ACTIVITY)[number]]: K extends `${infer A}.${infer B}` ? `${A}_${B}` : never;
+}[(typeof ACTIVITY)[number]];
 
 export function TeamView({ team }: { team: TeamData | null }) {
   const t = useTranslations("team");
@@ -93,13 +123,24 @@ export function TeamView({ team }: { team: TeamData | null }) {
               start(async () => {
                 const result = await createTeam(name);
                 if (result.ok) done(true, t("created"));
-                else toast.error(t(`errors.${result.error === "already_in_team" ? "already_in_team" : "generic"}`));
+                else
+                  toast.error(
+                    t(
+                      `errors.${result.error === "already_in_team" ? "already_in_team" : "generic"}`,
+                    ),
+                  );
               });
             }}
           >
             <div className="flex-1 space-y-1.5">
               <Label htmlFor="team-name">{t("name")}</Label>
-              <Input id="team-name" value={name} maxLength={80} placeholder={t("namePlaceholder")} onChange={(e) => setName(e.target.value)} />
+              <Input
+                id="team-name"
+                value={name}
+                maxLength={80}
+                placeholder={t("namePlaceholder")}
+                onChange={(e) => setName(e.target.value)}
+              />
             </div>
             <Button type="submit" loading={pending} disabled={name.trim().length < 2}>
               {t("create")}
@@ -123,13 +164,22 @@ export function TeamView({ team }: { team: TeamData | null }) {
           </h2>
           <div className="w-48 space-y-1">
             <Progress value={(used / team.seatLimit) * 100} />
-            <p className="text-right text-xs text-muted-foreground tabular-nums">{t("seats", { used, limit: team.seatLimit })}</p>
+            <p className="text-right text-xs text-muted-foreground tabular-nums">
+              {t("seats", { used, limit: team.seatLimit })}
+            </p>
           </div>
         </div>
-        <ul className="divide-y divide-border rounded-2xl border border-border bg-card" data-testid="team-members">
+        <ul
+          className="divide-y divide-border rounded-2xl border border-border bg-card"
+          data-testid="team-members"
+        >
           {team.members.map((m) => {
             const Icon = roleIcon[m.role];
-            const canManage = manager && m.userId !== team.currentUserId && m.role !== "owner" && (team.role === "owner" || m.role === "member");
+            const canManage =
+              manager &&
+              m.userId !== team.currentUserId &&
+              m.role !== "owner" &&
+              (team.role === "owner" || m.role === "member");
             return (
               <li key={m.userId} className="flex items-center gap-3 px-4 py-3">
                 <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-accent text-sm font-semibold text-accent-foreground">
@@ -137,7 +187,10 @@ export function TeamView({ team }: { team: TeamData | null }) {
                 </span>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold">
-                    {m.name} {m.userId === team.currentUserId && <span className="font-normal text-muted-foreground">({t("you")})</span>}
+                    {m.name}{" "}
+                    {m.userId === team.currentUserId && (
+                      <span className="font-normal text-muted-foreground">({t("you")})</span>
+                    )}
                   </p>
                   <p className="truncate text-xs text-muted-foreground">{m.email}</p>
                 </div>
@@ -147,17 +200,39 @@ export function TeamView({ team }: { team: TeamData | null }) {
                 {canManage && (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon-sm" aria-label={t("memberActions", { name: m.name })}>
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        aria-label={t("memberActions", { name: m.name })}
+                      >
                         <MoreHorizontal />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       {team.role === "owner" && (
-                        <DropdownMenuItem onSelect={() => start(async () => done((await changeRole(m.userId, m.role === "admin" ? "member" : "admin")).ok))}>
+                        <DropdownMenuItem
+                          onSelect={() =>
+                            start(async () =>
+                              done(
+                                (
+                                  await changeRole(
+                                    m.userId,
+                                    m.role === "admin" ? "member" : "admin",
+                                  )
+                                ).ok,
+                              ),
+                            )
+                          }
+                        >
                           <Shield /> {m.role === "admin" ? t("makeMember") : t("makeAdmin")}
                         </DropdownMenuItem>
                       )}
-                      <DropdownMenuItem destructive onSelect={() => start(async () => done((await removeMember(m.userId)).ok, t("removed")))}>
+                      <DropdownMenuItem
+                        destructive
+                        onSelect={() =>
+                          start(async () => done((await removeMember(m.userId)).ok, t("removed")))
+                        }
+                      >
                         <Trash2 /> {t("remove")}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -167,19 +242,30 @@ export function TeamView({ team }: { team: TeamData | null }) {
             );
           })}
           {team.invitations.map((i) => (
-            <li key={i.id} className="flex items-center gap-3 px-4 py-3" data-testid="team-invitation">
+            <li
+              key={i.id}
+              className="flex items-center gap-3 px-4 py-3"
+              data-testid="team-invitation"
+            >
               <span className="flex size-9 shrink-0 items-center justify-center rounded-full border border-dashed border-border text-muted-foreground">
                 <Mail className="size-4" aria-hidden />
               </span>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm">{i.email}</p>
                 <p className="text-xs text-muted-foreground">
-                  {t("invitedUntil", { date: format.dateTime(new Date(i.expiresAt), { dateStyle: "medium" }) })}
+                  {t("invitedUntil", {
+                    date: format.dateTime(new Date(i.expiresAt), { dateStyle: "medium" }),
+                  })}
                 </p>
               </div>
               <Badge variant="warning">{t("pendingInvite")}</Badge>
               {manager && (
-                <Button variant="ghost" size="icon-sm" aria-label={t("revoke", { email: i.email })} onClick={() => start(async () => done((await revokeInvitation(i.id)).ok))}>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  aria-label={t("revoke", { email: i.email })}
+                  onClick={() => start(async () => done((await revokeInvitation(i.id)).ok))}
+                >
                   <X />
                 </Button>
               )}
@@ -197,7 +283,8 @@ export function TeamView({ team }: { team: TeamData | null }) {
                 if (result.ok) {
                   setEmail("");
                   toast.success(result.emailed ? t("invited") : t("invitedLink"));
-                  if (!result.emailed) await navigator.clipboard?.writeText(result.link).catch(() => undefined);
+                  if (!result.emailed)
+                    await navigator.clipboard?.writeText(result.link).catch(() => undefined);
                   router.refresh();
                 } else toast.error(t(`errors.${result.error}`));
               });
@@ -205,7 +292,14 @@ export function TeamView({ team }: { team: TeamData | null }) {
           >
             <div className="space-y-1.5">
               <Label htmlFor="invite-email">{t("inviteEmail")}</Label>
-              <Input id="invite-email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="collegue@entreprise.cm" />
+              <Input
+                id="invite-email"
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder={t("emailPlaceholder")}
+              />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="invite-role">{t("role")}</Label>
@@ -237,11 +331,18 @@ export function TeamView({ team }: { team: TeamData | null }) {
           <ol className="space-y-2 border-l border-border pl-4" data-testid="team-activity">
             {team.activity.map((a) => (
               <li key={a.id} className="relative text-sm">
-                <span className="absolute top-1.5 -left-[21px] size-2 rounded-full bg-brand-violet" aria-hidden />
+                <span
+                  className="absolute top-1.5 -left-[21px] size-2 rounded-full bg-brand-violet"
+                  aria-hidden
+                />
                 <span className="font-medium">{a.actor ?? "—"}</span>{" "}
-                {ACTIVITY.includes(a.type as (typeof ACTIVITY)[number]) ? t(`events.${a.type.replace(".", "_") as ActivityKey}`) : a.type}
+                {ACTIVITY.includes(a.type as (typeof ACTIVITY)[number])
+                  ? t(`events.${a.type.replace(".", "_") as ActivityKey}`)
+                  : a.type}
                 {a.document && <span className="text-muted-foreground"> — {a.document}</span>}
-                <span className="block text-xs text-muted-foreground">{format.dateTime(new Date(a.at), { dateStyle: "medium", timeStyle: "short" })}</span>
+                <span className="block text-xs text-muted-foreground">
+                  {format.dateTime(new Date(a.at), { dateStyle: "medium", timeStyle: "short" })}
+                </span>
               </li>
             ))}
           </ol>
@@ -264,7 +365,9 @@ export function TeamView({ team }: { team: TeamData | null }) {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{confirm === "delete" ? t("deleteTitle") : t("leaveTitle")}</DialogTitle>
-            <DialogDescription>{confirm === "delete" ? t("deleteBody") : t("leaveBody")}</DialogDescription>
+            <DialogDescription>
+              {confirm === "delete" ? t("deleteBody") : t("leaveBody")}
+            </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <DialogClose asChild>

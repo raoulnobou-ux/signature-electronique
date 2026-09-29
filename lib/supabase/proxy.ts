@@ -6,14 +6,25 @@ import { publicEnv } from "@/lib/env";
 const PROTECTED_PREFIXES = ["/app"];
 /** Pages d'authentification : un utilisateur connecté est renvoyé vers l'application. */
 const AUTH_PAGES = ["/connexion", "/inscription", "/mot-de-passe-oublie"];
+/** Saisie du code de double authentification (session aal1 d'un compte protégé). */
+const MFA_PAGE = "/connexion/verification";
 
 /**
  * Rafraîchit la session Supabase à chaque requête (cookies) et applique les redirections
  * d'accès. Suit la recommandation @supabase/ssr : ne rien exécuter entre createServerClient
  * et getClaims().
  */
-export async function updateSession(request: NextRequest) {
-  let response = NextResponse.next({ request });
+export async function updateSession(
+  request: NextRequest,
+  extraHeaders: Record<string, string> = {},
+) {
+  // En-têtes transmis au rendu (nonce CSP) + cookies de session éventuellement rafraîchis.
+  const forward = () => {
+    const headers = new Headers(request.headers);
+    for (const [key, value] of Object.entries(extraHeaders)) headers.set(key, value);
+    return NextResponse.next({ request: { headers } });
+  };
+  let response = forward();
 
   const supabase = createServerClient(
     publicEnv.NEXT_PUBLIC_SUPABASE_URL,
@@ -23,7 +34,7 @@ export async function updateSession(request: NextRequest) {
         getAll: () => request.cookies.getAll(),
         setAll: (cookiesToSet) => {
           for (const { name, value } of cookiesToSet) request.cookies.set(name, value);
-          response = NextResponse.next({ request });
+          response = forward();
           for (const { name, value, options } of cookiesToSet) {
             response.cookies.set(name, value, options);
           }
@@ -40,6 +51,14 @@ export async function updateSession(request: NextRequest) {
     const url = request.nextUrl.clone();
     url.pathname = "/connexion";
     url.search = `?next=${encodeURIComponent(pathname + search)}`;
+    return redirectWithCookies(url, response);
+  }
+
+  // Page du code de double authentification : réservée à une session ouverte.
+  if (!isSignedIn && pathname === MFA_PAGE) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/connexion";
+    url.search = "";
     return redirectWithCookies(url, response);
   }
 

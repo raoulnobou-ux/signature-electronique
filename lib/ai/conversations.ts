@@ -141,7 +141,12 @@ export async function saveTurn(
 }
 
 /** Contexte ajouté au message (prénom, plan, écran, quota) — jamais d'autre donnée personnelle. */
-export function contextBlock(account: Account, path: string, remaining: number | null): string {
+export function contextBlock(
+  account: Account,
+  path: string,
+  remaining: number | null,
+  locale = "fr",
+): string {
   const ent = account.entitlements;
   const plan =
     ent.state === "trial"
@@ -154,7 +159,7 @@ export function contextBlock(account: Account, path: string, remaining: number |
           ? "Essentiel"
           : "expiré (lecture seule)";
   const first = account.profile.full_name.split(/\s+/)[0] || "";
-  return `<contexte>Prénom : ${first || "inconnu"} · Plan : ${plan} · Écran : ${path.slice(0, 120)} · Messages à l'assistant restants aujourd'hui : ${remaining === null ? "illimité" : remaining}</contexte>`;
+  return `<contexte>Prénom : ${first || "inconnu"} · Plan : ${plan} · Écran : ${path.slice(0, 120)} · Messages à l'assistant restants aujourd'hui : ${remaining === null ? "illimité" : remaining} · Langue de l'interface : ${locale === "en" ? "anglais (réponds en anglais)" : "français"}</contexte>`;
 }
 
 /** Messages lisibles (historique affiché) : texte tapé, réponses, actions proposées. */

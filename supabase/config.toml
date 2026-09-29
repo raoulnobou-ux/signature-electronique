@@ -235,11 +235,11 @@ otp_expiry = 3600
 
 # Modèles d'e-mails d'authentification (à reproduire dans le tableau de bord Supabase en production)
 [auth.email.template.confirmation]
-subject = "Confirmez votre adresse e-mail"
+subject = "Confirmez votre adresse e-mail · Confirm your email"
 content_path = "./supabase/templates/confirmation.html"
 
 [auth.email.template.recovery]
-subject = "Réinitialisation de votre mot de passe"
+subject = "Réinitialisation de votre mot de passe · Password reset"
 content_path = "./supabase/templates/recovery.html"
 
 [auth.email.template.email_change]
@@ -321,8 +321,8 @@ max_enrolled_factors = 10
 
 # Control MFA via App Authenticator (TOTP)
 [auth.mfa.totp]
-enroll_enabled = false
-verify_enabled = false
+enroll_enabled = true
+verify_enabled = true
 
 # Configure MFA via Phone Messaging
 [auth.mfa.phone]

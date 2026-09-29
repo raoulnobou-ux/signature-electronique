@@ -61,7 +61,14 @@ export type FinalizeError =
   | "server";
 
 export type FinalizeResult =
-  | { ok: true; version: number; sha256: string; downloadUrl: string; fileName: string; signedAt: string }
+  | {
+      ok: true;
+      version: number;
+      sha256: string;
+      downloadUrl: string;
+      fileName: string;
+      signedAt: string;
+    }
   | { ok: false; error: FinalizeError };
 
 /**
@@ -74,7 +81,8 @@ export async function finalizeSignature(
   options: { timestampFooter: boolean },
 ): Promise<FinalizeResult> {
   const parsed = fieldsSchema.safeParse(input);
-  if (!uuid.safeParse(documentId).success || !parsed.success) return { ok: false, error: "invalid" };
+  if (!uuid.safeParse(documentId).success || !parsed.success)
+    return { ok: false, error: "invalid" };
   const fields = parsed.data;
   if (fields.length === 0) return { ok: false, error: "no_fields" };
 
@@ -92,7 +100,8 @@ export async function finalizeSignature(
     .select("id, owner_id, title, pdf_path, page_count, current_version, status, trashed_at")
     .eq("id", documentId)
     .maybeSingle();
-  if (!doc || doc.owner_id !== account.userId || !doc.pdf_path || doc.trashed_at) return { ok: false, error: "not_found" };
+  if (!doc || doc.owner_id !== account.userId || !doc.pdf_path || doc.trashed_at)
+    return { ok: false, error: "not_found" };
   if (doc.status === "pending") return { ok: false, error: "request_pending" };
   if (fields.some((f) => f.page >= (doc.page_count ?? 0))) return { ok: false, error: "invalid" };
 
@@ -101,7 +110,10 @@ export async function finalizeSignature(
   const admin = createAdminClient();
   const images = new Map<string, Uint8Array>();
   if (assetIds.length) {
-    const { data: assets } = await supabase.from("signature_assets").select("id, type, image_path").in("id", assetIds);
+    const { data: assets } = await supabase
+      .from("signature_assets")
+      .select("id, type, image_path")
+      .in("id", assetIds);
     if ((assets?.length ?? 0) !== assetIds.length) return { ok: false, error: "asset_not_found" };
     for (const asset of assets!) {
       const { data: blob } = await admin.storage.from("signatures").download(asset.image_path);
@@ -117,7 +129,12 @@ export async function finalizeSignature(
 
   const signedAt = new Date();
   const timezone = account.profile.timezone;
-  const when = new Intl.DateTimeFormat("fr-FR", { dateStyle: "long", timeStyle: "short", timeZone: timezone }).format(signedAt);
+  const en = account.profile.locale === "en";
+  const when = new Intl.DateTimeFormat(en ? "en-GB" : "fr-FR", {
+    dateStyle: "long",
+    timeStyle: "short",
+    timeZone: timezone,
+  }).format(signedAt);
   const reference = documentId.slice(0, 8).toUpperCase();
   const signer = account.profile.full_name || account.email;
 
@@ -125,7 +142,11 @@ export async function finalizeSignature(
   try {
     signedBytes = await stampPdf(sourceBytes, fields as Field[], {
       images,
-      footer: options.timestampFooter ? `Signé électroniquement par ${signer} avec QuickSign — ${when} (${timezone}) — Réf. ${reference}` : null,
+      footer: options.timestampFooter
+        ? en
+          ? `Electronically signed by ${signer} with QuickSign — ${when} (${timezone}) — Ref. ${reference}`
+          : `Signé électroniquement par ${signer} avec QuickSign — ${when} (${timezone}) — Réf. ${reference}`
+        : null,
       metadata: { author: signer, title: doc.title, signedAt },
     });
   } catch (error) {
@@ -173,8 +194,16 @@ export async function finalizeSignature(
     created_by: account.userId,
     note: "Signé",
   });
-  await admin.from("placed_fields").delete().eq("document_id", documentId).is("request_signer_id", null);
-  await admin.rpc("increment_usage", { p_user_id: account.userId, p_kind: "documents_signed", p_amount: 1 });
+  await admin
+    .from("placed_fields")
+    .delete()
+    .eq("document_id", documentId)
+    .is("request_signer_id", null);
+  await admin.rpc("increment_usage", {
+    p_user_id: account.userId,
+    p_kind: "documents_signed",
+    p_amount: 1,
+  });
   await recordAudit({
     documentId,
     actorType: "user",
@@ -194,16 +223,29 @@ export async function finalizeSignature(
   });
 
   const fileName = `${doc.title.replace(/[\\/:*?"<>|]/g, "").slice(0, 150)} (signé).pdf`;
-  const { data: signed } = await admin.storage.from("documents").createSignedUrl(path, 3600, { download: fileName });
+  const { data: signed } = await admin.storage
+    .from("documents")
+    .createSignedUrl(path, 3600, { download: fileName });
 
   revalidatePath(`/app/documents/${documentId}`);
   revalidatePath("/app/documents");
   revalidatePath("/app");
-  return { ok: true, version, sha256, downloadUrl: signed?.signedUrl ?? "", fileName, signedAt: signedAt.toISOString() };
+  return {
+    ok: true,
+    version,
+    sha256,
+    downloadUrl: signed?.signedUrl ?? "",
+    fileName,
+    signedAt: signedAt.toISOString(),
+  };
 }
 
 async function currentSize(documentId: string): Promise<number> {
-  const { data } = await createAdminClient().from("documents").select("size_bytes").eq("id", documentId).single();
+  const { data } = await createAdminClient()
+    .from("documents")
+    .select("size_bytes")
+    .eq("id", documentId)
+    .single();
   return data?.size_bytes ?? 0;
 }
 
@@ -211,5 +253,6 @@ async function currentSize(documentId: string): Promise<number> {
 export async function todayLabel(): Promise<string> {
   const access = await guard("sign");
   if (!access.ok) return formatSignatureDate(new Date(), "Africa/Douala");
-  return formatSignatureDate(new Date(), access.account.profile.timezone, access.account.profile.city);
+  const { profile } = access.account;
+  return formatSignatureDate(new Date(), profile.timezone, profile.city, profile.locale);
 }

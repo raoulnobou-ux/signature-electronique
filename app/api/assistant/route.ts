@@ -1,4 +1,5 @@
 import type Anthropic from "@anthropic-ai/sdk";
+import { getLocale } from "next-intl/server";
 import { z } from "zod";
 import { getCurrentAccount } from "@/lib/auth/account";
 import { runTurn, type TurnResult } from "@/lib/ai/agent";
@@ -13,7 +14,9 @@ import {
 } from "@/lib/ai/conversations";
 import {
   QUICK_ACTIONS,
+  quickActionText,
   SUGGESTIONS,
+  suggestionText,
   type AssistantAction,
   type AssistantEvent,
   type QuickActionId,
@@ -94,10 +97,11 @@ export async function POST(request: Request) {
   const ent = account.entitlements;
   if (!account.emailConfirmed || ent.readOnly) return fail("read_only");
 
+  const locale = await getLocale();
   const userText = input.quickAction
-    ? QUICK_ACTIONS[input.quickAction]
+    ? quickActionText(input.quickAction, locale)
     : input.suggestion
-      ? SUGGESTIONS[input.suggestion]
+      ? suggestionText(input.suggestion, locale)
       : input.message;
   if (!userText) return fail("invalid", 400);
   const pro = ent.features.ai_advanced;
@@ -156,7 +160,7 @@ export async function POST(request: Request) {
   }
 
   const remaining = access.ok ? ent.remaining.aiMessagesToday : 0;
-  const text = `${contextBlock(account, input.path, remaining === null ? null : remaining - 1)}\n\n${userText}`;
+  const text = `${contextBlock(account, input.path, remaining === null ? null : remaining - 1, locale)}\n\n${userText}`;
   const storedUser: (DocumentRef | Anthropic.Beta.BetaContentBlockParam)[] = [
     ...(ref ? [ref] : []),
     { type: "text", text },
@@ -177,7 +181,7 @@ export async function POST(request: Request) {
       .eq("conversation_id", conversationId!);
     const faqKey =
       input.suggestion && !ref && !previous
-        ? `${backend.kind}:${input.suggestion}:${pro ? "pro" : "essential"}`
+        ? `${backend.kind}:${locale}:${input.suggestion}:${pro ? "pro" : "essential"}`
         : null;
     if (faqKey) {
       const { data: cached } = await admin

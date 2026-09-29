@@ -64,7 +64,7 @@ app/                  routes Next.js (pages publiques, authentification, applica
 components/ui/        design system (boutons, cartes, modales, tiroir, onglets, palette…)
 components/brand/     logo, fond d'ambiance
 lib/                  logique métier : supabase, entitlements, pdf, paiements, ia
-messages/             traductions (fr.json ; en.json en Phase 9)
+messages/             traductions (fr.json, en.json)
 supabase/migrations/  schéma SQL versionné (tables, RLS, stockage, triggers)
 tests/unit/           Vitest — tests/e2e/ : Playwright
 ```
@@ -127,6 +127,13 @@ Le schéma complet (tables, Row Level Security, buckets privés, trigger de cré
 - URL à déclarer dans Supabase → Authentication → URL Configuration : _Site URL_ = l'URL de l'application ; _Redirect URLs_ = `https://<domaine>/**`.
 - Google : créer un identifiant OAuth (Google Cloud Console), l'activer dans Supabase, puis `NEXT_PUBLIC_AUTH_GOOGLE_ENABLED=true`.
 - Les appels d'authentification passent par des Server Actions (validation zod, limitation de débit par IP et par compte). Supabase voyant l'IP du serveur, relever en production ses propres limites (Authentication → Rate Limits) : nos limites applicatives prennent le relais.
+
+## Langues, sécurité, application installable
+
+- **Français et anglais** : `messages/fr.json` et `messages/en.json` (mêmes clés, vérifié par les tests). Sélecteur dans le pied de page, les pages de connexion et Paramètres → Profil. En production, copier aussi les modèles bilingues `supabase/templates/confirmation.html` et `recovery.html` dans Supabase → Authentication → Email Templates.
+- **Double authentification** (application Google Authenticator, Authy…) : Paramètres → Sécurité. Activer « TOTP » dans Supabase → Authentication → Multi-Factor (actif par défaut sur Supabase hébergé).
+- **CSP stricte** avec nonce par requête (`proxy.ts`, `lib/security/csp.ts`), en-têtes HSTS, X-Frame-Options, etc.
+- **PWA** : `app/manifest.ts`, `public/sw.js` (aucune donnée privée en cache), page `/hors-ligne`.
 
 ## Tests
 

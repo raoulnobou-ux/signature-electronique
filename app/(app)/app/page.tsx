@@ -38,6 +38,7 @@ function greetingKey(timeZone: string): "morning" | "afternoon" | "evening" {
 }
 
 export default async function DashboardPage(props: PageProps<"/app">) {
+  const tc = await getTranslations("common");
   const [account, t, tGreet, searchParams] = await Promise.all([
     requireAccount(),
     getTranslations("app.dashboard"),
@@ -146,7 +147,7 @@ export default async function DashboardPage(props: PageProps<"/app">) {
         ))}
       </section>
 
-      <section aria-label="Statistiques" className="mt-6 grid grid-cols-3 gap-3">
+      <section aria-label={tc("stats")} className="mt-6 grid grid-cols-3 gap-3">
         {stats.map((stat) => (
           <Card key={stat.label}>
             <CardContent className="p-4 sm:p-5">

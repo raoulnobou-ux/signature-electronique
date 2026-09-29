@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
+import { getLocale as getRequestLocale } from "next-intl/server";
 import { SandboxCheckout } from "@/components/billing/sandbox-checkout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -19,7 +20,10 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /** Checkout simulé (développement et tests) — n'existe pas quand CinetPay est configuré. */
-export default async function SandboxCheckoutPage({ searchParams }: PageProps<"/app/abonnement/paiement-test">) {
+export default async function SandboxCheckoutPage({
+  searchParams,
+}: PageProps<"/app/abonnement/paiement-test">) {
+  const locale = await getRequestLocale();
   if (!getSandboxProvider()) notFound();
   const [account, t, params] = await Promise.all([
     requireAccount(),
@@ -42,7 +46,9 @@ export default async function SandboxCheckoutPage({ searchParams }: PageProps<"/
         </span>
         <h1 className="font-display text-2xl font-semibold">{t("title")}</h1>
       </div>
-      <p className="rounded-xl border border-warning/30 bg-warning/10 px-4 py-3 text-sm">{t("notice")}</p>
+      <p className="rounded-xl border border-warning/30 bg-warning/10 px-4 py-3 text-sm">
+        {t("notice")}
+      </p>
       {!payment || payment.status === "successful" || !isPaidPlan(payment.plan) ? (
         <Card>
           <CardContent className="space-y-4">
@@ -57,15 +63,23 @@ export default async function SandboxCheckoutPage({ searchParams }: PageProps<"/
           <CardContent className="space-y-6">
             <div>
               <p className="text-sm text-muted-foreground">
-                {paymentDescription(payment.plan, payment.billing_cycle as BillingCycle, payment.kind)}
+                {paymentDescription(
+                  payment.plan,
+                  payment.billing_cycle as BillingCycle,
+                  payment.kind,
+                )}
               </p>
               <p className="font-display text-4xl font-semibold tabular-nums">
-                {formatMoney(Number(payment.amount), payment.currency as Currency)}
+                {formatMoney(Number(payment.amount), payment.currency as Currency, locale)}
               </p>
             </div>
             <SandboxCheckout
               reference={reference}
-              amountLabel={formatMoney(Number(payment.amount), payment.currency as Currency)}
+              amountLabel={formatMoney(
+                Number(payment.amount),
+                payment.currency as Currency,
+                locale,
+              )}
               cardOnly={payment.currency === "USD"}
             />
           </CardContent>

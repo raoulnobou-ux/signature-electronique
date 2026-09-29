@@ -15,7 +15,28 @@
     "toggleTheme": "Changer de thème",
     "openMenu": "Ouvrir le menu",
     "skipToContent": "Aller au contenu",
-    "lastUpdated": "Dernière mise à jour : {date}"
+    "lastUpdated": "Dernière mise à jour : {date}",
+    "homeLink": "QuickSign — accueil",
+    "dashboardLink": "QuickSign — tableau de bord",
+    "progress": "Progression",
+    "stats": "Statistiques",
+    "color": "Couleur",
+    "retry": "Réessayer",
+    "mobileNav": "Navigation mobile",
+    "mainNav": "Navigation principale",
+    "language": "Langue",
+    "status": {
+      "draft": "Brouillon",
+      "pending": "En attente",
+      "sent": "Envoyé",
+      "opened": "Ouvert",
+      "signed": "Signé",
+      "completed": "Terminé",
+      "declined": "Refusé",
+      "expired": "Expiré",
+      "canceled": "Annulé"
+    },
+    "installApp": "Installer l'application"
   },
   "nav": {
     "features": "Fonctionnalités",
@@ -187,12 +208,7 @@
           "tab": "Administrations",
           "title": "Services publics et collectivités",
           "description": "Notes de service, courriers et annonces signés et diffusés plus vite, avec un historique clair de qui a signé quoi et quand.",
-          "examples": [
-            "Note de service",
-            "Courrier officiel",
-            "Annonce",
-            "Décision interne"
-          ]
+          "examples": ["Note de service", "Courrier officiel", "Annonce", "Décision interne"]
         }
       ]
     },
@@ -373,7 +389,7 @@
         "Aucune carte bancaire demandée",
         "Vos documents restent privés et chiffrés"
       ],
-      "quote": "Signez depuis votre téléphone, où que vous soyez."
+      "quote": "« Signez depuis votre téléphone, où que vous soyez. »"
     },
     "or": "ou",
     "google": "Continuer avec Google",
@@ -421,11 +437,7 @@
       "metaTitle": "Créer un compte",
       "title": "Créez votre compte",
       "subtitle": "6 jours gratuits, sans carte bancaire.",
-      "steps": [
-        "Compte",
-        "Profil",
-        "Confirmation"
-      ],
+      "steps": ["Compte", "Profil", "Confirmation"],
       "profileTitle": "Parlez-nous de votre structure",
       "profileSubtitle": "Facultatif — vous pourrez compléter plus tard.",
       "continue": "Continuer",
@@ -470,6 +482,18 @@
       "subtitle": "Il remplacera l'ancien sur tous vos appareils.",
       "submit": "Enregistrer le mot de passe",
       "expired": "Votre lien a expiré. Demandez un nouveau lien de réinitialisation."
+    },
+    "mfa": {
+      "metaTitle": "Vérification en deux étapes",
+      "title": "Vérification en deux étapes",
+      "subtitle": "Saisissez le code à 6 chiffres affiché par votre application d'authentification.",
+      "code": "Code de vérification",
+      "submit": "Vérifier",
+      "invalid": "Code incorrect ou expiré. Réessayez avec le code affiché maintenant.",
+      "rateLimited": "Trop de tentatives. Patientez quelques minutes.",
+      "expired": "Votre session a expiré. Reconnectez-vous.",
+      "signOut": "Se connecter avec un autre compte",
+      "help": "Plus d'accès à votre application d'authentification ? Contactez le support depuis la page Contact."
     }
   },
   "app": {
@@ -602,7 +626,7 @@
         "emailHint": "Pour changer d'adresse, contactez le support.",
         "timezone": "Fuseau horaire",
         "language": "Langue",
-        "languageSoon": "L'anglais arrive bientôt."
+        "languageSoon": "Langue de l'interface, des e-mails et de l'assistant."
       },
       "organization": {
         "title": "Votre structure",
@@ -624,7 +648,24 @@
         "sessionsBody": "Déconnectez QuickSign de tous vos appareils (téléphones, ordinateurs), y compris celui-ci.",
         "signOutAll": "Se déconnecter partout",
         "twoFactorTitle": "Double authentification",
-        "twoFactorBody": "Une protection supplémentaire à la connexion. Disponible prochainement."
+        "twoFactorBody": "Protégez votre compte : à chaque connexion, un code à 6 chiffres de votre application d'authentification (Google Authenticator, Microsoft Authenticator, Authy…) vous sera demandé en plus du mot de passe.",
+        "twoFactorOn": "Activée",
+        "twoFactorOff": "Désactivée",
+        "twoFactorEnable": "Activer la double authentification",
+        "twoFactorDisable": "Désactiver",
+        "twoFactorSetupTitle": "Activer la double authentification",
+        "twoFactorScan": "1. Scannez ce QR code avec votre application d'authentification.",
+        "twoFactorSecret": "Ou saisissez cette clé manuellement :",
+        "twoFactorEnterCode": "2. Saisissez le code à 6 chiffres affiché par l'application.",
+        "twoFactorCode": "Code à 6 chiffres",
+        "twoFactorConfirm": "Activer",
+        "twoFactorEnabled": "Double authentification activée.",
+        "twoFactorDisabled": "Double authentification désactivée.",
+        "twoFactorDisableTitle": "Désactiver la double authentification ?",
+        "twoFactorDisableBody": "Saisissez un code de votre application pour confirmer. Votre compte ne sera plus protégé que par le mot de passe.",
+        "twoFactorInvalid": "Code incorrect ou expiré.",
+        "twoFactorRateLimited": "Trop de tentatives. Patientez quelques minutes.",
+        "twoFactorError": "L'opération a échoué. Réessayez."
       },
       "preferences": {
         "theme": "Thème",
@@ -906,7 +947,9 @@
       "addPage": "Ajouter une page",
       "pagesCount": "{count, plural, one {# page} other {# pages}}",
       "finish": "Terminer ({count, plural, one {# page} other {# pages}})",
-      "description": "Photographiez la feuille à plat, bien éclairée. Les coins sont détectés automatiquement."
+      "description": "Photographiez la feuille à plat, bien éclairée. Les coins sont détectés automatiquement.",
+      "mode": "Mode",
+      "removePage": "Retirer la page"
     },
     "detail": {
       "back": "Documents",
@@ -966,7 +1009,8 @@
       "footer": "Horodatage en bas de page",
       "removeField": "Retirer l'élément",
       "placeHint": "Touchez la page pour placer : {tool}"
-    }
+    },
+    "folderOptions": "Options du dossier"
   },
   "signatures": {
     "metaTitle": "Signatures et cachets",
@@ -1455,7 +1499,8 @@
         "already_in_team": "Vous faites déjà partie d'une équipe : quittez-la avant d'en rejoindre une autre.",
         "no_seats": "L'équipe est complète."
       }
-    }
+    },
+    "emailPlaceholder": "collegue@entreprise.cm"
   },
   "sign": {
     "secure": "Lien personnel et sécurisé",

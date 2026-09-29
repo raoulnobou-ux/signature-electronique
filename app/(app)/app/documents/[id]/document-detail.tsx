@@ -13,7 +13,7 @@ import {
   Send,
 } from "lucide-react";
 import Link from "next/link";
-import { useFormatter, useTranslations } from "next-intl";
+import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 import { PdfViewer } from "@/components/documents/pdf-viewer";
@@ -55,6 +55,7 @@ export function DocumentDetail({
   extraActions?: React.ReactNode;
 }) {
   const t = useTranslations("documents");
+  const locale = useLocale();
   const format = useFormatter();
   const [copied, setCopied] = useState(false);
 
@@ -110,7 +111,8 @@ export function DocumentDetail({
                 </Button>
                 <Button asChild>
                   <Link href={`/app/documents/${doc.id}/signer`}>
-                    <FileSignature /> {doc.status === "signed" ? t("actions.signAgain") : t("actions.sign")}
+                    <FileSignature />{" "}
+                    {doc.status === "signed" ? t("actions.signAgain") : t("actions.sign")}
                   </Link>
                 </Button>
               </>
@@ -140,7 +142,7 @@ export function DocumentDetail({
                   <span className="break-all">{doc.originalName}</span>
                 </Row>
                 <Row label={t("detail.type")}>{typeLabel}</Row>
-                <Row label={t("detail.size")}>{formatBytes(doc.sizeBytes)}</Row>
+                <Row label={t("detail.size")}>{formatBytes(doc.sizeBytes, locale)}</Row>
               </dl>
               {doc.originalType !== "pdf" && (
                 <Button

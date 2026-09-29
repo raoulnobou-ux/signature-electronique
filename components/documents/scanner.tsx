@@ -134,7 +134,7 @@ export function Scanner({
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div
               role="radiogroup"
-              aria-label="Mode"
+              aria-label={t("mode")}
               className="inline-flex rounded-full border border-border bg-secondary p-1"
             >
               {(["document", "color"] as const).map((m) => (
@@ -212,7 +212,7 @@ export function Scanner({
                   type="button"
                   onClick={() => setPages((all) => all.filter((p) => p.id !== page.id))}
                   className="absolute top-1.5 right-1.5 flex size-8 cursor-pointer items-center justify-center rounded-full bg-black/60 text-white"
-                  aria-label="Retirer la page"
+                  aria-label={t("removePage")}
                 >
                   <Trash2 className="size-4" />
                 </button>

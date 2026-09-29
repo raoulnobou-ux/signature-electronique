@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { X } from "lucide-react";
 import { Dialog as SheetPrimitive } from "radix-ui";
 import type { ComponentProps } from "react";
@@ -24,6 +25,7 @@ function SheetContent({
   side = "right",
   ...props
 }: ComponentProps<typeof SheetPrimitive.Content> & { side?: keyof typeof sides }) {
+  const tc = useTranslations("common");
   return (
     <SheetPrimitive.Portal>
       <SheetPrimitive.Overlay className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0" />
@@ -39,7 +41,7 @@ function SheetContent({
         {children}
         <SheetPrimitive.Close
           className="absolute top-4 right-4 inline-flex size-9 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-          aria-label="Fermer"
+          aria-label={tc("close")}
         >
           <X className="size-4" />
         </SheetPrimitive.Close>

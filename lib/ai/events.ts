@@ -91,3 +91,30 @@ export const QUICK_ACTIONS = {
   translate: "Traduis ce document en anglais (texte intégral, en conservant la structure).",
 } as const;
 export type QuickActionId = keyof typeof QUICK_ACTIONS;
+
+/** Mêmes questions et actions en anglais (interface en anglais). */
+export const SUGGESTIONS_EN: Record<SuggestionId, string> = {
+  "how-sign": "How do I sign my first document?",
+  "how-import-word": "How do I import a Word document?",
+  plans: "What is the difference between Essential and Pro?",
+  legal: "Is an electronic signature valid in Cameroon?",
+  request: "How do I get a document signed by several people?",
+  stamp: "How do I create my company stamp?",
+};
+
+export const QUICK_ACTIONS_EN: Record<QuickActionId, string> = {
+  summarize: "Summarize this document in a few clear points.",
+  "key-info":
+    "Extract the key information from this document: parties, amounts, dates, duration, obligations.",
+  risks: "List the clauses to check or that are unusual in this document (no legal advice).",
+  zones: "Find where this document must be signed, initialed or dated.",
+  translate: "Translate this document into French (full text, keeping the structure).",
+};
+
+export function suggestionText(id: SuggestionId, locale: string): string {
+  return locale === "en" ? SUGGESTIONS_EN[id] : SUGGESTIONS[id];
+}
+
+export function quickActionText(id: QuickActionId, locale: string): string {
+  return locale === "en" ? QUICK_ACTIONS_EN[id] : QUICK_ACTIONS[id];
+}

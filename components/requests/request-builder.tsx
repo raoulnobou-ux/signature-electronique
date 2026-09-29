@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { createSignatureRequest } from "@/app/(app)/app/demandes/actions";
@@ -38,7 +38,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { MENTIONS } from "@/lib/pdf/fields";
+import { mentionsFor } from "@/lib/pdf/fields";
 import { MAX_SIGNERS, SIGNER_COLORS, type RequestFieldType } from "@/lib/requests/fields";
 import { cn } from "@/lib/utils";
 
@@ -80,6 +80,7 @@ export function RequestBuilder({
   const isTemplate = Boolean(template);
   const [templateName, setTemplateName] = useState(template?.name ?? "");
   const t = useTranslations("requests.builder");
+  const locale = useLocale();
   const tTools = useTranslations("editor.tools");
   const router = useRouter();
   const [step, setStep] = useState<0 | 1 | 2>(0);
@@ -171,7 +172,8 @@ export function RequestBuilder({
       opacity: 1,
       type: armed,
       assetId: null,
-      value: armed === "mention" ? MENTIONS[0]! : armed === "text" ? t("textDefault") : null,
+      value:
+        armed === "mention" ? mentionsFor(locale)[0]! : armed === "text" ? t("textDefault") : null,
       signer: current,
       required: true,
     };
@@ -653,11 +655,11 @@ export function RequestBuilder({
               {selected.type === "mention" && (
                 <select
                   aria-label={t("mention")}
-                  value={selected.value ?? MENTIONS[0]}
+                  value={selected.value ?? mentionsFor(locale)[0]}
                   onChange={(e) => patchSelected({ value: e.target.value })}
                   className="h-10 w-full rounded-xl border border-input bg-transparent px-3 text-sm"
                 >
-                  {MENTIONS.map((m) => (
+                  {mentionsFor(locale).map((m) => (
                     <option key={m}>{m}</option>
                   ))}
                 </select>

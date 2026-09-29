@@ -60,6 +60,8 @@ export const getCurrentAccount = cache(async (): Promise<Account | null> => {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return null;
+  // 2FA activée mais code pas encore saisi : aucune donnée (la base refuse aussi, cf. RLS).
+  if (await mfaPending(supabase, user)) return null;
 
   const [profileRes, subscriptionRes, usageRes, limitsRes] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", user.id).single(),
@@ -115,7 +117,11 @@ export const getCurrentAccount = cache(async (): Promise<Account | null> => {
         limits,
       });
       if (viaTeam.effectivePlan === "pro") {
-        entitlements = { ...viaTeam, state: viaTeam.state === "trial" ? "active" : viaTeam.state, trialDaysRemaining: null };
+        entitlements = {
+          ...viaTeam,
+          state: viaTeam.state === "trial" ? "active" : viaTeam.state,
+          trialDaysRemaining: null,
+        };
         sponsor = { teamId: sp.team_id, teamName: sp.team_name };
       }
     }
@@ -135,8 +141,30 @@ export const getCurrentAccount = cache(async (): Promise<Account | null> => {
 /** Pour les pages de l'application : redirige vers la connexion si nécessaire. */
 export async function requireAccount(): Promise<Account> {
   const account = await getCurrentAccount();
-  if (!account) redirect("/connexion");
+  if (!account) {
+    if (await mfaPending(await createClient())) redirect("/connexion/verification");
+    redirect("/connexion");
+  }
   return account;
+}
+
+/**
+ * Vrai si le compte a une 2FA active et que la session n'a pas encore été vérifiée (aal1).
+ * Le jeton lu ici a déjà été validé par getUser() ; la base revérifie tout (RLS).
+ */
+export async function mfaPending(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  knownUser?: { factors?: { status: string }[] } | null,
+): Promise<boolean> {
+  const user = knownUser === undefined ? (await supabase.auth.getUser()).data.user : knownUser;
+  if (!user?.factors?.some((f) => f.status === "verified")) return false;
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  const payload = session?.access_token.split(".")[1];
+  if (!payload) return true;
+  const claims = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as { aal?: string };
+  return claims.aal !== "aal2";
 }
 
 export type GuardDenial = DenialReason | "unauthenticated" | "email_unverified";

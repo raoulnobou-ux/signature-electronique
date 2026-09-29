@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useRef, useState, type DragEvent } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -209,6 +209,8 @@ export function UploadDialog({ open, onOpenChange, folderId = null }: Props) {
 }
 
 function UploadRow({ item, onRetry }: { item: UploadItem; onRetry: () => void }) {
+  const tc = useTranslations("common");
+  const locale = useLocale();
   const t = useTranslations("documents.upload");
   const errorKey = item.error ?? "generic";
   const errors = [
@@ -271,7 +273,9 @@ function UploadRow({ item, onRetry }: { item: UploadItem; onRetry: () => void })
         <div className="flex items-baseline justify-between gap-2">
           <p className="truncate text-sm font-medium">{item.name}</p>
           {item.size > 0 && (
-            <span className="shrink-0 text-xs text-muted-foreground">{formatBytes(item.size)}</span>
+            <span className="shrink-0 text-xs text-muted-foreground">
+              {formatBytes(item.size, locale)}
+            </span>
           )}
         </div>
         {item.stage === "error" ? (
@@ -288,7 +292,7 @@ function UploadRow({ item, onRetry }: { item: UploadItem; onRetry: () => void })
       {item.stage === "error" &&
         item.source.type === "file" &&
         !["unsupported", "encrypted", "too_large"].includes(errorKey) && (
-          <Button variant="ghost" size="icon-sm" onClick={onRetry} aria-label="Réessayer">
+          <Button variant="ghost" size="icon-sm" onClick={onRetry} aria-label={tc("retry")}>
             <RotateCcw />
           </Button>
         )}

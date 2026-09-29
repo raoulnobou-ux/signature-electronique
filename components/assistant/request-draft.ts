@@ -1,5 +1,6 @@
 import type { BuilderField, BuilderPreset } from "@/components/requests/request-builder";
 import type { ProposedZone } from "@/lib/ai/events";
+import { mentionsFor } from "@/lib/pdf/fields";
 
 /** Brouillon de demande préparé par l'assistant, transmis à l'écran de préparation. */
 export type AssistantDraft = {
@@ -29,7 +30,7 @@ export function readAssistantDraft(documentId: string): AssistantDraft | null {
 }
 
 /** Rôles des zones (« Bailleur »…) → signataires ; chaque zone rattachée au bon signataire. */
-export function draftToPreset(draft: AssistantDraft): BuilderPreset {
+export function draftToPreset(draft: AssistantDraft, locale = "fr"): BuilderPreset {
   const roles: string[] = [];
   for (const zone of draft.zones) if (!roles.includes(zone.signer)) roles.push(zone.signer);
   const count = Math.max(draft.signers.length, roles.length, 1);
@@ -50,7 +51,7 @@ export function draftToPreset(draft: AssistantDraft): BuilderPreset {
     opacity: 1,
     type: zone.type,
     assetId: null,
-    value: zone.type === "mention" ? "Lu et approuvé" : null,
+    value: zone.type === "mention" ? mentionsFor(locale)[0]! : null,
     signer: Math.min(Math.max(0, roles.indexOf(zone.signer)), signers.length - 1),
     required: true,
   }));

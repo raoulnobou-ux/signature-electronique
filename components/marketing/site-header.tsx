@@ -27,11 +27,11 @@ export async function SiteHeader() {
         {t("common.skipToContent")}
       </a>
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
-        <Link href="/" aria-label="QuickSign — accueil" className="rounded-lg">
+        <Link href="/" aria-label={t("common.homeLink")} className="rounded-lg">
           <Logo />
         </Link>
 
-        <nav aria-label="Navigation principale" className="hidden items-center gap-1 lg:flex">
+        <nav aria-label={t("common.mainNav")} className="hidden items-center gap-1 lg:flex">
           {links.map((link) => (
             <Link
               key={link.href}

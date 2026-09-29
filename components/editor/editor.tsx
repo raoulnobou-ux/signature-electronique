@@ -26,10 +26,14 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { finalizeSignature, saveDraft, type FinalizeResult } from "@/app/(app)/app/documents/[id]/signer/actions";
+import {
+  finalizeSignature,
+  saveDraft,
+  type FinalizeResult,
+} from "@/app/(app)/app/documents/[id]/signer/actions";
 import type { AssetType, SignatureAsset } from "@/app/(app)/app/signatures/actions";
 import { PdfViewer, type PageSize } from "@/components/documents/pdf-viewer";
 import { SignatureCreator } from "@/components/signatures/signature-creator";
@@ -47,7 +51,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Tooltip } from "@/components/ui/tooltip";
-import { isImageField, MENTIONS, type FieldType } from "@/lib/pdf/fields";
+import { isImageField, mentionsFor, type FieldType } from "@/lib/pdf/fields";
 import { cn } from "@/lib/utils";
 import { Confetti } from "./confetti";
 import { PageLayer } from "./page-layer";
@@ -75,8 +79,16 @@ const TOOLS: { type: FieldType; icon: LucideIcon }[] = [
 
 type SaveState = "idle" | "saving" | "saved" | "error";
 
-export function Editor({ document: doc, pdfUrl, initialFields, assets: initialAssets, defaults, stampsAllowed }: Props) {
+export function Editor({
+  document: doc,
+  pdfUrl,
+  initialFields,
+  assets: initialAssets,
+  defaults,
+  stampsAllowed,
+}: Props) {
   const t = useTranslations("editor");
+  const locale = useLocale();
   const editor = useEditorState(initialFields);
   const { fields, selected, update, select } = editor;
   const [assets, setAssets] = useState(initialAssets);
@@ -91,7 +103,10 @@ export function Editor({ document: doc, pdfUrl, initialFields, assets: initialAs
 
   const assetUrls = useMemo(() => Object.fromEntries(assets.map((a) => [a.id, a.url])), [assets]);
   const defaultAsset = useCallback(
-    (type: AssetType) => assets.find((a) => a.type === type && a.isDefault) ?? assets.find((a) => a.type === type) ?? null,
+    (type: AssetType) =>
+      assets.find((a) => a.type === type && a.isDefault) ??
+      assets.find((a) => a.type === type) ??
+      null,
     [assets],
   );
 
@@ -107,18 +122,40 @@ export function Editor({ document: doc, pdfUrl, initialFields, assets: initialAs
     // eslint-disable-next-line react-hooks/exhaustive-deps -- déclenché par la révision
   }, [editor.revision]);
   const saveState: SaveState =
-    editor.revision === 0 ? "idle" : lastSave.revision !== editor.revision ? "saving" : lastSave.ok ? "saved" : "error";
+    editor.revision === 0
+      ? "idle"
+      : lastSave.revision !== editor.revision
+        ? "saving"
+        : lastSave.ok
+          ? "saved"
+          : "error";
 
   // ----- Placement -----
   const createField = useCallback(
-    (type: FieldType, page: number, centerX: number, centerY: number, asset?: SignatureAsset | null): EditorField | null => {
+    (
+      type: FieldType,
+      page: number,
+      centerX: number,
+      centerY: number,
+      asset?: SignatureAsset | null,
+    ): EditorField | null => {
       const size = sizes[page];
       if (!size) return null;
       const pageAspect = size.width / size.height;
       const assetAspect = asset?.width && asset?.height ? asset.width / asset.height : undefined;
       const { w, h } = defaultSize(type, pageAspect, assetAspect);
       const value =
-        type === "date" ? defaults.dateLabel : type === "name" ? defaults.name : type === "mention" ? MENTIONS[0]! : type === "text" ? "Texte" : type === "checkbox" ? "true" : null;
+        type === "date"
+          ? defaults.dateLabel
+          : type === "name"
+            ? defaults.name
+            : type === "mention"
+              ? mentionsFor(locale)[0]!
+              : type === "text"
+                ? t("tools.text")
+                : type === "checkbox"
+                  ? "true"
+                  : null;
       return {
         id: newFieldId(),
         page,
@@ -133,7 +170,7 @@ export function Editor({ document: doc, pdfUrl, initialFields, assets: initialAs
         value,
       };
     },
-    [sizes, defaults],
+    [sizes, defaults, locale, t],
   );
 
   const armTool = (type: FieldType) => {
@@ -177,15 +214,35 @@ export function Editor({ document: doc, pdfUrl, initialFields, assets: initialAs
     if (!selected) return;
     const copies = sizes
       .map((_, page) => page)
-      .filter((page) => page !== selected.page && !fields.some((f) => f.page === page && f.type === selected.type && Math.abs(f.x - selected.x) < 0.5 && Math.abs(f.y - selected.y) < 0.5))
-      .map((page) => ({ ...selected, id: newFieldId(), page, y: Math.min(selected.y, 100 - selected.h) }));
+      .filter(
+        (page) =>
+          page !== selected.page &&
+          !fields.some(
+            (f) =>
+              f.page === page &&
+              f.type === selected.type &&
+              Math.abs(f.x - selected.x) < 0.5 &&
+              Math.abs(f.y - selected.y) < 0.5,
+          ),
+      )
+      .map((page) => ({
+        ...selected,
+        id: newFieldId(),
+        page,
+        y: Math.min(selected.y, 100 - selected.h),
+      }));
     update([...fields, ...copies]);
     toast.success(t("properties.repeated", { count: copies.length }));
   };
 
   const duplicateSelected = () => {
     if (!selected) return;
-    const copy = { ...selected, id: newFieldId(), x: Math.min(selected.x + 2, 100 - selected.w), y: Math.min(selected.y + 2, 100 - selected.h) };
+    const copy = {
+      ...selected,
+      id: newFieldId(),
+      x: Math.min(selected.x + 2, 100 - selected.w),
+      y: Math.min(selected.y + 2, 100 - selected.h),
+    };
     update([...fields, copy]);
     select(copy.id);
   };
@@ -230,8 +287,19 @@ export function Editor({ document: doc, pdfUrl, initialFields, assets: initialAs
     try {
       const response = await finalizeSignature(doc.id, fields, { timestampFooter: footer });
       if (!response.ok) {
-        const known = ["no_fields", "read_only", "quota_exceeded", "feature_not_in_plan", "email_unverified", "asset_not_found"];
-        toast.error(t(`errors.${known.includes(response.error) ? response.error : "generic"}` as "errors.generic"));
+        const known = [
+          "no_fields",
+          "read_only",
+          "quota_exceeded",
+          "feature_not_in_plan",
+          "email_unverified",
+          "asset_not_found",
+        ];
+        toast.error(
+          t(
+            `errors.${known.includes(response.error) ? response.error : "generic"}` as "errors.generic",
+          ),
+        );
         return;
       }
       setConfirmOpen(false);
@@ -257,7 +325,8 @@ export function Editor({ document: doc, pdfUrl, initialFields, assets: initialAs
         const next = fields.map((f) => (f.id === field.id ? field : f));
         update(next, false);
         // Au relâchement : une seule entrée d'historique pour tout le geste.
-        if (done && original) editor.commitFrom(fields.map((f) => (f.id === original.id ? original : f)));
+        if (done && original)
+          editor.commitFrom(fields.map((f) => (f.id === original.id ? original : f)));
       }}
     />
   );
@@ -276,21 +345,49 @@ export function Editor({ document: doc, pdfUrl, initialFields, assets: initialAs
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-semibold">{doc.title}</p>
           <p className="flex items-center gap-1.5 text-xs text-muted-foreground" aria-live="polite">
-            {saveState === "error" ? <CloudOff className="size-3.5 text-warning" /> : <Cloud className="size-3.5" />}
-            {saveState === "saving" ? t("saving") : saveState === "saved" ? t("saved") : saveState === "error" ? t("saveFailed") : t("fieldCount", { count: fields.length })}
+            {saveState === "error" ? (
+              <CloudOff className="size-3.5 text-warning" />
+            ) : (
+              <Cloud className="size-3.5" />
+            )}
+            {saveState === "saving"
+              ? t("saving")
+              : saveState === "saved"
+                ? t("saved")
+                : saveState === "error"
+                  ? t("saveFailed")
+                  : t("fieldCount", { count: fields.length })}
           </p>
         </div>
         <Tooltip label={t("undo")}>
-          <Button variant="ghost" size="icon-sm" aria-label={t("undo")} disabled={!editor.canUndo} onClick={editor.undo}>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            aria-label={t("undo")}
+            disabled={!editor.canUndo}
+            onClick={editor.undo}
+          >
             <Undo2 />
           </Button>
         </Tooltip>
         <Tooltip label={t("redo")}>
-          <Button variant="ghost" size="icon-sm" aria-label={t("redo")} disabled={!editor.canRedo} onClick={editor.redo}>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            aria-label={t("redo")}
+            disabled={!editor.canRedo}
+            onClick={editor.redo}
+          >
             <Redo2 />
           </Button>
         </Tooltip>
-        <Button size="sm" className="ml-1" aria-label={t("finalize")} disabled={fields.length === 0} onClick={() => setConfirmOpen(true)}>
+        <Button
+          size="sm"
+          className="ml-1"
+          aria-label={t("finalize")}
+          disabled={fields.length === 0}
+          onClick={() => setConfirmOpen(true)}
+        >
           <FileCheck2 /> <span className="hidden sm:inline">{t("finalize")}</span>
         </Button>
       </header>
@@ -298,9 +395,18 @@ export function Editor({ document: doc, pdfUrl, initialFields, assets: initialAs
       <div className="flex min-h-0 flex-1">
         {/* Outils (bureau) */}
         <aside className="hidden w-56 shrink-0 flex-col gap-1 overflow-y-auto border-r border-border p-3 lg:flex">
-          <p className="px-2 pb-2 text-xs font-medium tracking-wide text-muted-foreground uppercase">{t("tools.title")}</p>
+          <p className="px-2 pb-2 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+            {t("tools.title")}
+          </p>
           {TOOLS.map(({ type, icon: Icon }) => (
-            <ToolButton key={type} type={type} icon={Icon} active={armed === type} locked={type === "stamp" && !stampsAllowed} onClick={() => armTool(type)} />
+            <ToolButton
+              key={type}
+              type={type}
+              icon={Icon}
+              active={armed === type}
+              locked={type === "stamp" && !stampsAllowed}
+              onClick={() => armTool(type)}
+            />
           ))}
         </aside>
 
@@ -308,7 +414,7 @@ export function Editor({ document: doc, pdfUrl, initialFields, assets: initialAs
         <div className="relative min-w-0 flex-1">
           {armed && (
             <div className="absolute inset-x-0 top-12 z-20 flex justify-center px-3">
-              <div className="glass flex animate-in items-center gap-3 rounded-full bg-popover py-1.5 pr-1.5 pl-4 text-sm shadow-lift fade-in slide-in-from-top-2">
+              <div className="flex animate-in items-center gap-3 rounded-full glass bg-popover py-1.5 pr-1.5 pl-4 text-sm shadow-lift fade-in slide-in-from-top-2">
                 {t("placeHint", { tool: t(`tools.${armed}`) })}
                 <Button size="sm" variant="ghost" onClick={() => setArmed(null)}>
                   {t("cancelPlace")}
@@ -359,7 +465,10 @@ export function Editor({ document: doc, pdfUrl, initialFields, assets: initialAs
           />
         </div>
       )}
-      <nav aria-label={t("tools.title")} className="flex gap-1 overflow-x-auto border-t border-border bg-background px-2 py-2 pb-safe lg:hidden">
+      <nav
+        aria-label={t("tools.title")}
+        className="flex gap-1 overflow-x-auto border-t border-border bg-background px-2 py-2 pb-safe lg:hidden"
+      >
         {TOOLS.map(({ type, icon: Icon }) => (
           <button
             key={type}
@@ -385,7 +494,10 @@ export function Editor({ document: doc, pdfUrl, initialFields, assets: initialAs
         stampsAllowed={stampsAllowed}
         onOpenChange={(open) => !open && setCreatorFor(null)}
         onCreated={(asset) => {
-          setAssets((all) => [...all, { ...asset, isDefault: !all.some((a) => a.type === asset.type) || asset.isDefault }]);
+          setAssets((all) => [
+            ...all,
+            { ...asset, isDefault: !all.some((a) => a.type === asset.type) || asset.isDefault },
+          ]);
           setArmed(asset.type);
         }}
       />
@@ -396,7 +508,9 @@ export function Editor({ document: doc, pdfUrl, initialFields, assets: initialAs
             <DialogTitle>{t("confirm.title")}</DialogTitle>
             <DialogDescription>{t("confirm.body")}</DialogDescription>
           </DialogHeader>
-          <p className="text-sm">{t("confirm.fields", { count: fields.length, pages: pagesWithFields })}</p>
+          <p className="text-sm">
+            {t("confirm.fields", { count: fields.length, pages: pagesWithFields })}
+          </p>
           <div className="flex items-start justify-between gap-4 rounded-2xl border border-border p-4">
             <div>
               <label htmlFor="footer-switch" className="text-sm font-medium">
@@ -420,7 +534,19 @@ export function Editor({ document: doc, pdfUrl, initialFields, assets: initialAs
   );
 }
 
-function ToolButton({ type, icon: Icon, active, locked, onClick }: { type: FieldType; icon: LucideIcon; active: boolean; locked: boolean; onClick: () => void }) {
+function ToolButton({
+  type,
+  icon: Icon,
+  active,
+  locked,
+  onClick,
+}: {
+  type: FieldType;
+  icon: LucideIcon;
+  active: boolean;
+  locked: boolean;
+  onClick: () => void;
+}) {
   const t = useTranslations("editor.tools");
   return (
     <button
@@ -435,7 +561,11 @@ function ToolButton({ type, icon: Icon, active, locked, onClick }: { type: Field
     >
       <Icon className="size-[18px]" aria-hidden />
       <span className="flex-1 text-left">{t(type)}</span>
-      {locked && <Badge variant="outline" className="px-1.5 py-0 text-[10px]">Pro</Badge>}
+      {locked && (
+        <Badge variant="outline" className="px-1.5 py-0 text-[10px]">
+          Pro
+        </Badge>
+      )}
     </button>
   );
 }
@@ -462,16 +592,23 @@ function Properties({
   compact?: boolean;
 }) {
   const t = useTranslations("editor");
+  const locale = useLocale();
   const sameType = assets.filter((a) => a.type === field.type);
 
   return (
     <div className={cn("space-y-4", compact && "space-y-3")}>
       <div className="flex items-center justify-between">
         <p className="text-sm font-semibold">
-          {t(`tools.${field.type}`)} <span className="font-normal text-muted-foreground">· p. {field.page + 1}</span>
+          {t(`tools.${field.type}`)}{" "}
+          <span className="font-normal text-muted-foreground">· p. {field.page + 1}</span>
         </p>
         {onClose && (
-          <Button variant="ghost" size="icon-sm" aria-label={t("properties.close")} onClick={onClose}>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            aria-label={t("properties.close")}
+            onClick={onClose}
+          >
             <X />
           </Button>
         )}
@@ -489,11 +626,11 @@ function Properties({
       {field.type === "mention" && (
         <select
           aria-label={t("properties.mention")}
-          value={field.value ?? MENTIONS[0]}
+          value={field.value ?? mentionsFor(locale)[0]}
           onChange={(e) => onPatch({ value: e.target.value })}
           className="h-11 w-full rounded-xl border border-input bg-background-elevated/60 px-3 text-sm"
         >
-          {MENTIONS.map((m) => (
+          {mentionsFor(locale).map((m) => (
             <option key={m}>{m}</option>
           ))}
         </select>
@@ -501,11 +638,18 @@ function Properties({
       {field.type === "checkbox" && (
         <label className="flex items-center justify-between text-sm">
           {t("properties.checked")}
-          <Switch checked={field.value === "true"} onCheckedChange={(v) => onPatch({ value: v ? "true" : "false" })} />
+          <Switch
+            checked={field.value === "true"}
+            onCheckedChange={(v) => onPatch({ value: v ? "true" : "false" })}
+          />
         </label>
       )}
       {isImageField(field.type) && sameType.length > 1 && (
-        <div className="flex gap-2 overflow-x-auto" role="radiogroup" aria-label={t("properties.asset")}>
+        <div
+          className="flex gap-2 overflow-x-auto"
+          role="radiogroup"
+          aria-label={t("properties.asset")}
+        >
           {sameType.map((asset) => (
             <button
               key={asset.id}
@@ -515,17 +659,28 @@ function Properties({
               onClick={() => {
                 // Même largeur ; hauteur ajustée aux proportions de la nouvelle image.
                 const current = sameType.find((a) => a.id === field.assetId);
-                const oldAspect = current?.width && current.height ? current.width / current.height : 1;
-                const newAspect = asset.width && asset.height ? asset.width / asset.height : oldAspect;
-                onPatch({ assetId: asset.id, h: Math.min(100 - field.y, (field.h * oldAspect) / newAspect) });
+                const oldAspect =
+                  current?.width && current.height ? current.width / current.height : 1;
+                const newAspect =
+                  asset.width && asset.height ? asset.width / asset.height : oldAspect;
+                onPatch({
+                  assetId: asset.id,
+                  h: Math.min(100 - field.y, (field.h * oldAspect) / newAspect),
+                });
               }}
               className={cn(
                 "flex h-14 w-24 shrink-0 cursor-pointer items-center justify-center rounded-xl border bg-white p-1.5",
-                field.assetId === asset.id ? "border-brand-violet ring-2 ring-ring/30" : "border-border",
+                field.assetId === asset.id
+                  ? "border-brand-violet ring-2 ring-ring/30"
+                  : "border-border",
               )}
             >
               {/* eslint-disable-next-line @next/next/no-img-element -- URL signée */}
-              <img src={asset.url} alt={asset.name} className="max-h-full max-w-full object-contain" />
+              <img
+                src={asset.url}
+                alt={asset.name}
+                className="max-h-full max-w-full object-contain"
+              />
             </button>
           ))}
         </div>
@@ -578,7 +733,13 @@ function Properties({
 }
 
 /** Écran de succès : confettis, téléchargement, impression, partage WhatsApp / e-mail. */
-function SuccessScreen({ doc, result }: { doc: Props["document"]; result: Extract<FinalizeResult, { ok: true }> }) {
+function SuccessScreen({
+  doc,
+  result,
+}: {
+  doc: Props["document"];
+  result: Extract<FinalizeResult, { ok: true }>;
+}) {
   const t = useTranslations("editor.success");
   const [busy, setBusy] = useState<string | null>(null);
 
@@ -625,7 +786,8 @@ function SuccessScreen({ doc, result }: { doc: Props["document"]; result: Extrac
       } finally {
         setBusy(null);
       }
-      if (channel === "whatsapp") window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank", "noopener");
+      if (channel === "whatsapp")
+        window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank", "noopener");
       return;
     }
     window.location.href = `mailto:?subject=${encodeURIComponent(t("emailSubject", { title: doc.title }))}&body=${encodeURIComponent(text)}`;
@@ -634,7 +796,7 @@ function SuccessScreen({ doc, result }: { doc: Props["document"]; result: Extrac
   return (
     <div className="relative flex min-h-dvh items-center justify-center overflow-hidden px-4 py-10">
       <Confetti />
-      <div className="relative w-full max-w-lg animate-in space-y-6 text-center fade-in zoom-in-95 duration-500">
+      <div className="relative w-full max-w-lg animate-in space-y-6 text-center duration-500 zoom-in-95 fade-in">
         <div className="relative mx-auto flex size-20 items-center justify-center">
           <div className="absolute -inset-8 bg-[radial-gradient(closest-side,rgb(52_211_153/0.35),transparent)]" />
           <div className="relative flex size-16 items-center justify-center rounded-2xl bg-success text-white shadow-lift">
@@ -645,7 +807,7 @@ function SuccessScreen({ doc, result }: { doc: Props["document"]; result: Extrac
           <h1 className="font-display text-3xl font-semibold tracking-tight">{t("title")}</h1>
           <p className="text-muted-foreground">{t("body")}</p>
         </div>
-        <div className="glass rounded-2xl p-4 text-left">
+        <div className="rounded-2xl glass p-4 text-left">
           <p className="mb-1 text-xs text-muted-foreground">{t("fingerprint")}</p>
           <code className="block font-mono text-[11px] break-all">{result.sha256}</code>
         </div>
@@ -655,16 +817,31 @@ function SuccessScreen({ doc, result }: { doc: Props["document"]; result: Extrac
               <Download /> {t("download")}
             </a>
           </Button>
-          <Button variant="secondary" size="lg" loading={busy === "print"} onClick={() => void print()}>
+          <Button
+            variant="secondary"
+            size="lg"
+            loading={busy === "print"}
+            onClick={() => void print()}
+          >
             <Printer /> {t("print")}
           </Button>
-          <Button variant="secondary" size="lg" loading={busy === "whatsapp"} onClick={() => void share("whatsapp")}>
+          <Button
+            variant="secondary"
+            size="lg"
+            loading={busy === "whatsapp"}
+            onClick={() => void share("whatsapp")}
+          >
             <MessageCircle /> {t("whatsapp")}
           </Button>
           <Button variant="secondary" size="lg" onClick={() => void share("email")}>
             <Mail /> {t("email")}
           </Button>
-          <Button variant="secondary" size="lg" loading={busy === "native"} onClick={() => void share("native")}>
+          <Button
+            variant="secondary"
+            size="lg"
+            loading={busy === "native"}
+            onClick={() => void share("native")}
+          >
             <Share2 /> {t("share")}
           </Button>
         </div>

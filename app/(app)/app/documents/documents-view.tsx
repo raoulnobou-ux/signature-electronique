@@ -113,8 +113,17 @@ type Props = {
   bulkAllowed?: boolean;
 };
 
-export function DocumentsView({ documents, total, folders, tags, filters, readOnly, bulkAllowed = false }: Props) {
+export function DocumentsView({
+  documents,
+  total,
+  folders,
+  tags,
+  filters,
+  readOnly,
+  bulkAllowed = false,
+}: Props) {
   const t = useTranslations("documents");
+  const tStatus = useTranslations("common.status");
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -286,11 +295,12 @@ export function DocumentsView({ documents, total, folders, tags, filters, readOn
                 onChange={(v) => setParams({ statut: v || null })}
                 options={[
                   { value: "", label: t("filters.anyStatus") },
-                  { value: "draft", label: "Brouillon" },
-                  { value: "pending", label: "En attente" },
-                  { value: "signed", label: "Signé" },
-                  { value: "declined", label: "Refusé" },
-                  { value: "expired", label: "Expiré" },
+                  ...(["draft", "pending", "signed", "declined", "expired"] as const).map(
+                    (value) => ({
+                      value,
+                      label: tStatus(value),
+                    }),
+                  ),
                 ]}
               />
               <FilterSelect
@@ -487,7 +497,8 @@ export function DocumentsView({ documents, total, folders, tags, filters, readOn
                     )
                   }
                 >
-                  <RotateCcw /> <span className="sr-only sm:not-sr-only">{t("actions.restore")}</span>
+                  <RotateCcw />{" "}
+                  <span className="sr-only sm:not-sr-only">{t("actions.restore")}</span>
                 </Button>
                 <Button
                   size="sm"
@@ -495,7 +506,8 @@ export function DocumentsView({ documents, total, folders, tags, filters, readOn
                   className="text-destructive"
                   onClick={() => setDialog({ type: "delete", ids: selectedIds })}
                 >
-                  <Trash2 /> <span className="sr-only sm:not-sr-only">{t("actions.deleteForever")}</span>
+                  <Trash2 />{" "}
+                  <span className="sr-only sm:not-sr-only">{t("actions.deleteForever")}</span>
                 </Button>
               </>
             ) : (
@@ -506,11 +518,14 @@ export function DocumentsView({ documents, total, folders, tags, filters, readOn
                     variant="ghost"
                     onClick={() =>
                       bulkAllowed
-                        ? router.push(`/app/documents/lot?ids=${selectedIds.slice(0, 20).join(",")}`)
+                        ? router.push(
+                            `/app/documents/lot?ids=${selectedIds.slice(0, 20).join(",")}`,
+                          )
                         : toast.message(t("bulk.proOnly"))
                     }
                   >
-                    <FileSignature /> <span className="sr-only sm:not-sr-only">{t("actions.bulkSign")}</span>
+                    <FileSignature />{" "}
+                    <span className="sr-only sm:not-sr-only">{t("actions.bulkSign")}</span>
                   </Button>
                 )}
                 <Button
@@ -518,7 +533,8 @@ export function DocumentsView({ documents, total, folders, tags, filters, readOn
                   variant="ghost"
                   onClick={() => setDialog({ type: "move", ids: selectedIds })}
                 >
-                  <FolderInput /> <span className="sr-only sm:not-sr-only">{t("actions.move")}</span>
+                  <FolderInput />{" "}
+                  <span className="sr-only sm:not-sr-only">{t("actions.move")}</span>
                 </Button>
                 {tags.length > 0 && (
                   <DropdownMenu>
@@ -968,6 +984,7 @@ function FolderLink({
   children: React.ReactNode;
   menu?: React.ReactNode;
 }) {
+  const t = useTranslations("documents");
   return (
     <li className="group relative shrink-0">
       <button
@@ -992,7 +1009,7 @@ function FolderLink({
                 variant="ghost"
                 size="icon-sm"
                 className="size-7"
-                aria-label="Options du dossier"
+                aria-label={t("folderOptions")}
               >
                 <MoreHorizontal />
               </Button>
@@ -1051,6 +1068,7 @@ function NameDialog({
   onClose: () => void;
   onSubmit: (name: string, color?: string) => void;
 }) {
+  const tc = useTranslations("common");
   const [name, setName] = useState(initial);
   const [color, setColor] = useState("indigo");
   return (
@@ -1075,7 +1093,7 @@ function NameDialog({
             maxLength={120}
           />
           {withColor && (
-            <div role="radiogroup" aria-label="Couleur" className="flex gap-2">
+            <div role="radiogroup" aria-label={tc("color")} className="flex gap-2">
               {COLORS.map((c) => (
                 <button
                   key={c}

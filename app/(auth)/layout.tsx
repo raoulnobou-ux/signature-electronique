@@ -4,9 +4,11 @@ import { getTranslations } from "next-intl/server";
 import { AmbientBackground } from "@/components/brand/ambient-background";
 import { Logo } from "@/components/brand/logo";
 import { ClientMessages } from "@/components/providers/client-messages";
+import { LocaleSwitcher } from "@/components/locale-switcher";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 export default async function AuthLayout({ children }: LayoutProps<"/">) {
+  const tc = await getTranslations("common");
   const t = await getTranslations("auth.side");
   const points = t.raw("points") as string[];
 
@@ -15,7 +17,7 @@ export default async function AuthLayout({ children }: LayoutProps<"/">) {
       {/* Panneau de marque (bureau) */}
       <aside className="relative isolate hidden overflow-hidden border-r border-border lg:flex lg:flex-col lg:justify-between lg:p-12">
         <AmbientBackground grid />
-        <Link href="/" aria-label="QuickSign — accueil" className="w-fit">
+        <Link href="/" aria-label={tc("homeLink")} className="w-fit">
           <Logo />
         </Link>
         <div className="max-w-md space-y-8">
@@ -33,7 +35,7 @@ export default async function AuthLayout({ children }: LayoutProps<"/">) {
             ))}
           </ul>
         </div>
-        <p className="font-display text-lg text-muted-foreground">« {t("quote")} »</p>
+        <p className="font-display text-lg text-muted-foreground">{t("quote")}</p>
       </aside>
 
       {/* Formulaire */}
@@ -42,10 +44,13 @@ export default async function AuthLayout({ children }: LayoutProps<"/">) {
           <AmbientBackground intensity="subtle" />
         </div>
         <header className="flex items-center justify-between p-4 sm:p-6">
-          <Link href="/" aria-label="QuickSign — accueil" className="lg:invisible">
+          <Link href="/" aria-label={tc("homeLink")} className="lg:invisible">
             <Logo />
           </Link>
-          <ThemeToggle />
+          <div className="flex items-center gap-2">
+            <LocaleSwitcher className="text-xs" />
+            <ThemeToggle />
+          </div>
         </header>
         <main
           id="contenu"

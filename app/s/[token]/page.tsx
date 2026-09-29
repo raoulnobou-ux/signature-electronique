@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
+import { getLocale } from "next-intl/server";
 import { ClientMessages } from "@/components/providers/client-messages";
 import { SignerView, type SignerField } from "@/components/requests/signer-view";
 import { formatLongDate } from "@/lib/format";
-import { formatSignatureDate, MENTIONS } from "@/lib/pdf/fields";
+import { formatSignatureDate, mentionsFor } from "@/lib/pdf/fields";
 import type { RequestFieldType } from "@/lib/requests/fields";
 import { loadSignerContext } from "@/lib/requests/service";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -25,10 +26,17 @@ export default async function SignPage(props: PageProps<"/s/[token]">) {
     const admin = createAdminClient();
     const [{ data: signed }, { data: owner }] = await Promise.all([
       admin.storage.from("documents").createSignedUrl(ctx.document.pdfPath, 3600),
-      admin.from("profiles").select("timezone").eq("id", ctx.request.owner_id).single(),
+      admin.from("profiles").select("timezone, locale").eq("id", ctx.request.owner_id).single(),
     ]);
     pdfUrl = signed?.signedUrl ?? null;
-    const today = formatSignatureDate(new Date(), owner?.timezone ?? "Africa/Douala");
+    // Date et mention dans la langue du document (celle de l'expéditeur).
+    const docLocale = owner?.locale ?? "fr";
+    const today = formatSignatureDate(
+      new Date(),
+      owner?.timezone ?? "Africa/Douala",
+      null,
+      docLocale,
+    );
     fields = ctx.fields.map((f) => {
       const type = f.type as RequestFieldType;
       return {
@@ -40,7 +48,14 @@ export default async function SignPage(props: PageProps<"/s/[token]">) {
         w: f.w_pct,
         h: f.h_pct,
         required: f.required,
-        value: type === "date" ? today : type === "name" ? ctx.signer.name : type === "mention" ? f.value || MENTIONS[0]! : f.value,
+        value:
+          type === "date"
+            ? today
+            : type === "name"
+              ? ctx.signer.name
+              : type === "mention"
+                ? f.value || mentionsFor(docLocale)[0]!
+                : f.value,
       };
     });
   }
@@ -54,7 +69,11 @@ export default async function SignPage(props: PageProps<"/s/[token]">) {
         senderName={ctx?.request.sender_name ?? ""}
         title={ctx?.document.title ?? ""}
         message={ctx?.request.message ?? null}
-        expiresAt={ctx?.request.expires_at ? formatLongDate(new Date(ctx.request.expires_at)) : null}
+        expiresAt={
+          ctx?.request.expires_at
+            ? formatLongDate(new Date(ctx.request.expires_at), await getLocale())
+            : null
+        }
         pdfUrl={pdfUrl}
         fields={fields}
       />

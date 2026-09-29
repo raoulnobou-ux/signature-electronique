@@ -1,0 +1,1697 @@
+{
+  "common": {
+    "appName": "QuickSign",
+    "tagline": "Sign, get it signed, done. In 30 seconds.",
+    "startTrial": "Try free for 6 days",
+    "signIn": "Sign in",
+    "signUp": "Create an account",
+    "signOut": "Sign out",
+    "continue": "Continue",
+    "back": "Back",
+    "cancel": "Cancel",
+    "save": "Save",
+    "close": "Close",
+    "loading": "Loading…",
+    "toggleTheme": "Toggle theme",
+    "openMenu": "Open menu",
+    "skipToContent": "Skip to content",
+    "lastUpdated": "Last updated: {date}",
+    "homeLink": "QuickSign — home",
+    "dashboardLink": "QuickSign — dashboard",
+    "progress": "Progress",
+    "stats": "Statistics",
+    "color": "Color",
+    "retry": "Retry",
+    "mobileNav": "Mobile navigation",
+    "mainNav": "Main navigation",
+    "language": "Language",
+    "status": {
+      "draft": "Draft",
+      "pending": "Pending",
+      "sent": "Sent",
+      "opened": "Opened",
+      "signed": "Signed",
+      "completed": "Completed",
+      "declined": "Declined",
+      "expired": "Expired",
+      "canceled": "Cancelled"
+    },
+    "installApp": "Install the app"
+  },
+  "nav": {
+    "features": "Features",
+    "howItWorks": "How it works",
+    "pricing": "Pricing",
+    "security": "Security",
+    "faq": "FAQ",
+    "contact": "Contact",
+    "goToApp": "My workspace"
+  },
+  "footer": {
+    "about": "Simple, fast e-signatures, built for Cameroon and French-speaking Africa.",
+    "product": "Product",
+    "company": "QuickSign",
+    "legal": "Legal",
+    "terms": "Terms of service",
+    "privacy": "Privacy",
+    "legalNotice": "Legal notice",
+    "legalValidity": "Legal validity",
+    "madeIn": "Made in Douala, for French-speaking Africa.",
+    "rights": "© {year} QuickSign. All rights reserved."
+  },
+  "landing": {
+    "hero": {
+      "badge": "Built for Cameroon and French-speaking Africa",
+      "titleStart": "Sign, get it signed, done.",
+      "titleHighlight": "In 30 seconds.",
+      "subtitle": "No more printing, scanning and back-and-forth. Open your Word or PDF file, add your signature and your organization's stamp, then send a signed, timestamped PDF — even from your phone.",
+      "ctaPrimary": "Try free for 6 days",
+      "ctaSecondary": "See how it works",
+      "reassurance1": "No credit card",
+      "reassurance2": "Mobile Money payment",
+      "reassurance3": "Private, encrypted documents",
+      "demoDocTitle": "Service agreement",
+      "demoDocMeta": "PDF · 2 pages",
+      "demoSigned": "Signed",
+      "demoSignedAt": "Timestamped · Sep 28, 2026, 09:41",
+      "demoSigner": "Awa Nkeng, Esq.",
+      "demoStamp": "CABINET NKENG · DOUALA",
+      "demoHash": "SHA-256 fingerprint verified"
+    },
+    "beforeAfter": {
+      "eyebrow": "Before / After",
+      "title": "Twenty minutes of paperwork. Or thirty seconds.",
+      "beforeTitle": "Without QuickSign",
+      "beforeSteps": [
+        "Print the document",
+        "Sign and stamp by hand",
+        "Scan every page",
+        "Send, then print again"
+      ],
+      "beforeTime": "≈ 20 minutes, paper and ink",
+      "afterTitle": "With QuickSign",
+      "afterSteps": [
+        "Import the Word or PDF file",
+        "Add signature and stamp",
+        "Download, print or send"
+      ],
+      "afterTime": "30 seconds, from your phone"
+    },
+    "steps": {
+      "eyebrow": "How it works",
+      "title": "Three steps, and it's signed.",
+      "subtitle": "No training needed. If you can send a WhatsApp message, you can use QuickSign.",
+      "items": [
+        {
+          "title": "Import",
+          "description": "Drop a Word or PDF file, or take a photo of the document. It is converted to PDF automatically."
+        },
+        {
+          "title": "Sign",
+          "description": "Draw your signature with your finger, type your name or upload it. Add your organization's stamp."
+        },
+        {
+          "title": "Send",
+          "description": "Download a signed, timestamped PDF, print it or share it via WhatsApp and email."
+        }
+      ]
+    },
+    "features": {
+      "eyebrow": "Features",
+      "title": "Everything you need. Nothing you don't.",
+      "subtitle": "The tools of a major international provider, adapted to the way we work here.",
+      "items": [
+        {
+          "key": "stamp",
+          "title": "Your stamp, digital",
+          "description": "Upload your rubber stamp or generate one: round or rectangular, blue or red ink, realistic look."
+        },
+        {
+          "key": "momo",
+          "title": "Mobile Money",
+          "description": "Pay for your subscription with MTN MoMo, Orange Money or a bank card."
+        },
+        {
+          "key": "whatsapp",
+          "title": "Send via WhatsApp",
+          "description": "Get a client or partner to sign by sending them a simple link. No account required."
+        },
+        {
+          "key": "ai",
+          "title": "Built-in AI assistant",
+          "description": "It finds where to sign, summarizes a contract before you sign and drafts your letters and certificates."
+        },
+        {
+          "key": "proof",
+          "title": "Full audit trail",
+          "description": "Timestamp, SHA-256 fingerprint, audit log and a proof certificate verifiable by QR code."
+        },
+        {
+          "key": "multi",
+          "title": "Multiple signers",
+          "description": "Send a document to several people, in order or at the same time, and track who has signed."
+        },
+        {
+          "key": "word",
+          "title": "Word and PDF",
+          "description": "Your Word documents are faithfully converted to PDF. The original is always kept."
+        },
+        {
+          "key": "mobile",
+          "title": "Designed for phones",
+          "description": "Light and fast, even on a slow connection. Everything works with your finger, no computer needed."
+        }
+      ]
+    },
+    "useCases": {
+      "eyebrow": "Who is it for?",
+      "title": "For every organization that signs a lot.",
+      "items": [
+        {
+          "key": "firm",
+          "tab": "Firms",
+          "title": "Lawyers, notaries, accountants, architects",
+          "description": "Engagement letters, fee agreements, powers of attorney, reports: sign and stamp every document in seconds, with an audit trail that reassures your clients.",
+          "examples": ["Engagement letter", "Fee agreement", "Power of attorney", "Expert report"]
+        },
+        {
+          "key": "school",
+          "tab": "Schools",
+          "title": "Schools, institutes and universities",
+          "description": "Enrollment certificates, transcripts, notices and circulars signed by management in bulk, with the institution's stamp.",
+          "examples": ["Enrollment certificate", "Transcript", "Notice", "Circular"]
+        },
+        {
+          "key": "business",
+          "tab": "SMEs & NGOs",
+          "title": "Companies, NGOs and associations",
+          "description": "Contracts, purchase orders, meeting minutes, travel orders: get partners to sign remotely and keep every version safe.",
+          "examples": ["Service agreement", "Purchase order", "Meeting minutes", "Travel order"]
+        },
+        {
+          "key": "admin",
+          "tab": "Public sector",
+          "title": "Public services and local authorities",
+          "description": "Memos, letters and announcements signed and circulated faster, with a clear history of who signed what and when.",
+          "examples": ["Internal memo", "Official letter", "Announcement", "Internal decision"]
+        }
+      ]
+    },
+    "pricing": {
+      "eyebrow": "Pricing",
+      "title": "A fair price, in CFA francs.",
+      "subtitle": "Start with a 6-day trial including every Pro feature. No credit card.",
+      "monthly": "Monthly",
+      "yearly": "Yearly",
+      "yearlyBadge": "2 months free",
+      "currencyLabel": "Currency",
+      "perMonth": "/ month",
+      "perYear": "/ year",
+      "equivalentMonthly": "i.e. {amount} / month",
+      "popular": "Most popular",
+      "cta": "Start the free trial",
+      "trialNote": "6 days free, then {price}. Cancel anytime.",
+      "paymentMethods": "Pay with MTN MoMo, Orange Money or Visa / Mastercard.",
+      "plans": {
+        "essential": {
+          "name": "Essential",
+          "description": "To sign your own documents, simply.",
+          "features": [
+            "PDF and Word import (automatic conversion)",
+            "Drawn, typed or uploaded signature",
+            "Drag and drop, resize",
+            "Signed, timestamped PDF",
+            "5 saved signatures",
+            "50 signed documents per month",
+            "1 GB of storage",
+            "AI assistant: 20 messages per day"
+          ]
+        },
+        "pro": {
+          "name": "Pro",
+          "description": "For organizations that get others to sign.",
+          "features": [
+            "Everything in Essential, plus:",
+            "Unlimited documents",
+            "Unlimited company stamps",
+            "Multiple signers, in order or in parallel",
+            "Audit trail and proof certificate",
+            "Reusable templates",
+            "Send via WhatsApp and email",
+            "Bulk signing (20 documents at once)",
+            "Unlimited advanced AI assistant",
+            "20 GB of storage · team of 5 members",
+            "Priority support"
+          ]
+        }
+      }
+    },
+    "testimonials": {
+      "eyebrow": "They sign with QuickSign",
+      "title": "What our users say"
+    },
+    "faq": {
+      "eyebrow": "FAQ",
+      "title": "Your questions, answered.",
+      "items": [
+        {
+          "q": "Is a QuickSign signature legally valid?",
+          "a": "QuickSign produces a simple electronic signature. Its evidential value relies on traceability: timestamp, digital fingerprint of the document, audit log and signature certificate. It is suitable for the vast majority of everyday documents (contracts, certificates, letters). Some deeds require a specific form (notarial deeds, certain administrative acts): if in doubt, check with a legal professional."
+        },
+        {
+          "q": "Do I need a credit card for the free trial?",
+          "a": "No. The 6-day trial starts as soon as you sign up, with no card or payment, and includes every Pro feature."
+        },
+        {
+          "q": "How can I pay?",
+          "a": "With MTN Mobile Money, Orange Money or a Visa / Mastercard card, through our secure payment partner. We never store your payment details."
+        },
+        {
+          "q": "What happens when the trial ends?",
+          "a": "Your account becomes read-only: you can still view and download your signed documents. Nothing is deleted. Choose a plan whenever you like to sign again."
+        },
+        {
+          "q": "Are my documents safe?",
+          "a": "Your documents are stored privately and encrypted, and are only reachable through temporary links. Nobody but you (and the people you invite) can see them. The AI assistant only reads a document when you ask it to."
+        },
+        {
+          "q": "Can I sign from my phone?",
+          "a": "Yes. QuickSign is designed for phones first: import, sign with your finger and send, even on a slow connection."
+        },
+        {
+          "q": "Are Word documents supported?",
+          "a": "Yes. .doc and .docx files are automatically converted to a PDF faithful to the original, which you can then sign. The original Word file is kept."
+        },
+        {
+          "q": "Do the people I ask to sign need an account?",
+          "a": "No. With the Pro plan, they receive a secure link via WhatsApp or email, read the document and sign in seconds, without signing up."
+        },
+        {
+          "q": "Can I change plans or cancel?",
+          "a": "Yes, anytime from your workspace. Upgrading to Pro is immediate; a cancellation takes effect at the end of the period already paid."
+        }
+      ]
+    },
+    "finalCta": {
+      "title": "Your next document, signed in 30 seconds.",
+      "subtitle": "Join the organizations that said goodbye to the printer and the scanner.",
+      "cta": "Try free for 6 days",
+      "secondary": "See pricing"
+    }
+  },
+  "pricingPage": {
+    "metaTitle": "Pricing",
+    "metaDescription": "Essential at 5,000 FCFA / month, Pro at 15,000 FCFA / month. 6-day free trial, Mobile Money or card payment.",
+    "compareTitle": "Compare plans",
+    "feature": "Feature",
+    "included": "Included",
+    "notIncluded": "Not included",
+    "unlimited": "Unlimited",
+    "rows": {
+      "documents": "Signed documents per month",
+      "signatures": "Saved signatures",
+      "storage": "Storage",
+      "ai": "AI assistant",
+      "aiEssential": "20 messages / day",
+      "aiPro": "Advanced, unlimited",
+      "stamps": "Company stamps",
+      "multi": "Multiple signers",
+      "audit": "Proof certificate and audit",
+      "templates": "Reusable templates",
+      "whatsapp": "Send via WhatsApp and email",
+      "bulk": "Bulk signing",
+      "team": "Team members",
+      "support": "Priority support"
+    }
+  },
+  "security": {
+    "metaTitle": "Security and legal validity",
+    "metaDescription": "How QuickSign protects your documents, and what a simple electronic signature is worth legally."
+  },
+  "contact": {
+    "metaTitle": "Contact",
+    "metaDescription": "A question, a need for your organization? The QuickSign team will answer.",
+    "title": "Let's talk about your organization.",
+    "subtitle": "A question about QuickSign, a need for your firm, school or company? Write to us, we reply within 24 business hours.",
+    "emailTitle": "By email",
+    "whatsappTitle": "By WhatsApp",
+    "whatsappDescription": "The fastest way for a simple question.",
+    "hoursTitle": "Hours",
+    "hours": "Monday to Friday, 8 am – 6 pm (Douala time)",
+    "form": {
+      "name": "Full name",
+      "email": "Email address",
+      "organization": "Organization (optional)",
+      "message": "Your message",
+      "messagePlaceholder": "Tell us in a few words how we can help.",
+      "submit": "Send message",
+      "success": "Message sent. We'll get back to you very soon.",
+      "error": "Sending failed. Try again, or email us directly.",
+      "rateLimited": "You sent several messages in a short time. Try again in an hour, or email us."
+    }
+  },
+  "notFound": {
+    "title": "This page has flown away.",
+    "description": "The link may be wrong, or the page has moved.",
+    "cta": "Back to home"
+  },
+  "validation": {
+    "required": "This field is required.",
+    "email": "This email address doesn't look valid.",
+    "tooShort": "Too short.",
+    "tooLong": "Too long.",
+    "phone": "This phone number doesn't look valid.",
+    "passwordPolicy": "At least 8 characters, with at least one letter and one digit.",
+    "acceptTerms": "Please accept the terms to continue.",
+    "passwordMismatch": "The two passwords don't match.",
+    "samePassword": "Choose a password different from the old one."
+  },
+  "auth": {
+    "side": {
+      "title": "The e-signature that saves you hours.",
+      "points": [
+        "6-day trial, every Pro feature",
+        "No credit card required",
+        "Your documents stay private and encrypted"
+      ],
+      "quote": "“Sign from your phone, wherever you are.”"
+    },
+    "or": "or",
+    "google": "Continue with Google",
+    "googleError": "Google sign-in failed. Try again or use your email.",
+    "genericError": "Something went wrong. Please try again in a moment.",
+    "rateLimited": "Too many attempts. Wait a few minutes before trying again.",
+    "fields": {
+      "fullName": "Full name",
+      "fullNamePlaceholder": "Awa Nkeng",
+      "email": "Email address",
+      "emailPlaceholder": "you@example.cm",
+      "phone": "Phone",
+      "phoneHint": "Used for reminders and, later, WhatsApp verification.",
+      "country": "Country",
+      "password": "Password",
+      "newPassword": "New password",
+      "confirmPassword": "Confirm password",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password",
+      "acceptTerms": "I accept the <terms>terms of service</terms> and the <privacy>privacy policy</privacy>.",
+      "accountType": "Account type",
+      "orgName": "Organization name",
+      "orgNamePlaceholder": "Nkeng & Associates",
+      "orgSector": "Industry",
+      "orgSectorPlaceholder": "Legal, education, construction…",
+      "city": "City",
+      "cityPlaceholder": "Douala"
+    },
+    "strength": {
+      "0": "Too weak",
+      "1": "Weak",
+      "2": "Fair",
+      "3": "Good",
+      "4": "Excellent"
+    },
+    "accountTypes": {
+      "individual": "Individual",
+      "company": "Company",
+      "firm": "Firm",
+      "school": "School",
+      "ngo": "NGO / Association",
+      "administration": "Public administration"
+    },
+    "signUp": {
+      "metaTitle": "Create an account",
+      "title": "Create your account",
+      "subtitle": "6 days free, no credit card.",
+      "steps": ["Account", "Profile", "Confirmation"],
+      "profileTitle": "Tell us about your organization",
+      "profileSubtitle": "Optional — you can complete it later.",
+      "continue": "Continue",
+      "skip": "Skip this step",
+      "submit": "Create my account",
+      "haveAccount": "Already have an account?",
+      "emailTaken": "An account already exists with this address. Sign in or reset your password.",
+      "checkEmailTitle": "Check your inbox",
+      "checkEmailBody": "We sent a confirmation link to <email></email>. Click it to activate your account and start your 6-day trial.",
+      "checkEmailTip": "Nothing received? Check your spam folder, or resend the email.",
+      "resend": "Resend email",
+      "resent": "Email sent again.",
+      "resendWait": "Resend in {seconds} s",
+      "wrongEmail": "Change address"
+    },
+    "signIn": {
+      "metaTitle": "Sign in",
+      "title": "Welcome back",
+      "subtitle": "Sign in to sign your documents.",
+      "submit": "Sign in",
+      "forgot": "Forgot password?",
+      "noAccount": "No account yet?",
+      "invalid": "Incorrect email address or password.",
+      "unconfirmed": "Your email address isn't confirmed yet. Check your inbox.",
+      "resendConfirmation": "Resend the confirmation email",
+      "linkInvalid": "This link is no longer valid (already used or expired). Request a new one.",
+      "passwordUpdated": "Password updated. You can sign in.",
+      "signedOut": "You are signed out."
+    },
+    "forgot": {
+      "metaTitle": "Forgot password",
+      "title": "Forgot password",
+      "subtitle": "Enter your email address: we'll send you a link to choose a new one.",
+      "submit": "Send the link",
+      "sentTitle": "Check your inbox",
+      "sentBody": "If an account exists for this address, a reset link has just been sent. It is valid for one hour.",
+      "back": "Back to sign in"
+    },
+    "reset": {
+      "metaTitle": "New password",
+      "title": "Choose a new password",
+      "subtitle": "It will replace the old one on all your devices.",
+      "submit": "Save password",
+      "expired": "Your link has expired. Request a new reset link."
+    },
+    "mfa": {
+      "metaTitle": "Two-step verification",
+      "title": "Two-step verification",
+      "subtitle": "Enter the 6-digit code shown by your authenticator app.",
+      "code": "Verification code",
+      "submit": "Verify",
+      "invalid": "Wrong or expired code. Try again with the code shown now.",
+      "rateLimited": "Too many attempts. Wait a few minutes.",
+      "expired": "Your session has expired. Please sign in again.",
+      "signOut": "Sign in with another account",
+      "help": "Lost access to your authenticator app? Contact support from the Contact page."
+    }
+  },
+  "app": {
+    "nav": {
+      "dashboard": "Dashboard",
+      "documents": "Documents",
+      "signatures": "Signatures & stamps",
+      "requests": "Signature requests",
+      "templates": "Templates",
+      "team": "Team",
+      "assistant": "AI assistant",
+      "billing": "Subscription",
+      "settings": "Settings",
+      "home": "Home",
+      "sign": "Sign",
+      "more": "More",
+      "search": "Search",
+      "profile": "My profile",
+      "mainNav": "App navigation",
+      "pro": "Pro",
+      "signaturesShort": "Signatures"
+    },
+    "palette": {
+      "placeholder": "Search for a page or an action…",
+      "empty": "No results.",
+      "pages": "Pages",
+      "actions": "Actions",
+      "toggleTheme": "Toggle dark / light theme",
+      "signOut": "Sign out"
+    },
+    "trial": {
+      "badge": "Free trial",
+      "daysLeft": "{days, plural, =0 {Last day} one {# day left} other {# days left}}",
+      "cardTitle": "Pro trial in progress",
+      "cardBody": "Enjoy every feature. Choose a plan when you're ready.",
+      "choosePlan": "Choose a plan",
+      "endingSoon": "Your trial ends {when}. Choose a plan to keep signing without interruption.",
+      "graceTitle": "Payment pending",
+      "grace": "Your subscription expired on {date}. Renew before {graceEnd} to avoid going read-only.",
+      "renew": "Renew",
+      "expiredTitle": "Read-only account",
+      "expired": "You can view and download your documents. Choose a plan to sign again — nothing has been deleted.",
+      "upgrade": "Choose a plan"
+    },
+    "greeting": {
+      "morning": "Good morning",
+      "afternoon": "Good afternoon",
+      "evening": "Good evening"
+    },
+    "dashboard": {
+      "metaTitle": "Dashboard",
+      "subtitle": "What would you like to sign today?",
+      "quick": {
+        "sign": "Sign a document",
+        "signHint": "PDF, Word or photo",
+        "request": "Get it signed",
+        "requestHint": "Send to other people",
+        "import": "Import",
+        "importHint": "Add to your documents"
+      },
+      "stats": {
+        "signedThisMonth": "Signed this month",
+        "pending": "Awaiting signature",
+        "quota": "Documents left this month",
+        "unlimited": "Unlimited"
+      },
+      "recent": "Recent documents",
+      "seeAll": "See all",
+      "emptyTitle": "No documents yet",
+      "emptyBody": "Import a PDF or Word file: it will be signed in less than a minute.",
+      "emptyCta": "Import a document",
+      "copilotTitle": "Assistant tip",
+      "copilotBody": "Add your organization's stamp once and for all: you'll then place it in one click on every document.",
+      "copilotCta": "Add my stamp",
+      "passwordUpdated": "Your password has been changed."
+    },
+    "welcome": {
+      "metaTitle": "Welcome",
+      "title": "Welcome, {name}!",
+      "titleNoName": "Welcome to QuickSign!",
+      "subtitle": "Your 6-day Pro trial is active. Here's how to sign your first document in less than a minute.",
+      "steps": {
+        "signature": {
+          "title": "Create your signature",
+          "body": "Draw it with your finger, type your name or upload a photo."
+        },
+        "stamp": {
+          "title": "Add your stamp",
+          "body": "Optional: your organization's stamp, ready to place."
+        },
+        "import": {
+          "title": "Import a document",
+          "body": "PDF, Word or photo: conversion is automatic."
+        },
+        "sign": {
+          "title": "Sign it",
+          "body": "Place your signature and stamp, then download your signed PDF."
+        }
+      },
+      "start": "Let's go",
+      "later": "Explore first"
+    },
+    "comingSoon": {
+      "title": "Coming soon",
+      "body": "This section is coming in a future QuickSign update.",
+      "back": "Back to dashboard"
+    },
+    "settings": {
+      "metaTitle": "Settings",
+      "title": "Settings",
+      "tabs": {
+        "profile": "Profile",
+        "organization": "Organization",
+        "billing": "Subscription",
+        "security": "Security",
+        "preferences": "Preferences",
+        "danger": "Danger zone"
+      },
+      "saved": "Changes saved.",
+      "saveError": "Saving failed. Please try again.",
+      "save": "Save",
+      "profile": {
+        "title": "Personal information",
+        "avatar": "Profile photo",
+        "avatarHint": "PNG, JPG or WebP, 2 MB maximum.",
+        "changeAvatar": "Change photo",
+        "removeAvatar": "Remove",
+        "avatarError": "Invalid or too large image (2 MB maximum).",
+        "email": "Email address",
+        "emailHint": "To change your address, contact support.",
+        "timezone": "Time zone",
+        "language": "Language",
+        "languageSoon": "Language of the interface, emails and assistant."
+      },
+      "organization": {
+        "title": "Your organization",
+        "subtitle": "This information appears on your documents and receipts.",
+        "address": "Address",
+        "footer": "Default footer text",
+        "footerPlaceholder": "Nkeng & Associates — Trade reg. … — Douala"
+      },
+      "billing": {
+        "title": "Your subscription",
+        "manage": "Manage subscription"
+      },
+      "security": {
+        "passwordTitle": "Password",
+        "passwordBody": "Receive a link by email to choose a new password.",
+        "passwordCta": "Change my password",
+        "passwordSent": "A link has just been sent to you by email.",
+        "sessionsTitle": "Signed-in devices",
+        "sessionsBody": "Sign QuickSign out of all your devices (phones, computers), including this one.",
+        "signOutAll": "Sign out everywhere",
+        "twoFactorTitle": "Two-factor authentication",
+        "twoFactorBody": "Protect your account: each time you sign in, a 6-digit code from your authenticator app (Google Authenticator, Microsoft Authenticator, Authy…) will be required in addition to your password.",
+        "twoFactorOn": "Enabled",
+        "twoFactorOff": "Disabled",
+        "twoFactorEnable": "Enable two-factor authentication",
+        "twoFactorDisable": "Disable",
+        "twoFactorSetupTitle": "Enable two-factor authentication",
+        "twoFactorScan": "1. Scan this QR code with your authenticator app.",
+        "twoFactorSecret": "Or enter this key manually:",
+        "twoFactorEnterCode": "2. Enter the 6-digit code shown by the app.",
+        "twoFactorCode": "6-digit code",
+        "twoFactorConfirm": "Enable",
+        "twoFactorEnabled": "Two-factor authentication enabled.",
+        "twoFactorDisabled": "Two-factor authentication disabled.",
+        "twoFactorDisableTitle": "Disable two-factor authentication?",
+        "twoFactorDisableBody": "Enter a code from your app to confirm. Your account will then only be protected by your password.",
+        "twoFactorInvalid": "Wrong or expired code.",
+        "twoFactorRateLimited": "Too many attempts. Wait a few minutes.",
+        "twoFactorError": "The operation failed. Please try again."
+      },
+      "preferences": {
+        "theme": "Theme",
+        "themeDark": "Dark",
+        "themeLight": "Light",
+        "notifications": "Email notifications",
+        "notificationsBody": "Trial and subscription reminders, activity on your signature requests."
+      },
+      "danger": {
+        "exportTitle": "Export my data",
+        "exportBody": "Download a file containing your profile, your documents and your signature history.",
+        "exportCta": "Export (JSON)",
+        "deleteTitle": "Delete my account",
+        "deleteBody": "Permanent deletion of your account, documents and signatures. This cannot be undone.",
+        "deleteCta": "Delete my account",
+        "deleteConfirmTitle": "Permanently delete your account?",
+        "deleteConfirmBody": "Type DELETE to confirm. Your documents and signatures will be erased and cannot be recovered.",
+        "deleteConfirmWord": "DELETE",
+        "deleteConfirmCta": "Delete permanently",
+        "deleteError": "Deletion failed. Contact support."
+      }
+    },
+    "billing": {
+      "metaTitle": "Subscription",
+      "title": "Subscription",
+      "currentPlan": "Current plan",
+      "plans": {
+        "trial": "Pro trial",
+        "essential": "Essential",
+        "pro": "Pro"
+      },
+      "status": {
+        "trial": "Trial in progress",
+        "active": "Active",
+        "grace": "Payment pending",
+        "expired": "Expired"
+      },
+      "trialEnds": "Trial ends: {date}",
+      "ends": "Ends on: {date}",
+      "usage": "Usage this month",
+      "documents": "Signed documents",
+      "signatures": "Saved signatures",
+      "storage": "Storage",
+      "ai": "Assistant messages today",
+      "of": "{used} of {total}",
+      "unlimited": "{used} · unlimited",
+      "choose": "Choose a plan",
+      "history": "Payment history",
+      "noPayments": "No payments yet.",
+      "validUntil": "Valid until {date}",
+      "renew": "Renew",
+      "paymentUnavailable": "Online payment isn't enabled yet. Write to us from the Contact page to subscribe.",
+      "methodsNote": "Mobile Money (MTN, Orange) or bank card. No automatic charge: you renew whenever you like, and we remind you before the due date.",
+      "result": {
+        "succes": {
+          "title": "Payment confirmed",
+          "body": "Thank you! Your plan is active. Your receipt has been sent to you by email."
+        },
+        "echec": {
+          "title": "The payment didn't go through",
+          "body": "No amount was charged. Check your balance or try another payment method."
+        },
+        "attente": {
+          "title": "Payment being confirmed",
+          "body": "The operator hasn't confirmed the transaction yet. Your plan will activate automatically as soon as it does, with no further action from you."
+        }
+      },
+      "labels": {
+        "choose": "Choose {plan}",
+        "renew": "Renew {plan}",
+        "upgrade": "Upgrade to Pro now",
+        "switch": "Switch to {plan}"
+      },
+      "checkout": {
+        "title": "Summary",
+        "cycles": {
+          "monthly": "monthly",
+          "yearly": "yearly"
+        },
+        "plan": "{plan} plan · {cycle}",
+        "amount": "To pay",
+        "prorata": "Immediate upgrade to Pro, prorated for the current period (until {date}).",
+        "startsNow": "Active immediately, until {date}.",
+        "startsLater": "The new period starts on {date}: your remaining days are kept.",
+        "pay": "Pay {amount}",
+        "secure": "Secure payment. QuickSign never sees or stores your card details.",
+        "redirecting": "Redirecting to payment…",
+        "cancel": "Cancel"
+      },
+      "manage": {
+        "title": "Manage subscription",
+        "cancel": "Cancel subscription",
+        "cancelTitle": "Cancel your subscription?",
+        "cancelBody": "You keep full access until {date}. After that, your account becomes read-only: your documents remain viewable and downloadable.",
+        "cancelConfirm": "Confirm cancellation",
+        "keep": "Keep my subscription",
+        "resume": "Resume subscription",
+        "canceledNote": "Subscription cancelled: full access until {date}, no renewal reminders.",
+        "downgrade": "Switch to Essential at renewal",
+        "downgradeNote": "Switch to Essential scheduled on {date}.",
+        "undoDowngrade": "Stay on Pro",
+        "switchNote": "Your {plan} plan starts on {date}.",
+        "done": "Done."
+      },
+      "paymentStatus": {
+        "pending": "Pending",
+        "successful": "Paid",
+        "failed": "Failed",
+        "cancelled": "Abandoned"
+      },
+      "kinds": {
+        "new": "Subscription",
+        "renewal": "Renewal",
+        "upgrade": "Upgrade to Pro"
+      },
+      "receipt": "Receipt",
+      "errors": {
+        "unauthenticated": "Your session has expired. Please sign in again.",
+        "email_unverified": "Confirm your email address first.",
+        "payments_unavailable": "Online payment isn't available yet.",
+        "rate_limited": "Too many attempts. Try again in a few minutes.",
+        "invalid": "Invalid request.",
+        "not_allowed": "Not possible with your current subscription.",
+        "provider_error": "The payment service isn't responding. Try again in a moment."
+      },
+      "sandbox": {
+        "metaTitle": "Test payment",
+        "title": "Test payment",
+        "notice": "Test mode: no real money is charged. In production, this step is replaced by CinetPay's secure page.",
+        "method": "Payment method",
+        "methods": {
+          "mtn": "MTN Mobile Money",
+          "orange": "Orange Money",
+          "card": "Bank card"
+        },
+        "pay": "Pay {amount}",
+        "fail": "Simulate a failure",
+        "back": "Back to subscription",
+        "notFound": "This payment can't be found or has already been processed."
+      },
+      "sponsored": "Pro plan included through your team “{team}”."
+    }
+  },
+  "documents": {
+    "metaTitle": "Documents",
+    "title": "Documents",
+    "subtitle": "All your documents, signed or to be signed.",
+    "import": "Import",
+    "searchPlaceholder": "Search for a document…",
+    "all": "All documents",
+    "trash": "Trash",
+    "trashHint": "Documents in the trash are permanently deleted after 30 days.",
+    "folders": "Folders",
+    "newFolder": "New folder",
+    "folderName": "Folder name",
+    "renameFolder": "Rename folder",
+    "deleteFolder": "Delete folder",
+    "deleteFolderConfirm": "The folder will be deleted; its documents remain available in “All documents”.",
+    "tags": "Tags",
+    "newTag": "New tag",
+    "tagName": "Tag name",
+    "noFolder": "No folder",
+    "filters": {
+      "status": "Status",
+      "anyStatus": "All statuses",
+      "period": "Period",
+      "anyPeriod": "All dates",
+      "7d": "Last 7 days",
+      "30d": "Last 30 days",
+      "year": "This year",
+      "sort": "Sort",
+      "recent": "Newest",
+      "oldest": "Oldest",
+      "name": "Name (A → Z)",
+      "reset": "Reset"
+    },
+    "view": {
+      "grid": "Grid view",
+      "list": "List view"
+    },
+    "pages": "{count, plural, one {# page} other {# pages}}",
+    "updated": "Updated {date}",
+    "selected": "{count, plural, one {# selected} other {# selected}}",
+    "selectAll": "Select all",
+    "clearSelection": "Clear selection",
+    "select": "Select {title}",
+    "actions": {
+      "open": "Open",
+      "sign": "Sign",
+      "download": "Download",
+      "downloadOriginal": "Download original",
+      "rename": "Rename",
+      "move": "Move",
+      "tag": "Tag",
+      "trash": "Move to trash",
+      "restore": "Restore",
+      "deleteForever": "Delete permanently",
+      "deleteForeverConfirm": "These documents and their files will be permanently deleted. This cannot be undone.",
+      "signAgain": "Add a signature",
+      "request": "Get it signed",
+      "viewRequest": "Track the current request",
+      "bulkSign": "Bulk sign"
+    },
+    "toasts": {
+      "trashed": "{count, plural, one {Document moved to trash.} other {# documents moved to trash.}}",
+      "restored": "{count, plural, one {Document restored.} other {# documents restored.}}",
+      "deleted": "Permanently deleted.",
+      "moved": "Moved.",
+      "renamed": "Renamed.",
+      "tagged": "Tag updated.",
+      "error": "The operation failed. Please try again."
+    },
+    "empty": {
+      "title": "No documents yet",
+      "body": "Import a PDF or Word file, or take a photo: it will be ready to sign in seconds.",
+      "searchTitle": "No results",
+      "searchBody": "Try other keywords or remove some filters.",
+      "trashTitle": "The trash is empty",
+      "trashBody": "Deleted documents appear here for 30 days."
+    },
+    "loadMore": "Show more",
+    "upload": {
+      "title": "Import documents",
+      "description": "PDF, Word (.doc, .docx, .odt) or photos. {max} MB maximum per file.",
+      "drop": "Drop your files here",
+      "dropActive": "Drop to import",
+      "or": "or",
+      "browse": "Browse",
+      "camera": "Scan with the camera",
+      "link": "Import from a link",
+      "linkPlaceholder": "https://drive.google.com/…",
+      "linkHint": "Public link: Google Drive, Dropbox, OneDrive or website.",
+      "linkSubmit": "Import",
+      "stages": {
+        "queued": "Waiting",
+        "preparing": "Preparing…",
+        "uploading": "Uploading… {percent}%",
+        "processing": "Checking…",
+        "converting": "Converting to PDF…",
+        "thumbnail": "Finishing…",
+        "done": "Ready",
+        "error": "Failed"
+      },
+      "sign": "Sign now",
+      "close": "Close",
+      "allDone": "{count, plural, one {Document imported.} other {# documents imported.}}",
+      "errors": {
+        "too_large": "File too large ({max} MB maximum).",
+        "unsupported": "Unsupported format. Use a PDF, a Word file or a photo.",
+        "encrypted": "This PDF is password-protected. Remove the protection and try again.",
+        "corrupted": "This file seems damaged and can't be opened.",
+        "empty": "This file is empty.",
+        "conversion_failed": "Converting this Word document failed. Try saving it as PDF from Word.",
+        "conversion_unavailable": "Word conversion is temporarily unavailable. Import a PDF in the meantime.",
+        "storage_full": "Storage full. Free up some space or upgrade your plan.",
+        "read_only": "Your account is read-only. Choose a plan to import new documents.",
+        "feature_not_in_plan": "This feature isn't included in your plan.",
+        "email_unverified": "Confirm your email address first.",
+        "unauthenticated": "Your session has expired. Please sign in again.",
+        "invalid_url": "This link isn't valid.",
+        "blocked": "This link points to a forbidden address.",
+        "not_found": "No document found at this link (check that it's public).",
+        "timeout": "The download took too long.",
+        "rate_limited": "Too many imports in a short time. Try again later.",
+        "network": "Connection lost. Check your network and try again.",
+        "generic": "The import failed. Please try again."
+      }
+    },
+    "scanner": {
+      "title": "Scan a document",
+      "adjust": "Adjust the corners to the edges of the sheet.",
+      "detecting": "Detecting the sheet…",
+      "modeDocument": "Document",
+      "modeColor": "Color",
+      "retake": "Retake",
+      "rotate": "Rotate",
+      "processing": "Straightening…",
+      "use": "Use this scan",
+      "addPage": "Add a page",
+      "pagesCount": "{count, plural, one {# page} other {# pages}}",
+      "finish": "Finish ({count, plural, one {# page} other {# pages}})",
+      "description": "Photograph the sheet flat and well lit. Corners are detected automatically.",
+      "mode": "Mode",
+      "removePage": "Remove page"
+    },
+    "detail": {
+      "back": "Documents",
+      "info": "Information",
+      "status": "Status",
+      "pages": "Pages",
+      "size": "Size",
+      "created": "Imported on",
+      "originalName": "Original file",
+      "type": "Original format",
+      "fingerprint": "SHA-256 fingerprint",
+      "fingerprintHint": "Unique identifier of the content: the slightest change to the file changes it.",
+      "versions": "Versions",
+      "version": "Version {n}",
+      "folder": "Folder",
+      "copied": "Copied.",
+      "copy": "Copy",
+      "loading": "Loading document…",
+      "loadError": "Unable to display this document.",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out",
+      "fullscreen": "Full screen",
+      "page": "Page {n} of {total}"
+    },
+    "types": {
+      "pdf": "PDF",
+      "docx": "Word (.docx)",
+      "doc": "Word (.doc)",
+      "odt": "OpenDocument",
+      "rtf": "RTF",
+      "jpeg": "Photo (JPEG)",
+      "png": "Image (PNG)"
+    },
+    "bulk": {
+      "metaTitle": "Bulk signing",
+      "proOnly": "Bulk signing is included in the Pro plan.",
+      "back": "Back to documents",
+      "title": "{count, plural, one {# document to sign} other {# documents to sign}}",
+      "hint": "Place your elements once: they will be applied at the same spot on every document.",
+      "signAll": "Sign all {count}",
+      "signing": "Signing…",
+      "finished": "{count, plural, =0 {No documents signed} one {# document signed} other {# documents signed}}",
+      "status": {
+        "waiting": "Waiting",
+        "signing": "Signing…",
+        "done": "Signed",
+        "error": "Failed"
+      },
+      "zip": "Download ZIP",
+      "zipName": "signed-documents.zip",
+      "zipError": "The ZIP couldn't be created.",
+      "backToDocuments": "See my documents",
+      "missingAsset": "First create this element in “Signatures & stamps”.",
+      "createSignature": "Create my signature",
+      "lastPage": "Last page",
+      "lastPageHint": "Elements placed on the last page go on the last page of each document.",
+      "footer": "Timestamp in the footer",
+      "removeField": "Remove element",
+      "placeHint": "Tap the page to place: {tool}"
+    },
+    "folderOptions": "Folder options"
+  },
+  "signatures": {
+    "metaTitle": "Signatures & stamps",
+    "title": "Signatures & stamps",
+    "subtitle": "Create them once, place them in one click on all your documents.",
+    "create": "New signature",
+    "sections": {
+      "signature": "Signatures",
+      "initials": "Initials",
+      "stamp": "Stamps"
+    },
+    "emptySection": {
+      "signature": "No signature. Create yours in seconds.",
+      "initials": "No initials. Handy to initial every page of a contract.",
+      "stamp": "No stamp. Upload your organization's stamp."
+    },
+    "default": "Default",
+    "setDefault": "Set as default",
+    "rename": "Rename",
+    "duplicate": "Duplicate",
+    "delete": "Delete",
+    "deleteConfirm": "Delete “{name}”? Documents already signed are not changed.",
+    "limit": "{used} of {max} saved signatures",
+    "limitReached": "You've reached the limit of {max} signatures on the Essential plan. Delete one or upgrade to Pro.",
+    "proOnly": "Company stamps are included in the Pro plan.",
+    "toasts": {
+      "created": "Saved to your library.",
+      "renamed": "Renamed.",
+      "deleted": "Deleted.",
+      "defaultSet": "Set as default.",
+      "duplicated": "Duplicated.",
+      "error": "The operation failed. Please try again.",
+      "shared": "Stamp shared with your team.",
+      "unshared": "Sharing removed."
+    },
+    "methods": {
+      "draw": "Drawn",
+      "type": "Typed",
+      "upload": "Uploaded",
+      "generated": "Generated"
+    },
+    "creator": {
+      "title": "Create a signature",
+      "titleInitials": "Create initials",
+      "titleStamp": "Add a stamp",
+      "kind": "Type",
+      "kinds": {
+        "signature": "Signature",
+        "initials": "Initials",
+        "stamp": "Stamp"
+      },
+      "tabs": {
+        "draw": "Draw",
+        "type": "Type",
+        "upload": "Upload",
+        "generate": "Generate"
+      },
+      "draw": {
+        "hint": "Sign in the box, with your finger or the mouse.",
+        "baseline": "Sign above the line",
+        "undo": "Undo last stroke",
+        "clear": "Clear",
+        "color": "Ink color",
+        "colors": {
+          "black": "Black",
+          "blue": "Pen blue",
+          "navy": "Navy"
+        },
+        "thickness": "Thickness",
+        "empty": "Draw your signature before saving it.",
+        "fullscreen": "Full screen"
+      },
+      "type": {
+        "placeholder": "Your name",
+        "hint": "Pick the style that suits you.",
+        "empty": "Type your name."
+      },
+      "upload": {
+        "choose": "Choose a photo or scan",
+        "hint": "Sign on a white sheet and photograph it flat. The background is removed automatically.",
+        "threshold": "Background removal",
+        "thresholdHint": "Increase if the background is still visible, decrease if the stroke disappears.",
+        "before": "Before",
+        "after": "After",
+        "invalid": "Unreadable image. Use a JPG or PNG photo."
+      },
+      "name": "Name",
+      "namePlaceholders": {
+        "signature": "Official signature",
+        "initials": "Initials",
+        "stamp": "Firm stamp"
+      },
+      "save": "Save",
+      "saving": "Saving…",
+      "stamp": {
+        "empty": "Enter your organization's name.",
+        "organization": "Organization name",
+        "organizationPlaceholder": "Ngono & Associates",
+        "title": "Title",
+        "titlePlaceholder": "The Managing Director",
+        "city": "City",
+        "cityPlaceholder": "Douala — Cameroon",
+        "shape": "Shape",
+        "shapes": {
+          "round": "Round",
+          "oval": "Oval",
+          "rect": "Rectangle"
+        },
+        "color": "Ink color",
+        "colors": {
+          "blue": "Blue",
+          "red": "Red",
+          "green": "Green",
+          "black": "Black"
+        },
+        "includeDate": "Today's date",
+        "ink": "Ink effect",
+        "preview": "Stamp preview",
+        "presets": {
+          "label": "Presets",
+          "classic": "Classic",
+          "official": "Official",
+          "oval": "Red oval",
+          "clean": "Clean"
+        }
+      }
+    },
+    "teamShared": "Team",
+    "share": "Share with the team",
+    "unshare": "Stop sharing"
+  },
+  "editor": {
+    "metaTitle": "Sign “{title}”",
+    "back": "Back to document",
+    "tools": {
+      "title": "Add",
+      "signature": "Signature",
+      "initials": "Initials",
+      "stamp": "Stamp",
+      "date": "Date",
+      "text": "Text",
+      "checkbox": "Checkbox",
+      "name": "Name",
+      "mention": "Note"
+    },
+    "placeHint": "Tap the page where you want to place: {tool}",
+    "cancelPlace": "Cancel",
+    "undo": "Undo",
+    "redo": "Redo",
+    "saved": "Draft saved",
+    "saving": "Saving…",
+    "saveFailed": "Draft not saved",
+    "finalize": "Finalize and sign",
+    "properties": {
+      "title": "Selected element",
+      "text": "Text",
+      "mention": "Note",
+      "checked": "Checked",
+      "opacity": "Opacity",
+      "rotation": "Rotation",
+      "asset": "Image",
+      "repeat": "Repeat on every page",
+      "repeated": "Copied to {count, plural, one {# other page} other {# other pages}}.",
+      "duplicate": "Duplicate",
+      "delete": "Delete",
+      "close": "Close"
+    },
+    "empty": "Choose an element in the toolbar, then tap the page to place it.",
+    "needAsset": {
+      "signature": "Create your signature first.",
+      "initials": "Create your initials first.",
+      "stamp": "Add your organization's stamp first."
+    },
+    "fieldCount": "{count, plural, =0 {No elements} one {# element} other {# elements}}",
+    "confirm": {
+      "title": "Finalize and sign?",
+      "body": "A new signed version of the document will be created. The original stays intact and viewable.",
+      "footer": "Stamp the timestamp at the bottom of signed pages",
+      "footerHint": "Signer's name, date and time, document reference.",
+      "cta": "Sign the document",
+      "fields": "{count, plural, one {# element will be applied} other {# elements will be applied}} on {pages, plural, one {# page} other {# pages}}."
+    },
+    "errors": {
+      "no_fields": "Add at least one signature or element.",
+      "read_only": "Your account is read-only. Choose a plan to sign.",
+      "quota_exceeded": "You've reached your quota of signed documents this month. Upgrade to Pro to sign without limits.",
+      "feature_not_in_plan": "The company stamp is included in the Pro plan.",
+      "email_unverified": "Confirm your email address before signing.",
+      "asset_not_found": "One of the images used no longer exists. Replace it.",
+      "generic": "Signing failed. Please try again."
+    },
+    "success": {
+      "title": "Document signed!",
+      "body": "Your signed, timestamped PDF is ready.",
+      "fingerprint": "SHA-256 fingerprint",
+      "download": "Download",
+      "print": "Print",
+      "whatsapp": "WhatsApp",
+      "email": "Email",
+      "share": "Share",
+      "view": "View document",
+      "shareText": "Here is the document “{title}”, signed with QuickSign.",
+      "emailSubject": "Signed document: {title}"
+    }
+  },
+  "requests": {
+    "metaTitle": "Signature requests",
+    "status": {
+      "draft": "Draft",
+      "pending": "In progress",
+      "completed": "Completed",
+      "declined": "Declined",
+      "expired": "Expired",
+      "canceled": "Cancelled"
+    },
+    "signerStatus": {
+      "pending": "Waiting for their turn",
+      "sent": "Invitation sent",
+      "opened": "Document opened",
+      "signed": "Signed",
+      "declined": "Declined",
+      "expired": "Expired"
+    },
+    "builder": {
+      "metaTitle": "Request signatures",
+      "back": "Back to document",
+      "signerN": "Signer {n}",
+      "steps": {
+        "signers": "Signers",
+        "zones": "Zones",
+        "send": "Send"
+      },
+      "previous": "Previous",
+      "next": "Next",
+      "send": "Send the request",
+      "sent": "Request sent.",
+      "signersTitle": "Who needs to sign?",
+      "signersHint": "Enter each signer's name and email or WhatsApp number. No account is needed to sign.",
+      "moveUp": "Move up",
+      "moveDown": "Move down",
+      "remove": "Remove this signer",
+      "name": "Full name",
+      "email": "Email",
+      "phone": "Phone (WhatsApp)",
+      "signerErrors": {
+        "name": "Enter the full name.",
+        "contact": "Enter an email or a phone number.",
+        "email": "Invalid email address.",
+        "role": "Enter the role name."
+      },
+      "addSigner": "Add a signer",
+      "mode": "Signing order",
+      "modes": {
+        "sequential": {
+          "title": "In order",
+          "hint": "Each person receives the link once the previous one has signed."
+        },
+        "parallel": {
+          "title": "At the same time",
+          "hint": "Everyone receives the link right away."
+        }
+      },
+      "message": "Message (optional)",
+      "messagePlaceholder": "Hello, please sign the contract before Friday.",
+      "deadline": "Deadline",
+      "days": "{count, plural, one {# day} other {# days}}",
+      "zonesFor": "Zones for",
+      "needsSignature": "signature required",
+      "tools": "Zone types",
+      "placeHint": "Tap the page to place “{tool}” for {name}",
+      "zone": "Selected zone",
+      "page": "page {n}",
+      "assignedTo": "Assigned to",
+      "textLabel": "Text to fill in (hint)",
+      "textDefault": "To be completed",
+      "mention": "Note",
+      "required": "Required",
+      "deleteZone": "Delete zone",
+      "reviewTitle": "All set",
+      "zonesCount": "{count, plural, one {# zone} other {# zones}}",
+      "singleSigner": "A single signer",
+      "expires": "The link expires in {count, plural, one {# day} other {# days}}.",
+      "delivery": "Signers with an email receive the link automatically; for WhatsApp, you can send it in one click at the next step.",
+      "errors": {
+        "missing_fields": "Add at least one signature or initials zone for {name}.",
+        "invalid_phone": "{name}'s phone number is invalid.",
+        "feature_not_in_plan": "Signature requests are included in the Pro plan.",
+        "already_pending": "A request is already in progress for this document.",
+        "not_found": "Document not found.",
+        "read_only": "Your account is read-only.",
+        "generic": "Sending failed. Please try again.",
+        "missingTemplate": "Each role needs at least one signature or initials zone."
+      },
+      "rolesTitle": "Signer roles",
+      "rolesHint": "Name each role (“Client”, “Landlord”…). Each time you use the template, you'll say who holds each role.",
+      "templateName": "Template name",
+      "role": "Role",
+      "rolePlaceholder": "Client",
+      "addRole": "Add a role",
+      "saveTemplate": "Save template",
+      "templateSaved": "Template saved.",
+      "reviewTemplate": "Your template is ready",
+      "variable": "Variable field",
+      "variableHint": "Filled in by you each time (name, amount…).",
+      "variableZone": "{label} · filled in by you",
+      "variablesCount": "{count, plural, =0 {No variable fields} one {# variable field} other {# variable fields}}"
+    },
+    "list": {
+      "title": "Signature requests",
+      "description": "Get your documents signed by several people, in order or at the same time.",
+      "empty": "No requests yet.",
+      "emptyHint": "Open a document then choose “Request signatures”.",
+      "openDocuments": "Choose a document",
+      "progress": "{signed} / {total} signed",
+      "proTitle": "Get partners to sign in a few clicks",
+      "proText": "Multiple signers, real-time tracking, reminders, verifiable proof certificate: available with the Pro plan.",
+      "upgrade": "Upgrade to Pro",
+      "created": "Created on {date}"
+    },
+    "detail": {
+      "metaTitle": "Request tracking",
+      "back": "All requests",
+      "sentBanner": "Request sent! Signers with an email address have received their link. Send the others via WhatsApp below.",
+      "signers": "Signers",
+      "order": "Order",
+      "mode": {
+        "sequential": "In order",
+        "parallel": "At the same time"
+      },
+      "expires": "Expires on {date}",
+      "completedAt": "Completed on {date}",
+      "copyLink": "Copy link",
+      "copied": "Link copied.",
+      "whatsapp": "WhatsApp",
+      "remind": "Remind",
+      "reminded": "Reminder sent.",
+      "remindedLink": "Link ready: send it to the signer.",
+      "tooSoon": "A reminder was already sent less than an hour ago.",
+      "signedAt": "Signed on {date}",
+      "declinedReason": "Reason: “{reason}”",
+      "downloadSigned": "Download the signed PDF",
+      "downloadCertificate": "Signature certificate",
+      "verify": "Verification page",
+      "cancel": "Cancel the request",
+      "cancelTitle": "Cancel this request?",
+      "cancelBody": "Links already sent will stop working. Signatures already applied remain in the document's history.",
+      "cancelConfirm": "Cancel the request",
+      "keep": "Keep",
+      "canceled": "Request cancelled.",
+      "timeline": "Log",
+      "exportAudit": "Export the log (CSV)",
+      "live": "Live updates",
+      "events": {
+        "request_created": "Request created",
+        "request_invitation_sent": "Invitation sent",
+        "request_reminder_sent": "Reminder sent",
+        "signer_opened": "Document opened",
+        "signer_signed": "Signed",
+        "signer_declined": "Declined",
+        "request_completed": "All signatures collected",
+        "request_canceled": "Request cancelled",
+        "request_expired": "Request expired"
+      },
+      "error": "Action not possible."
+    }
+  },
+  "templates": {
+    "metaTitle": "Templates",
+    "editTitle": "Edit template",
+    "title": "Templates",
+    "description": "Your recurring contracts and forms, ready to send in one click.",
+    "proTitle": "Your recurring documents in one click",
+    "proText": "Save a contract with its signature zones and variable fields, then send it in seconds. Available with the Pro plan.",
+    "upgrade": "Upgrade to Pro",
+    "empty": "No templates yet.",
+    "emptyHint": "Open a document then choose “Save as template”.",
+    "meta": "{pages, plural, one {# page} other {# pages}} · {roles, plural, one {# role} other {# roles}} · used {uses, plural, =0 {never} one {# time} other {# times}}",
+    "actions": "Actions — {name}",
+    "edit": "Edit",
+    "delete": "Delete",
+    "share": "Share with the team",
+    "unshare": "Stop sharing",
+    "shared": "Template shared with your team.",
+    "unshared": "Sharing removed.",
+    "teamBadge": "Team",
+    "use": "Use",
+    "create": "Create the document",
+    "cancel": "Cancel",
+    "continue": "Continue",
+    "created": "Document created from the template.",
+    "variable": "Variable field",
+    "variablesHint": "Fill in the variable fields: they will be written on the document before sending.",
+    "deleteTitle": "Delete “{name}”?",
+    "deleteBody": "Documents already created from this template are not affected.",
+    "saveAs": "Save as template",
+    "saveAsHint": "The document is copied; you then define the roles, signature zones and variable fields.",
+    "name": "Template name",
+    "descriptionLabel": "Description (optional)",
+    "errors": {
+      "generic": "Action not possible. Please try again.",
+      "missingVariable": "Fill in the required fields.",
+      "empty": "This template has no zones yet: edit it first."
+    }
+  },
+  "team": {
+    "metaTitle": "Team",
+    "title": "Team",
+    "description": "Work together: shared templates and stamps, up to 5 people.",
+    "teamDescription": "Your team's members, invitations and activity.",
+    "proTitle": "Sign and get documents signed as a team",
+    "proText": "Up to 5 members, Owner / Admin / Member roles, shared templates and stamps, activity log: included in the Pro plan.",
+    "upgrade": "Upgrade to Pro",
+    "createTitle": "Create your team",
+    "createHint": "Your members get the Pro plan, your templates and your shared stamps.",
+    "name": "Team name",
+    "namePlaceholder": "Ngono & Associates",
+    "create": "Create the team",
+    "created": "Team created.",
+    "members": "Members",
+    "seats": "{used} / {limit} seats",
+    "you": "you",
+    "roles": {
+      "owner": "Owner",
+      "admin": "Admin",
+      "member": "Member"
+    },
+    "memberActions": "Actions — {name}",
+    "makeAdmin": "Make admin",
+    "makeMember": "Make member",
+    "remove": "Remove from team",
+    "removed": "Member removed.",
+    "invitedUntil": "Invitation valid until {date}",
+    "pendingInvite": "Invited",
+    "revoke": "Cancel {email}'s invitation",
+    "inviteEmail": "Invite by email",
+    "role": "Role",
+    "invite": "Invite",
+    "invited": "Invitation sent.",
+    "invitedLink": "Invitation created: the link has been copied, send it to your colleague.",
+    "sharingHint": "Tip: share a template or a stamp from its “Share with the team” menu.",
+    "activity": "Recent activity",
+    "noActivity": "No activity yet.",
+    "events": {
+      "document_imported": "imported a document",
+      "document_signed": "signed a document",
+      "request_created": "sent a signature request",
+      "request_canceled": "cancelled a request",
+      "template_created": "created a template",
+      "template_used": "used a template",
+      "template_shared": "shared a template",
+      "team_member_joined": "joined the team",
+      "team_member_removed": "removed a member",
+      "asset_shared": "shared a stamp"
+    },
+    "deleteTeam": "Delete the team",
+    "leave": "Leave the team",
+    "cancel": "Cancel",
+    "done": "Done.",
+    "deleteTitle": "Delete the team?",
+    "deleteBody": "Members lose access to shared items and to the team's Pro plan. Everyone's documents are kept.",
+    "leaveTitle": "Leave the team?",
+    "leaveBody": "You lose access to shared templates and stamps, and to the team's Pro plan. Your documents remain yours.",
+    "errors": {
+      "generic": "Action not possible.",
+      "already_in_team": "You're already part of a team.",
+      "forbidden": "Only administrators can do this.",
+      "invalid": "Invalid email address.",
+      "no_seats": "All seats are taken (5 maximum).",
+      "already_member": "This person is already in the team.",
+      "rate_limited": "Too many invitations. Try again later.",
+      "feature_not_in_plan": "Teams are included in the Pro plan."
+    },
+    "invitation": {
+      "metaTitle": "Team invitation",
+      "title": "Join the team",
+      "body": "You have been invited to join a team on QuickSign.",
+      "accept": "Join the team",
+      "signIn": "Sign in to accept",
+      "signUp": "Create an account",
+      "joined": "Welcome to the team!",
+      "errors": {
+        "unauthenticated": "Sign in to accept the invitation.",
+        "invalid": "This invitation doesn't exist or has already been used.",
+        "expired": "This invitation has expired. Ask for a new one.",
+        "wrong_email": "This invitation was sent to another email address. Sign in with the right address.",
+        "already_in_team": "You're already part of a team: leave it before joining another one.",
+        "no_seats": "The team is full."
+      }
+    },
+    "emailPlaceholder": "colleague@company.cm"
+  },
+  "sign": {
+    "secure": "Personal, secure link",
+    "hello": "Hello {name},",
+    "invite": "{sender} invites you to sign “{title}”",
+    "steps": {
+      "read": "Read the document.",
+      "fill": "Tap each highlighted zone to complete it.",
+      "sign": "Confirm: it's signed, without printing anything."
+    },
+    "start": "Read and sign",
+    "noAccount": "No account or app to install.",
+    "states": {
+      "waiting": {
+        "title": "It's not your turn yet",
+        "body": "{sender} requested signatures in a specific order. You'll receive a new message as soon as it's your turn."
+      },
+      "signed": {
+        "title": "Thank you, it's signed!",
+        "body": "Your signature is recorded. You'll receive the final document and its certificate by email once all signers have signed."
+      },
+      "completed": {
+        "title": "Document fully signed",
+        "body": "All signers have signed. Download the final document and its signature certificate."
+      },
+      "declined": {
+        "title": "Signature declined",
+        "body": "You declined to sign this document. {sender} has been notified."
+      },
+      "expired": {
+        "title": "This link has expired",
+        "body": "The signing deadline has passed. Contact {sender} to receive a new link."
+      },
+      "canceled": {
+        "title": "Request cancelled",
+        "body": "{sender} cancelled this signature request."
+      },
+      "closed": {
+        "title": "Request closed",
+        "body": "This signature request is no longer active."
+      },
+      "invalid": {
+        "title": "Invalid link",
+        "body": "This signing link doesn't exist or is no longer valid. Check that it's complete or ask for a new one."
+      },
+      "ready": {
+        "title": "",
+        "body": ""
+      }
+    },
+    "download": "Download the signed document",
+    "certificate": "Signature certificate",
+    "remaining": "{count, plural, one {# zone to complete} other {# zones to complete}}",
+    "allDone": "Everything is complete.",
+    "decline": "Decline",
+    "finish": "Finish and sign",
+    "next": "Next zone",
+    "tapHere": "{field} — tap here",
+    "fieldTodo": "{field} to complete",
+    "fieldDone": "{field} completed",
+    "textHint": "Enter the requested text.",
+    "ok": "Confirm",
+    "confirmTitle": "Sign the document?",
+    "confirmBody": "Your signature will be applied to the document. This action is final.",
+    "consent": "I have read the document and agree to sign it electronically.",
+    "evidence": "As evidence, QuickSign records the date and time, your IP address, your device and the document's fingerprint before and after your signature.",
+    "back": "Back",
+    "signNow": "Sign now",
+    "declineTitle": "Decline to sign?",
+    "declineBody": "Briefly state the reason: it will be passed on to the sender.",
+    "declineReason": "Reason for declining",
+    "declineConfirm": "Decline to sign",
+    "padSignature": "Your signature",
+    "padInitials": "Your initials",
+    "padHint": "Draw with your finger or the mouse, or type your name.",
+    "usePad": "Use",
+    "errors": {
+      "consent": "Tick the consent box to sign.",
+      "invalid": "Invalid request. Reload the page.",
+      "not_ready": "This document can no longer be signed with this link.",
+      "missing_signature": "Add your signature.",
+      "missing_initials": "Add your initials.",
+      "missing_value": "Complete all required zones.",
+      "server": "The signature couldn't be saved. Please try again.",
+      "rate_limited": "Too many attempts. Wait a few minutes.",
+      "decline": "The refusal couldn't be saved."
+    }
+  },
+  "verify": {
+    "metaTitle": "Verify a signed document",
+    "title": "Verify a signed document",
+    "intro": "Drop a PDF signed with QuickSign: we check that it hasn't been changed since it was signed.",
+    "drop": "Drop the PDF here or tap to choose it",
+    "privacy": "The file stays on your device: only its SHA-256 fingerprint is compared.",
+    "match": {
+      "final": "Authentic: this file is the final copy, signed by everyone.",
+      "original": "This file is the original document, before signing.",
+      "intermediate": "This file is an intermediate version (not all signatures are on it yet)."
+    },
+    "found": "Document recognized: “{title}”",
+    "foundDetail": "Version {version}, recorded on {date}. It hasn't been changed since.",
+    "seeRequest": "See the signers",
+    "nomatch": "No match",
+    "nomatchHint": "This file doesn't match any document signed with QuickSign, or it was changed after being signed.",
+    "learnMore": "How does verification work?",
+    "completedTitle": "Signed, verifiable document",
+    "statusTitle": "Signature request",
+    "status": {
+      "completed": "Signed by all",
+      "pending": "Being signed",
+      "declined": "Declined",
+      "expired": "Expired",
+      "canceled": "Cancelled"
+    },
+    "sender": "Issued by",
+    "created": "Request created on",
+    "completed": "Signed by all on",
+    "finalHash": "Final fingerprint (SHA-256)",
+    "originalHash": "Original fingerprint",
+    "signers": "Signers",
+    "signedAt": "Signed on {date}",
+    "notSigned": "Not signed",
+    "checkTitle": "Check your copy",
+    "checkIntro": "Drop your PDF file: its fingerprint is compared with those recorded for this document."
+  },
+  "assistant": {
+    "metaTitle": "AI assistant",
+    "title": "QuickSign Copilot",
+    "subtitle": "Your signing assistant",
+    "open": "Open the assistant",
+    "close": "Close the assistant",
+    "newConversation": "New conversation",
+    "history": "History",
+    "fullPage": "Open full screen",
+    "emptyTitle": "Hello {name}, how can I help?",
+    "emptyHint": "Ask a question about QuickSign, or attach a document to analyze it.",
+    "placeholder": "Ask your question…",
+    "send": "Send",
+    "stop": "Stop",
+    "thinking": "Thinking…",
+    "you": "You",
+    "tools": {
+      "show_in_app": "Showing you where to click…",
+      "find_document": "Searching your documents…",
+      "get_document_details": "Reading document details…",
+      "propose_signature_zones": "Finding signature zones…",
+      "prepare_signature_request": "Preparing the request…",
+      "draft_document": "Drafting the document…",
+      "list_pending_signatures": "Checking pending signatures…",
+      "explain_certificate": "Reading the certificate…"
+    },
+    "attach": "Attach “{title}”",
+    "attached": "Attached document: {title}",
+    "detach": "Remove the document",
+    "attachHint": "The document is only sent to the assistant if you attach it.",
+    "attachPro": "Document analysis is included in the Pro plan.",
+    "analyze": "Analyze with the assistant",
+    "quick": {
+      "summarize": "Summarize",
+      "key-info": "Key points",
+      "risks": "Points to check",
+      "zones": "Signature zones",
+      "translate": "Translate to French"
+    },
+    "suggestions": {
+      "how-sign": "Sign my first document",
+      "how-import-word": "Import a Word file",
+      "plans": "Essential or Pro?",
+      "legal": "Legal value in Cameroon",
+      "request": "Get several people to sign",
+      "stamp": "Create my stamp"
+    },
+    "remaining": "{count, plural, =0 {No messages left today} one {# message left today} other {# messages left today}}",
+    "disclaimer": "The assistant can make mistakes and is not a substitute for legal advice.",
+    "noHistory": "No conversations yet.",
+    "delete": "Delete conversation",
+    "deleted": "Conversation deleted.",
+    "errors": {
+      "not_configured": "The assistant isn't enabled on this installation yet.",
+      "quota": "You've used your 20 messages for today (Essential plan). Come back tomorrow, or upgrade to Pro for unlimited use.",
+      "rate_limited": "Too many messages in a short time. Wait a minute.",
+      "refusal": "I can't answer this request.",
+      "read_only": "Your account is read-only: the assistant is suspended. Reactivate a plan to use it.",
+      "feature_not_in_plan": "This assistant feature is included in the Pro plan.",
+      "invalid": "Invalid message.",
+      "server": "The assistant couldn't answer. Please try again.",
+      "network": "Connection lost. Please try again."
+    },
+    "actions": {
+      "showAgain": "Show again",
+      "zonesDetail": "{count, plural, one {# zone} other {# zones}} · pages {pages}",
+      "useZones": "Prepare a request with these zones",
+      "requestDraft": "Draft request: {count, plural, one {# signer} other {# signers}}",
+      "openDraft": "Open and review the draft",
+      "confirmHint": "Nothing is sent until you confirm.",
+      "expand": "Show all",
+      "collapse": "Collapse",
+      "createPdf": "Create the PDF",
+      "openDocument": "Open the document",
+      "created": "Document created.",
+      "error": "Action not possible.",
+      "remind": "Remind",
+      "reminded": "Reminder sent.",
+      "remindedLink": "Link ready: send it to the signer.",
+      "tooSoon": "Already reminded less than an hour ago."
+    },
+    "paletteAsk": "Ask the assistant: “{query}”"
+  }
+}

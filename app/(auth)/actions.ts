@@ -1,6 +1,10 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { getLocale } from "next-intl/server";
+import { applyProfileLocale } from "@/lib/i18n/server";
+import { isLocale } from "@/i18n/config";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { publicEnv } from "@/lib/env";
 import { rateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/request";
@@ -61,6 +65,8 @@ export async function signUp(input: unknown): Promise<ActionResult<{ email: stri
         org_name: data.orgName || null,
         org_sector: data.orgSector || null,
         city: data.city || null,
+        // Langue des e-mails d'authentification (modèles Supabase : .Data.locale).
+        locale: await getLocale(),
       },
     },
   });
@@ -78,6 +84,10 @@ export async function signUp(input: unknown): Promise<ActionResult<{ email: stri
   // Adresse déjà inscrite et confirmée : Supabase renvoie un utilisateur sans identité.
   if (result.user && result.user.identities?.length === 0)
     return { ok: false, error: "email_taken" };
+  // Langue choisie à l'inscription : e-mails et assistant dans la même langue.
+  const locale = await getLocale();
+  if (result.user && isLocale(locale))
+    await createAdminClient().from("profiles").update({ locale }).eq("id", result.user.id);
 
   return { ok: true, data: { email: data.email } };
 }
@@ -112,7 +122,7 @@ export async function signIn(input: unknown, next?: string): Promise<ActionResul
   if (!allowed) return { ok: false, error: "rate_limited" };
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { data: session, error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) {
     if (error.code === "email_not_confirmed") return { ok: false, error: "unconfirmed" };
     if (error.code === "invalid_credentials" || error.status === 400)
@@ -120,6 +130,11 @@ export async function signIn(input: unknown, next?: string): Promise<ActionResul
     if (error.status === 429) return { ok: false, error: "rate_limited" };
     console.error("[auth] connexion impossible", error);
     return { ok: false, error: "server" };
+  }
+  await applyProfileLocale(session.user.id);
+  // Double authentification activée : code demandé avant d'entrer dans l'application.
+  if (session.user.factors?.some((f) => f.status === "verified")) {
+    redirect(`/connexion/verification?next=${encodeURIComponent(safeNextPath(next))}`);
   }
 
   redirect(safeNextPath(next));

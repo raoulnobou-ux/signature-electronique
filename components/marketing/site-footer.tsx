@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { Logo } from "@/components/brand/logo";
+import { LocaleSwitcher } from "@/components/locale-switcher";
 
 export async function SiteFooter() {
   const t = await getTranslations();
@@ -62,6 +63,7 @@ export async function SiteFooter() {
         <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-6 text-xs text-muted-foreground sm:flex-row sm:justify-between sm:px-6">
           <p>{t("footer.rights", { year: new Date().getFullYear() })}</p>
           <p>{t("footer.madeIn")}</p>
+          <LocaleSwitcher className="text-xs" />
         </div>
       </div>
     </footer>

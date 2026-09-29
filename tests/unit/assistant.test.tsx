@@ -204,7 +204,7 @@ describe("conversations", () => {
     } as unknown as Account;
     const text = contextBlock(account, "/app/documents", 12);
     expect(text).toBe(
-      "<contexte>Prénom : Awa · Plan : Essentiel · Écran : /app/documents · Messages à l'assistant restants aujourd'hui : 12</contexte>",
+      "<contexte>Prénom : Awa · Plan : Essentiel · Écran : /app/documents · Messages à l'assistant restants aujourd'hui : 12 · Langue de l'interface : français</contexte>",
     );
     expect(text).not.toContain("awa@example.com");
   });

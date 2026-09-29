@@ -1,13 +1,14 @@
 "use client";
 
 import { ArrowUp, FileText, Loader2, Paperclip, Sparkles, Square, X } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   QUICK_ACTIONS,
   SUGGESTIONS,
+  suggestionText,
   type AssistantAction,
   type AssistantErrorCode,
   type AssistantEvent,
@@ -61,6 +62,7 @@ export function Chat({
   className?: string;
 }) {
   const t = useTranslations("assistant");
+  const locale = useLocale();
   const pathname = usePathname();
   const { currentDocument, onAsk, highlight, pro, remaining, setRemaining } = useAssistant();
   const [messages, setMessages] = useState<UIMessage[]>(initialMessages);
@@ -212,7 +214,7 @@ export function Chat({
                   key={id}
                   type="button"
                   disabled={streaming}
-                  onClick={() => void send({ suggestion: id, label: SUGGESTIONS[id] })}
+                  onClick={() => void send({ suggestion: id, label: suggestionText(id, locale) })}
                   className="cursor-pointer rounded-full border border-border px-3 py-1.5 text-xs font-medium transition-colors hover:border-brand-violet hover:bg-accent"
                 >
                   {t(`suggestions.${id}`)}

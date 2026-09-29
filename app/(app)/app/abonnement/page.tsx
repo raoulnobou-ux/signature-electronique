@@ -1,6 +1,7 @@
 import { CheckCircle2, Clock, Info, XCircle } from "lucide-react";
 import type { Metadata } from "next";
 import { getFormatter, getTranslations } from "next-intl/server";
+import { getLocale as getRequestLocale } from "next-intl/server";
 import { PageHeader } from "@/components/app/page-header";
 import { CheckoutPlans } from "@/components/billing/checkout-plans";
 import { ReceiptButton } from "@/components/billing/receipt-button";
@@ -36,6 +37,7 @@ const STATUS_VARIANT = {
 } as const;
 
 export default async function BillingPage({ searchParams }: PageProps<"/app/abonnement">) {
+  const locale = await getRequestLocale();
   const [account, t, format, prices, detected, params, supabase] = await Promise.all([
     requireAccount(),
     getTranslations("app.billing"),
@@ -48,12 +50,17 @@ export default async function BillingPage({ searchParams }: PageProps<"/app/abon
 
   const { data: payments } = await supabase
     .from("payments")
-    .select("id, created_at, paid_at, amount, currency, status, plan, billing_cycle, kind, receipt_number, receipt_path")
+    .select(
+      "id, created_at, paid_at, amount, currency, status, plan, billing_cycle, kind, receipt_number, receipt_path",
+    )
     .order("created_at", { ascending: false })
     .limit(50);
   const { data: subscription } = await supabase.from("subscriptions").select("currency").single();
 
-  const resultKey = typeof params.paiement === "string" && params.paiement in RESULTS ? (params.paiement as keyof typeof RESULTS) : null;
+  const resultKey =
+    typeof params.paiement === "string" && params.paiement in RESULTS
+      ? (params.paiement as keyof typeof RESULTS)
+      : null;
   const result = resultKey ? RESULTS[resultKey] : null;
   const available = getPaymentProvider() !== null;
   const currency = (subscription?.currency as Currency | null) ?? detected;
@@ -107,20 +114,28 @@ export default async function BillingPage({ searchParams }: PageProps<"/app/abon
                   <li key={p.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-4">
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium">
-                        {isPaidPlan(p.plan) ? paymentDescription(p.plan, p.billing_cycle as BillingCycle, p.kind) : p.plan}
+                        {isPaidPlan(p.plan)
+                          ? paymentDescription(p.plan, p.billing_cycle as BillingCycle, p.kind)
+                          : p.plan}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {format.dateTime(new Date(p.paid_at ?? p.created_at), { dateStyle: "medium" })}
+                        {format.dateTime(new Date(p.paid_at ?? p.created_at), {
+                          dateStyle: "medium",
+                        })}
                         {p.receipt_number && ` · ${p.receipt_number}`}
                       </p>
                     </div>
                     <span className="text-sm font-semibold tabular-nums">
-                      {formatMoney(Number(p.amount), p.currency as Currency)}
+                      {formatMoney(Number(p.amount), p.currency as Currency, locale)}
                     </span>
-                    <Badge variant={STATUS_VARIANT[p.status as keyof typeof STATUS_VARIANT] ?? "muted"}>
+                    <Badge
+                      variant={STATUS_VARIANT[p.status as keyof typeof STATUS_VARIANT] ?? "muted"}
+                    >
                       {t(`paymentStatus.${p.status as keyof typeof STATUS_VARIANT}`)}
                     </Badge>
-                    {p.receipt_path && p.receipt_number && <ReceiptButton paymentId={p.id} number={p.receipt_number} />}
+                    {p.receipt_path && p.receipt_number && (
+                      <ReceiptButton paymentId={p.id} number={p.receipt_number} />
+                    )}
                   </li>
                 ))}
               </ul>

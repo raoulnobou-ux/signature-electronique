@@ -1,13 +1,23 @@
 "use client";
 
 import { Eraser, ImageUp, Keyboard, PenLine, Stamp, Undo2 } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import type SignaturePadType from "signature_pad";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
-import { createSignatureAsset, type AssetType, type SignatureAsset } from "@/app/(app)/app/signatures/actions";
+import {
+  createSignatureAsset,
+  type AssetType,
+  type SignatureAsset,
+} from "@/app/(app)/app/signatures/actions";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -22,7 +32,13 @@ import {
   trimCanvas,
   type TrimmedImage,
 } from "@/lib/images/signature";
-import { renderStampSvg, STAMP_COLORS, STAMP_PRESETS, STAMP_SHAPES, type StampOptions } from "@/lib/images/stamp";
+import {
+  renderStampSvg,
+  STAMP_COLORS,
+  STAMP_PRESETS,
+  STAMP_SHAPES,
+  type StampOptions,
+} from "@/lib/images/stamp";
 import { cn } from "@/lib/utils";
 
 const INKS = [
@@ -45,10 +61,19 @@ type Props = {
 
 /** Réinitialise entièrement la fenêtre à chaque ouverture (nouvelle instance). */
 export function SignatureCreator(props: Props) {
-  return <CreatorDialog key={props.open ? `open-${props.type ?? "signature"}` : "closed"} {...props} />;
+  return (
+    <CreatorDialog key={props.open ? `open-${props.type ?? "signature"}` : "closed"} {...props} />
+  );
 }
 
-function CreatorDialog({ open, onOpenChange, type: initialType = "signature", allowTypeChange = true, stampsAllowed = true, onCreated }: Props) {
+function CreatorDialog({
+  open,
+  onOpenChange,
+  type: initialType = "signature",
+  allowTypeChange = true,
+  stampsAllowed = true,
+  onCreated,
+}: Props) {
   const t = useTranslations("signatures");
   const tc = useTranslations("signatures.creator");
   const [type, setType] = useState<AssetType>(initialType);
@@ -57,13 +82,21 @@ function CreatorDialog({ open, onOpenChange, type: initialType = "signature", al
   const [name, setName] = useState("");
   const [saving, setSaving] = useState(false);
   const [celebrate, setCelebrate] = useState<string | null>(null);
-  const getImage = useRef<() => Promise<{ image: TrimmedImage; svg?: string } | null>>(async () => null);
+  const getImage = useRef<() => Promise<{ image: TrimmedImage; svg?: string } | null>>(
+    async () => null,
+  );
 
   const save = async () => {
     const result = await getImage.current();
     if (!result) {
       toast.error(
-        method === "draw" ? tc("draw.empty") : method === "type" ? tc("type.empty") : method === "generate" ? tc("stamp.empty") : tc("upload.invalid"),
+        method === "draw"
+          ? tc("draw.empty")
+          : method === "type"
+            ? tc("type.empty")
+            : method === "generate"
+              ? tc("stamp.empty")
+              : tc("upload.invalid"),
       );
       return;
     }
@@ -71,7 +104,8 @@ function CreatorDialog({ open, onOpenChange, type: initialType = "signature", al
     try {
       const form = new FormData();
       form.append("png", await canvasToPngBlob(result.image.canvas), "signature.png");
-      if (result.svg) form.append("svg", new Blob([result.svg], { type: "image/svg+xml" }), "signature.svg");
+      if (result.svg)
+        form.append("svg", new Blob([result.svg], { type: "image/svg+xml" }), "signature.svg");
       form.append("name", name.trim() || tc(`namePlaceholders.${type}`));
       form.append("type", type);
       form.append("method", method === "generate" ? "generated" : method);
@@ -79,7 +113,13 @@ function CreatorDialog({ open, onOpenChange, type: initialType = "signature", al
       form.append("height", String(result.image.height));
       const response = await createSignatureAsset(form);
       if (!response.ok) {
-        toast.error(response.error === "limit_reached" ? t("limitReached", { max: 5 }) : response.error === "feature_not_in_plan" ? t("proOnly") : t("toasts.error"));
+        toast.error(
+          response.error === "limit_reached"
+            ? t("limitReached", { max: 5 })
+            : response.error === "feature_not_in_plan"
+              ? t("proOnly")
+              : t("toasts.error"),
+        );
         return;
       }
       // Petite animation « la signature s'écrit » avant de refermer.
@@ -92,7 +132,8 @@ function CreatorDialog({ open, onOpenChange, type: initialType = "signature", al
     }
   };
 
-  const title = type === "stamp" ? tc("titleStamp") : type === "initials" ? tc("titleInitials") : tc("title");
+  const title =
+    type === "stamp" ? tc("titleStamp") : type === "initials" ? tc("titleInitials") : tc("title");
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -106,14 +147,22 @@ function CreatorDialog({ open, onOpenChange, type: initialType = "signature", al
           <div className="flex min-h-64 flex-col items-center justify-center gap-4">
             <div className="relative w-full max-w-md rounded-2xl bg-white p-6">
               {/* eslint-disable-next-line @next/next/no-img-element -- aperçu local généré */}
-              <img src={celebrate} alt="" className="animate-write-in mx-auto max-h-40 object-contain" />
+              <img
+                src={celebrate}
+                alt=""
+                className="mx-auto max-h-40 animate-write-in object-contain"
+              />
             </div>
             <p className="font-display text-lg font-semibold">{t("toasts.created")}</p>
           </div>
         ) : (
           <>
             {allowTypeChange && (
-              <div role="radiogroup" aria-label={tc("kind")} className="inline-flex self-start rounded-full border border-border bg-secondary p-1">
+              <div
+                role="radiogroup"
+                aria-label={tc("kind")}
+                className="inline-flex self-start rounded-full border border-border bg-secondary p-1"
+              >
                 {(["signature", "initials", "stamp"] as const).map((k) => (
                   <button
                     key={k}
@@ -161,10 +210,18 @@ function CreatorDialog({ open, onOpenChange, type: initialType = "signature", al
                 </TabsList>
               )}
               <TabsContent value="draw">
-                {method === "draw" && <DrawPad ink={ink} register={(fn) => (getImage.current = fn)} initials={type === "initials"} />}
+                {method === "draw" && (
+                  <DrawPad
+                    ink={ink}
+                    register={(fn) => (getImage.current = fn)}
+                    initials={type === "initials"}
+                  />
+                )}
               </TabsContent>
               <TabsContent value="type">
-                {method === "type" && <TypePad ink={ink} register={(fn) => (getImage.current = fn)} />}
+                {method === "type" && (
+                  <TypePad ink={ink} register={(fn) => (getImage.current = fn)} />
+                )}
               </TabsContent>
               <TabsContent value="upload">
                 {method === "upload" && <UploadPad register={(fn) => (getImage.current = fn)} />}
@@ -186,7 +243,10 @@ function CreatorDialog({ open, onOpenChange, type: initialType = "signature", al
                       aria-checked={ink === c.value}
                       aria-label={tc(`draw.colors.${c.key}`)}
                       onClick={() => setInk(c.value)}
-                      className={cn("size-8 cursor-pointer rounded-full ring-offset-2 ring-offset-popover transition", ink === c.value && "ring-2 ring-ring")}
+                      className={cn(
+                        "size-8 cursor-pointer rounded-full ring-offset-2 ring-offset-popover transition",
+                        ink === c.value && "ring-2 ring-ring",
+                      )}
                       style={{ backgroundColor: c.value }}
                     />
                   ))}
@@ -197,7 +257,13 @@ function CreatorDialog({ open, onOpenChange, type: initialType = "signature", al
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
               <div className="flex-1 space-y-2">
                 <Label htmlFor="asset-name">{tc("name")}</Label>
-                <Input id="asset-name" value={name} onChange={(e) => setName(e.target.value)} placeholder={tc(`namePlaceholders.${type}`)} maxLength={80} />
+                <Input
+                  id="asset-name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder={tc(`namePlaceholders.${type}`)}
+                  maxLength={80}
+                />
               </div>
               <Button size="lg" onClick={() => void save()} loading={saving}>
                 {tc("save")}
@@ -213,7 +279,15 @@ function CreatorDialog({ open, onOpenChange, type: initialType = "signature", al
 export type Register = (fn: () => Promise<{ image: TrimmedImage; svg?: string } | null>) => void;
 
 /** Zone de dessin : trait lissé à épaisseur variable (signature_pad), lueur pendant le tracé. */
-export function DrawPad({ ink, register, initials }: { ink: string; register: Register; initials: boolean }) {
+export function DrawPad({
+  ink,
+  register,
+  initials,
+}: {
+  ink: string;
+  register: Register;
+  initials: boolean;
+}) {
   const tc = useTranslations("signatures.creator.draw");
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const padRef = useRef<SignaturePadType | null>(null);
@@ -265,7 +339,14 @@ export function DrawPad({ ink, register, initials }: { ink: string; register: Re
     pad.penColor = ink;
     pad.minWidth = thickness * 0.45;
     pad.maxWidth = thickness * 1.5;
-    const data = pad.toData().map((group) => ({ ...group, penColor: ink, minWidth: thickness * 0.45, maxWidth: thickness * 1.5 }));
+    const data = pad
+      .toData()
+      .map((group) => ({
+        ...group,
+        penColor: ink,
+        minWidth: thickness * 0.45,
+        maxWidth: thickness * 1.5,
+      }));
     pad.clear();
     pad.fromData(data);
   }, [ink, thickness]);
@@ -287,12 +368,21 @@ export function DrawPad({ ink, register, initials }: { ink: string; register: Re
         <canvas
           ref={canvasRef}
           aria-label={tc("hint")}
-          className={cn("block w-full touch-none [filter:drop-shadow(0_0_5px_rgb(139_92_246/0.45))]", initials ? "h-44" : "h-56 sm:h-64")}
+          className={cn(
+            "block w-full touch-none [filter:drop-shadow(0_0_5px_rgb(139_92_246/0.45))]",
+            initials ? "h-44" : "h-56 sm:h-64",
+          )}
         />
         {/* Ligne de base, guide visuel (non exportée) */}
-        <div aria-hidden className="pointer-events-none absolute inset-x-8 bottom-12 border-b border-dashed border-slate-300" />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-8 bottom-12 border-b border-dashed border-slate-300"
+        />
         {empty && (
-          <p aria-hidden className="pointer-events-none absolute inset-x-0 bottom-5 text-center text-xs text-slate-400">
+          <p
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 bottom-5 text-center text-xs text-slate-400"
+          >
             {tc("baseline")}
           </p>
         )}
@@ -300,7 +390,15 @@ export function DrawPad({ ink, register, initials }: { ink: string; register: Re
       <div className="flex flex-wrap items-center justify-between gap-3">
         <label className="flex items-center gap-3 text-sm text-muted-foreground">
           {tc("thickness")}
-          <input type="range" min={1} max={4} step={0.2} value={thickness} onChange={(e) => setThickness(Number(e.target.value))} className="w-28 accent-brand-violet" />
+          <input
+            type="range"
+            min={1}
+            max={4}
+            step={0.2}
+            value={thickness}
+            onChange={(e) => setThickness(Number(e.target.value))}
+            className="w-28 accent-brand-violet"
+          />
         </label>
         <div className="flex gap-2">
           <Button
@@ -335,7 +433,15 @@ export function DrawPad({ ink, register, initials }: { ink: string; register: Re
 }
 
 /** Nom tapé : aperçu instantané dans six écritures manuscrites. */
-export function TypePad({ ink, register, initialText = "" }: { ink: string; register: Register; initialText?: string }) {
+export function TypePad({
+  ink,
+  register,
+  initialText = "",
+}: {
+  ink: string;
+  register: Register;
+  initialText?: string;
+}) {
   const tc = useTranslations("signatures.creator.type");
   const [text, setText] = useState(initialText);
   const [family, setFamily] = useState<string>(HANDWRITING_FONTS[0].family);
@@ -356,7 +462,14 @@ export function TypePad({ ink, register, initialText = "" }: { ink: string; regi
 
   return (
     <div className="space-y-3">
-      <Input autoFocus value={text} onChange={(e) => setText(e.target.value)} placeholder={tc("placeholder")} maxLength={60} aria-label={tc("placeholder")} />
+      <Input
+        autoFocus
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        placeholder={tc("placeholder")}
+        maxLength={60}
+        aria-label={tc("placeholder")}
+      />
       <p className="text-sm text-muted-foreground">{tc("hint")}</p>
       <div role="radiogroup" aria-label={tc("hint")} className="grid gap-2 sm:grid-cols-2">
         {HANDWRITING_FONTS.map((font) =>
@@ -369,7 +482,9 @@ export function TypePad({ ink, register, initialText = "" }: { ink: string; regi
               onClick={() => setFamily(font.family)}
               className={cn(
                 "flex h-20 cursor-pointer items-center justify-center overflow-hidden rounded-2xl border bg-white px-4 text-3xl transition-all",
-                family === font.family ? "border-brand-violet ring-4 ring-ring/25" : "border-border hover:border-ring/50",
+                family === font.family
+                  ? "border-brand-violet ring-4 ring-ring/25"
+                  : "border-border hover:border-ring/50",
               )}
               style={{ fontFamily: `"QS ${font.family}"`, color: ink }}
             >
@@ -392,7 +507,10 @@ function UploadPad({ register }: { register: Register }) {
   const [threshold, setThreshold] = useState(200);
   const [before, setBefore] = useState<string | null>(null);
 
-  const processed = useMemo(() => (source ? trimCanvas(removeBackground(source, threshold), 8) : null), [source, threshold]);
+  const processed = useMemo(
+    () => (source ? trimCanvas(removeBackground(source, threshold), 8) : null),
+    [source, threshold],
+  );
   const after = useMemo(() => processed?.canvas.toDataURL("image/png") ?? null, [processed]);
 
   useEffect(() => {
@@ -436,13 +554,19 @@ function UploadPad({ register }: { register: Register }) {
             <figure className="space-y-1.5">
               <figcaption className="text-xs text-muted-foreground">{tc("before")}</figcaption>
               {/* eslint-disable-next-line @next/next/no-img-element -- aperçu local */}
-              <img src={before} alt={tc("before")} className="h-36 w-full rounded-xl border border-border object-contain" />
+              <img
+                src={before}
+                alt={tc("before")}
+                className="h-36 w-full rounded-xl border border-border object-contain"
+              />
             </figure>
             <figure className="space-y-1.5">
               <figcaption className="text-xs text-muted-foreground">{tc("after")}</figcaption>
               <div className="h-36 rounded-xl border border-border bg-[repeating-conic-gradient(#e5e7eb_0_25%,#fff_0_50%)] bg-[length:16px_16px]">
                 {/* eslint-disable-next-line @next/next/no-img-element -- aperçu local */}
-                {after && <img src={after} alt={tc("after")} className="size-full object-contain p-2" />}
+                {after && (
+                  <img src={after} alt={tc("after")} className="size-full object-contain p-2" />
+                )}
               </div>
             </figure>
           </div>
@@ -479,10 +603,25 @@ async function rasterizeSvg(svg: string, scale = 3): Promise<TrimmedImage | null
 /** Générateur de cachet : nom, fonction, ville, date → rond, ovale ou rectangulaire. */
 function StampPad({ register }: { register: Register }) {
   const tc = useTranslations("signatures.creator.stamp");
-  const [options, setOptions] = useState<StampOptions>({ ...STAMP_PRESETS[0]!.options, organization: "", title: "", city: "", seed: 7 });
+  const locale = useLocale();
+  const [options, setOptions] = useState<StampOptions>({
+    ...STAMP_PRESETS[0]!.options,
+    organization: "",
+    title: "",
+    city: "",
+    seed: 7,
+  });
   const [withDate, setWithDate] = useState(false);
-  const [today] = useState(() => new Intl.DateTimeFormat("fr-FR", { dateStyle: "short", timeZone: "Africa/Douala" }).format(new Date()));
-  const svg = useMemo(() => renderStampSvg({ ...options, date: withDate ? today : "" }), [options, withDate, today]);
+  const [today] = useState(() =>
+    new Intl.DateTimeFormat(locale === "en" ? "en-GB" : "fr-FR", {
+      dateStyle: "short",
+      timeZone: "Africa/Douala",
+    }).format(new Date()),
+  );
+  const svg = useMemo(
+    () => renderStampSvg({ ...options, date: withDate ? today : "" }),
+    [options, withDate, today],
+  );
   const set = (patch: Partial<StampOptions>) => setOptions((o) => ({ ...o, ...patch }));
 
   useEffect(() => {
@@ -502,7 +641,11 @@ function StampPad({ register }: { register: Register }) {
               key={preset.id}
               type="button"
               role="radio"
-              aria-checked={preset.options.shape === options.shape && preset.options.color === options.color && preset.options.ink === options.ink}
+              aria-checked={
+                preset.options.shape === options.shape &&
+                preset.options.color === options.color &&
+                preset.options.ink === options.ink
+              }
               onClick={() => set(preset.options)}
               className="cursor-pointer rounded-full border border-border px-3 py-1.5 text-xs font-medium aria-checked:border-brand-violet aria-checked:bg-accent"
             >
@@ -512,20 +655,42 @@ function StampPad({ register }: { register: Register }) {
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="stamp-org">{tc("organization")}</Label>
-          <Input id="stamp-org" value={options.organization} maxLength={60} placeholder={tc("organizationPlaceholder")} onChange={(e) => set({ organization: e.target.value })} />
+          <Input
+            id="stamp-org"
+            value={options.organization}
+            maxLength={60}
+            placeholder={tc("organizationPlaceholder")}
+            onChange={(e) => set({ organization: e.target.value })}
+          />
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="space-y-1.5">
             <Label htmlFor="stamp-title">{tc("title")}</Label>
-            <Input id="stamp-title" value={options.title} maxLength={40} placeholder={tc("titlePlaceholder")} onChange={(e) => set({ title: e.target.value })} />
+            <Input
+              id="stamp-title"
+              value={options.title}
+              maxLength={40}
+              placeholder={tc("titlePlaceholder")}
+              onChange={(e) => set({ title: e.target.value })}
+            />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="stamp-city">{tc("city")}</Label>
-            <Input id="stamp-city" value={options.city} maxLength={40} placeholder={tc("cityPlaceholder")} onChange={(e) => set({ city: e.target.value })} />
+            <Input
+              id="stamp-city"
+              value={options.city}
+              maxLength={40}
+              placeholder={tc("cityPlaceholder")}
+              onChange={(e) => set({ city: e.target.value })}
+            />
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
-          <div role="radiogroup" aria-label={tc("shape")} className="inline-flex rounded-full border border-border bg-secondary p-1">
+          <div
+            role="radiogroup"
+            aria-label={tc("shape")}
+            className="inline-flex rounded-full border border-border bg-secondary p-1"
+          >
             {STAMP_SHAPES.map((shape) => (
               <button
                 key={shape}
@@ -533,7 +698,12 @@ function StampPad({ register }: { register: Register }) {
                 role="radio"
                 aria-checked={options.shape === shape}
                 onClick={() => set({ shape })}
-                className={cn("h-8 cursor-pointer rounded-full px-3 text-xs font-medium", options.shape === shape ? "bg-background-elevated shadow-soft" : "text-muted-foreground")}
+                className={cn(
+                  "h-8 cursor-pointer rounded-full px-3 text-xs font-medium",
+                  options.shape === shape
+                    ? "bg-background-elevated shadow-soft"
+                    : "text-muted-foreground",
+                )}
               >
                 {tc(`shapes.${shape}`)}
               </button>
@@ -548,7 +718,10 @@ function StampPad({ register }: { register: Register }) {
                 aria-checked={options.color === color}
                 aria-label={tc(`colors.${color}`)}
                 onClick={() => set({ color })}
-                className={cn("size-7 cursor-pointer rounded-full ring-offset-2 ring-offset-popover", options.color === color && "ring-2 ring-ring")}
+                className={cn(
+                  "size-7 cursor-pointer rounded-full ring-offset-2 ring-offset-popover",
+                  options.color === color && "ring-2 ring-ring",
+                )}
                 style={{ backgroundColor: STAMP_COLORS[color] }}
               />
             ))}
@@ -556,10 +729,19 @@ function StampPad({ register }: { register: Register }) {
         </div>
         <div className="flex flex-wrap gap-x-6 gap-y-2">
           <label className="flex items-center gap-2 text-sm">
-            <Switch checked={withDate} onCheckedChange={setWithDate} aria-label={tc("includeDate")} /> {tc("includeDate")}
+            <Switch
+              checked={withDate}
+              onCheckedChange={setWithDate}
+              aria-label={tc("includeDate")}
+            />{" "}
+            {tc("includeDate")}
           </label>
           <label className="flex items-center gap-2 text-sm">
-            <Switch checked={Boolean(options.ink)} onCheckedChange={(ink) => set({ ink, seed: Math.floor(Math.random() * 900) + 1 })} aria-label={tc("ink")} />
+            <Switch
+              checked={Boolean(options.ink)}
+              onCheckedChange={(ink) => set({ ink, seed: Math.floor(Math.random() * 900) + 1 })}
+              aria-label={tc("ink")}
+            />
             {tc("ink")}
           </label>
         </div>

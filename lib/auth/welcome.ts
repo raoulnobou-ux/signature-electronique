@@ -1,4 +1,5 @@
 import "server-only";
+import { toLocale } from "@/i18n/config";
 import { sendEmail } from "@/lib/email/send";
 import { welcomeEmail } from "@/lib/email/templates";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -10,8 +11,11 @@ export async function sendWelcomeOnce(userId: string) {
     .update({ welcome_email_sent_at: new Date().toISOString() })
     .eq("id", userId)
     .is("welcome_email_sent_at", null)
-    .select("full_name, email")
+    .select("full_name, email, locale")
     .maybeSingle();
   if (!profile?.email) return;
-  await sendEmail({ to: profile.email, ...welcomeEmail({ fullName: profile.full_name }) });
+  await sendEmail({
+    to: profile.email,
+    ...welcomeEmail({ fullName: profile.full_name, locale: toLocale(profile.locale) }),
+  });
 }
