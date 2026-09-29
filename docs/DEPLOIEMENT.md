@@ -52,6 +52,10 @@ Vérification : `curl https://<gotenberg>/health` renvoie 200 ; sans mot de pass
 
 ## 3. Vercel — l'application
 
+> **Déjà fait** : projet Vercel `quicksign` (`prj_iTQoJMmqK9AcaqOuk0CBsGfFjPPu`, compte raoulnobou), région Paris (`cdg1`), Node 22, protection Vercel limitée aux aperçus. Variables déjà renseignées : `NEXT_PUBLIC_SUPABASE_URL` et `NEXT_PUBLIC_SUPABASE_ANON_KEY` (production → `quicksign-prod`, aperçus → `quicksign-preprod`), `LINK_SECRET`, `CRON_SECRET`, `GOTENBERG_TOKEN`, `EMAIL_FROM`. Sans `NEXT_PUBLIC_APP_URL`, l'application utilise son adresse `*.vercel.app`.
+>
+> **Reste à faire** : (a) Vercel → Account Settings → Authentication → connecter GitHub, puis projet `quicksign` → Settings → Git → connecter `raoulnobou-ux/signature-electronique` (branche de production : `claude/bonjour-s9n385`) ; (b) ajouter `SUPABASE_SERVICE_ROLE_KEY` (clé `service_role` de `quicksign-prod` pour _Production_, de `quicksign-preprod` pour _Preview_) ; (c) les clés des services : `ANTHROPIC_API_KEY`, `RESEND_API_KEY`, `CINETPAY_*`, `GOTENBERG_URL`.
+
 1. https://vercel.com/new → importer le dépôt GitHub `signature-electronique` (Framework : Next.js, aucune autre option).
 2. **Settings → Environment Variables** (environnement _Production_, et _Preview_ avec les clés de préproduction) :
 
