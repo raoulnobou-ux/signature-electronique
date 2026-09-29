@@ -1068,6 +1068,7 @@ export type Database = {
           description: string | null;
           fields: NonNullable<Json>;
           id: string;
+          mode: string;
           name: string;
           owner_id: string;
           page_count: number | null;
@@ -1083,6 +1084,7 @@ export type Database = {
           description?: string | null;
           fields?: NonNullable<Json>;
           id?: string;
+          mode?: string;
           name: string;
           owner_id: string;
           page_count?: number | null;
@@ -1098,6 +1100,7 @@ export type Database = {
           description?: string | null;
           fields?: NonNullable<Json>;
           id?: string;
+          mode?: string;
           name?: string;
           owner_id?: string;
           page_count?: number | null;

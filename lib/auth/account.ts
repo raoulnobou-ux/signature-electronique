@@ -27,6 +27,8 @@ export type Account = {
   profile: Profile;
   entitlements: Entitlements;
   usage: UsageSnapshot;
+  /** Plan Pro fourni par le propriétaire de l'équipe (membres d'une équipe). */
+  sponsor: { teamId: string; teamName: string } | null;
 };
 
 const EMPTY_USAGE: UsageSnapshot = {
@@ -81,7 +83,8 @@ export const getCurrentAccount = cache(async (): Promise<Account | null> => {
   }
   const usage = usageRes.error ? EMPTY_USAGE : toUsage(usageRes.data);
 
-  const entitlements = getEntitlements({
+  let sponsor: Account["sponsor"] = null;
+  let entitlements = getEntitlements({
     subscription: {
       plan: sub.plan as PlanId,
       status: sub.status as SubscriptionStatus,
@@ -94,6 +97,30 @@ export const getCurrentAccount = cache(async (): Promise<Account | null> => {
     limits,
   });
 
+  // Membre d'une équipe : le plan Pro du propriétaire s'applique s'il est plus favorable.
+  if (entitlements.effectivePlan !== "pro") {
+    const { data: sponsorRows } = await supabase.rpc("my_team_sponsor");
+    const sp = sponsorRows?.[0];
+    if (sp && (sp.plan === "pro" || sp.plan === "trial")) {
+      const viaTeam = getEntitlements({
+        subscription: {
+          plan: sp.plan as PlanId,
+          status: sp.status as SubscriptionStatus,
+          currentPeriodEnd: new Date(sp.current_period_end),
+          cancelAtPeriodEnd: sp.cancel_at_period_end,
+          scheduledPlan: isPaidPlan(sp.scheduled_plan) ? sp.scheduled_plan : null,
+          scheduledPlanAt: sp.scheduled_plan_at ? new Date(sp.scheduled_plan_at) : null,
+        },
+        usage,
+        limits,
+      });
+      if (viaTeam.effectivePlan === "pro") {
+        entitlements = { ...viaTeam, state: viaTeam.state === "trial" ? "active" : viaTeam.state, trialDaysRemaining: null };
+        sponsor = { teamId: sp.team_id, teamName: sp.team_name };
+      }
+    }
+  }
+
   return {
     userId: user.id,
     email: user.email ?? profileRes.data.email,
@@ -101,6 +128,7 @@ export const getCurrentAccount = cache(async (): Promise<Account | null> => {
     profile: profileRes.data,
     entitlements,
     usage,
+    sponsor,
   };
 });
 

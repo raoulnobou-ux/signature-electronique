@@ -1,6 +1,6 @@
 "use client";
 
-import { Copy, Lock, MoreHorizontal, PenLine, Pencil, Plus, Stamp, Star, Trash2, Type } from "lucide-react";
+import { Copy, Lock, MoreHorizontal, PenLine, Pencil, Plus, Share2, Stamp, Star, Trash2, Type, Users } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
@@ -31,6 +31,7 @@ import {
   deleteSignatureAsset,
   duplicateSignatureAsset,
   renameSignatureAsset,
+  setAssetShared,
   setDefaultSignatureAsset,
   type AssetType,
   type SignatureAsset,
@@ -47,11 +48,13 @@ export function SignaturesView({
   readOnly,
   stampsAllowed,
   limit,
+  inTeam = false,
 }: {
   assets: SignatureAsset[];
   readOnly: boolean;
   stampsAllowed: boolean;
   limit: number | null;
+  inTeam?: boolean;
 }) {
   const t = useTranslations("signatures");
   const router = useRouter();
@@ -62,7 +65,7 @@ export function SignaturesView({
   const [deleting, setDeleting] = useState<SignatureAsset | null>(null);
   const [pending, startTransition] = useTransition();
 
-  const personal = assets.filter((a) => a.type !== "stamp").length;
+  const personal = assets.filter((a) => a.mine && a.type !== "stamp").length;
 
   const run = (action: () => Promise<{ ok: boolean }>, message: string, after?: () => void) =>
     startTransition(async () => {
@@ -133,7 +136,12 @@ export function SignaturesView({
                         {/* eslint-disable-next-line @next/next/no-img-element -- URL signée temporaire */}
                         <img src={asset.url} alt={asset.name} className="max-h-full max-w-full object-contain" />
                       </div>
-                      {asset.isDefault && (
+                      {asset.shared && (
+                        <Badge variant="default" className="absolute top-2 right-2">
+                          <Users aria-hidden /> {t("teamShared")}
+                        </Badge>
+                      )}
+                      {asset.mine && asset.isDefault && (
                         <Badge variant="brand" className="absolute top-2 left-2">
                           <Star aria-hidden /> {t("default")}
                         </Badge>
@@ -143,7 +151,7 @@ export function SignaturesView({
                           <p className="truncate text-sm font-medium">{asset.name}</p>
                           <p className="text-xs text-muted-foreground">{t(`methods.${asset.method}`)}</p>
                         </div>
-                        {!readOnly && (
+                        {!readOnly && asset.mine && (
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button variant="ghost" size="icon-sm" aria-label={`Actions — ${asset.name}`}>
@@ -162,6 +170,13 @@ export function SignaturesView({
                               <DropdownMenuItem onSelect={() => run(() => duplicateSignatureAsset(asset.id), t("toasts.duplicated"))}>
                                 <Copy /> {t("duplicate")}
                               </DropdownMenuItem>
+                              {inTeam && asset.type === "stamp" && (
+                                <DropdownMenuItem
+                                  onSelect={() => run(() => setAssetShared(asset.id, !asset.shared), asset.shared ? t("toasts.unshared") : t("toasts.shared"))}
+                                >
+                                  <Share2 /> {asset.shared ? t("unshare") : t("share")}
+                                </DropdownMenuItem>
+                              )}
                               <DropdownMenuSeparator />
                               <DropdownMenuItem destructive onSelect={() => setDeleting(asset)}>
                                 <Trash2 /> {t("delete")}

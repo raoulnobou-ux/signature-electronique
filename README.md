@@ -94,6 +94,16 @@ Le schéma complet (tables, Row Level Security, buckets privés, trigger de cré
 - Éditeur `/app/documents/<id>/signer` : placement au toucher, déplacement, redimensionnement, rotation, opacité, guides d'alignement, annuler/rétablir (Ctrl+Z / Ctrl+Y), brouillon enregistré automatiquement (`placed_fields`).
 - Finalisation côté serveur (pdf-lib) : nouvelle version `v<n>.pdf`, SHA-256 avant/après, événement d'audit `document.signed`, compteur mensuel. L'original et les versions précédentes ne sont jamais modifiés.
 
+## Fonctionnalités Pro
+
+- **Cachets** : générateur (rond, ovale, rectangle, texte circulaire, effet encre) ou import d'image.
+- **Demandes de signature** `/app/documents/<id>/demande` : signataires (e-mail et/ou WhatsApp), ordre ou simultané, zones par signataire, date limite. Lien personnel `/s/<jeton>` : signature au doigt, sans compte, refus motivé. Suivi `/app/demandes/<id>` (relances, lien WhatsApp, annulation, journal CSV).
+- **Certificat et vérification** : certificat PDF avec QR code ; `/verify/<id>` et `/verify` comparent l'empreinte d'un fichier sans l'envoyer.
+- **Modèles** `/app/modeles` : rôles, zones, champs variables ; création d'un document et d'une demande en un clic.
+- **Signature en lot** : sélection de 2 à 20 documents dans la liste → un placement → archive ZIP.
+- **Équipe** `/app/equipe` : 5 places, rôles, invitations par e-mail (`/invitation/<jeton>`), cachets et modèles partagés, journal d'activité ; les membres bénéficient du plan Pro du propriétaire.
+- Tâche planifiée quotidienne `/api/cron/requests` (expiration, relances automatiques). Variable `LINK_SECRET` (secret des liens de signature).
+
 ## Abonnements et paiements
 
 - Page `/app/abonnement` : plan actuel, usage, choix du plan (mensuel/annuel, FCFA/USD), récapitulatif exact (prorata), historique et reçus PDF.

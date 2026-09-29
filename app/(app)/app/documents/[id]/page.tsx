@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { SaveAsTemplateButton } from "@/components/templates/save-as-template";
 import { requireAccount } from "@/lib/auth/account";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -43,6 +44,11 @@ export default async function DocumentPage(props: PageProps<"/app/documents/[id]
       pendingRequestId={pendingRequest?.id ?? null}
       canRequest={account.entitlements.features.multi_signers && doc.owner_id === account.userId}
       pdfUrl={signed.signedUrl}
+      extraActions={
+        account.entitlements.features.templates && doc.owner_id === account.userId && !doc.trashed_at ? (
+          <SaveAsTemplateButton documentId={doc.id} defaultName={doc.title} />
+        ) : null
+      }
       doc={{
         id: doc.id,
         title: doc.title,

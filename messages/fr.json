@@ -755,7 +755,8 @@
         "fail": "Simuler un échec",
         "back": "Retour à l'abonnement",
         "notFound": "Ce paiement est introuvable ou déjà traité."
-      }
+      },
+      "sponsored": "Plan Pro inclus grâce à votre équipe « {team} »."
     }
   },
   "documents": {
@@ -815,7 +816,8 @@
       "deleteForeverConfirm": "Ces documents et leurs fichiers seront supprimés définitivement. Cette action est irréversible.",
       "signAgain": "Ajouter une signature",
       "request": "Faire signer",
-      "viewRequest": "Suivre la demande en cours"
+      "viewRequest": "Suivre la demande en cours",
+      "bulkSign": "Signer en lot"
     },
     "toasts": {
       "trashed": "{count, plural, one {Document mis à la corbeille.} other {# documents mis à la corbeille.}}",
@@ -928,6 +930,33 @@
       "rtf": "RTF",
       "jpeg": "Photo (JPEG)",
       "png": "Image (PNG)"
+    },
+    "bulk": {
+      "metaTitle": "Signature en lot",
+      "proOnly": "La signature en lot est incluse dans le plan Pro.",
+      "back": "Retour aux documents",
+      "title": "{count, plural, one {# document à signer} other {# documents à signer}}",
+      "hint": "Placez vos éléments une fois : ils seront apposés au même endroit sur chaque document.",
+      "signAll": "Signer les {count}",
+      "signing": "Signature en cours…",
+      "finished": "{count, plural, =0 {Aucun document signé} one {# document signé} other {# documents signés}}",
+      "status": {
+        "waiting": "En attente",
+        "signing": "Signature…",
+        "done": "Signé",
+        "error": "Échec"
+      },
+      "zip": "Télécharger le ZIP",
+      "zipName": "documents-signes.zip",
+      "zipError": "Le ZIP n'a pas pu être créé.",
+      "backToDocuments": "Voir mes documents",
+      "missingAsset": "Créez d'abord cet élément dans « Signatures et cachets ».",
+      "createSignature": "Créer ma signature",
+      "lastPage": "Dernière page",
+      "lastPageHint": "Les éléments placés sur la dernière page vont sur la dernière page de chaque document.",
+      "footer": "Horodatage en bas de page",
+      "removeField": "Retirer l'élément",
+      "placeHint": "Touchez la page pour placer : {tool}"
     }
   },
   "signatures": {
@@ -960,7 +989,9 @@
       "deleted": "Supprimé.",
       "defaultSet": "Défini par défaut.",
       "duplicated": "Dupliqué.",
-      "error": "L'opération a échoué. Réessayez."
+      "error": "L'opération a échoué. Réessayez.",
+      "shared": "Cachet partagé avec votre équipe.",
+      "unshared": "Partage retiré."
     },
     "methods": {
       "draw": "Dessinée",
@@ -1053,7 +1084,10 @@
           "clean": "Net"
         }
       }
-    }
+    },
+    "teamShared": "Équipe",
+    "share": "Partager avec l'équipe",
+    "unshare": "Ne plus partager"
   },
   "editor": {
     "metaTitle": "Signer « {title} »",
@@ -1171,7 +1205,8 @@
       "signerErrors": {
         "name": "Indiquez le nom complet.",
         "contact": "Indiquez un e-mail ou un numéro de téléphone.",
-        "email": "Adresse e-mail invalide."
+        "email": "Adresse e-mail invalide.",
+        "role": "Indiquez le nom du rôle."
       },
       "addSigner": "Ajouter un signataire",
       "mode": "Ordre de signature",
@@ -1213,8 +1248,22 @@
         "already_pending": "Une demande est déjà en cours pour ce document.",
         "not_found": "Document introuvable.",
         "read_only": "Votre compte est en lecture seule.",
-        "generic": "L'envoi a échoué. Réessayez."
-      }
+        "generic": "L'envoi a échoué. Réessayez.",
+        "missingTemplate": "Chaque rôle a besoin d'au moins une zone de signature ou de paraphe."
+      },
+      "rolesTitle": "Rôles des signataires",
+      "rolesHint": "Nommez chaque rôle (« Client », « Bailleur »…). À chaque utilisation du modèle, vous indiquerez qui tient chaque rôle.",
+      "templateName": "Nom du modèle",
+      "role": "Rôle",
+      "rolePlaceholder": "Client",
+      "addRole": "Ajouter un rôle",
+      "saveTemplate": "Enregistrer le modèle",
+      "templateSaved": "Modèle enregistré.",
+      "reviewTemplate": "Votre modèle est prêt",
+      "variable": "Champ variable",
+      "variableHint": "Rempli par vous à chaque utilisation (nom, montant…).",
+      "variableZone": "{label} · à remplir par vous",
+      "variablesCount": "{count, plural, =0 {Aucun champ variable} one {# champ variable} other {# champs variables}}"
     },
     "list": {
       "title": "Demandes de signature",
@@ -1276,10 +1325,128 @@
     }
   },
   "templates": {
-    "metaTitle": "Modèles"
+    "metaTitle": "Modèles",
+    "editTitle": "Modifier le modèle",
+    "title": "Modèles",
+    "description": "Vos contrats et formulaires récurrents, prêts à être envoyés en un clic.",
+    "proTitle": "Vos documents récurrents en un clic",
+    "proText": "Enregistrez un contrat avec ses zones de signature et ses champs variables, puis envoyez-le en quelques secondes. Disponible avec le plan Pro.",
+    "upgrade": "Passer au Pro",
+    "empty": "Aucun modèle pour l'instant.",
+    "emptyHint": "Ouvrez un document puis choisissez « Enregistrer comme modèle ».",
+    "meta": "{pages, plural, one {# page} other {# pages}} · {roles, plural, one {# rôle} other {# rôles}} · utilisé {uses, plural, =0 {jamais} one {# fois} other {# fois}}",
+    "actions": "Actions — {name}",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "share": "Partager avec l'équipe",
+    "unshare": "Ne plus partager",
+    "shared": "Modèle partagé avec votre équipe.",
+    "unshared": "Partage retiré.",
+    "teamBadge": "Équipe",
+    "use": "Utiliser",
+    "create": "Créer le document",
+    "cancel": "Annuler",
+    "continue": "Continuer",
+    "created": "Document créé depuis le modèle.",
+    "variable": "Champ variable",
+    "variablesHint": "Complétez les champs variables : ils seront inscrits sur le document avant l'envoi.",
+    "deleteTitle": "Supprimer « {name} » ?",
+    "deleteBody": "Les documents déjà créés depuis ce modèle ne sont pas touchés.",
+    "saveAs": "Enregistrer comme modèle",
+    "saveAsHint": "Le document est copié ; vous définissez ensuite les rôles, les zones de signature et les champs variables.",
+    "name": "Nom du modèle",
+    "descriptionLabel": "Description (facultatif)",
+    "errors": {
+      "generic": "Action impossible. Réessayez.",
+      "missingVariable": "Complétez les champs obligatoires.",
+      "empty": "Ce modèle n'a pas encore de zones : modifiez-le d'abord."
+    }
   },
   "team": {
-    "metaTitle": "Équipe"
+    "metaTitle": "Équipe",
+    "title": "Équipe",
+    "description": "Travaillez à plusieurs : modèles et cachets partagés, jusqu'à 5 personnes.",
+    "teamDescription": "Membres, invitations et activité de votre équipe.",
+    "proTitle": "Signez et faites signer en équipe",
+    "proText": "Jusqu'à 5 membres, rôles Propriétaire / Admin / Membre, modèles et cachets partagés, journal d'activité : inclus dans le plan Pro.",
+    "upgrade": "Passer au Pro",
+    "createTitle": "Créer votre équipe",
+    "createHint": "Vos membres profitent du plan Pro, de vos modèles et de vos cachets partagés.",
+    "name": "Nom de l'équipe",
+    "namePlaceholder": "Cabinet Ngono & Associés",
+    "create": "Créer l'équipe",
+    "created": "Équipe créée.",
+    "members": "Membres",
+    "seats": "{used} / {limit} places",
+    "you": "vous",
+    "roles": {
+      "owner": "Propriétaire",
+      "admin": "Admin",
+      "member": "Membre"
+    },
+    "memberActions": "Actions — {name}",
+    "makeAdmin": "Nommer admin",
+    "makeMember": "Repasser membre",
+    "remove": "Retirer de l'équipe",
+    "removed": "Membre retiré.",
+    "invitedUntil": "Invitation valable jusqu'au {date}",
+    "pendingInvite": "Invité",
+    "revoke": "Annuler l'invitation de {email}",
+    "inviteEmail": "Inviter par e-mail",
+    "role": "Rôle",
+    "invite": "Inviter",
+    "invited": "Invitation envoyée.",
+    "invitedLink": "Invitation créée : le lien a été copié, envoyez-le à votre collègue.",
+    "sharingHint": "Astuce : partagez un modèle ou un cachet depuis son menu « Partager avec l'équipe ».",
+    "activity": "Activité récente",
+    "noActivity": "Aucune activité pour l'instant.",
+    "events": {
+      "document_imported": "a importé un document",
+      "document_signed": "a signé un document",
+      "request_created": "a envoyé une demande de signature",
+      "request_canceled": "a annulé une demande",
+      "template_created": "a créé un modèle",
+      "template_used": "a utilisé un modèle",
+      "template_shared": "a partagé un modèle",
+      "team_member_joined": "a rejoint l'équipe",
+      "team_member_removed": "a retiré un membre",
+      "asset_shared": "a partagé un cachet"
+    },
+    "deleteTeam": "Supprimer l'équipe",
+    "leave": "Quitter l'équipe",
+    "cancel": "Annuler",
+    "done": "C'est fait.",
+    "deleteTitle": "Supprimer l'équipe ?",
+    "deleteBody": "Les membres perdent l'accès aux éléments partagés et le plan Pro de l'équipe. Les documents de chacun sont conservés.",
+    "leaveTitle": "Quitter l'équipe ?",
+    "leaveBody": "Vous perdez l'accès aux modèles et cachets partagés, et au plan Pro de l'équipe. Vos documents restent à vous.",
+    "errors": {
+      "generic": "Action impossible.",
+      "already_in_team": "Vous faites déjà partie d'une équipe.",
+      "forbidden": "Action réservée aux administrateurs.",
+      "invalid": "Adresse e-mail invalide.",
+      "no_seats": "Toutes les places sont occupées (5 au maximum).",
+      "already_member": "Cette personne fait déjà partie de l'équipe.",
+      "rate_limited": "Trop d'invitations. Réessayez plus tard.",
+      "feature_not_in_plan": "L'équipe est incluse dans le plan Pro."
+    },
+    "invitation": {
+      "metaTitle": "Invitation d'équipe",
+      "title": "Rejoindre l'équipe",
+      "body": "Vous avez été invité(e) à rejoindre une équipe sur QuickSign.",
+      "accept": "Rejoindre l'équipe",
+      "signIn": "Se connecter pour accepter",
+      "signUp": "Créer un compte",
+      "joined": "Bienvenue dans l'équipe !",
+      "errors": {
+        "unauthenticated": "Connectez-vous pour accepter l'invitation.",
+        "invalid": "Cette invitation n'existe pas ou a déjà été utilisée.",
+        "expired": "Cette invitation a expiré. Demandez-en une nouvelle.",
+        "wrong_email": "Cette invitation a été envoyée à une autre adresse e-mail. Connectez-vous avec la bonne adresse.",
+        "already_in_team": "Vous faites déjà partie d'une équipe : quittez-la avant d'en rejoindre une autre.",
+        "no_seats": "L'équipe est complète."
+      }
+    }
   },
   "sign": {
     "secure": "Lien personnel et sécurisé",

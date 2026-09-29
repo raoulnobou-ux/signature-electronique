@@ -19,6 +19,7 @@ import {
   Trash2,
   Upload,
   X,
+  FileSignature,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -108,9 +109,11 @@ type Props = {
   tags: TagItem[];
   filters: Filters;
   readOnly: boolean;
+  /** Signature en lot (Pro). */
+  bulkAllowed?: boolean;
 };
 
-export function DocumentsView({ documents, total, folders, tags, filters, readOnly }: Props) {
+export function DocumentsView({ documents, total, folders, tags, filters, readOnly, bulkAllowed = false }: Props) {
   const t = useTranslations("documents");
   const router = useRouter();
   const pathname = usePathname();
@@ -484,7 +487,7 @@ export function DocumentsView({ documents, total, folders, tags, filters, readOn
                     )
                   }
                 >
-                  <RotateCcw /> <span className="hidden sm:inline">{t("actions.restore")}</span>
+                  <RotateCcw /> <span className="sr-only sm:not-sr-only">{t("actions.restore")}</span>
                 </Button>
                 <Button
                   size="sm"
@@ -492,23 +495,36 @@ export function DocumentsView({ documents, total, folders, tags, filters, readOn
                   className="text-destructive"
                   onClick={() => setDialog({ type: "delete", ids: selectedIds })}
                 >
-                  <Trash2 /> <span className="hidden sm:inline">{t("actions.deleteForever")}</span>
+                  <Trash2 /> <span className="sr-only sm:not-sr-only">{t("actions.deleteForever")}</span>
                 </Button>
               </>
             ) : (
               <>
+                {!readOnly && selected.size >= 2 && (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() =>
+                      bulkAllowed
+                        ? router.push(`/app/documents/lot?ids=${selectedIds.slice(0, 20).join(",")}`)
+                        : toast.message(t("bulk.proOnly"))
+                    }
+                  >
+                    <FileSignature /> <span className="sr-only sm:not-sr-only">{t("actions.bulkSign")}</span>
+                  </Button>
+                )}
                 <Button
                   size="sm"
                   variant="ghost"
                   onClick={() => setDialog({ type: "move", ids: selectedIds })}
                 >
-                  <FolderInput /> <span className="hidden sm:inline">{t("actions.move")}</span>
+                  <FolderInput /> <span className="sr-only sm:not-sr-only">{t("actions.move")}</span>
                 </Button>
                 {tags.length > 0 && (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button size="sm" variant="ghost">
-                        <Tag /> <span className="hidden sm:inline">{t("actions.tag")}</span>
+                        <Tag /> <span className="sr-only sm:not-sr-only">{t("actions.tag")}</span>
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="center" side="top">
@@ -543,7 +559,7 @@ export function DocumentsView({ documents, total, folders, tags, filters, readOn
                     )
                   }
                 >
-                  <Trash2 /> <span className="hidden sm:inline">{t("actions.trash")}</span>
+                  <Trash2 /> <span className="sr-only sm:not-sr-only">{t("actions.trash")}</span>
                 </Button>
               </>
             )}
@@ -926,7 +942,7 @@ function DocumentListItem({
           <p className="truncate text-sm font-medium">{doc.title}</p>
           <p className="flex items-center gap-2 text-xs text-muted-foreground">
             {doc.pageCount !== null && <span>{t("pages", { count: doc.pageCount })}</span>}
-            <span className="hidden sm:inline">
+            <span className="sr-only sm:not-sr-only">
               · <UpdatedAt date={doc.updatedAt} />
             </span>
             <TagDots ids={doc.tagIds} tags={tags} />

@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { RequestBuilder } from "@/components/requests/request-builder";
+import { RequestBuilder, type BuilderPreset } from "@/components/requests/request-builder";
+import { templatePreset } from "../../../modeles/actions";
 import { requireAccount } from "@/lib/auth/account";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -37,7 +38,32 @@ export default async function NewRequestPage(props: PageProps<"/app/documents/[i
   const { data: signed } = await createAdminClient().storage.from("documents").createSignedUrl(doc.pdf_path, 3600);
   if (!signed) notFound();
 
+  // Demande préparée depuis un modèle : rôles et zones préremplis.
+  const templateId = (await props.searchParams).modele;
+  const fromTemplate = typeof templateId === "string" && /^[0-9a-f-]{36}$/i.test(templateId) ? await templatePreset(templateId) : null;
+  const preset: BuilderPreset | undefined = fromTemplate
+    ? {
+        mode: fromTemplate.mode,
+        signers: fromTemplate.roles.map((role) => ({ name: "", email: "", phone: "", role })),
+        fields: fromTemplate.fields.map((f) => ({
+          id: f.id,
+          page: f.page,
+          x: f.x,
+          y: f.y,
+          w: f.w,
+          h: f.h,
+          rotation: 0,
+          opacity: 1,
+          type: f.type,
+          assetId: null,
+          value: f.value ?? null,
+          signer: f.signer,
+          required: f.required,
+        })),
+      }
+    : undefined;
+
   return (
-    <RequestBuilder document={{ id: doc.id, title: doc.title }} pdfUrl={signed.signedUrl} />
+    <RequestBuilder document={{ id: doc.id, title: doc.title }} pdfUrl={signed.signedUrl} preset={preset} />
   );
 }

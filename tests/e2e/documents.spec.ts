@@ -6,6 +6,7 @@ const fixture = (name: string) => path.join(__dirname, "fixtures", name);
 
 test.describe("documents", () => {
   test("importer un PDF, un Word et une photo, puis les retrouver", async ({ page }) => {
+    test.setTimeout(90_000); // conversion Word par Gotenberg, plus lente quand la suite tourne en parallèle
     const errors: string[] = [];
     page.on("pageerror", (e) => errors.push(e.message));
     const user = await createConfirmedUser("docs");

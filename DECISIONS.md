@@ -164,3 +164,27 @@ _Mesure (Lighthouse mobile, build de production) :_ performance 94, accessibilit
 **D65 — Tâche quotidienne de facturation** (`/api/cron/billing`, 7 h UTC = 8 h à Douala) : fin d'essai J-2 et essai terminé, rappels, passage en grâce puis en lecture seule, bascules de plan, paiements abandonnés (> 24 h). Chaque e-mail est réservé dans `billing_notices` avant envoi : relancer la tâche ne crée aucun doublon.
 
 **D66 — Navigations et actions serveur dans des transitions séparées** (liste des documents) : une navigation de filtre lancée juste après une action (ex. déplacer puis ouvrir le dossier) pouvait être perdue quand elle partageait la transition de l'action.
+
+## Fonctionnalités Pro (Phase 7)
+
+**D67 — Cachets générés en SVG** (rond, ovale, rectangulaire ; texte circulaire par `textPath` ; encre irrégulière par filtre SVG à graine fixe). Le même SVG sert à l'aperçu, au PNG apposé (rendu ×3) et à l'archive vectorielle. Les textes sont échappés ; seuls les liens internes « #… » sont admis dans un SVG stocké.
+
+**D68 — Liens de signature dérivés, jamais stockés.** Jeton = HMAC-SHA256(secret, identifiant du signataire + version) : le propriétaire peut recopier ou renvoyer le lien à tout moment (WhatsApp, relance) ; la base ne contient que l'empreinte SHA-256. Secret `LINK_SECRET` (à défaut, dérivé de la clé service). Pages de lien en `noindex` et `Referrer-Policy: no-referrer`.
+
+**D69 — « Ouvert » marqué par le navigateur, pas par le serveur** : les aperçus de liens (WhatsApp, messageries) chargent la page sans exécuter de JavaScript ; seule une vraie ouverture est journalisée.
+
+**D70 — Une version par signataire.** Chaque signature est apposée immédiatement sur la version courante (empreintes avant/après enregistrées), avec mise à jour conditionnelle et nouvelle tentative en mode parallèle. Le document final est la dernière version ; aucune retouche après la dernière signature (l'empreinte finale reste celle du certificat).
+
+**D71 — Certificat PDF séparé du document** (identité déclarée, coordonnées, IP, appareil, horodatage local + UTC, empreintes, chronologie, cadre juridique : signature électronique simple, loi n° 2010/012 et OHADA), QR code vers `/verify/[id]`. Envoyé avec le PDF final à tous (pièce jointe ≤ 8 Mo, sinon lien de 7 jours).
+
+**D72 — Vérification sans envoi de fichier** : l'empreinte SHA-256 est calculée dans le navigateur et comparée aux versions connues ; `/verify` (recherche par empreinte) ne révèle que le titre et la date.
+
+**D73 — Suivi « temps réel » par actualisation discrète** (15 s) de la page de suivi tant que la demande est en cours, plutôt que Supabase Realtime (pas de publication de tables sensibles, fonctionne derrière tous les réseaux mobiles).
+
+**D74 — Relances** : manuelles (au plus une par heure et par signataire) et automatiques (après 3 jours, 2 au maximum) par la tâche quotidienne `/api/cron/requests`, qui gère aussi l'expiration. L'annulation garde les liens lisibles (« demande annulée ») mais bloque toute signature.
+
+**D75 — Modèles = copie du PDF + rôles + zones.** Les zones texte « variables » sont remplies par l'expéditeur à chaque utilisation et apposées sur la nouvelle copie ; les autres zones préremplissent la demande (rôle affiché à côté de chaque signataire).
+
+**D76 — Signature en lot sans nouvelle logique serveur** : même placement (positions relatives, option « dernière page ») envoyé document par document à la finalisation unitaire (droits, quotas, audit identiques) ; ZIP construit dans le navigateur (JSZip) pour ne pas dépasser les limites des fonctions serverless.
+
+**D77 — Équipe : une seule équipe par personne, 5 places (invitations comprises).** Les membres profitent du plan Pro du propriétaire (`team_sponsor`, pris en compte par `getEntitlements` côté application et par `can_write` côté base). Rôles : propriétaire (tout), admin (invite et retire des membres), membre. Partage explicite des cachets et modèles ; un membre qui part récupère ses éléments en privé. Gestion des membres uniquement côté serveur (plus d'écriture directe via la RLS).

@@ -276,3 +276,34 @@ export function requestExpiredEmail({ ownerName, documentTitle, url }: { ownerNa
     }),
   };
 }
+
+// ---------------------------------------------------------------------------
+// Équipe (Phase 7)
+// ---------------------------------------------------------------------------
+
+export function teamInvitationEmail({
+  inviterName,
+  teamName,
+  link,
+  expiresAt,
+}: {
+  inviterName: string;
+  teamName: string;
+  link: string;
+  expiresAt: string;
+}) {
+  return {
+    subject: `${inviterName} vous invite à rejoindre ${teamName} sur QuickSign`,
+    ...renderEmail({
+      preheader: "Signez et faites signer vos documents avec votre équipe.",
+      title: `Rejoignez l'équipe ${teamName}`,
+      paragraphs: [
+        "Bonjour,",
+        `${inviterName} vous invite à rejoindre l'équipe « ${teamName} » sur QuickSign : modèles et cachets partagés, demandes de signature et plan Pro inclus.`,
+        `L'invitation est valable jusqu'au ${expiresAt}. Si vous n'avez pas encore de compte, créez-le avec cette adresse e-mail puis ouvrez à nouveau ce lien.`,
+      ],
+      cta: { label: "Rejoindre l'équipe", url: link },
+      footnote: "Si vous ne vous attendiez pas à cette invitation, ignorez simplement cet e-mail.",
+    }),
+  };
+}

@@ -66,6 +66,9 @@ export async function SubscriptionOverview({
             </Button>
           </div>
 
+          {account.sponsor && (
+            <p className="rounded-xl bg-accent px-3 py-2 text-sm text-accent-foreground">{t("sponsored", { team: account.sponsor.teamName })}</p>
+          )}
           {ent.state === "trial" && ent.trialDaysRemaining !== null ? (
             <div className="space-y-2">
               <Progress value={(ent.trialDaysRemaining / TRIAL_DAYS) * 100} />

@@ -105,6 +105,7 @@ export default async function DocumentsPage(props: PageProps<"/app/documents">) 
     <div className="mx-auto max-w-7xl">
       <Suspense>
         <DocumentsView
+          bulkAllowed={account.entitlements.features.bulk_sign}
           documents={rows}
           total={count ?? rows.length}
           folders={folders ?? []}

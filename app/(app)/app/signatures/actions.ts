@@ -3,6 +3,7 @@
 import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { recordAudit } from "@/lib/audit";
 import { guard, type GuardDenial } from "@/lib/auth/account";
 import { sniffFileType } from "@/lib/files/sniff";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -21,6 +22,10 @@ export type SignatureAsset = {
   height: number | null;
   url: string;
   createdAt: string;
+  /** Élément créé par l'utilisateur (sinon : partagé par un membre de son équipe). */
+  mine: boolean;
+  /** Partagé avec l'équipe. */
+  shared: boolean;
 };
 
 const MAX_PNG = 2 * 1024 * 1024;
@@ -118,6 +123,8 @@ export async function createSignatureAsset(
       height: data.height,
       url: signed?.signedUrl ?? "",
       createdAt: data.created_at,
+      mine: true,
+      shared: false,
     },
   };
 }
@@ -125,7 +132,10 @@ export async function createSignatureAsset(
 /** Liste des signatures accessibles (propres et partagées par l'équipe), avec URL signées. */
 export async function listSignatureAssets(): Promise<SignatureAsset[]> {
   const supabase = await createClient();
-  const { data } = await supabase.from("signature_assets").select("*").order("created_at", { ascending: true });
+  const [{ data }, { data: auth }] = await Promise.all([
+    supabase.from("signature_assets").select("*").order("created_at", { ascending: true }),
+    supabase.auth.getUser(),
+  ]);
   if (!data?.length) return [];
   const { data: urls } = await createAdminClient()
     .storage.from("signatures")
@@ -144,7 +154,28 @@ export async function listSignatureAssets(): Promise<SignatureAsset[]> {
     height: a.height,
     url: byPath.get(a.image_path) ?? "",
     createdAt: a.created_at,
+    mine: a.owner_id === auth.user?.id,
+    shared: Boolean(a.team_id),
   }));
+}
+
+/** Partage d'un cachet avec son équipe (bibliothèque partagée), ou retrait du partage. */
+export async function setAssetShared(id: string, shared: boolean): Promise<{ ok: boolean }> {
+  const owned = await ownAsset(id);
+  if (!owned || owned.asset.type !== "stamp") return { ok: false };
+  const admin = createAdminClient();
+  const { data: member } = await admin.from("team_members").select("team_id").eq("user_id", owned.userId).maybeSingle();
+  if (shared && !member) return { ok: false };
+  const { error } = await owned.supabase
+    .from("signature_assets")
+    .update({ team_id: shared ? member!.team_id : null })
+    .eq("id", id);
+  if (error) return { ok: false };
+  if (shared) {
+    await recordAudit({ actorType: "user", actorId: owned.userId, eventType: "asset.shared", metadata: { asset_id: id } });
+  }
+  revalidatePath("/app/signatures");
+  return { ok: true };
 }
 
 const uuid = z.uuid();
