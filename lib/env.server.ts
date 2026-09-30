@@ -30,8 +30,29 @@ const serverSchema = z.object({
 
 const emptyToUndefined = (value: string | undefined) => (value === "" ? undefined : value);
 
-export const serverEnv = serverSchema.parse(
+type ServerEnv = z.infer<typeof serverSchema>;
+
+const parsed = serverSchema.safeParse(
   Object.fromEntries(
     Object.keys(serverSchema.shape).map((key) => [key, emptyToUndefined(process.env[key])]),
   ),
 );
+
+/**
+ * Ni le build (next build) ni les pages publiques ne dépendent des secrets : une variable
+ * manquante n'est signalée, avec son nom, que lorsqu'une fonctionnalité s'en sert.
+ */
+function missing(error: z.ZodError): ServerEnv {
+  const names = error.issues.map((issue) => issue.path.join(".")).join(", ");
+  return new Proxy({} as ServerEnv, {
+    get() {
+      throw new Error(`Variables d'environnement serveur manquantes ou invalides : ${names}`);
+    },
+  });
+}
+
+if (!parsed.success && process.env.NEXT_PHASE !== "phase-production-build") {
+  console.error("[env] configuration serveur incomplète", parsed.error.issues);
+}
+
+export const serverEnv: ServerEnv = parsed.success ? parsed.data : missing(parsed.error);
