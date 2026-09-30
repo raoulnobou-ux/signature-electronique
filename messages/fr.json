@@ -48,7 +48,7 @@
     "goToApp": "Mon espace"
   },
   "footer": {
-    "about": "La signature électronique simple et rapide, pensée pour le Cameroun et l'Afrique francophone.",
+    "about": "La signature électronique simple et rapide, accessible à tout le monde.",
     "product": "Produit",
     "company": "QuickSign",
     "legal": "Légal",
@@ -56,12 +56,12 @@
     "privacy": "Confidentialité",
     "legalNotice": "Mentions légales",
     "legalValidity": "Validité juridique",
-    "madeIn": "Conçu à Douala, pour l'Afrique francophone.",
+    "madeIn": "Fabriqué au Cameroun.",
     "rights": "© {year} QuickSign. Tous droits réservés."
   },
   "landing": {
     "hero": {
-      "badge": "Conçu pour le Cameroun et l'Afrique francophone",
+      "badge": "Accessible à tout le monde",
       "titleStart": "Signez, faites signer, terminé.",
       "titleHighlight": "En 30 secondes.",
       "subtitle": "Fini l'impression, le scan et les allers-retours. Ouvrez votre Word ou PDF, apposez votre signature et le cachet de votre structure, puis envoyez un PDF signé et horodaté — même depuis votre téléphone.",
@@ -1686,6 +1686,9 @@
       "read_only": "Votre compte est en lecture seule : l'assistant est suspendu. Réactivez un plan pour l'utiliser.",
       "feature_not_in_plan": "Cette fonction de l'assistant est incluse dans le plan Pro.",
       "invalid": "Message invalide.",
+      "provider_auth": "L'assistant est indisponible : la clé du service IA est refusée. L'administrateur doit la vérifier.",
+      "provider_billing": "L'assistant est indisponible : le crédit du service IA est épuisé. L'administrateur doit le recharger.",
+      "provider_unavailable": "Le service IA est momentanément surchargé. Réessayez dans quelques instants.",
       "server": "L'assistant n'a pas pu répondre. Réessayez.",
       "network": "Connexion interrompue. Réessayez."
     },

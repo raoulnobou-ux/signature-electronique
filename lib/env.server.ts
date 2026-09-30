@@ -28,7 +28,11 @@ const serverSchema = z.object({
   CRON_SECRET: z.string().optional(),
 });
 
-const emptyToUndefined = (value: string | undefined) => (value === "" ? undefined : value);
+/** Valeurs collées dans un tableau de bord : espaces et retours à la ligne parasites retirés. */
+const emptyToUndefined = (value: string | undefined) => {
+  const trimmed = value?.trim();
+  return trimmed === "" ? undefined : trimmed;
+};
 
 type ServerEnv = z.infer<typeof serverSchema>;
 

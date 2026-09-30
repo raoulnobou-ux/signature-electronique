@@ -4,6 +4,7 @@ import { z } from "zod";
 import { getCurrentAccount } from "@/lib/auth/account";
 import { runTurn, type TurnResult } from "@/lib/ai/agent";
 import { assistantBackend } from "@/lib/ai/client";
+import { providerErrorCode } from "@/lib/ai/provider-error";
 import {
   contextBlock,
   documentBlocks,
@@ -61,7 +62,7 @@ function ndjson(run: (send: (event: AssistantEvent) => void) => Promise<void>): 
         await run(send);
       } catch (error) {
         console.error("[assistant]", error);
-        send({ type: "error", code: "server" });
+        send({ type: "error", code: providerErrorCode(error) });
       } finally {
         if (!closed) {
           closed = true;

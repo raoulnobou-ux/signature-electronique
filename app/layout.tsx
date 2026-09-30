@@ -22,7 +22,7 @@ const spaceGrotesk = localFont({
 });
 
 const EN_DESCRIPTION =
-  "Sign your Word and PDF documents in seconds, with your signature and your organization's stamp. Built for Cameroon and French-speaking Africa.";
+  "Sign your Word and PDF documents in seconds, with your signature and your organization's stamp. Accessible to everyone.";
 
 export async function generateMetadata(): Promise<Metadata> {
   const en = (await getLocale()) === "en";

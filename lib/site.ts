@@ -3,7 +3,7 @@ export const siteConfig = {
   name: "QuickSign",
   tagline: "Signez, faites signer, terminé. En 30 secondes.",
   description:
-    "Signez vos documents Word et PDF en quelques secondes, avec votre signature et le cachet de votre structure. Pensé pour le Cameroun et l'Afrique francophone.",
+    "Signez vos documents Word et PDF en quelques secondes, avec votre signature et le cachet de votre structure. Accessible à tout le monde.",
   // Même règle que lib/env.ts (sans la validation, pour rester importable partout).
   url:
     process.env.NEXT_PUBLIC_APP_URL ||

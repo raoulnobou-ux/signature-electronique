@@ -59,6 +59,12 @@ export type AssistantErrorCode =
   | "read_only"
   | "feature_not_in_plan"
   | "invalid"
+  /** Clé API Claude refusée (invalide ou révoquée). */
+  | "provider_auth"
+  /** Crédit API Claude épuisé. */
+  | "provider_billing"
+  /** Service Claude surchargé ou momentanément indisponible. */
+  | "provider_unavailable"
   | "server";
 
 export type AssistantEvent =
