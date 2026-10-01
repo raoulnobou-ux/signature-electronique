@@ -53,9 +53,23 @@ const emptyToUndefined = (value: string | undefined) => {
 
 type ServerEnv = z.infer<typeof serverSchema>;
 
+/**
+ * Noms acceptés en plus du nom officiel : une variable secrète Vercel ne peut pas être
+ * renommée, et une clé Anthropic ne s'affiche qu'une fois à sa création.
+ */
+const ALIASES: Partial<Record<keyof typeof serverSchema.shape, string>> = {
+  ANTHROPIC_API_KEY: "ANTROPIC_API_KEY",
+};
+
 const parsed = serverSchema.safeParse(
   Object.fromEntries(
-    Object.keys(serverSchema.shape).map((key) => [key, emptyToUndefined(process.env[key])]),
+    Object.keys(serverSchema.shape).map((key) => {
+      const alias = ALIASES[key as keyof typeof ALIASES];
+      const value =
+        emptyToUndefined(process.env[key]) ??
+        (alias ? emptyToUndefined(process.env[alias]) : undefined);
+      return [key, value];
+    }),
   ),
 );
 
