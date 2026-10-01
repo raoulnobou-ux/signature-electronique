@@ -69,8 +69,12 @@ await check(
   "Tâches planifiées refusées sans secret",
   async () => (await get("/api/cron/billing")).status === 401,
 );
-await check("Webhook CinetPay refuse une notification non signée", async () => {
-  const res = await get("/api/webhooks/cinetpay", { method: "POST", body: "cpm_trans_id=faux" });
+await check("Webhook Paddle refuse une notification non signée", async () => {
+  const res = await get("/api/webhooks/paddle", { method: "POST", body: "{}" });
+  return [401, 404].includes(res.status) || `statut ${res.status}`;
+});
+await check("Webhook pawaPay refuse une notification invalide", async () => {
+  const res = await get("/api/webhooks/pawapay", { method: "POST", body: "{}" });
   return [401, 404].includes(res.status) || `statut ${res.status}`;
 });
 await check("Application installable (manifeste, icônes, service worker)", async () => {

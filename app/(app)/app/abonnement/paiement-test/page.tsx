@@ -19,7 +19,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t("metaTitle"), robots: { index: false } };
 }
 
-/** Checkout simulé (développement et tests) — n'existe pas quand CinetPay est configuré. */
+/** Checkout simulé (développement et tests) — jamais actif en production. */
 export default async function SandboxCheckoutPage({
   searchParams,
 }: PageProps<"/app/abonnement/paiement-test">) {

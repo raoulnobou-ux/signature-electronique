@@ -13,9 +13,10 @@ const complete = {
   GOTENBERG_URL: "https://gotenberg.fly.dev",
   GOTENBERG_TOKEN: "token",
   ANTHROPIC_API_KEY: "sk-ant",
-  CINETPAY_API_KEY: "k",
-  CINETPAY_SITE_ID: "1",
-  CINETPAY_SECRET_KEY: "s",
+  PAWAPAY_API_TOKEN: "pawapay-token",
+  PADDLE_API_KEY: "pdl_live_apikey_x",
+  PADDLE_WEBHOOK_SECRET: "pdl_ntfset_x",
+  PADDLE_CLIENT_TOKEN: "live_x",
   SENTRY_DSN: "https://pub@o1.ingest.sentry.io/42",
 };
 

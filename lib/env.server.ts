@@ -9,17 +9,25 @@ import { z } from "zod";
 const serverSchema = z.object({
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(20),
   ANTHROPIC_API_KEY: z.string().optional(),
+  /** Espace de travail Anthropic, requis si la clé n'est rattachée à aucun espace de travail. */
+  ANTHROPIC_WORKSPACE_ID: z.string().optional(),
   /** "true" : assistant simulé sans clé Anthropic (dev, tests e2e). Ignoré en production Vercel. */
   AI_MOCK: z.enum(["true", "false"]).optional(),
   GOTENBERG_URL: z.url().optional(),
   GOTENBERG_TOKEN: z.string().optional(),
   RESEND_API_KEY: z.string().optional(),
   EMAIL_FROM: z.string().default("QuickSign <bonjour@quicksign.app>"),
-  CINETPAY_API_KEY: z.string().optional(),
-  CINETPAY_SITE_ID: z.string().optional(),
-  /** Clé secrète : authentifie les notifications (en-tête x-token). */
-  CINETPAY_SECRET_KEY: z.string().optional(),
-  /** "true" : paiements simulés sans clé CinetPay (dev, tests). Ignoré en production Vercel. */
+  /** pawaPay (Mobile Money, FCFA) : jeton d'API. */
+  PAWAPAY_API_TOKEN: z.string().optional(),
+  PAWAPAY_ENV: z.enum(["sandbox", "production"]).optional(),
+  /** Paddle (carte, international, dollars) : clé d'API serveur. */
+  PADDLE_API_KEY: z.string().optional(),
+  /** Clé secrète de la destination de notification Paddle (en-tête Paddle-Signature). */
+  PADDLE_WEBHOOK_SECRET: z.string().optional(),
+  PADDLE_ENV: z.enum(["sandbox", "production"]).optional(),
+  /** Jeton côté client de Paddle.js (public, commence par test_ ou live_). */
+  PADDLE_CLIENT_TOKEN: z.string().optional(),
+  /** "true" : paiements simulés sans prestataire (dev, tests). Ignoré en production Vercel. */
   PAYMENTS_SANDBOX: z.enum(["true", "false"]).optional(),
   VERCEL_ENV: z.string().optional(),
   /** Secret des liens de signature (sinon dérivé de la clé service Supabase). */

@@ -5,7 +5,7 @@ import type { CheckoutRequest, PaymentProvider, VerifiedTransaction } from "./pr
 
 /**
  * Prestataire « bac à sable » pour le développement et les tests automatisés, quand aucune
- * clé CinetPay n'est configurée. Le checkout est une page de QuickSign qui simule
+ * prestataire n'est configuré. Le checkout est une page de QuickSign qui simule
  * Mobile Money ou carte ; l'identifiant de transaction est signé par le serveur, donc
  * impossible à fabriquer depuis le navigateur. Jamais actif en production (voir index.ts).
  */

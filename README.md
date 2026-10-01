@@ -114,8 +114,11 @@ Le schéma complet (tables, Row Level Security, buckets privés, trigger de cré
 ## Abonnements et paiements
 
 - Page `/app/abonnement` : plan actuel, usage, choix du plan (mensuel/annuel, FCFA/USD), récapitulatif exact (prorata), historique et reçus PDF.
-- Prestataire : **CinetPay** (Mobile Money MTN/Orange + carte). Dans le back-office CinetPay (Intégrations), récupérer l'**API key**, le **Site ID** et la **clé secrète**, puis renseigner `CINETPAY_API_KEY`, `CINETPAY_SITE_ID` et `CINETPAY_SECRET_KEY`. L'URL de notification est envoyée à chaque paiement (`https://<domaine>/api/webhooks/cinetpay`) et le retour client arrive sur `/api/billing/return`.
-- Sans clé CinetPay, `PAYMENTS_SANDBOX=true` active un paiement simulé (développement, tests e2e) ; jamais en production.
+- Deux prestataires, choisis selon la devise :
+  - **FCFA → pawaPay** (Mobile Money MTN, Orange… sur la page de paiement hébergée de pawaPay) : `PAWAPAY_API_TOKEN` (et `PAWAPAY_ENV=sandbox` pour les essais). Callback de dépôt : `https://<domaine>/api/webhooks/pawapay`.
+  - **Dollars → Paddle** (carte, PayPal, Apple Pay, Google Pay ; Paddle est revendeur officiel et gère la TVA) : `PADDLE_API_KEY`, `PADDLE_CLIENT_TOKEN`, `PADDLE_WEBHOOK_SECRET`. Lien de paiement par défaut : `https://<domaine>/app/abonnement/paiement` ; notifications : `https://<domaine>/api/webhooks/paddle`.
+- Le retour client arrive sur `/api/billing/return` ; aucun plan n'est activé sans revérification de la transaction par l'API du prestataire.
+- Sans prestataire, `PAYMENTS_SANDBOX=true` active un paiement simulé (développement, tests e2e) ; jamais en production.
 - Tâche planifiée quotidienne : `/api/cron/billing` (rappels J-5/J-2/J, fin d'essai, grâce de 3 jours, lecture seule), déclarée dans `vercel.json`.
 - Les prix se modifient dans la table `plans_config` sans redéployer.
 

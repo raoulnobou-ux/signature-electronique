@@ -22,7 +22,7 @@ import { formatLongDate, formatMoney } from "@/lib/format";
 import { toLocale, type Locale } from "@/i18n/config";
 import { siteConfig } from "@/lib/site";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getPaymentProvider } from ".";
+import { providerByName } from ".";
 import { paymentMethodLabel, renderReceipt } from "./receipt";
 
 const DAY = 24 * 60 * 60 * 1000;
@@ -162,8 +162,6 @@ export async function settlePayment(input: {
   reference: string;
   transactionId: string | null;
 }): Promise<{ outcome: SettleOutcome; userId?: string }> {
-  const provider = getPaymentProvider();
-  if (!provider) return { outcome: "unknown" };
   const admin = createAdminClient();
   const { data: payment } = await admin
     .from("payments")
@@ -177,12 +175,14 @@ export async function settlePayment(input: {
     await issueReceipt(payment.id, { email: false });
     return { outcome: "successful", userId };
   }
-  if (payment.provider !== provider.name) return { outcome: "unknown", userId };
+  const provider = providerByName(payment.provider);
+  if (!provider) return { outcome: "unknown", userId };
 
   const expected = { amount: Number(payment.amount), currency: payment.currency as Currency };
   const tx = await provider.verifyTransaction({
     reference: payment.provider_ref,
-    transactionId: input.transactionId,
+    // Identifiant fourni par le prestataire au retour, sinon celui noté à la création.
+    transactionId: input.transactionId ?? payment.provider_tx_id,
     expected,
   });
   if (!tx) return { outcome: "pending", userId };

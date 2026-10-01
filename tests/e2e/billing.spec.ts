@@ -28,7 +28,7 @@ async function payInSandbox(
     .getByRole("dialog")
     .getByRole("button", { name: /^Payer/ })
     .click();
-  await page.waitForURL(/\/paiement-test\?ref=QS-/);
+  await page.waitForURL(/\/paiement-test\?ref=[0-9a-f-]{36}/);
   await page.getByRole("radio", { name: method }).click();
   await page.getByRole("button", { name: succeed ? /^Payer/ : "Simuler un échec" }).click();
   await page.waitForURL(/\/app\/abonnement\?paiement=/);
@@ -171,11 +171,12 @@ test("sécurité : webhook non configuré, tâche planifiée protégée, faux re
   request,
   page,
 }) => {
-  // Sans clé CinetPay (bac à sable), l'URL de notification refuse tout ; elle répond au test de disponibilité.
-  expect(
-    (await request.post("/api/webhooks/cinetpay", { form: { cpm_trans_id: "QS-X" } })).status(),
-  ).toBe(404);
-  expect((await request.get("/api/webhooks/cinetpay")).status()).toBe(200);
+  // Sans clé pawaPay ni Paddle (bac à sable), les URL de notification refusent tout.
+  for (const provider of ["pawapay", "paddle"]) {
+    expect(
+      (await request.post(`/api/webhooks/${provider}`, { data: { depositId: "x" } })).status(),
+    ).toBe(404);
+  }
   expect((await request.get("/api/cron/billing")).status()).toBe(401);
   const cron = await request.get("/api/cron/billing", {
     headers: { Authorization: `Bearer ${process.env.CRON_SECRET}` },
@@ -192,7 +193,7 @@ test("sécurité : webhook non configuré, tâche planifiée protégée, faux re
     .getByRole("dialog")
     .getByRole("button", { name: /^Payer/ })
     .click();
-  await page.waitForURL(/\/paiement-test\?ref=QS-/);
+  await page.waitForURL(/\/paiement-test\?ref=[0-9a-f-]{36}/);
   const ref = new URL(page.url()).searchParams.get("ref")!;
   await page.goto(
     `/api/billing/return?status=successful&tx_ref=${ref}&transaction_id=sbx_successful_mtn_${"0".repeat(32)}`,

@@ -50,9 +50,22 @@ export function productionChecks(env: Env): Check[] {
   );
   add("anthropic", set(env, "ANTHROPIC_API_KEY"), "ANTHROPIC_API_KEY : assistant IA");
   add(
-    "cinetpay",
-    set(env, "CINETPAY_API_KEY") && set(env, "CINETPAY_SITE_ID") && set(env, "CINETPAY_SECRET_KEY"),
-    "CINETPAY_API_KEY, CINETPAY_SITE_ID, CINETPAY_SECRET_KEY : paiements",
+    "pawapay",
+    set(env, "PAWAPAY_API_TOKEN"),
+    "PAWAPAY_API_TOKEN : paiements Mobile Money (FCFA)",
+  );
+  add(
+    "paddle",
+    set(env, "PADDLE_API_KEY") &&
+      set(env, "PADDLE_WEBHOOK_SECRET") &&
+      set(env, "PADDLE_CLIENT_TOKEN"),
+    "PADDLE_API_KEY, PADDLE_WEBHOOK_SECRET, PADDLE_CLIENT_TOKEN : paiements par carte (dollars)",
+  );
+  add(
+    "payments_live",
+    env.PAWAPAY_ENV !== "sandbox" && env.PADDLE_ENV !== "sandbox",
+    "PAWAPAY_ENV et PADDLE_ENV : environnement de test, aucun paiement réel",
+    "warning",
   );
   add("no_mock", env.AI_MOCK !== "true", "AI_MOCK doit être vide en production");
   add(

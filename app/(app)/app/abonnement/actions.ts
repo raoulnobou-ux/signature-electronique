@@ -1,17 +1,18 @@
 "use server";
 
 import { randomUUID } from "node:crypto";
-import { logAppError } from "@/lib/monitoring/app-errors";
 import { revalidatePath } from "next/cache";
+import { getLocale } from "next-intl/server";
 import { z } from "zod";
 import { recordAudit } from "@/lib/audit";
 import { getCurrentAccount, type Account } from "@/lib/auth/account";
 import { getPaymentProvider, getSandboxProvider } from "@/lib/billing";
 import { quoteCheckout, type Quote } from "@/lib/billing/quote";
 import { SANDBOX_METHODS, SANDBOX_OUTCOMES } from "@/lib/billing/sandbox";
-import { paymentDescription } from "@/lib/billing/service";
+import { PLAN_LABELS, paymentDescription } from "@/lib/billing/service";
 import type { BillingCycle, Currency, PlanId } from "@/lib/entitlements/plans";
 import { publicEnv } from "@/lib/env";
+import { logAppError } from "@/lib/monitoring/app-errors";
 import { getPrices } from "@/lib/pricing";
 import { rateLimit } from "@/lib/rate-limit";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -81,8 +82,8 @@ export async function getCheckoutQuote(
   const ctx = await loadContext();
   if ("ok" in ctx) return ctx;
   if (!ctx.subscription) return { ok: false, reason: "invalid" };
-  if (!getPaymentProvider()) return { ok: false, reason: "payments_unavailable" };
   const quote = await computeQuote(ctx.account, ctx.subscription, parsed.data);
+  if (!getPaymentProvider(quote.currency)) return { ok: false, reason: "payments_unavailable" };
   const end = new Date(ctx.subscription.current_period_end);
   const startsAt =
     quote.kind !== "upgrade" &&
@@ -116,14 +117,15 @@ export async function startCheckout(
   if ("ok" in ctx) return ctx;
   const { account, subscription } = ctx;
   if (!subscription) return { ok: false, reason: "invalid" };
-  const provider = getPaymentProvider();
-  if (!provider) return { ok: false, reason: "payments_unavailable" };
   if (!(await rateLimit("checkout", account.userId, 10, 600)))
     return { ok: false, reason: "rate_limited" };
 
   const quote = await computeQuote(account, subscription, parsed.data);
-  // Identifiant de transaction : lettres, chiffres et tirets uniquement (exigence CinetPay).
-  const reference = `QS-${randomUUID().replaceAll("-", "").slice(0, 24).toUpperCase()}`;
+  // FCFA → pawaPay (Mobile Money) ; dollars → Paddle (carte, international).
+  const provider = getPaymentProvider(quote.currency);
+  if (!provider) return { ok: false, reason: "payments_unavailable" };
+  // Référence unique : UUID v4 (identifiant de dépôt exigé par pawaPay).
+  const reference = randomUUID();
   const admin = createAdminClient();
   const { data: payment, error } = await admin
     .from("payments")
@@ -147,11 +149,14 @@ export async function startCheckout(
   }
 
   try {
-    const { url } = await provider.createCheckout({
+    const locale = await getLocale();
+    const { url, transactionId } = await provider.createCheckout({
       reference,
       amount: quote.amount,
       currency: quote.currency,
       description: paymentDescription(quote.plan, quote.cycle, quote.kind),
+      productName: `QuickSign ${PLAN_LABELS[quote.plan]}`,
+      language: locale === "en" ? "en" : "fr",
       customer: {
         email: account.email,
         name: account.profile.full_name,
@@ -159,9 +164,12 @@ export async function startCheckout(
         city: account.profile.city,
       },
       redirectUrl: `${publicEnv.NEXT_PUBLIC_APP_URL}/api/billing/return?ref=${encodeURIComponent(reference)}`,
-      notifyUrl: `${publicEnv.NEXT_PUBLIC_APP_URL}/api/webhooks/cinetpay`,
+      checkoutPageUrl: `${publicEnv.NEXT_PUBLIC_APP_URL}/app/abonnement/paiement`,
       meta: { user_id: account.userId, payment_id: payment.id, kind: quote.kind },
     });
+    if (transactionId) {
+      await admin.from("payments").update({ provider_tx_id: transactionId }).eq("id", payment.id);
+    }
     await recordAudit({
       actorType: "user",
       actorId: account.userId,
@@ -262,7 +270,7 @@ export async function getReceiptUrl(paymentId: string): Promise<{ ok: true; url:
   return data ? { ok: true, url: data.signedUrl } : { ok: false, reason: "provider_error" };
 }
 
-/** Bac à sable local : simule la réponse de l'opérateur puis revient comme le ferait CinetPay. */
+/** Bac à sable local : simule la réponse de l'opérateur puis revient comme le ferait un prestataire. */
 export async function completeSandboxPayment(input: {
   reference: string;
   outcome: string;

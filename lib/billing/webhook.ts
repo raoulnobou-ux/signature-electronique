@@ -1,24 +1,25 @@
+import "server-only";
 import { NextResponse } from "next/server";
-import { getPaymentProvider } from "@/lib/billing";
-import { settlePayment } from "@/lib/billing/service";
 import type { Json } from "@/lib/supabase/database.types";
 import { createAdminClient } from "@/lib/supabase/admin";
+import type { PaymentProvider } from "./provider";
+import { settlePayment } from "./service";
 
 /**
- * Notification CinetPay (notify_url, envoyée à chaque paiement) :
- * 1. authentification par le jeton HMAC `x-token` (clé secrète) ;
+ * Notification d'un prestataire de paiement :
+ * 1. authentification propre au prestataire (signature Paddle ; pawaPay : contenu jamais cru) ;
  * 2. journal brut + idempotence (une même notification n'est traitée qu'une fois) ;
  * 3. revérification de la transaction par l'API avant toute activation (settlePayment).
- * Une erreur renvoie 500 pour que CinetPay réessaie ; l'événement reste rejouable.
+ * Une erreur renvoie 500 pour que le prestataire réessaie ; l'événement reste rejouable.
  */
-export async function POST(request: Request) {
-  const provider = getPaymentProvider();
-  if (!provider || provider.name !== "cinetpay") {
-    return NextResponse.json({ error: "not_configured" }, { status: 404 });
-  }
+export async function handlePaymentWebhook(
+  provider: PaymentProvider | null,
+  request: Request,
+): Promise<Response> {
+  if (!provider) return NextResponse.json({ error: "not_configured" }, { status: 404 });
 
   const rawBody = await request.text();
-  if (rawBody.length > 100_000) return NextResponse.json({ error: "too_large" }, { status: 413 });
+  if (rawBody.length > 200_000) return NextResponse.json({ error: "too_large" }, { status: 413 });
   const event = provider.parseWebhook(request.headers, rawBody);
   if (!event) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
@@ -77,9 +78,4 @@ export async function POST(request: Request) {
       .eq("id", eventId!);
     return NextResponse.json({ error: "processing" }, { status: 500 });
   }
-}
-
-/** CinetPay vérifie la disponibilité de l'URL de notification par une simple requête GET. */
-export function GET() {
-  return NextResponse.json({ ok: true });
 }

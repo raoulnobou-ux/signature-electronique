@@ -794,7 +794,7 @@
       "sandbox": {
         "metaTitle": "Paiement de test",
         "title": "Paiement de test",
-        "notice": "Mode test : aucun argent réel n'est débité. En production, cette étape est remplacée par la page sécurisée de CinetPay.",
+        "notice": "Mode test : aucun argent réel n'est débité. En production, cette étape est remplacée par la page sécurisée de pawaPay (Mobile Money) ou de Paddle (carte).",
         "method": "Moyen de paiement",
         "methods": {
           "mtn": "MTN Mobile Money",
@@ -806,7 +806,16 @@
         "back": "Retour à l'abonnement",
         "notFound": "Ce paiement est introuvable ou déjà traité."
       },
-      "sponsored": "Plan Pro inclus grâce à votre équipe « {team} »."
+      "sponsored": "Plan Pro inclus grâce à votre équipe « {team} ».",
+      "paddle": {
+        "metaTitle": "Paiement par carte",
+        "title": "Paiement par carte",
+        "opening": "Le formulaire de paiement sécurisé Paddle s'ouvre. S'il ne s'affiche pas, cliquez sur « Ouvrir le paiement ».",
+        "retry": "Ouvrir le paiement",
+        "back": "Retour à l'abonnement",
+        "notFound": "Ce paiement est introuvable ou déjà traité.",
+        "notConfigured": "Le paiement par carte n'est pas encore disponible."
+      }
     }
   },
   "documents": {

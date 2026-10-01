@@ -9,11 +9,15 @@ export interface CheckoutRequest {
   amount: number;
   currency: Currency;
   description: string;
+  /** Nom du produit affiché par le prestataire (« QuickSign Pro »). */
+  productName: string;
+  /** Langue de la page de paiement. */
+  language: "fr" | "en";
   customer: { email: string; name: string; phone: string | null; city?: string | null };
   /** URL de retour du navigateur après paiement. */
   redirectUrl: string;
-  /** URL de notification serveur à serveur (webhook). */
-  notifyUrl: string;
+  /** Page de QuickSign qui ouvre le formulaire du prestataire (Paddle.js). */
+  checkoutPageUrl?: string;
   meta: Record<string, string>;
 }
 
@@ -23,7 +27,7 @@ export interface VerifiedTransaction {
   transactionId: string;
   amount: number;
   currency: string;
-  /** Moyen de paiement (OMCM, MOMOCM, VISAM…), pour le reçu. */
+  /** Moyen de paiement (MTN_MOMO_CMR, ORANGE_CMR, card, paypal…), pour le reçu. */
   method: string | null;
   failureReason: string | null;
 }
@@ -38,12 +42,13 @@ export interface WebhookEvent {
 }
 
 /**
- * Couche d'abstraction des paiements : CinetPay aujourd'hui ; un autre prestataire
- * (Notch Pay, Flutterwave…) s'ajoute sans toucher au reste de l'application.
+ * Couche d'abstraction des paiements : pawaPay (Mobile Money, FCFA) et Paddle (carte,
+ * international, dollars) ; un autre prestataire s'ajoute sans toucher au reste de l'application.
  */
 export interface PaymentProvider {
   readonly name: string;
-  createCheckout(request: CheckoutRequest): Promise<{ url: string }>;
+  /** URL du paiement, et l'identifiant de transaction du prestataire s'il est déjà connu. */
+  createCheckout(request: CheckoutRequest): Promise<{ url: string; transactionId?: string }>;
   /**
    * Revérifie une transaction auprès du prestataire. `expected` n'est utilisé que par le
    * bac à sable local ; les vrais prestataires renvoient leurs propres montants.

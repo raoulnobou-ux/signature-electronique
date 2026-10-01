@@ -8,6 +8,8 @@ export function buildCsp(
 ): string {
   const supabase = new URL(env.supabaseUrl);
   const supabaseWs = `${supabase.protocol === "https:" ? "wss:" : "ws:"}//${supabase.host}`;
+  // Paiement par carte : Paddle.js (chargé avec le nonce) et son formulaire en iframe.
+  const paddle = "https://*.paddle.com";
   const directives: Record<string, string[]> = {
     "default-src": ["'self'"],
     // 'strict-dynamic' : les scripts chargés par un script de confiance le sont aussi.
@@ -21,11 +23,11 @@ export function buildCsp(
     ],
     // Positions des signatures et zones : styles en ligne indispensables (aucun script).
     "style-src": ["'self'", "'unsafe-inline'"],
-    "img-src": ["'self'", "blob:", "data:", supabase.origin],
+    "img-src": ["'self'", "blob:", "data:", supabase.origin, paddle],
     "font-src": ["'self'", "data:"],
-    "connect-src": ["'self'", supabase.origin, supabaseWs],
+    "connect-src": ["'self'", supabase.origin, supabaseWs, paddle],
     "worker-src": ["'self'", "blob:"],
-    "frame-src": ["'self'", "blob:"],
+    "frame-src": ["'self'", "blob:", paddle],
     "media-src": ["'self'", "blob:"],
     "manifest-src": ["'self'"],
     "object-src": ["'none'"],

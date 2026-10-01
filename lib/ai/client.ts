@@ -15,6 +15,9 @@ export function assistantBackend():
       apiKey: serverEnv.ANTHROPIC_API_KEY,
       maxRetries: 2,
       timeout: 5 * 60 * 1000,
+      defaultHeaders: serverEnv.ANTHROPIC_WORKSPACE_ID
+        ? { "anthropic-workspace-id": serverEnv.ANTHROPIC_WORKSPACE_ID }
+        : undefined,
     });
     return { kind: "anthropic", client };
   }

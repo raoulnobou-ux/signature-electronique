@@ -2,12 +2,12 @@ import { createHmac } from "node:crypto";
 import { PDFDocument } from "pdf-lib";
 import { describe, expect, it, vi } from "vitest";
 import {
-  CinetPayProvider,
-  cinetpayDescription,
-  mapStatus,
-  notificationToken,
-  parseNotificationBody,
-} from "@/lib/billing/cinetpay";
+  PaddleProvider,
+  fromMinorUnits,
+  mapTransactionStatus,
+  verifyPaddleSignature,
+} from "@/lib/billing/paddle";
+import { PawaPayProvider, customerMessage, mapDepositStatus } from "@/lib/billing/pawapay";
 import {
   quoteCheckout,
   roundAmount,
@@ -153,228 +153,270 @@ describe("rappels de renouvellement", () => {
   });
 });
 
-describe("CinetPay", () => {
-  const SECRET = "cle-secrete";
-  const notification: Record<string, string> = {
-    cpm_site_id: "105",
-    cpm_trans_id: "QS-ABC123",
-    cpm_trans_date: "2026-09-28 11:02:43",
-    cpm_amount: "5000",
-    cpm_currency: "XAF",
-    signature: "sig",
-    payment_method: "OMCM",
-    cel_phone_num: "690000000",
-    cpm_phone_prefixe: "237",
-    cpm_language: "fr",
-    cpm_version: "V4",
-    cpm_payment_config: "Single",
-    cpm_page_action: "Payment",
-    cpm_custom: "",
-    cpm_designation: "Abonnement",
-    cpm_error_message: "SUCCES",
-  };
-  const body = new URLSearchParams(notification).toString();
-  // Jeton calculé indépendamment : HMAC-SHA256 (hex) des champs concaténés dans l'ordre documenté.
-  const token = createHmac("sha256", SECRET)
-    .update(Object.values(notification).join(""))
-    .digest("hex");
+const DEPOSIT_ID = "1b4d9b0e-6c2a-4f6e-9d3a-2f1e8c7b6a50";
+const checkoutRequest = {
+  reference: DEPOSIT_ID,
+  amount: 5000,
+  currency: "XAF" as const,
+  description: "Abonnement Essentiel — mensuel",
+  productName: "QuickSign Essentiel",
+  language: "fr" as const,
+  customer: { email: "a@b.cm", name: "Awa Ngono", phone: "+237 690 00 00 00" },
+  redirectUrl: `https://quicksign.app/api/billing/return?ref=${DEPOSIT_ID}`,
+  meta: { user_id: "u", payment_id: "p" },
+};
 
-  it("jeton x-token : HMAC-SHA256 des champs dans l'ordre de la documentation", () => {
-    expect(notificationToken(parseNotificationBody(body), SECRET)).toBe(token);
-    expect(parseNotificationBody(JSON.stringify(notification))).toEqual(notification);
-  });
+function jsonFetcher(status: number, body: unknown) {
+  return vi.fn(async () => new Response(JSON.stringify(body), { status }));
+}
 
-  it("n'accepte que les notifications signées de notre site", () => {
-    const provider = new CinetPayProvider("api", "105", SECRET);
-    const event = provider.parseWebhook(new Headers({ "x-token": token }), body);
-    expect(event).toMatchObject({ reference: "QS-ABC123", transactionId: "QS-ABC123" });
-    expect(event!.key).toMatch(/^notify:QS-ABC123:/);
-    expect(
-      provider.parseWebhook(new Headers({ "x-token": token }), body.replace("5000", "50")),
-    ).toBeNull();
-    expect(provider.parseWebhook(new Headers({ "x-token": "0".repeat(64) }), body)).toBeNull();
-    expect(provider.parseWebhook(new Headers(), body)).toBeNull();
-    expect(
-      new CinetPayProvider("api", "999", SECRET).parseWebhook(
-        new Headers({ "x-token": token }),
-        body,
-      ),
-    ).toBeNull();
-    expect(
-      new CinetPayProvider("api", "105", undefined).parseWebhook(
-        new Headers({ "x-token": token }),
-        body,
-      ),
-    ).toBeNull();
-  });
-
-  it("revérifie la transaction par l'API /payment/check", async () => {
-    const fetcher = vi.fn(
-      async () =>
-        new Response(
-          JSON.stringify({
-            code: "00",
-            message: "SUCCES",
-            data: {
-              amount: "5000",
-              currency: "XAF",
-              status: "ACCEPTED",
-              payment_method: "MOMOCM",
-              operator_id: "MP2609.1102",
-            },
-          }),
-        ),
-    );
-    const provider = new CinetPayProvider(
-      "api-key",
-      "105",
-      SECRET,
-      fetcher as unknown as typeof fetch,
-    );
-    const tx = await provider.verifyTransaction({
-      reference: "QS-ABC123",
-      transactionId: null,
-      expected: { amount: 1, currency: "XAF" },
+describe("pawaPay (Mobile Money, FCFA)", () => {
+  it("crée une page de paiement pawaPay avec montant, téléphone et message valides", async () => {
+    const fetcher = jsonFetcher(200, { redirectUrl: "https://paywith.pawapay.io/?token=abc" });
+    const provider = new PawaPayProvider("tok", "sandbox", fetcher as unknown as typeof fetch);
+    const { url } = await provider.createCheckout(checkoutRequest);
+    expect(url).toBe("https://paywith.pawapay.io/?token=abc");
+    const [endpoint, init] = fetcher.mock.calls[0] as unknown as [string, RequestInit];
+    expect(endpoint).toBe("https://api.sandbox.pawapay.io/v2/paymentpage");
+    expect((init.headers as Record<string, string>).Authorization).toBe("Bearer tok");
+    const body = JSON.parse(String(init.body));
+    expect(body).toMatchObject({
+      depositId: DEPOSIT_ID,
+      returnUrl: checkoutRequest.redirectUrl,
+      amountDetails: { amount: "5000", currency: "XAF" },
+      phoneNumber: "237690000000",
+      language: "FR",
     });
+    expect(body.customerMessage).toMatch(/^[A-Za-z0-9 ]{4,22}$/);
+    expect(body.metadata).toEqual([{ user_id: "u" }, { payment_id: "p" }]);
+  });
+
+  it("refuse une référence qui n'est pas un UUID v4 ; erreur pawaPay remontée", async () => {
+    const provider = new PawaPayProvider(
+      "tok",
+      "production",
+      jsonFetcher(400, {
+        status: "REJECTED",
+        failureReason: { failureCode: "INVALID_AMOUNT", failureMessage: "Amount too small" },
+      }) as unknown as typeof fetch,
+    );
+    await expect(
+      provider.createCheckout({ ...checkoutRequest, reference: "QS-1" }),
+    ).rejects.toThrow(/UUID/);
+    await expect(provider.createCheckout(checkoutRequest)).rejects.toThrow(
+      /INVALID_AMOUNT — Amount too small/,
+    );
+  });
+
+  it("revérifie le dépôt par l'API ; dépôt introuvable → null", async () => {
+    const found = jsonFetcher(200, {
+      status: "FOUND",
+      data: {
+        depositId: DEPOSIT_ID,
+        status: "COMPLETED",
+        amount: "5000",
+        currency: "XAF",
+        providerTransactionId: "MP123",
+        payer: {
+          type: "MMO",
+          accountDetails: { phoneNumber: "237690000000", provider: "MTN_MOMO_CMR" },
+        },
+      },
+    });
+    const provider = new PawaPayProvider("tok", "production", found as unknown as typeof fetch);
+    const tx = await provider.verifyTransaction({ reference: DEPOSIT_ID, transactionId: null });
+    expect((found.mock.calls[0] as unknown as [string])[0]).toBe(
+      `https://api.pawapay.io/v2/deposits/${DEPOSIT_ID}`,
+    );
     expect(tx).toMatchObject({
       status: "successful",
       amount: 5000,
       currency: "XAF",
-      method: "MOMOCM",
-      transactionId: "MP2609.1102",
-      reference: "QS-ABC123",
+      transactionId: "MP123",
+      method: "MTN_MOMO_CMR",
     });
-    const [url, init] = fetcher.mock.calls[0] as unknown as [string, RequestInit];
-    expect(url).toBe("https://api-checkout.cinetpay.com/v2/payment/check");
-    expect(JSON.parse(init.body as string)).toEqual({
-      apikey: "api-key",
-      site_id: "105",
-      transaction_id: "QS-ABC123",
-    });
+
+    const failed = new PawaPayProvider(
+      "tok",
+      "production",
+      jsonFetcher(200, {
+        status: "FOUND",
+        data: {
+          depositId: DEPOSIT_ID,
+          status: "FAILED",
+          amount: "5000",
+          currency: "XAF",
+          failureReason: { failureCode: "PAYER_LIMIT_REACHED", failureMessage: "Limite atteinte" },
+        },
+      }) as unknown as typeof fetch,
+    );
+    expect(
+      await failed.verifyTransaction({ reference: DEPOSIT_ID, transactionId: null }),
+    ).toMatchObject({ status: "failed", failureReason: "Limite atteinte" });
+
+    const missing = new PawaPayProvider(
+      "tok",
+      "production",
+      jsonFetcher(200, { status: "NOT_FOUND" }) as unknown as typeof fetch,
+    );
+    expect(
+      await missing.verifyTransaction({ reference: DEPOSIT_ID, transactionId: null }),
+    ).toBeNull();
   });
 
-  it("paiement refusé → échec ; transaction inconnue → null", async () => {
-    const refused = vi.fn(
-      async () =>
-        new Response(
-          JSON.stringify({
-            code: "627",
-            message: "TRANSACTION_CANCEL",
-            data: { amount: "5000", currency: "XAF", status: "REFUSED" },
-          }),
-        ),
+  it("notification : seule la référence est retenue, le contenu sera revérifié", () => {
+    const provider = new PawaPayProvider("tok", "production");
+    const event = provider.parseWebhook(
+      new Headers(),
+      JSON.stringify({ depositId: DEPOSIT_ID, status: "COMPLETED", amount: "1" }),
     );
-    const p1 = new CinetPayProvider("k", "105", SECRET, refused as unknown as typeof fetch);
-    expect(await p1.verifyTransaction({ reference: "QS-1", transactionId: null })).toMatchObject({
-      status: "failed",
-      failureReason: "TRANSACTION_CANCEL",
+    expect(event).toMatchObject({
+      key: `${DEPOSIT_ID}:COMPLETED`,
+      reference: DEPOSIT_ID,
+      transactionId: null,
     });
-    const unknown = vi.fn(
-      async () =>
-        new Response(JSON.stringify({ code: "662", message: "WAITING_CUSTOMER_PAYMENT" })),
-    );
-    const p2 = new CinetPayProvider("k", "105", SECRET, unknown as unknown as typeof fetch);
-    expect(await p2.verifyTransaction({ reference: "QS-1", transactionId: null })).toBeNull();
+    expect(provider.parseWebhook(new Headers(), "pas du json")).toBeNull();
+    expect(provider.parseWebhook(new Headers(), JSON.stringify({ depositId: "x" }))).toBeNull();
   });
 
-  it("description sans caractères spéciaux refusés par CinetPay", () => {
-    expect(cinetpayDescription("Abonnement Essentiel — mensuel")).toBe(
-      "Abonnement Essentiel mensuel",
+  it("statuts et message client", () => {
+    expect(mapDepositStatus("COMPLETED")).toBe("successful");
+    expect(mapDepositStatus("FAILED")).toBe("failed");
+    expect(mapDepositStatus("PROCESSING")).toBe("pending");
+    expect(mapDepositStatus("IN_RECONCILIATION")).toBe("pending");
+    expect(customerMessage("QuickSign Abonnement Pro — annuel (prorata)")).toBe(
+      "QuickSign Abonnement P",
     );
-    expect(cinetpayDescription("Abonnement Pro — annuel (passage au Pro, au prorata)")).toBe(
-      "Abonnement Pro annuel passage au Pro, au prorata",
-    );
-    expect(cinetpayDescription("Équipe #1 / 50 $")).toBe("Equipe 1 50");
+    expect(customerMessage("—")).toBe("QuickSign");
   });
+});
 
-  it("crée un checkout Mobile Money + carte en FCFA, carte seule en dollars", async () => {
-    const fetcher = vi.fn(
-      async () =>
-        new Response(
-          JSON.stringify({
-            code: "201",
-            message: "CREATED",
-            data: { payment_token: "t", payment_url: "https://checkout.cinetpay.com/payment/t" },
-          }),
-        ),
-    );
-    const provider = new CinetPayProvider(
-      "api-key",
-      "105",
+describe("Paddle (carte, international)", () => {
+  const SECRET = "pdl_ntfset_secret";
+
+  it("crée une transaction au prix exact, liée à notre référence", async () => {
+    const fetcher = jsonFetcher(201, {
+      data: {
+        id: "txn_01abc",
+        status: "ready",
+        checkout: { url: "https://quicksign.app/app/abonnement/paiement?_ptxn=txn_01abc" },
+      },
+    });
+    const provider = new PaddleProvider(
+      "pdl_sdbx_apikey_x",
+      "sandbox",
       SECRET,
       fetcher as unknown as typeof fetch,
     );
-    const request = {
-      reference: "QS-1",
-      amount: 5000,
-      currency: "XAF" as const,
-      description: "Abonnement Essentiel — mensuel",
-      customer: {
-        email: "a@b.cm",
-        name: "Awa Ngono Mballa",
-        phone: "+237690000000",
-        city: "Yaoundé",
-      },
-      redirectUrl: "https://quicksign.app/api/billing/return?ref=QS-1",
-      notifyUrl: "https://quicksign.app/api/webhooks/cinetpay",
-      meta: { user_id: "u" },
-    };
-    const { url } = await provider.createCheckout(request);
-    expect(url).toBe("https://checkout.cinetpay.com/payment/t");
-    const sent = JSON.parse(
-      (fetcher.mock.calls[0] as unknown as [string, RequestInit])[1].body as string,
-    );
-    expect(sent).toMatchObject({
-      apikey: "api-key",
-      site_id: "105",
-      transaction_id: "QS-1",
-      amount: 5000,
-      currency: "XAF",
-      channels: "ALL",
-      notify_url: "https://quicksign.app/api/webhooks/cinetpay",
-      return_url: "https://quicksign.app/api/billing/return?ref=QS-1",
-      customer_name: "Awa",
-      customer_surname: "Ngono Mballa",
-      customer_city: "Yaoundé",
-      customer_country: "CM",
+    const result = await provider.createCheckout({
+      ...checkoutRequest,
+      amount: 9.99,
+      currency: "USD",
+      checkoutPageUrl: "https://quicksign.app/app/abonnement/paiement",
     });
-    await provider.createCheckout({ ...request, currency: "USD", amount: 9 });
-    expect(
-      JSON.parse((fetcher.mock.calls[1] as unknown as [string, RequestInit])[1].body as string)
-        .channels,
-    ).toBe("CREDIT_CARD");
+    expect(result).toEqual({
+      url: "https://quicksign.app/app/abonnement/paiement?_ptxn=txn_01abc",
+      transactionId: "txn_01abc",
+    });
+    const [endpoint, init] = fetcher.mock.calls[0] as unknown as [string, RequestInit];
+    expect(endpoint).toBe("https://sandbox-api.paddle.com/transactions");
+    const body = JSON.parse(String(init.body));
+    expect(body.items[0].price.unit_price).toEqual({ amount: "999", currency_code: "USD" });
+    expect(body.items[0].price.product).toEqual({
+      name: "QuickSign Essentiel",
+      tax_category: "standard",
+    });
+    expect(body.custom_data).toMatchObject({ reference: DEPOSIT_ID, user_id: "u" });
+    expect(body.checkout).toEqual({ url: "https://quicksign.app/app/abonnement/paiement" });
   });
 
-  it("une erreur de CinetPay est remontée clairement", async () => {
-    const fetcher = vi.fn(
-      async () =>
-        new Response(JSON.stringify({ code: "608", message: "MINIMUM_REQUIRED_FIELDS" }), {
-          status: 400,
-        }),
+  it("une erreur de Paddle est remontée clairement", async () => {
+    const provider = new PaddleProvider(
+      "k",
+      "production",
+      SECRET,
+      jsonFetcher(400, {
+        error: { code: "transaction_checkout_url_domain_is_not_approved", detail: "Domain" },
+      }) as unknown as typeof fetch,
     );
-    const provider = new CinetPayProvider("k", "105", SECRET, fetcher as unknown as typeof fetch);
     await expect(
       provider.createCheckout({
-        reference: "QS-1",
-        amount: 1,
-        currency: "XAF",
-        description: "x",
-        customer: { email: "a@b.cm", name: "", phone: null },
-        redirectUrl: "https://x",
-        notifyUrl: "https://x",
-        meta: {},
+        ...checkoutRequest,
+        currency: "USD",
+        checkoutPageUrl: "https://x.y",
       }),
-    ).rejects.toThrow(/MINIMUM_REQUIRED_FIELDS/);
+    ).rejects.toThrow(/transaction_checkout_url_domain_is_not_approved — Domain/);
   });
 
-  it("statuts et moyens de paiement", () => {
-    expect(mapStatus("ACCEPTED")).toBe("successful");
-    expect(mapStatus("REFUSED")).toBe("failed");
-    expect(mapStatus("EXPIRED")).toBe("failed");
-    expect(mapStatus("PENDING")).toBe("pending");
-    expect(paymentMethodLabel("OMCM")).toBe("Orange Money");
-    expect(paymentMethodLabel("MOMOCM")).toBe("Mobile Money (MTN)");
-    expect(paymentMethodLabel("VISAM")).toBe("Carte bancaire");
+  it("revérifie la transaction et sa référence auprès de Paddle", async () => {
+    const tx = {
+      id: "txn_01abc",
+      status: "completed",
+      currency_code: "USD",
+      custom_data: { reference: DEPOSIT_ID },
+      details: { totals: { total: "1199", grand_total: "1199" } },
+      payments: [{ status: "captured", method_details: { type: "card" } }],
+    };
+    const fetcher = jsonFetcher(200, { data: tx });
+    const provider = new PaddleProvider(
+      "k",
+      "production",
+      SECRET,
+      fetcher as unknown as typeof fetch,
+    );
+    expect(
+      await provider.verifyTransaction({ reference: DEPOSIT_ID, transactionId: "txn_01abc" }),
+    ).toMatchObject({
+      status: "successful",
+      amount: 11.99,
+      currency: "USD",
+      method: "card",
+      transactionId: "txn_01abc",
+    });
+    expect((fetcher.mock.calls[0] as unknown as [string])[0]).toBe(
+      "https://api.paddle.com/transactions/txn_01abc",
+    );
+    // Transaction d'un autre paiement, ou identifiant absent : rien n'est accepté.
+    expect(
+      await provider.verifyTransaction({ reference: "autre", transactionId: "txn_01abc" }),
+    ).toBeNull();
+    expect(
+      await provider.verifyTransaction({ reference: DEPOSIT_ID, transactionId: null }),
+    ).toBeNull();
+  });
+
+  it("notification : signature Paddle-Signature vérifiée, horodatage récent exigé", () => {
+    const provider = new PaddleProvider("k", "production", SECRET);
+    const body = JSON.stringify({
+      event_id: "evt_1",
+      event_type: "transaction.completed",
+      data: { id: "txn_01abc", custom_data: { reference: DEPOSIT_ID } },
+    });
+    const ts = Math.floor(Date.now() / 1000);
+    const h1 = createHmac("sha256", SECRET).update(`${ts}:${body}`).digest("hex");
+    const signed = new Headers({ "Paddle-Signature": `ts=${ts};h1=${h1}` });
+    expect(provider.parseWebhook(signed, body)).toMatchObject({
+      key: "evt_1",
+      type: "transaction.completed",
+      reference: DEPOSIT_ID,
+      transactionId: "txn_01abc",
+    });
+    expect(provider.parseWebhook(signed, body.replace("txn_01abc", "txn_02xyz"))).toBeNull();
+    expect(provider.parseWebhook(new Headers(), body)).toBeNull();
+    expect(verifyPaddleSignature(`ts=${ts - 3600};h1=${h1}`, body, SECRET)).toBe(false);
+    expect(new PaddleProvider("k", "production", undefined).parseWebhook(signed, body)).toBeNull();
+  });
+
+  it("statuts, montants et moyens de paiement", () => {
+    expect(mapTransactionStatus("completed")).toBe("successful");
+    expect(mapTransactionStatus("paid")).toBe("successful");
+    expect(mapTransactionStatus("canceled")).toBe("failed");
+    expect(mapTransactionStatus("ready")).toBe("pending");
+    expect(fromMinorUnits("1999", "USD")).toBe(19.99);
+    expect(paymentMethodLabel("MTN_MOMO_CMR")).toBe("Mobile Money (MTN)");
+    expect(paymentMethodLabel("ORANGE_CMR")).toBe("Orange Money");
+    expect(paymentMethodLabel("card")).toBe("Carte bancaire");
+    expect(paymentMethodLabel("paypal")).toBe("PayPal");
   });
 });
 

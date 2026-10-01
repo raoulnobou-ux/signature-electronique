@@ -779,7 +779,7 @@
       "sandbox": {
         "metaTitle": "Test payment",
         "title": "Test payment",
-        "notice": "Test mode: no real money is charged. In production, this step is replaced by CinetPay's secure page.",
+        "notice": "Test mode: no real money is charged. In production, this step is replaced by pawaPay's secure page (Mobile Money) or Paddle's (card).",
         "method": "Payment method",
         "methods": {
           "mtn": "MTN Mobile Money",
@@ -791,7 +791,16 @@
         "back": "Back to subscription",
         "notFound": "This payment can't be found or has already been processed."
       },
-      "sponsored": "Pro plan included through your team “{team}”."
+      "sponsored": "Pro plan included through your team “{team}”.",
+      "paddle": {
+        "metaTitle": "Card payment",
+        "title": "Card payment",
+        "opening": "Paddle's secure payment form is opening. If it doesn't appear, click “Open payment”.",
+        "retry": "Open payment",
+        "back": "Back to subscription",
+        "notFound": "This payment can't be found or was already processed.",
+        "notConfigured": "Card payment isn't available yet."
+      }
     }
   },
   "documents": {

@@ -1,4 +1,4 @@
--- Journal des erreurs des services externes (Claude, CinetPay…), lisible par l'équipe
+-- Journal des erreurs des services externes (Claude, paiements…), lisible par l'équipe
 -- dans le tableau de bord Supabase : cause exacte d'un échec sans accès aux journaux Vercel.
 -- Aucune donnée personnelle : identifiant d'utilisateur et message technique seulement.
 create table public.app_errors (
