@@ -11,6 +11,14 @@ describe("providerErrorCode", () => {
     expect(providerErrorCode(apiError(403, "permission"))).toBe("provider_auth");
     expect(providerErrorCode(apiError(402, "billing"))).toBe("provider_billing");
     expect(
+      providerErrorCode(
+        apiError(
+          400,
+          "This API key is not scoped to a workspace, so this request must include the anthropic-workspace-id header",
+        ),
+      ),
+    ).toBe("provider_workspace");
+    expect(
       providerErrorCode(apiError(400, "Your credit balance is too low to access the API")),
     ).toBe("provider_billing");
     expect(providerErrorCode(apiError(529, "overloaded"))).toBe("provider_unavailable");

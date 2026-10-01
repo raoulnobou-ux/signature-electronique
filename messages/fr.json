@@ -1696,6 +1696,7 @@
       "feature_not_in_plan": "Cette fonction de l'assistant est incluse dans le plan Pro.",
       "invalid": "Message invalide.",
       "provider_auth": "L'assistant est indisponible : la clé du service IA est refusée. L'administrateur doit la vérifier.",
+      "provider_workspace": "L'assistant est indisponible : la clé du service IA n'est rattachée à aucun espace de travail. L'administrateur doit renseigner l'identifiant de l'espace de travail.",
       "provider_billing": "L'assistant est indisponible : le crédit du service IA est épuisé. L'administrateur doit le recharger.",
       "provider_unavailable": "Le service IA est momentanément surchargé. Réessayez dans quelques instants.",
       "server": "L'assistant n'a pas pu répondre. Réessayez.",

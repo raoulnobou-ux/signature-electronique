@@ -61,6 +61,8 @@ export type AssistantErrorCode =
   | "invalid"
   /** Clé API Claude refusée (invalide ou révoquée). */
   | "provider_auth"
+  /** Clé API Claude non rattachée à un espace de travail (ANTHROPIC_WORKSPACE_ID manquant). */
+  | "provider_workspace"
   /** Crédit API Claude épuisé. */
   | "provider_billing"
   /** Service Claude surchargé ou momentanément indisponible. */
