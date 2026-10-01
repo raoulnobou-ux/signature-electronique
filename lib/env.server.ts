@@ -6,6 +6,15 @@ import { z } from "zod";
  * (IA, paiement, e-mail, conversion Word) peuvent être absentes en développement :
  * les fonctionnalités concernées affichent alors un message clair au lieu de planter.
  */
+/**
+ * Environnement d'un prestataire (« sandbox » ou « production »), insensible à la casse ;
+ * une valeur inconnue est ignorée (production) au lieu de bloquer toute la configuration.
+ */
+const providerEnv = z.preprocess(
+  (value) => (typeof value === "string" ? value.toLowerCase() : value),
+  z.enum(["sandbox", "production"]).optional().catch(undefined),
+);
+
 const serverSchema = z.object({
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(20),
   ANTHROPIC_API_KEY: z.string().optional(),
@@ -19,12 +28,12 @@ const serverSchema = z.object({
   EMAIL_FROM: z.string().default("QuickSign <bonjour@quicksign.app>"),
   /** pawaPay (Mobile Money, FCFA) : jeton d'API. */
   PAWAPAY_API_TOKEN: z.string().optional(),
-  PAWAPAY_ENV: z.enum(["sandbox", "production"]).optional(),
+  PAWAPAY_ENV: providerEnv,
   /** Paddle (carte, international, dollars) : clé d'API serveur. */
   PADDLE_API_KEY: z.string().optional(),
   /** Clé secrète de la destination de notification Paddle (en-tête Paddle-Signature). */
   PADDLE_WEBHOOK_SECRET: z.string().optional(),
-  PADDLE_ENV: z.enum(["sandbox", "production"]).optional(),
+  PADDLE_ENV: providerEnv,
   /** Jeton côté client de Paddle.js (public, commence par test_ ou live_). */
   PADDLE_CLIENT_TOKEN: z.string().optional(),
   /** "true" : paiements simulés sans prestataire (dev, tests). Ignoré en production Vercel. */
