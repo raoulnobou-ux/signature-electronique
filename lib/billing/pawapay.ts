@@ -48,6 +48,30 @@ export function customerMessage(text: string): string {
   return clean.length >= 4 ? clean : "QuickSign";
 }
 
+/** Pays de la zone FCFA (CEMAC) servis par pawaPay : indicatif → code ISO alpha-3. */
+const XAF_COUNTRIES: Record<string, string> = {
+  "237": "CMR",
+  "241": "GAB",
+  "242": "COG",
+  "235": "TCD",
+  "236": "CAF",
+  "240": "GNQ",
+};
+
+/**
+ * Pays et numéro transmis à pawaPay (l'un des deux est obligatoire avec le montant) :
+ * le pays du numéro s'il est dans la zone FCFA, sinon le Cameroun sans numéro (le client
+ * saisit alors son numéro sur la page pawaPay).
+ */
+export function payerCountry(phone: string | null | undefined): {
+  country: string;
+  phoneNumber?: string;
+} {
+  const digits = (phone ?? "").replace(/\D/g, "");
+  const country = XAF_COUNTRIES[digits.slice(0, 3)];
+  return country && digits.length >= 11 ? { country, phoneNumber: digits } : { country: "CMR" };
+}
+
 type Deposit = {
   depositId?: string;
   status?: string;
@@ -89,7 +113,6 @@ export class PawaPayProvider implements PaymentProvider {
     if (!UUID_V4.test(req.reference)) {
       throw new PaymentProviderError("pawaPay : la référence doit être un UUID v4");
     }
-    const phone = req.customer.phone?.replace(/\D/g, "");
     const { status, body } = await this.request("/v2/paymentpage", {
       method: "POST",
       body: {
@@ -97,7 +120,7 @@ export class PawaPayProvider implements PaymentProvider {
         returnUrl: req.redirectUrl,
         customerMessage: customerMessage(`QuickSign ${req.description}`),
         amountDetails: { amount: String(Math.round(req.amount)), currency: req.currency },
-        ...(phone ? { phoneNumber: phone } : {}),
+        ...payerCountry(req.customer.phone),
         language: req.language === "en" ? "EN" : "FR",
         reason: req.description.slice(0, 50),
         metadata: Object.entries(req.meta).map(([key, value]) => ({ [key]: value })),

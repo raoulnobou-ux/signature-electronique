@@ -7,7 +7,12 @@ import {
   mapTransactionStatus,
   verifyPaddleSignature,
 } from "@/lib/billing/paddle";
-import { PawaPayProvider, customerMessage, mapDepositStatus } from "@/lib/billing/pawapay";
+import {
+  PawaPayProvider,
+  customerMessage,
+  mapDepositStatus,
+  payerCountry,
+} from "@/lib/billing/pawapay";
 import {
   quoteCheckout,
   roundAmount,
@@ -185,6 +190,7 @@ describe("pawaPay (Mobile Money, FCFA)", () => {
       returnUrl: checkoutRequest.redirectUrl,
       amountDetails: { amount: "5000", currency: "XAF" },
       phoneNumber: "237690000000",
+      country: "CMR",
       language: "FR",
     });
     expect(body.customerMessage).toMatch(/^[A-Za-z0-9 ]{4,22}$/);
@@ -277,6 +283,20 @@ describe("pawaPay (Mobile Money, FCFA)", () => {
     });
     expect(provider.parseWebhook(new Headers(), "pas du json")).toBeNull();
     expect(provider.parseWebhook(new Headers(), JSON.stringify({ depositId: "x" }))).toBeNull();
+  });
+
+  it("pays toujours transmis avec le montant (exigence pawaPay)", () => {
+    expect(payerCountry("+237 690 00 00 00")).toEqual({
+      country: "CMR",
+      phoneNumber: "237690000000",
+    });
+    expect(payerCountry("+241 06 12 34 56")).toEqual({
+      country: "GAB",
+      phoneNumber: "24106123456",
+    });
+    // Sans numéro, ou numéro hors zone FCFA : Cameroun, le client saisit son numéro chez pawaPay.
+    expect(payerCountry(null)).toEqual({ country: "CMR" });
+    expect(payerCountry("+33 6 12 34 56 78")).toEqual({ country: "CMR" });
   });
 
   it("statuts et message client", () => {
