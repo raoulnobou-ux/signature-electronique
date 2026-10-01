@@ -1,4 +1,5 @@
 import "server-only";
+import { CFA_COUNTRIES } from "./cfa";
 import {
   PaymentProviderError,
   type CheckoutRequest,
@@ -64,28 +65,26 @@ export function customerMessage(text: string): string {
   return clean.length >= 4 ? clean : "QuickSign";
 }
 
-/** Pays de la zone FCFA (CEMAC) servis par pawaPay : indicatif → code ISO alpha-3. */
-const XAF_COUNTRIES: Record<string, string> = {
-  "237": "CMR",
-  "241": "GAB",
-  "242": "COG",
-  "235": "TCD",
-  "236": "CAF",
-  "240": "GNQ",
-};
-
 /**
- * Pays et numéro transmis à pawaPay (l'un des deux est obligatoire avec le montant) :
- * le pays du numéro s'il est dans la zone FCFA, sinon le Cameroun sans numéro (le client
- * saisit alors son numéro sur la page pawaPay).
+ * Pays où le compte pawaPay accepte des dépôts en franc CFA, d'après sa configuration
+ * active (GET /v2/active-conf) : seuls ces pays sont proposés au client.
  */
-export function payerCountry(phone: string | null | undefined): {
-  country: string;
-  phoneNumber?: string;
-} {
-  const digits = (phone ?? "").replace(/\D/g, "");
-  const country = XAF_COUNTRIES[digits.slice(0, 3)];
-  return country && digits.length >= 11 ? { country, phoneNumber: digits } : { country: "CMR" };
+export function cfaDepositCountries(activeConf: unknown): string[] {
+  const countries = (activeConf as { countries?: unknown })?.countries;
+  if (!Array.isArray(countries)) return [];
+  const result: string[] = [];
+  for (const item of countries as { country?: string; providers?: unknown }[]) {
+    const code = item?.country;
+    const expected = code ? CFA_COUNTRIES[code]?.currency : undefined;
+    if (!code || !expected || !Array.isArray(item.providers)) continue;
+    const accepts = (item.providers as { currencies?: unknown }[]).some(
+      (provider) =>
+        Array.isArray(provider?.currencies) &&
+        (provider.currencies as { currency?: string }[]).some((c) => c?.currency === expected),
+    );
+    if (accepts && !result.includes(code)) result.push(code);
+  }
+  return result;
 }
 
 type Deposit = {
@@ -101,6 +100,7 @@ type Deposit = {
 export class PawaPayProvider implements PaymentProvider {
   readonly name = "pawapay";
   private readonly base: string;
+  private countriesCache: { value: string[]; until: number } | null = null;
 
   constructor(
     private readonly token: string,
@@ -130,14 +130,17 @@ export class PawaPayProvider implements PaymentProvider {
     if (!UUID_V4.test(req.reference)) {
       throw new PaymentProviderError("pawaPay : la référence doit être un UUID v4");
     }
+    const country = req.country && CFA_COUNTRIES[req.country] ? req.country : "CMR";
+    const cfa = CFA_COUNTRIES[country]!;
     const { status, body } = await this.request("/v2/paymentpage", {
       method: "POST",
       body: {
         depositId: req.reference,
         returnUrl: req.redirectUrl,
         customerMessage: customerMessage(`QuickSign ${req.description}`),
-        amountDetails: { amount: String(Math.round(req.amount)), currency: req.currency },
-        ...payerCountry(req.customer.phone),
+        // Franc CFA de l'Ouest (XOF) pour un pays de l'UEMOA : même montant qu'en XAF.
+        amountDetails: { amount: String(Math.round(req.amount)), currency: cfa.currency },
+        country,
         language: req.language === "en" ? "EN" : "FR",
         reason: req.description.slice(0, 50),
         metadata: Object.entries(req.meta).map(([key, value]) => ({ [key]: value })),
@@ -154,6 +157,20 @@ export class PawaPayProvider implements PaymentProvider {
       );
     }
     return { url };
+  }
+
+  /** Pays proposés au client (configuration active du compte), mis en cache 10 minutes. */
+  async depositCountries(): Promise<string[]> {
+    if (this.countriesCache && this.countriesCache.until > Date.now()) {
+      return this.countriesCache.value;
+    }
+    const { status, body } = await this.request("/v2/active-conf?operationType=DEPOSIT", {
+      method: "GET",
+    });
+    if (status >= 300) throw new PaymentProviderError(`pawaPay ${status}: active-conf`, body);
+    const value = cfaDepositCountries(body);
+    this.countriesCache = { value, until: Date.now() + 10 * 60_000 };
+    return value;
   }
 
   async verifyTransaction({

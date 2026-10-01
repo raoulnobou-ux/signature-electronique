@@ -11,9 +11,10 @@ import {
   PawaPayProvider,
   customerMessage,
   mapDepositStatus,
+  cfaDepositCountries,
   pawapayApiUrl,
-  payerCountry,
 } from "@/lib/billing/pawapay";
+import { sameCfaCurrency, suggestedCountry } from "@/lib/billing/cfa";
 import {
   quoteCheckout,
   roundAmount,
@@ -190,10 +191,11 @@ describe("pawaPay (Mobile Money, FCFA)", () => {
       depositId: DEPOSIT_ID,
       returnUrl: checkoutRequest.redirectUrl,
       amountDetails: { amount: "5000", currency: "XAF" },
-      phoneNumber: "237690000000",
       country: "CMR",
       language: "FR",
     });
+    // Le numéro du compte n'est jamais imposé : le client saisit le sien chez pawaPay.
+    expect(body).not.toHaveProperty("phoneNumber");
     expect(body.customerMessage).toMatch(/^[A-Za-z0-9 ]{4,22}$/);
     expect(body.metadata).toEqual([{ user_id: "u" }, { payment_id: "p" }]);
   });
@@ -309,18 +311,54 @@ describe("pawaPay (Mobile Money, FCFA)", () => {
     );
   });
 
-  it("pays toujours transmis avec le montant (exigence pawaPay)", () => {
-    expect(payerCountry("+237 690 00 00 00")).toEqual({
-      country: "CMR",
-      phoneNumber: "237690000000",
-    });
-    expect(payerCountry("+241 06 12 34 56")).toEqual({
-      country: "GAB",
-      phoneNumber: "24106123456",
-    });
-    // Sans numéro, ou numéro hors zone FCFA : Cameroun, le client saisit son numéro chez pawaPay.
-    expect(payerCountry(null)).toEqual({ country: "CMR" });
-    expect(payerCountry("+33 6 12 34 56 78")).toEqual({ country: "CMR" });
+  it("pays choisi par le client ; franc CFA de l'Ouest au même montant", async () => {
+    const fetcher = jsonFetcher(200, { redirectUrl: "https://paywith.pawapay.io/x" });
+    const provider = new PawaPayProvider("tok", "sandbox", fetcher as unknown as typeof fetch);
+    await provider.createCheckout({ ...checkoutRequest, country: "CIV" });
+    const body = JSON.parse(
+      String((fetcher.mock.calls[0] as unknown as [string, RequestInit])[1].body),
+    );
+    expect(body.country).toBe("CIV");
+    expect(body.amountDetails).toEqual({ amount: "5000", currency: "XOF" });
+    expect(sameCfaCurrency("XOF", "XAF")).toBe(true);
+    expect(sameCfaCurrency("USD", "XAF")).toBe(false);
+  });
+
+  it("pays proposés : ceux du compte pawaPay qui acceptent le franc CFA", async () => {
+    const conf = {
+      countries: [
+        {
+          country: "CMR",
+          providers: [
+            { provider: "MTN_MOMO_CMR", currencies: [{ currency: "XAF", operationTypes: {} }] },
+            { provider: "ORANGE_CMR", currencies: [{ currency: "XAF", operationTypes: {} }] },
+          ],
+        },
+        {
+          country: "CIV",
+          providers: [{ provider: "MTN_MOMO_CIV", currencies: [{ currency: "XOF" }] }],
+        },
+        {
+          country: "ZMB",
+          providers: [{ provider: "MTN_MOMO_ZMB", currencies: [{ currency: "ZMW" }] }],
+        },
+        { country: "GAB", providers: [] },
+      ],
+    };
+    expect(cfaDepositCountries(conf)).toEqual(["CMR", "CIV"]);
+    expect(cfaDepositCountries(null)).toEqual([]);
+    const fetcher = jsonFetcher(200, conf);
+    const provider = new PawaPayProvider("tok", "sandbox", fetcher as unknown as typeof fetch);
+    expect(await provider.depositCountries()).toEqual(["CMR", "CIV"]);
+    await provider.depositCountries();
+    expect(fetcher).toHaveBeenCalledTimes(1);
+    expect((fetcher.mock.calls[0] as unknown as [string])[0]).toBe(
+      "https://api.sandbox.pawapay.io/v2/active-conf?operationType=DEPOSIT",
+    );
+    // Présélection d'après l'indicatif du profil, sinon le premier pays proposé.
+    expect(suggestedCountry("+225 07 00 00 00 00", ["CMR", "CIV"])).toBe("CIV");
+    expect(suggestedCountry("+33 6 12 34 56 78", ["CMR", "CIV"])).toBe("CMR");
+    expect(suggestedCountry(null, [])).toBe("CMR");
   });
 
   it("statuts et message client", () => {

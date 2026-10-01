@@ -6,7 +6,7 @@ import { getLocale } from "next-intl/server";
 import { z } from "zod";
 import { recordAudit } from "@/lib/audit";
 import { getCurrentAccount, type Account } from "@/lib/auth/account";
-import { getPaymentProvider, getSandboxProvider } from "@/lib/billing";
+import { getPaymentProvider, getSandboxProvider, mobileMoneyCountries } from "@/lib/billing";
 import { quoteCheckout, type Quote } from "@/lib/billing/quote";
 import { SANDBOX_METHODS, SANDBOX_OUTCOMES } from "@/lib/billing/sandbox";
 import { PLAN_LABELS, paymentDescription } from "@/lib/billing/service";
@@ -21,6 +21,11 @@ const targetSchema = z.object({
   plan: z.enum(["essential", "pro"]),
   cycle: z.enum(["monthly", "yearly"]),
   currency: z.enum(["XAF", "USD"]),
+  /** Pays du numéro Mobile Money (paiement en FCFA). */
+  country: z
+    .string()
+    .regex(/^[A-Z]{3}$/)
+    .optional(),
 });
 
 export type BillingError =
@@ -124,6 +129,13 @@ export async function startCheckout(
   // FCFA → pawaPay (Mobile Money) ; dollars → Paddle (carte, international).
   const provider = getPaymentProvider(quote.currency);
   if (!provider) return { ok: false, reason: "payments_unavailable" };
+  // Mobile Money : uniquement un pays proposé (activé sur le compte pawaPay).
+  let country: string | undefined;
+  if (quote.currency === "XAF") {
+    const countries = await mobileMoneyCountries();
+    country = parsed.data.country ?? countries[0];
+    if (!country || !countries.includes(country)) return { ok: false, reason: "invalid" };
+  }
   // Référence unique : UUID v4 (identifiant de dépôt exigé par pawaPay).
   const reference = randomUUID();
   const admin = createAdminClient();
@@ -165,6 +177,7 @@ export async function startCheckout(
       },
       redirectUrl: `${publicEnv.NEXT_PUBLIC_APP_URL}/api/billing/return?ref=${encodeURIComponent(reference)}`,
       checkoutPageUrl: `${publicEnv.NEXT_PUBLIC_APP_URL}/app/abonnement/paiement`,
+      country,
       meta: { user_id: account.userId, payment_id: payment.id, kind: quote.kind },
     });
     if (transactionId) {

@@ -89,7 +89,7 @@ Le prestataire est choisi selon la devise du plan : **FCFA → pawaPay**, **doll
 1. Commencer en bac à sable (`PAWAPAY_ENV=sandbox`), puis passer en production une fois le compte validé (vide ou `production`).
 2. **API tokens** → générer un jeton → `PAWAPAY_API_TOKEN`.
 3. **Callback URLs** → dépôts (_Deposits_) : `https://<domaine>/api/webhooks/pawapay`.
-4. Le client paie sur la page hébergée de pawaPay (choix de l'opérateur, saisie du numéro), puis revient sur `/api/billing/return`.
+4. Le client choisit sur QuickSign le **pays** de son numéro (liste lue dans la configuration active du compte pawaPay, ou `PAWAPAY_COUNTRIES`), puis paie sur la page hébergée de pawaPay (opérateur, saisie du numéro avec lequel il paie) et revient sur `/api/billing/return`. Pays d'Afrique de l'Ouest : paiement en XOF au même montant (parité avec le XAF).
 
 **Paddle** (https://vendors.paddle.com, ou https://sandbox-vendors.paddle.com pour les essais) :
 

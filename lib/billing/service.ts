@@ -23,6 +23,7 @@ import { toLocale, type Locale } from "@/i18n/config";
 import { siteConfig } from "@/lib/site";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { providerByName } from ".";
+import { sameCfaCurrency } from "./cfa";
 import { paymentMethodLabel, renderReceipt } from "./receipt";
 
 const DAY = 24 * 60 * 60 * 1000;
@@ -192,7 +193,7 @@ export async function settlePayment(input: {
   }
 
   if (tx.status === "successful") {
-    if (tx.currency !== expected.currency || tx.amount + 0.001 < expected.amount) {
+    if (!sameCfaCurrency(tx.currency, expected.currency) || tx.amount + 0.001 < expected.amount) {
       console.error("[billing] montant ou devise incorrects", tx, expected);
       await admin
         .from("payments")

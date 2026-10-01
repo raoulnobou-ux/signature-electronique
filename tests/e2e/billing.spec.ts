@@ -219,10 +219,16 @@ test("le récapitulatif demande le moyen de paiement : Mobile Money (FCFA) ou ca
   const card = dialog.getByRole("radio", { name: /Carte bancaire — en dollars/ });
   await expect(mobile).toBeChecked();
   await expect(page.getByTestId("checkout-amount")).toContainText("FCFA");
+  // Mobile Money : choix du pays (le numéro se saisit sur la page du prestataire).
+  const country = dialog.getByLabel("Pays de votre numéro Mobile Money");
+  await expect(country).toHaveValue("CMR");
+  await country.selectOption("CIV");
+  await expect(dialog.getByRole("note")).toContainText("Mode test");
 
   await card.check();
   await expect(card).toBeChecked();
   await expect(page.getByTestId("checkout-amount")).toContainText("$");
+  await expect(country).toBeHidden();
   await mobile.check();
   await expect(page.getByTestId("checkout-amount")).toContainText("FCFA");
 });

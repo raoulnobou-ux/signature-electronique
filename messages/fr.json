@@ -760,6 +760,9 @@
           "unavailable": "Pas encore disponible.",
           "locked": "Le passage au Pro se paie dans la devise de votre abonnement actuel."
         },
+        "country": "Pays de votre numéro Mobile Money",
+        "countryHint": "Vous saisirez sur la page sécurisée pawaPay le numéro avec lequel vous payez (il peut être différent de celui de votre compte).",
+        "testMode": "Mode test : aucun argent réel n'est débité, et le paiement est validé automatiquement avec les numéros de test.",
         "prorata": "Passage immédiat au Pro, au prorata de la période en cours (jusqu'au {date}).",
         "startsNow": "Actif immédiatement, jusqu'au {date}.",
         "startsLater": "La nouvelle période démarre le {date} : vos jours restants sont conservés.",

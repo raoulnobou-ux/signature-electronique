@@ -745,6 +745,9 @@
           "unavailable": "Not available yet.",
           "locked": "Upgrading to Pro is paid in your current subscription's currency."
         },
+        "country": "Country of your Mobile Money number",
+        "countryHint": "You'll enter the number you pay with on pawaPay's secure page (it can differ from your account's number).",
+        "testMode": "Test mode: no real money is charged, and the payment is approved automatically with test numbers.",
         "prorata": "Immediate upgrade to Pro, prorated for the current period (until {date}).",
         "startsNow": "Active immediately, until {date}.",
         "startsLater": "The new period starts on {date}: your remaining days are kept.",

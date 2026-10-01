@@ -10,7 +10,8 @@ import { ClientMessages } from "@/components/providers/client-messages";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { requireAccount } from "@/lib/auth/account";
-import { getPaymentProvider } from "@/lib/billing";
+import { getPaymentProvider, mobileMoneyCountries, testModes } from "@/lib/billing";
+import { suggestedCountry } from "@/lib/billing/cfa";
 import { paymentDescription } from "@/lib/billing/service";
 import { isPaidPlan, type BillingCycle, type Currency } from "@/lib/entitlements/plans";
 import { formatMoney } from "@/lib/format";
@@ -67,6 +68,7 @@ export default async function BillingPage({ searchParams }: PageProps<"/app/abon
     USD: getPaymentProvider("USD") !== null,
   };
   const available = methods.XAF || methods.USD;
+  const countries = methods.XAF ? await mobileMoneyCountries() : [];
   const currency = (subscription?.currency as Currency | null) ?? detected;
 
   return (
@@ -98,6 +100,9 @@ export default async function BillingPage({ searchParams }: PageProps<"/app/abon
             prices={prices}
             defaultCurrency={currency}
             methods={methods}
+            countries={countries}
+            testMode={testModes()}
+            defaultCountry={suggestedCountry(account.profile.phone, countries)}
             state={account.entitlements.state}
             plan={account.entitlements.subscriptionPlan}
           />

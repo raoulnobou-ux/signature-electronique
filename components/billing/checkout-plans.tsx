@@ -23,6 +23,7 @@ import type { BillingCycle, Currency, PaidPlan, PlanId } from "@/lib/entitlement
 import { formatMoney } from "@/lib/format";
 import type { PriceTable } from "@/lib/pricing";
 import { cn } from "@/lib/utils";
+import { CFA_COUNTRIES } from "@/lib/billing/cfa";
 
 type Selection = { plan: PaidPlan; cycle: BillingCycle; currency: Currency };
 
@@ -31,6 +32,9 @@ export function CheckoutPlans({
   prices,
   defaultCurrency,
   methods,
+  countries,
+  defaultCountry,
+  testMode,
   state,
   plan,
 }: {
@@ -38,6 +42,11 @@ export function CheckoutPlans({
   defaultCurrency: Currency;
   /** Moyens de paiement configurés : FCFA → Mobile Money (pawaPay), USD → carte (Paddle). */
   methods: Record<Currency, boolean>;
+  /** Pays proposés pour le Mobile Money (ISO alpha-3), et celui présélectionné. */
+  countries: string[];
+  defaultCountry: string;
+  /** Prestataire en bac à sable : aucun argent réel n'est débité. */
+  testMode: Record<Currency, boolean>;
   state: AccessState;
   plan: PlanId;
 }) {
@@ -46,6 +55,12 @@ export function CheckoutPlans({
   const format = useFormatter();
   const locale = useLocale();
   const [selection, setSelection] = useState<Selection | null>(null);
+  const [country, setCountry] = useState(defaultCountry);
+  const regionNames = new Intl.DisplayNames([locale], { type: "region" });
+  const countryName = (code: string) => {
+    const alpha2 = CFA_COUNTRIES[code]?.alpha2;
+    return (alpha2 && regionNames.of(alpha2)) || code;
+  };
   const [quote, setQuote] = useState<{
     quote: Quote;
     startsAt: string;
@@ -90,7 +105,9 @@ export function CheckoutPlans({
   const pay = () => {
     if (!selection) return;
     startPaying(async () => {
-      const result = await startCheckout(selection);
+      const result = await startCheckout(
+        selection.currency === "XAF" ? { ...selection, country } : selection,
+      );
       if (result.ok) {
         toast.message(t("checkout.redirecting"));
         window.location.assign(result.url);
@@ -205,6 +222,34 @@ export function CheckoutPlans({
                   );
                 })}
               </fieldset>
+              {q.currency === "XAF" && countries.length > 0 && (
+                <div className="space-y-1.5">
+                  <label htmlFor="mobile-money-country" className="text-sm font-medium">
+                    {t("checkout.country")}
+                  </label>
+                  <select
+                    id="mobile-money-country"
+                    value={country}
+                    onChange={(event) => setCountry(event.target.value)}
+                    className="h-11 w-full rounded-xl border border-input bg-background px-3 text-sm"
+                  >
+                    {countries.map((code) => (
+                      <option key={code} value={code}>
+                        {countryName(code)}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-muted-foreground">{t("checkout.countryHint")}</p>
+                </div>
+              )}
+              {testMode[q.currency] && (
+                <p
+                  role="note"
+                  className="rounded-xl border border-warning/30 bg-warning/10 px-3 py-2 text-sm"
+                >
+                  {t("checkout.testMode")}
+                </p>
+              )}
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li className="flex gap-2">
                   <ShieldCheck className="mt-0.5 size-4 shrink-0 text-success" aria-hidden />{" "}

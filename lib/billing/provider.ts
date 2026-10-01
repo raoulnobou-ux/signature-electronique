@@ -16,6 +16,8 @@ export interface CheckoutRequest {
   customer: { email: string; name: string; phone: string | null; city?: string | null };
   /** URL de retour du navigateur après paiement. */
   redirectUrl: string;
+  /** Pays du numéro Mobile Money choisi par le client (ISO alpha-3, pawaPay). */
+  country?: string;
   /** Page de QuickSign qui ouvre le formulaire du prestataire (Paddle.js). */
   checkoutPageUrl?: string;
   meta: Record<string, string>;

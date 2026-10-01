@@ -1,6 +1,8 @@
 import "server-only";
 import { serverEnv } from "@/lib/env.server";
 import type { Currency } from "@/lib/entitlements/plans";
+import { logAppError } from "@/lib/monitoring/app-errors";
+import { CFA_COUNTRIES } from "./cfa";
 import { PaddleProvider } from "./paddle";
 import { PAWAPAY_API, PawaPayProvider, pawapayApiUrl } from "./pawapay";
 import type { PaymentProvider } from "./provider";
@@ -71,6 +73,37 @@ export function getSandboxProvider(): SandboxProvider | null {
 export function getPaymentProvider(currency: Currency): PaymentProvider | null {
   const real = currency === "XAF" ? getPawaPay() : getPaddle();
   return real ?? getSandboxProvider();
+}
+
+/**
+ * Pays proposés pour le Mobile Money : PAWAPAY_COUNTRIES (codes alpha-3 séparés par des
+ * virgules) s'il est renseigné, sinon la configuration active du compte pawaPay ; le
+ * Cameroun si elle est inaccessible. Bac à sable : quelques pays pour les essais.
+ */
+export async function mobileMoneyCountries(): Promise<string[]> {
+  const configured = (serverEnv.PAWAPAY_COUNTRIES ?? "")
+    .split(",")
+    .map((code) => code.trim().toUpperCase())
+    .filter((code) => code in CFA_COUNTRIES);
+  if (configured.length) return [...new Set(configured)];
+  const pawapay = getPawaPay();
+  if (!pawapay) return getSandboxProvider() ? ["CMR", "GAB", "COG", "CIV", "SEN"] : [];
+  try {
+    const countries = await pawapay.depositCountries();
+    if (countries.length) return countries;
+  } catch (error) {
+    await logAppError("billing.countries", error);
+  }
+  return ["CMR"];
+}
+
+/** Paiements de test (aucun argent réel) : bac à sable du prestataire de chaque devise. */
+export function testModes(): Record<Currency, boolean> {
+  const pawapay = getPawaPay();
+  return {
+    XAF: pawapay ? pawapayBaseUrl() !== PAWAPAY_API.production : getSandboxProvider() !== null,
+    USD: getPaddle() ? paddleEnvironment() === "sandbox" : getSandboxProvider() !== null,
+  };
 }
 
 /** Prestataire qui a créé un paiement (payments.provider), pour le revérifier. */
