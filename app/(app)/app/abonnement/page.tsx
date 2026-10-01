@@ -10,7 +10,7 @@ import { ClientMessages } from "@/components/providers/client-messages";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { requireAccount } from "@/lib/auth/account";
-import { paymentsAvailable } from "@/lib/billing";
+import { getPaymentProvider } from "@/lib/billing";
 import { paymentDescription } from "@/lib/billing/service";
 import { isPaidPlan, type BillingCycle, type Currency } from "@/lib/entitlements/plans";
 import { formatMoney } from "@/lib/format";
@@ -62,7 +62,11 @@ export default async function BillingPage({ searchParams }: PageProps<"/app/abon
       ? (params.paiement as keyof typeof RESULTS)
       : null;
   const result = resultKey ? RESULTS[resultKey] : null;
-  const available = paymentsAvailable();
+  const methods = {
+    XAF: getPaymentProvider("XAF") !== null,
+    USD: getPaymentProvider("USD") !== null,
+  };
+  const available = methods.XAF || methods.USD;
   const currency = (subscription?.currency as Currency | null) ?? detected;
 
   return (
@@ -93,7 +97,7 @@ export default async function BillingPage({ searchParams }: PageProps<"/app/abon
           <CheckoutPlans
             prices={prices}
             defaultCurrency={currency}
-            available={available}
+            methods={methods}
             state={account.entitlements.state}
             plan={account.entitlements.subscriptionPlan}
           />

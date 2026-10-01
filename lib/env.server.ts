@@ -29,6 +29,8 @@ const serverSchema = z.object({
   /** pawaPay (Mobile Money, FCFA) : jeton d'API. */
   PAWAPAY_API_TOKEN: z.string().optional(),
   PAWAPAY_ENV: providerEnv,
+  /** Adresse de l'API pawaPay de test (https://api.sandbox.pawapay.io par défaut). */
+  PAWAPAY_API_SANDBOX_URL: z.string().optional(),
   /** Paddle (carte, international, dollars) : clé d'API serveur. */
   PADDLE_API_KEY: z.string().optional(),
   /** Clé secrète de la destination de notification Paddle (en-tête Paddle-Signature). */

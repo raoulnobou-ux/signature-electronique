@@ -20,6 +20,22 @@ export const PAWAPAY_API = {
 
 export type PawaPayEnvironment = keyof typeof PAWAPAY_API;
 
+/**
+ * Adresse d'API pawaPay saisie dans la configuration : https, domaine pawapay.io uniquement
+ * (le jeton y est envoyé), sans « / » final ni suffixe de version ; sinon null.
+ */
+export function pawapayApiUrl(value: string | undefined): string | null {
+  if (!value) return null;
+  try {
+    const url = new URL(value.trim());
+    if (url.protocol !== "https:") return null;
+    if (url.hostname !== "pawapay.io" && !url.hostname.endsWith(".pawapay.io")) return null;
+    return url.origin;
+  } catch {
+    return null;
+  }
+}
+
 /** Identifiant de dépôt exigé par pawaPay : UUID version 4. */
 export const UUID_V4 = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -88,10 +104,11 @@ export class PawaPayProvider implements PaymentProvider {
 
   constructor(
     private readonly token: string,
-    environment: PawaPayEnvironment,
+    /** Environnement (« sandbox », « production ») ou adresse d'API déjà validée. */
+    target: PawaPayEnvironment | string,
     private readonly fetcher: typeof fetch = fetch,
   ) {
-    this.base = PAWAPAY_API[environment];
+    this.base = target in PAWAPAY_API ? PAWAPAY_API[target as PawaPayEnvironment] : target;
   }
 
   private async request(path: string, init: { method: "GET" | "POST"; body?: unknown }) {

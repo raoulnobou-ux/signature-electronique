@@ -206,3 +206,23 @@ test("sécurité : webhook non configuré, tâche planifiée protégée, faux re
     .single();
   expect(sub!.status).toBe("expired");
 });
+
+test("le récapitulatif demande le moyen de paiement : Mobile Money (FCFA) ou carte (dollars)", async ({
+  page,
+}) => {
+  const user = await createConfirmedUser("paie-moyen");
+  await signInAs(page, user.email);
+  await choosePlan(page, "Choisir Essentiel");
+  const dialog = page.getByRole("dialog");
+  await expect(dialog.getByText("Comment voulez-vous payer ?")).toBeVisible();
+  const mobile = dialog.getByRole("radio", { name: /Mobile Money — en FCFA/ });
+  const card = dialog.getByRole("radio", { name: /Carte bancaire — en dollars/ });
+  await expect(mobile).toBeChecked();
+  await expect(page.getByTestId("checkout-amount")).toContainText("FCFA");
+
+  await card.check();
+  await expect(card).toBeChecked();
+  await expect(page.getByTestId("checkout-amount")).toContainText("$");
+  await mobile.check();
+  await expect(page.getByTestId("checkout-amount")).toContainText("FCFA");
+});

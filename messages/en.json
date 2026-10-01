@@ -732,6 +732,19 @@
         },
         "plan": "{plan} plan · {cycle}",
         "amount": "To pay",
+        "method": "How would you like to pay?",
+        "methods": {
+          "XAF": {
+            "title": "Mobile Money — in CFA francs (XAF)",
+            "body": "MTN Mobile Money, Orange Money… on pawaPay's secure page."
+          },
+          "USD": {
+            "title": "Card — in US dollars (USD)",
+            "body": "Visa, Mastercard, PayPal, Apple Pay, Google Pay, on Paddle's secure form."
+          },
+          "unavailable": "Not available yet.",
+          "locked": "Upgrading to Pro is paid in your current subscription's currency."
+        },
         "prorata": "Immediate upgrade to Pro, prorated for the current period (until {date}).",
         "startsNow": "Active immediately, until {date}.",
         "startsLater": "The new period starts on {date}: your remaining days are kept.",

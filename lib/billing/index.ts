@@ -2,7 +2,7 @@ import "server-only";
 import { serverEnv } from "@/lib/env.server";
 import type { Currency } from "@/lib/entitlements/plans";
 import { PaddleProvider } from "./paddle";
-import { PawaPayProvider } from "./pawapay";
+import { PAWAPAY_API, PawaPayProvider, pawapayApiUrl } from "./pawapay";
 import type { PaymentProvider } from "./provider";
 import { SandboxProvider } from "./sandbox";
 
@@ -10,11 +10,21 @@ let pawapay: PawaPayProvider | null | undefined;
 let paddle: PaddleProvider | null | undefined;
 let sandbox: SandboxProvider | null | undefined;
 
+/**
+ * Adresse de l'API pawaPay : PAWAPAY_API_SANDBOX_URL (bac à sable) si elle est renseignée
+ * et que PAWAPAY_ENV ne force pas la production, sinon l'adresse officielle de PAWAPAY_ENV.
+ */
+export function pawapayBaseUrl(): string {
+  const sandboxUrl = pawapayApiUrl(serverEnv.PAWAPAY_API_SANDBOX_URL);
+  if (sandboxUrl && serverEnv.PAWAPAY_ENV !== "production") return sandboxUrl;
+  return PAWAPAY_API[serverEnv.PAWAPAY_ENV ?? "production"];
+}
+
 /** pawaPay : Mobile Money (FCFA), dès que PAWAPAY_API_TOKEN est défini. */
 export function getPawaPay(): PawaPayProvider | null {
   if (pawapay === undefined) {
     pawapay = serverEnv.PAWAPAY_API_TOKEN
-      ? new PawaPayProvider(serverEnv.PAWAPAY_API_TOKEN, serverEnv.PAWAPAY_ENV ?? "production")
+      ? new PawaPayProvider(serverEnv.PAWAPAY_API_TOKEN, pawapayBaseUrl())
       : null;
   }
   return pawapay;
@@ -61,11 +71,6 @@ export function getSandboxProvider(): SandboxProvider | null {
 export function getPaymentProvider(currency: Currency): PaymentProvider | null {
   const real = currency === "XAF" ? getPawaPay() : getPaddle();
   return real ?? getSandboxProvider();
-}
-
-/** Au moins un moyen de paiement disponible (affichage de l'espace Abonnement). */
-export function paymentsAvailable(): boolean {
-  return getPaymentProvider("XAF") !== null || getPaymentProvider("USD") !== null;
 }
 
 /** Prestataire qui a créé un paiement (payments.provider), pour le revérifier. */

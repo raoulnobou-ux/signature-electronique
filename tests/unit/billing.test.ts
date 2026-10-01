@@ -11,6 +11,7 @@ import {
   PawaPayProvider,
   customerMessage,
   mapDepositStatus,
+  pawapayApiUrl,
   payerCountry,
 } from "@/lib/billing/pawapay";
 import {
@@ -283,6 +284,29 @@ describe("pawaPay (Mobile Money, FCFA)", () => {
     });
     expect(provider.parseWebhook(new Headers(), "pas du json")).toBeNull();
     expect(provider.parseWebhook(new Headers(), JSON.stringify({ depositId: "x" }))).toBeNull();
+  });
+
+  it("adresse d'API de test : https et domaine pawapay.io uniquement", async () => {
+    expect(pawapayApiUrl("https://api.sandbox.pawapay.io/v2/")).toBe(
+      "https://api.sandbox.pawapay.io",
+    );
+    expect(pawapayApiUrl(" https://api.sandbox.pawapay.io ")).toBe(
+      "https://api.sandbox.pawapay.io",
+    );
+    expect(pawapayApiUrl("http://api.sandbox.pawapay.io")).toBeNull();
+    expect(pawapayApiUrl("https://pawapay.io.evil.com")).toBeNull();
+    expect(pawapayApiUrl("pas une adresse")).toBeNull();
+    expect(pawapayApiUrl(undefined)).toBeNull();
+    const fetcher = jsonFetcher(200, { redirectUrl: "https://paywith.pawapay.io/x" });
+    const provider = new PawaPayProvider(
+      "tok",
+      "https://api.sandbox.pawapay.io",
+      fetcher as unknown as typeof fetch,
+    );
+    await provider.createCheckout(checkoutRequest);
+    expect((fetcher.mock.calls[0] as unknown as [string])[0]).toBe(
+      "https://api.sandbox.pawapay.io/v2/paymentpage",
+    );
   });
 
   it("pays toujours transmis avec le montant (exigence pawaPay)", () => {

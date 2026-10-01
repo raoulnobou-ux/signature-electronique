@@ -1,6 +1,6 @@
 "use client";
 
-import { Lock, ShieldCheck, Smartphone } from "lucide-react";
+import { CreditCard, Lock, ShieldCheck, Smartphone } from "lucide-react";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
@@ -22,6 +22,7 @@ import type { AccessState } from "@/lib/entitlements";
 import type { BillingCycle, Currency, PaidPlan, PlanId } from "@/lib/entitlements/plans";
 import { formatMoney } from "@/lib/format";
 import type { PriceTable } from "@/lib/pricing";
+import { cn } from "@/lib/utils";
 
 type Selection = { plan: PaidPlan; cycle: BillingCycle; currency: Currency };
 
@@ -29,13 +30,14 @@ type Selection = { plan: PaidPlan; cycle: BillingCycle; currency: Currency };
 export function CheckoutPlans({
   prices,
   defaultCurrency,
-  available,
+  methods,
   state,
   plan,
 }: {
   prices: PriceTable;
   defaultCurrency: Currency;
-  available: boolean;
+  /** Moyens de paiement configurés : FCFA → Mobile Money (pawaPay), USD → carte (Paddle). */
+  methods: Record<Currency, boolean>;
   state: AccessState;
   plan: PlanId;
 }) {
@@ -62,7 +64,11 @@ export function CheckoutPlans({
     return t("labels.choose", { plan: planName(p) });
   };
 
-  const select = (p: PaidPlan, cycle: BillingCycle, currency: Currency) => {
+  const available = methods.XAF || methods.USD;
+
+  const select = (p: PaidPlan, cycle: BillingCycle, shown: Currency) => {
+    // Devise affichée si son moyen de paiement est disponible, sinon l'autre.
+    const currency = methods[shown] ? shown : shown === "XAF" ? "USD" : "XAF";
     setSelection({ plan: p, cycle, currency });
     setQuote(null);
     startQuote(async () => {
@@ -73,6 +79,12 @@ export function CheckoutPlans({
         setSelection(null);
       }
     });
+  };
+
+  /** Choix du moyen de paiement : nouveau devis dans la devise correspondante. */
+  const chooseMethod = (currency: Currency) => {
+    if (!selection || selection.currency === currency) return;
+    select(selection.plan, selection.cycle, currency);
   };
 
   const pay = () => {
@@ -151,10 +163,49 @@ export function CheckoutPlans({
                         date: format.dateTime(periodEnd!, { dateStyle: "long" }),
                       })}
               </p>
+              <fieldset className="space-y-2">
+                <legend className="mb-2 text-sm font-medium">{t("checkout.method")}</legend>
+                {(["XAF", "USD"] as const).map((currency) => {
+                  const Icon = currency === "XAF" ? Smartphone : CreditCard;
+                  // Le prorata garde la devise de l'abonnement en cours.
+                  const locked = q.kind === "upgrade" && q.currency !== currency;
+                  const disabled = !methods[currency] || locked || loadingQuote;
+                  const checked = q.currency === currency;
+                  return (
+                    <label
+                      key={currency}
+                      className={cn(
+                        "flex cursor-pointer items-start gap-3 rounded-xl border p-3 transition-colors",
+                        checked ? "border-primary bg-primary/5" : "border-border",
+                        disabled && "cursor-not-allowed opacity-50",
+                      )}
+                    >
+                      <input
+                        type="radio"
+                        name="payment-method"
+                        className="mt-1 accent-[var(--color-primary)]"
+                        checked={checked}
+                        disabled={disabled}
+                        onChange={() => chooseMethod(currency)}
+                      />
+                      <Icon className="mt-0.5 size-5 shrink-0 text-muted-foreground" aria-hidden />
+                      <span>
+                        <span className="block text-sm font-medium">
+                          {t(`checkout.methods.${currency}.title`)}
+                        </span>
+                        <span className="block text-xs text-muted-foreground">
+                          {!methods[currency]
+                            ? t("checkout.methods.unavailable")
+                            : locked
+                              ? t("checkout.methods.locked")
+                              : t(`checkout.methods.${currency}.body`)}
+                        </span>
+                      </span>
+                    </label>
+                  );
+                })}
+              </fieldset>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li className="flex gap-2">
-                  <Smartphone className="mt-0.5 size-4 shrink-0" aria-hidden /> {t("methodsNote")}
-                </li>
                 <li className="flex gap-2">
                   <ShieldCheck className="mt-0.5 size-4 shrink-0 text-success" aria-hidden />{" "}
                   {t("checkout.secure")}
