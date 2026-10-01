@@ -1,6 +1,7 @@
 "use server";
 
 import { randomUUID } from "node:crypto";
+import { logAppError } from "@/lib/monitoring/app-errors";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { recordAudit } from "@/lib/audit";
@@ -177,9 +178,11 @@ export async function startCheckout(
     return { ok: true, url };
   } catch (err) {
     console.error("[billing] checkout", err);
+    await logAppError("billing.checkout", err, { userId: account.userId });
+    const detail = err instanceof Error ? err.message.slice(0, 300) : "";
     await admin
       .from("payments")
-      .update({ status: "failed", failure_reason: "checkout_error" })
+      .update({ status: "failed", failure_reason: `checkout_error: ${detail}` })
       .eq("id", payment.id);
     return { ok: false, reason: "provider_error" };
   }

@@ -53,6 +53,20 @@ function safeEqual(a: string, b: string): boolean {
   return x.length === y.length && timingSafeEqual(x, y);
 }
 
+/**
+ * CinetPay refuse les caractères spéciaux dans la description ($, #, /, tirets longs…) :
+ * accents retirés, seuls lettres, chiffres, espaces, tirets, points et virgules conservés.
+ */
+export function cinetpayDescription(text: string): string {
+  return text
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^A-Za-z0-9 .,-]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 120);
+}
+
 /** Statut CinetPay → statut interne. */
 export function mapStatus(status: string | undefined): TransactionStatus {
   const s = (status ?? "").toUpperCase();
@@ -116,7 +130,7 @@ export class CinetPayProvider implements PaymentProvider {
         transaction_id: req.reference,
         amount: req.amount,
         currency: req.currency,
-        description: req.description,
+        description: cinetpayDescription(req.description),
         notify_url: req.notifyUrl,
         return_url: req.redirectUrl,
         channels: CHANNELS[req.currency],

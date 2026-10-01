@@ -1,4 +1,5 @@
 import type Anthropic from "@anthropic-ai/sdk";
+import { logAppError } from "@/lib/monitoring/app-errors";
 import { getLocale } from "next-intl/server";
 import { z } from "zod";
 import { getCurrentAccount } from "@/lib/auth/account";
@@ -62,7 +63,9 @@ function ndjson(run: (send: (event: AssistantEvent) => void) => Promise<void>): 
         await run(send);
       } catch (error) {
         console.error("[assistant]", error);
-        send({ type: "error", code: providerErrorCode(error) });
+        const code = providerErrorCode(error);
+        await logAppError("assistant", error, { code });
+        send({ type: "error", code });
       } finally {
         if (!closed) {
           closed = true;

@@ -109,6 +109,33 @@ export type Database = {
           },
         ];
       };
+      app_errors: {
+        Row: {
+          code: string | null;
+          created_at: string;
+          id: number;
+          message: string;
+          scope: string;
+          user_id: string | null;
+        };
+        Insert: {
+          code?: string | null;
+          created_at?: string;
+          id?: never;
+          message: string;
+          scope: string;
+          user_id?: string | null;
+        };
+        Update: {
+          code?: string | null;
+          created_at?: string;
+          id?: never;
+          message?: string;
+          scope?: string;
+          user_id?: string | null;
+        };
+        Relationships: [];
+      };
       audit_events: {
         Row: {
           actor_id: string | null;

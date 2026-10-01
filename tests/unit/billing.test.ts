@@ -3,6 +3,7 @@ import { PDFDocument } from "pdf-lib";
 import { describe, expect, it, vi } from "vitest";
 import {
   CinetPayProvider,
+  cinetpayDescription,
   mapStatus,
   notificationToken,
   parseNotificationBody,
@@ -274,6 +275,16 @@ describe("CinetPay", () => {
     );
     const p2 = new CinetPayProvider("k", "105", SECRET, unknown as unknown as typeof fetch);
     expect(await p2.verifyTransaction({ reference: "QS-1", transactionId: null })).toBeNull();
+  });
+
+  it("description sans caractères spéciaux refusés par CinetPay", () => {
+    expect(cinetpayDescription("Abonnement Essentiel — mensuel")).toBe(
+      "Abonnement Essentiel mensuel",
+    );
+    expect(cinetpayDescription("Abonnement Pro — annuel (passage au Pro, au prorata)")).toBe(
+      "Abonnement Pro annuel passage au Pro, au prorata",
+    );
+    expect(cinetpayDescription("Équipe #1 / 50 $")).toBe("Equipe 1 50");
   });
 
   it("crée un checkout Mobile Money + carte en FCFA, carte seule en dollars", async () => {
