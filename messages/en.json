@@ -57,7 +57,11 @@
     "legalNotice": "Legal notice",
     "legalValidity": "Legal validity",
     "madeIn": "Made in Cameroon.",
-    "rights": "© {year} QuickSign. All rights reserved."
+    "rights": "© {year} QuickSign. All rights reserved.",
+    "securityPrivacy": "Security & privacy",
+    "follow": "Follow QuickSign",
+    "whatsapp": "Chat on WhatsApp",
+    "whatsappMessage": "Hello QuickSign, I have a question:"
   },
   "landing": {
     "hero": {

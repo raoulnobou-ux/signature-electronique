@@ -56,3 +56,35 @@ test("la FAQ s'ouvre au clic", async ({ page }) => {
   await question.click();
   await expect(page.getByText(/sans carte ni paiement/)).toBeVisible();
 });
+
+test("pied de page : réseaux sociaux, support et liens légaux sur chaque page publique", async ({
+  page,
+}) => {
+  for (const { path } of pages) {
+    await page.goto(path);
+    const footer = page.getByRole("contentinfo");
+    const socials = footer.getByRole("list", { name: "Suivez QuickSign" });
+    await expect(socials.getByRole("link")).toHaveCount(5);
+    for (const [name, url] of [
+      ["LinkedIn", "https://www.linkedin.com/in/quicksign-app-5b0546440"],
+      ["X (Twitter)", "https://x.com/Quicksignapp"],
+      ["Instagram", "https://www.instagram.com/quicksignapp/"],
+      ["TikTok", "https://www.tiktok.com/@quicksignapp"],
+    ] as const) {
+      const link = socials.getByRole("link", { name });
+      await expect(link).toHaveAttribute("href", url);
+      await expect(link).toHaveAttribute("rel", "noopener noreferrer");
+    }
+    await expect(
+      footer.getByRole("link", { name: "supportquicksignapp@gmail.com" }),
+    ).toHaveAttribute("href", "mailto:supportquicksignapp@gmail.com");
+    for (const [name, href] of [
+      ["Conditions générales", "/cgu"],
+      ["Confidentialité", "/confidentialite"],
+      ["Mentions légales", "/mentions-legales"],
+      ["Sécurité et confidentialité", "/securite"],
+    ] as const) {
+      await expect(footer.getByRole("link", { name, exact: true })).toHaveAttribute("href", href);
+    }
+  }
+});

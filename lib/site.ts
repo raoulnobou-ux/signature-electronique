@@ -1,3 +1,5 @@
+import { SUPPORT_EMAIL } from "@/config/social-links";
+
 /** Informations publiques du site, partagées par les métadonnées, les e-mails et les pages. */
 export const siteConfig = {
   name: "QuickSign",
@@ -10,6 +12,6 @@ export const siteConfig = {
     (process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL
       ? `https://${process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL}`
       : "http://localhost:3000"),
-  supportEmail: "support@quicksign.app",
+  supportEmail: SUPPORT_EMAIL,
   trialDays: 6,
 } as const;
