@@ -22,6 +22,10 @@ export type SecurityContent = {
   intro: string;
   protectionsTitle: string;
   protections: Protection[];
+  dataTitle: string;
+  dataIntro: string;
+  /** Questions fréquentes sur les données : hébergement, chiffrement, accès, conservation. */
+  data: { question: string; answer: string }[];
   legalTitle: string;
   legal: ReactNode;
   ctaTrial: string;
@@ -76,7 +80,7 @@ const fr: SecurityContent = {
     ],
     [
       "Paiements sécurisés",
-      "Les paiements Mobile Money et carte sont traités par un prestataire certifié. Aucune donnée de carte ne transite ni n'est stockée chez QuickSign.",
+      "Les paiements sont traités par pawaPay (Mobile Money) et Paddle (carte bancaire), prestataires spécialisés. Aucune donnée de carte ni code PIN ne transite ni n'est stocké chez QuickSign.",
     ],
     [
       "IA sous votre contrôle",
@@ -87,6 +91,40 @@ const fr: SecurityContent = {
       "Protégez votre compte par un code à usage unique (application d'authentification). Base de données sauvegardée automatiquement, erreurs surveillées en continu.",
     ],
   ]),
+  dataTitle: "Vos données, en clair",
+  dataIntro: "Les réponses simples aux questions que l'on nous pose le plus souvent.",
+  data: [
+    {
+      question: "Où sont hébergées mes données ?",
+      answer:
+        "Dans l'Union européenne, à Paris : la base de données et les fichiers chez Supabase (infrastructure Amazon Web Services, région eu-west-3), l'application chez Vercel (région Paris). Ces hébergeurs sont audités selon la norme SOC 2.",
+    },
+    {
+      question: "Mes fichiers sont-ils chiffrés ?",
+      answer:
+        "Oui, deux fois. Pendant le transfert, tout passe par HTTPS (TLS 1.2 ou plus récent). Au repos, la base de données, ses sauvegardes et tous les fichiers (documents, signatures, cachets, certificats, reçus) sont chiffrés en AES-256 par l'hébergeur. Aucun fichier n'est public : chaque ouverture passe par un lien signé qui expire au bout de quelques minutes.",
+    },
+    {
+      question: "Qui peut voir mes documents ?",
+      answer:
+        "Vous seul. Les personnes que vous invitez à signer ne voient que le document concerné, par un lien personnel, secret et limité dans le temps. Les membres de votre équipe ne voient que ce que vous partagez explicitement (modèles, cachets). L'équipe QuickSign ne consulte jamais vos documents, sauf si vous le demandez par écrit pour une assistance. L'assistant IA ne lit un document que si vous le lui demandez.",
+    },
+    {
+      question: "Quels prestataires traitent mes données ?",
+      answer:
+        "Uniquement ceux qui sont nécessaires au service : Supabase et Vercel (hébergement), Resend (envoi des e-mails), Anthropic (assistant IA, seulement à votre demande et sans entraînement sur vos données), pawaPay et Paddle (paiements). Aucune donnée n'est vendue ni utilisée à des fins publicitaires.",
+    },
+    {
+      question: "Combien de temps sont-elles conservées ?",
+      answer:
+        "Vos documents restent disponibles tant que votre compte existe, même si l'abonnement expire (lecture seule). Un document mis à la corbeille est supprimé définitivement après 30 jours. Si vous supprimez votre compte, tous vos fichiers sont effacés immédiatement ; seul le journal d'audit des signatures est conservé, sans le contenu des documents, car il sert de preuve aux autres signataires.",
+    },
+    {
+      question: "Comment exporter ou supprimer mes données ?",
+      answer:
+        "À tout moment, depuis Paramètres → Zone sensible : « Exporter mes données » télécharge immédiatement toutes vos informations (profil, liste des documents, demandes, paiements, journal d'audit), chaque fichier restant téléchargeable depuis l'application ; « Supprimer mon compte » efface définitivement votre compte et vos fichiers. Vous pouvez aussi écrire à supportquicksignapp@gmail.com.",
+    },
+  ],
   legalTitle: "Validité juridique",
   legal: (
     <>
@@ -195,7 +233,7 @@ const en: SecurityContent = {
     ],
     [
       "Secure payments",
-      "Mobile Money and card payments are processed by a certified provider. No card data passes through or is stored at QuickSign.",
+      "Payments are processed by pawaPay (Mobile Money) and Paddle (card), specialised providers. No card data or PIN ever passes through or is stored at QuickSign.",
     ],
     [
       "AI under your control",
@@ -206,6 +244,40 @@ const en: SecurityContent = {
       "Protect your account with a one-time code (authenticator app). The database is backed up automatically, and errors are monitored continuously.",
     ],
   ]),
+  dataTitle: "Your data, plainly",
+  dataIntro: "Straight answers to the questions we're asked most often.",
+  data: [
+    {
+      question: "Where is my data hosted?",
+      answer:
+        "In the European Union, in Paris: the database and files at Supabase (Amazon Web Services infrastructure, eu-west-3 region), the application at Vercel (Paris region). Both hosts are SOC 2 audited.",
+    },
+    {
+      question: "Are my files encrypted?",
+      answer:
+        "Yes, twice. In transit, everything goes over HTTPS (TLS 1.2 or later). At rest, the database, its backups and every file (documents, signatures, stamps, certificates, receipts) are encrypted with AES-256 by the host. No file is public: every access goes through a signed link that expires within minutes.",
+    },
+    {
+      question: "Who can see my documents?",
+      answer:
+        "Only you. People you invite to sign only see the document concerned, through a personal, secret, time-limited link. Your team members only see what you explicitly share (templates, stamps). The QuickSign team never looks at your documents unless you ask us in writing for support. The AI assistant only reads a document when you ask it to.",
+    },
+    {
+      question: "Which providers process my data?",
+      answer:
+        "Only those the service needs: Supabase and Vercel (hosting), Resend (emails), Anthropic (AI assistant, only at your request and never trained on your data), pawaPay and Paddle (payments). No data is ever sold or used for advertising.",
+    },
+    {
+      question: "How long is it kept?",
+      answer:
+        "Your documents stay available as long as your account exists, even if your subscription lapses (read-only). A document moved to the trash is permanently deleted after 30 days. If you delete your account, all your files are erased immediately; only the signing audit log is kept, without document content, because it is evidence for the other signers.",
+    },
+    {
+      question: "How do I export or delete my data?",
+      answer:
+        "Anytime, from Settings → Danger zone: “Export my data” instantly downloads all your information (profile, document list, requests, payments, audit log), with every file still downloadable from the app; “Delete my account” permanently erases your account and files. You can also write to supportquicksignapp@gmail.com.",
+    },
+  ],
   legalTitle: "Legal validity",
   legal: (
     <>

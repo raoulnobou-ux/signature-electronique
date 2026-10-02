@@ -9,6 +9,7 @@ import { IMAGE_MIME, sniffFileType } from "@/lib/files/sniff";
 import { toE164, type CountryCode } from "@/lib/phone";
 import { rateLimit } from "@/lib/rate-limit";
 import { purgeUserFiles } from "@/lib/storage/purge";
+import { avatarPath, avatarUrl } from "@/lib/storage/avatars";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { ACCOUNT_TYPES } from "@/lib/validation/auth";
@@ -143,7 +144,6 @@ export async function uploadAvatar(formData: FormData): Promise<SettingsResult> 
   });
   if (uploadError) return { ok: false, error: "server" };
 
-  const { data: publicUrl } = admin.storage.from("avatars").getPublicUrl(path);
   const { data: previous } = await supabase
     .from("profiles")
     .select("avatar_url")
@@ -151,7 +151,7 @@ export async function uploadAvatar(formData: FormData): Promise<SettingsResult> 
     .single();
   const { error } = await supabase
     .from("profiles")
-    .update({ avatar_url: publicUrl.publicUrl })
+    .update({ avatar_url: avatarUrl(path) })
     .eq("id", user.id);
   if (error) return { ok: false, error: "server" };
 
@@ -176,9 +176,7 @@ export async function removeAvatar(): Promise<SettingsResult> {
 
 /** Supprime l'ancien avatar s'il est hébergé chez nous (pas une photo Google). */
 async function removeStoredAvatar(url: string | null, userId: string) {
-  const marker = "/storage/v1/object/public/avatars/";
-  if (!url?.includes(marker)) return;
-  const path = url.split(marker)[1];
+  const path = avatarPath(url);
   if (path?.startsWith(`${userId}/`))
     await createAdminClient().storage.from("avatars").remove([path]);
 }

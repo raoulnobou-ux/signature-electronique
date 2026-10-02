@@ -175,6 +175,8 @@ export async function listSignatureAssets(): Promise<SignatureAsset[]> {
 
 /** Partage d'un cachet avec son équipe (bibliothèque partagée), ou retrait du partage. */
 export async function setAssetShared(id: string, shared: boolean): Promise<{ ok: boolean }> {
+  // Partage d'un cachet avec l'équipe : cachets et équipe sont réservés au plan Pro.
+  if (shared && !(await guard("stamps")).ok) return { ok: false };
   const owned = await ownAsset(id);
   if (!owned || owned.asset.type !== "stamp") return { ok: false };
   const admin = createAdminClient();

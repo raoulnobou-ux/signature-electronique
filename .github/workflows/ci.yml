@@ -32,6 +32,8 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
+      - name: Aucun secret dans le code envoyé au navigateur
+        run: npm run check:bundle
 
   database:
     name: Migrations et sécurité de la base (RLS)

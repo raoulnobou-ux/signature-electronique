@@ -65,9 +65,16 @@ describe.skipIf(!hasLocalDb)("sécurité des données (RLS)", () => {
       .from("audit_events")
       .update({ event_type: "tampered" })
       .eq("id", row!.id);
-    expect(update.error?.message).toContain("ajout seul");
+    // Même le rôle serveur est refusé : droits retirés, et déclencheur « ajout seul » derrière.
+    expect(update.error?.message).toMatch(/permission denied|ajout seul/);
     const del = await admin().from("audit_events").delete().eq("id", row!.id);
-    expect(del.error?.message).toContain("ajout seul");
+    expect(del.error?.message).toMatch(/permission denied|ajout seul/);
+    const { data: kept } = await admin()
+      .from("audit_events")
+      .select("event_type")
+      .eq("id", row!.id)
+      .single();
+    expect(kept?.event_type).toBe("test.immutable");
   });
 
   it("un compte expiré ne peut plus créer de document, même via l'API", async () => {

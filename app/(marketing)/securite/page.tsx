@@ -47,6 +47,28 @@ export default async function SecurityPage() {
       </section>
 
       <section
+        id="donnees"
+        aria-labelledby="data-title"
+        className="mx-auto max-w-3xl scroll-mt-20 px-4 pt-10 sm:px-6"
+      >
+        <h2
+          id="data-title"
+          className="font-display text-3xl font-semibold tracking-tight sm:text-4xl"
+        >
+          {c.dataTitle}
+        </h2>
+        <p className="mt-3 text-muted-foreground">{c.dataIntro}</p>
+        <dl className="mt-8 divide-y divide-border rounded-3xl glass">
+          {c.data.map(({ question, answer }) => (
+            <div key={question} className="reveal p-6">
+              <dt className="font-display text-lg font-semibold">{question}</dt>
+              <dd className="mt-2 text-sm leading-relaxed text-muted-foreground">{answer}</dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+
+      <section
         id="validite-juridique"
         aria-labelledby="legal-title"
         className="mx-auto max-w-3xl scroll-mt-20 px-4 py-16 sm:px-6"

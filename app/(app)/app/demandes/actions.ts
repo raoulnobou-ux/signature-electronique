@@ -213,6 +213,8 @@ export async function getSignerLink(signerId: string): Promise<LinkResult> {
 
 /** Relance manuelle (e-mail si possible), au plus une fois par heure et par signataire. */
 export async function remindSigner(signerId: string): Promise<LinkResult> {
+  // Relance (e-mail) : réservée aux comptes actifs dont le plan inclut les demandes.
+  if (!(await guard("multi_signers")).ok) return { ok: false, error: "not_found" };
   const owned = await ownedSigner(signerId);
   if (!owned) return { ok: false, error: "not_found" };
   const { signer, request, account } = owned;

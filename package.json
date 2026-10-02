@@ -20,7 +20,8 @@
     "check": "npm run lint && npm run typecheck && npm run test",
     "postinstall": "node scripts/copy-pdf-worker.mjs",
     "deploy:check": "node scripts/deploy-check.mts",
-    "smoke": "node scripts/smoke.mts"
+    "smoke": "node scripts/smoke.mts",
+    "check:bundle": "node --env-file-if-exists=.env.local scripts/check-bundle.mts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.129.0",

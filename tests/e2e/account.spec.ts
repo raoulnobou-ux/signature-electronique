@@ -32,7 +32,20 @@ test("modifier son profil, sa structure et sa photo", async ({ page }) => {
   expect(data.phone).toBe("+237655443322");
   expect(data.account_type).toBe("school");
   expect(data.org_name).toBe("Institut Bilingue de Bonamoussadi");
-  expect(data.avatar_url).toContain("/avatars/");
+  expect(data.avatar_url).toMatch(/^\/api\/avatars\/[0-9a-f-]{36}\/[0-9a-f-]{36}\.png$/);
+
+  // Photo privée : visible par son propriétaire (URL signée), jamais par un inconnu.
+  const own = await page.request.get(data.avatar_url, { maxRedirects: 0 });
+  expect(own.status()).toBe(302);
+  expect(own.headers().location).toContain("/storage/v1/object/sign/avatars/");
+  const stranger = await createConfirmedUser("intrus");
+  await page.context().clearCookies();
+  expect((await page.request.get(data.avatar_url, { maxRedirects: 0 })).status()).toBe(401);
+  await signInAs(page, stranger.email);
+  expect((await page.request.get(data.avatar_url, { maxRedirects: 0 })).status()).toBe(404);
+  // L'ancien accès public direct au stockage est fermé.
+  const publicUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/avatars/${data.avatar_url.split("/api/avatars/")[1]}`;
+  expect((await page.request.get(publicUrl)).status()).toBeGreaterThanOrEqual(400);
 });
 
 test("une fausse image (texte renommé en .png) est refusée", async ({ page }) => {
