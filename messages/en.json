@@ -123,7 +123,7 @@
     "features": {
       "eyebrow": "Features",
       "title": "Everything you need. Nothing you don't.",
-      "subtitle": "The tools of a major international provider, adapted to the way we work here.",
+      "subtitle": "The tools of the leading international platforms, designed around the way you work.",
       "items": [
         {
           "key": "stamp",
@@ -203,7 +203,7 @@
     },
     "pricing": {
       "eyebrow": "Pricing",
-      "title": "A fair price, in CFA francs.",
+      "title": "A fair price, in CFA francs or US dollars.",
       "subtitle": "Start with a 6-day trial including every Pro feature. No credit card.",
       "monthly": "Monthly",
       "yearly": "Yearly",
@@ -268,7 +268,7 @@
         },
         {
           "q": "How can I pay?",
-          "a": "With MTN Mobile Money, Orange Money or a Visa / Mastercard card, through our secure payment partner. We never store your payment details."
+          "a": "With MTN Mobile Money or Orange Money (through pawaPay), or a Visa / Mastercard card (through Paddle), our secure payment partners. QuickSign never sees or stores your payment details."
         },
         {
           "q": "What happens when the trial ends?",
@@ -341,7 +341,7 @@
     "whatsappTitle": "By WhatsApp",
     "whatsappDescription": "The fastest way for a simple question.",
     "hoursTitle": "Hours",
-    "hours": "Monday to Friday, 8 am – 6 pm (Douala time)",
+    "hours": "Monday to Friday, 8 am – 6 pm (Cameroon time, UTC+1)",
     "form": {
       "name": "Full name",
       "email": "Email address",
@@ -391,7 +391,7 @@
       "email": "Email address",
       "emailPlaceholder": "you@example.cm",
       "phone": "Phone",
-      "phoneHint": "Used for reminders and, later, WhatsApp verification.",
+      "phoneHint": "Optional: only used to reach you about your account.",
       "country": "Country",
       "password": "Password",
       "newPassword": "New password",
@@ -665,7 +665,7 @@
       },
       "danger": {
         "exportTitle": "Export my data",
-        "exportBody": "Download a file containing your profile, your documents and your signature history.",
+        "exportBody": "Download a file containing your profile, your document list, your requests, your payments and your signature history.",
         "exportCta": "Export (JSON)",
         "deleteTitle": "Delete my account",
         "deleteBody": "Permanent deletion of your account, documents and signatures. This cannot be undone.",
@@ -704,6 +704,7 @@
       "choose": "Choose a plan",
       "history": "Payment history",
       "noPayments": "No payments yet.",
+      "noPaymentsHint": "Your receipts will appear here after your first payment.",
       "validUntil": "Valid until {date}",
       "renew": "Renew",
       "paymentUnavailable": "Online payment isn't enabled yet. Write to us from the Contact page to subscribe.",
@@ -1467,6 +1468,7 @@
     "sharingHint": "Tip: share a template or a stamp from its “Share with the team” menu.",
     "activity": "Recent activity",
     "noActivity": "No activity yet.",
+    "noActivityHint": "Your team's imports, signatures and shares will show up here.",
     "events": {
       "document_imported": "imported a document",
       "document_signed": "signed a document",
@@ -1693,16 +1695,16 @@
     "delete": "Delete conversation",
     "deleted": "Conversation deleted.",
     "errors": {
-      "not_configured": "The assistant isn't enabled on this installation yet.",
+      "not_configured": "The assistant is temporarily unavailable. Our team has been notified — please try again a little later.",
       "quota": "You've used your 20 messages for today (Essential plan). Come back tomorrow, or upgrade to Pro for unlimited use.",
       "rate_limited": "Too many messages in a short time. Wait a minute.",
       "refusal": "I can't answer this request.",
       "read_only": "Your account is read-only: the assistant is suspended. Reactivate a plan to use it.",
       "feature_not_in_plan": "This assistant feature is included in the Pro plan.",
       "invalid": "Invalid message.",
-      "provider_auth": "The assistant is unavailable: the AI service key was rejected. The administrator needs to check it.",
-      "provider_workspace": "The assistant is unavailable: the AI service key isn't attached to a workspace. The administrator needs to set the workspace ID.",
-      "provider_billing": "The assistant is unavailable: the AI service credit is used up. The administrator needs to top it up.",
+      "provider_auth": "The assistant is temporarily unavailable. Our team has been notified — please try again a little later.",
+      "provider_workspace": "The assistant is temporarily unavailable. Our team has been notified — please try again a little later.",
+      "provider_billing": "The assistant is temporarily unavailable. Our team has been notified — please try again a little later.",
       "provider_unavailable": "The AI service is temporarily overloaded. Try again in a moment.",
       "server": "The assistant couldn't answer. Please try again.",
       "network": "Connection lost. Please try again."

@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Activity,
   Crown,
   LogOut,
   Mail,
@@ -42,6 +43,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
@@ -326,7 +328,12 @@ export function TeamView({ team }: { team: TeamData | null }) {
           {t("activity")}
         </h2>
         {team.activity.length === 0 ? (
-          <p className="text-sm text-muted-foreground">{t("noActivity")}</p>
+          <EmptyState
+            icon={Activity}
+            title={t("noActivity")}
+            description={t("noActivityHint")}
+            className="py-10"
+          />
         ) : (
           <ol className="space-y-2 border-l border-border pl-4" data-testid="team-activity">
             {team.activity.map((a) => (

@@ -1,6 +1,6 @@
 "use client";
 
-import { History, Loader2, MessageSquarePlus, Trash2 } from "lucide-react";
+import { History, Loader2, MessageSquarePlus, MessagesSquare, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
@@ -41,7 +41,13 @@ function HistoryList({
       </div>
     );
   }
-  if (!items.length) return <p className="p-4 text-sm text-muted-foreground">{t("noHistory")}</p>;
+  if (!items.length)
+    return (
+      <div className="flex flex-col items-center gap-2 px-4 py-8 text-center">
+        <MessagesSquare className="size-6 text-muted-foreground" strokeWidth={1.6} aria-hidden />
+        <p className="text-sm text-muted-foreground">{t("noHistory")}</p>
+      </div>
+    );
   return (
     <ul className="space-y-1 p-2" data-testid="assistant-history">
       {items.map((c) => (

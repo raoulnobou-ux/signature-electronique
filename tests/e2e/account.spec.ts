@@ -91,7 +91,7 @@ test("à la fin de l'essai, le compte passe en lecture seule", async ({ page }) 
 
   await signInAs(page, user.email);
   await expect(page.getByText("Compte en lecture seule")).toBeVisible();
-  await expect(page.getByRole("link", { name: "Passer à un plan" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Choisir un plan" }).first()).toBeVisible();
 
   // Garde-fou en base : impossible de créer un document, même en contournant l'interface.
   const { error } = await adminClient().rpc("can_write", { p_user_id: user.id });

@@ -1,4 +1,4 @@
-import { CheckCircle2, Clock, Info, XCircle } from "lucide-react";
+import { CheckCircle2, Clock, Info, ReceiptText, XCircle } from "lucide-react";
 import type { Metadata } from "next";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { getLocale as getRequestLocale } from "next-intl/server";
@@ -8,6 +8,7 @@ import { ReceiptButton } from "@/components/billing/receipt-button";
 import { SubscriptionOverview } from "@/components/billing/subscription-overview";
 import { ClientMessages } from "@/components/providers/client-messages";
 import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Card, CardContent } from "@/components/ui/card";
 import { requireAccount } from "@/lib/auth/account";
 import { getPaymentProvider, mobileMoneyCountries, testModes } from "@/lib/billing";
@@ -114,7 +115,12 @@ export default async function BillingPage({ searchParams }: PageProps<"/app/abon
           {t("history")}
         </h2>
         {!payments?.length ? (
-          <p className="text-sm text-muted-foreground">{t("noPayments")}</p>
+          <EmptyState
+            icon={ReceiptText}
+            title={t("noPayments")}
+            description={t("noPaymentsHint")}
+            className="py-10"
+          />
         ) : (
           <Card>
             <CardContent className="p-0">

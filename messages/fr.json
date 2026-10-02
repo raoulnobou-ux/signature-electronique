@@ -123,7 +123,7 @@
     "features": {
       "eyebrow": "Fonctionnalités",
       "title": "Tout ce qu'il faut. Rien de superflu.",
-      "subtitle": "Les outils d'un grand éditeur international, adaptés à la façon dont on travaille ici.",
+      "subtitle": "Les outils des grands éditeurs internationaux, pensés pour votre façon de travailler.",
       "items": [
         {
           "key": "stamp",
@@ -218,7 +218,7 @@
     },
     "pricing": {
       "eyebrow": "Tarifs",
-      "title": "Un prix juste, en FCFA.",
+      "title": "Un prix juste, en FCFA ou en dollars.",
       "subtitle": "Commencez par 6 jours d'essai avec toutes les fonctionnalités Pro. Sans carte bancaire.",
       "monthly": "Mensuel",
       "yearly": "Annuel",
@@ -283,7 +283,7 @@
         },
         {
           "q": "Comment puis-je payer ?",
-          "a": "Par MTN Mobile Money, Orange Money ou carte Visa / Mastercard, via notre partenaire de paiement sécurisé. Nous ne stockons jamais vos informations de paiement."
+          "a": "Par MTN Mobile Money ou Orange Money (via pawaPay), ou par carte Visa / Mastercard (via Paddle), nos partenaires de paiement sécurisés. QuickSign ne voit ni ne stocke jamais vos informations de paiement."
         },
         {
           "q": "Que se passe-t-il à la fin de l'essai ?",
@@ -356,7 +356,7 @@
     "whatsappTitle": "Par WhatsApp",
     "whatsappDescription": "Le plus rapide pour une question simple.",
     "hoursTitle": "Horaires",
-    "hours": "Du lundi au vendredi, 8 h – 18 h (heure de Douala)",
+    "hours": "Du lundi au vendredi, 8 h – 18 h (heure du Cameroun, UTC+1)",
     "form": {
       "name": "Nom complet",
       "email": "Adresse e-mail",
@@ -406,7 +406,7 @@
       "email": "Adresse e-mail",
       "emailPlaceholder": "vous@exemple.cm",
       "phone": "Téléphone",
-      "phoneHint": "Utilisé pour les rappels et, plus tard, la vérification par WhatsApp.",
+      "phoneHint": "Facultatif : utilisé uniquement pour vous joindre au sujet de votre compte.",
       "country": "Pays",
       "password": "Mot de passe",
       "newPassword": "Nouveau mot de passe",
@@ -540,7 +540,7 @@
       "renew": "Renouveler",
       "expiredTitle": "Compte en lecture seule",
       "expired": "Vous pouvez consulter et télécharger vos documents. Choisissez un plan pour signer à nouveau — rien n'a été supprimé.",
-      "upgrade": "Passer à un plan"
+      "upgrade": "Choisir un plan"
     },
     "greeting": {
       "morning": "Bonjour",
@@ -680,7 +680,7 @@
       },
       "danger": {
         "exportTitle": "Exporter mes données",
-        "exportBody": "Téléchargez un fichier contenant votre profil, vos documents et l'historique de vos signatures.",
+        "exportBody": "Téléchargez un fichier contenant votre profil, la liste de vos documents, vos demandes, vos paiements et l'historique de vos signatures.",
         "exportCta": "Exporter (JSON)",
         "deleteTitle": "Supprimer mon compte",
         "deleteBody": "Suppression définitive de votre compte, de vos documents et de vos signatures. Action irréversible.",
@@ -719,6 +719,7 @@
       "choose": "Choisir un plan",
       "history": "Historique des paiements",
       "noPayments": "Aucun paiement pour l'instant.",
+      "noPaymentsHint": "Vos reçus apparaîtront ici après votre premier paiement.",
       "validUntil": "Valable jusqu'au {date}",
       "renew": "Renouveler",
       "paymentUnavailable": "Le paiement en ligne n'est pas encore activé. Écrivez-nous depuis la page Contact pour souscrire.",
@@ -1181,7 +1182,7 @@
       "stamp": "Cachet",
       "date": "Date",
       "text": "Texte",
-      "checkbox": "Case",
+      "checkbox": "Case à cocher",
       "name": "Nom",
       "mention": "Mention"
     },
@@ -1482,6 +1483,7 @@
     "sharingHint": "Astuce : partagez un modèle ou un cachet depuis son menu « Partager avec l'équipe ».",
     "activity": "Activité récente",
     "noActivity": "Aucune activité pour l'instant.",
+    "noActivityHint": "Imports, signatures et partages de l'équipe s'afficheront ici.",
     "events": {
       "document_imported": "a importé un document",
       "document_signed": "a signé un document",
@@ -1708,16 +1710,16 @@
     "delete": "Supprimer la conversation",
     "deleted": "Conversation supprimée.",
     "errors": {
-      "not_configured": "L'assistant n'est pas encore activé sur cette installation.",
+      "not_configured": "L'assistant est momentanément indisponible. Notre équipe a été prévenue : réessayez un peu plus tard.",
       "quota": "Vous avez utilisé vos 20 messages du jour (plan Essentiel). Revenez demain, ou passez au Pro pour un usage illimité.",
       "rate_limited": "Trop de messages en peu de temps. Patientez une minute.",
       "refusal": "Je ne peux pas répondre à cette demande.",
       "read_only": "Votre compte est en lecture seule : l'assistant est suspendu. Réactivez un plan pour l'utiliser.",
       "feature_not_in_plan": "Cette fonction de l'assistant est incluse dans le plan Pro.",
       "invalid": "Message invalide.",
-      "provider_auth": "L'assistant est indisponible : la clé du service IA est refusée. L'administrateur doit la vérifier.",
-      "provider_workspace": "L'assistant est indisponible : la clé du service IA n'est rattachée à aucun espace de travail. L'administrateur doit renseigner l'identifiant de l'espace de travail.",
-      "provider_billing": "L'assistant est indisponible : le crédit du service IA est épuisé. L'administrateur doit le recharger.",
+      "provider_auth": "L'assistant est momentanément indisponible. Notre équipe a été prévenue : réessayez un peu plus tard.",
+      "provider_workspace": "L'assistant est momentanément indisponible. Notre équipe a été prévenue : réessayez un peu plus tard.",
+      "provider_billing": "L'assistant est momentanément indisponible. Notre équipe a été prévenue : réessayez un peu plus tard.",
       "provider_unavailable": "Le service IA est momentanément surchargé. Réessayez dans quelques instants.",
       "server": "L'assistant n'a pas pu répondre. Réessayez.",
       "network": "Connexion interrompue. Réessayez."

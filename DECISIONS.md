@@ -256,3 +256,12 @@ Récapitulatif de chaque mesure, à citer à un client ou un partenaire. Chacune
 **D105 — Droits des utilisateurs.** Paramètres → Zone sensible : « Exporter mes données » télécharge en JSON le profil, l'abonnement, les paiements, la liste des documents et versions, les signatures, les demandes et signataires, les modèles et le journal d'audit. « Supprimer mon compte » efface tous les fichiers des cinq buckets puis le compte (les lignes liées sont supprimées en cascade) [e2e `account`]. Les demandes écrites sont traitées par e-mail à supportquicksignapp@gmail.com. Conservation : documents tant que le compte existe (même expiré, en lecture seule), corbeille vidée après 30 jours, journal d'audit conservé.
 
 **D106 — Page publique « Sécurité et confidentialité »** (`/securite`). Elle explique en langage simple, en français et en anglais : protections, hébergement (UE, Paris), chiffrement, qui a accès (prestataires listés, aucune revente), durée de conservation, export et suppression, et validité juridique.
+
+**D107 — Finitions (2 octobre 2026).**
+
+- Pages d'erreur à l'image de la marque (`app/error.tsx`, `app/global-error.tsx`) : message rassurant en français ou en anglais, boutons « Réessayer » (`retry`, Next.js 16) et « Retour à l'accueil », et seulement la référence `digest` de l'erreur, jamais de détail technique.
+- Erreurs de l'assistant liées à la configuration (clé, crédit, espace de travail) : message neutre côté client, cause exacte dans `app_errors`.
+- États vides illustrés pour l'historique des paiements, l'activité d'équipe et l'historique de l'assistant (documents, demandes et modèles l'étaient déjà).
+- Relecture de l'ensemble des 1 358 textes français de l'interface (et de leurs équivalents anglais) : formulations « locales » remplacées pour le positionnement international, partenaires de paiement nommés, libellés plus précis (« Case à cocher », export).
+- Mesure en 3G lente (Chrome « Slow 3G », mobile) : texte de l'accueil visible à environ 3,3 s en première visite (333 Ko au total, dont 106 Ko pour React/Next et 69 Ko de polices en `font-display: swap`), pages suivantes quasi instantanées grâce au cache.
+- Aucun faux témoignage : la section ne s'affiche qu'avec de vrais avis (`content/testimonials.ts`).
