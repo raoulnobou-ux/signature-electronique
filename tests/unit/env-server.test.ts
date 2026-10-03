@@ -8,7 +8,7 @@ describe("variables serveur", () => {
     delete process.env.ANTHROPIC_API_KEY;
     process.env.ANTROPIC_API_KEY = " sk-ant-test ";
     process.env.PAWAPAY_API_TOKEN = "ancien-jeton";
-    process.env.PAWAPAY_API_TOKEN2 = "nouveau-jeton";
+    process.env.PAWAPAY_API_TOKEN2 = ' "Bearer nouveau-jeton" ';
     const { serverEnv } = await import("@/lib/env.server");
     expect(serverEnv.PAWAPAY_ENV).toBe("sandbox");
     expect(serverEnv.PADDLE_ENV).toBeUndefined();

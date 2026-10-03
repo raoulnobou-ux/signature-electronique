@@ -178,6 +178,15 @@ export class PawaPayProvider implements PaymentProvider {
    * environnement pawaPay ? Ne renvoie qu'une conclusion, jamais le jeton.
    */
   async diagnoseToken(): Promise<string> {
+    // Forme du jeton (jamais son contenu) : longueur, structure JWT, caractères suspects.
+    const parts = this.token.split(".");
+    const shape = `jeton de ${this.token.length} caractères, ${
+      parts.length === 3 && parts.every(Boolean) ? "format JWT" : "format non JWT"
+    }${/\s/.test(this.token) ? ", contient des espaces" : ""}`;
+    return `${await this.tokenVerdict()} (${shape})`;
+  }
+
+  private async tokenVerdict(): Promise<string> {
     const other =
       this.base === PAWAPAY_API.production ? PAWAPAY_API.sandbox : PAWAPAY_API.production;
     const otherName = other === PAWAPAY_API.sandbox ? "bac à sable (sandbox)" : "production";

@@ -51,7 +51,12 @@ const serverSchema = z.object({
 
 /** Valeurs collées dans un tableau de bord : espaces et retours à la ligne parasites retirés. */
 const emptyToUndefined = (value: string | undefined) => {
-  const trimmed = value?.trim();
+  // Guillemets englobants et préfixe « Bearer » collés par erreur avec un jeton.
+  const trimmed = value
+    ?.trim()
+    .replace(/^(["'])(.*)\1$/s, "$2")
+    .replace(/^Bearer\s+/i, "")
+    .trim();
   return trimmed === "" ? undefined : trimmed;
 };
 
