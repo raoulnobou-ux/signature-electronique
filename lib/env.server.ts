@@ -65,11 +65,21 @@ const ALIASES: Partial<Record<keyof typeof serverSchema.shape, string>> = {
   ANTHROPIC_API_KEY: "ANTROPIC_API_KEY",
 };
 
+/**
+ * Remplacements prioritaires : une nouvelle valeur enregistrée sous un second nom
+ * (« …2 ») l'emporte sur l'ancienne, impossible à modifier sans la ressaisir.
+ */
+const REPLACEMENTS: Partial<Record<keyof typeof serverSchema.shape, string>> = {
+  PAWAPAY_API_TOKEN: "PAWAPAY_API_TOKEN2",
+};
+
 const parsed = serverSchema.safeParse(
   Object.fromEntries(
     Object.keys(serverSchema.shape).map((key) => {
       const alias = ALIASES[key as keyof typeof ALIASES];
+      const replacement = REPLACEMENTS[key as keyof typeof REPLACEMENTS];
       const value =
+        (replacement ? emptyToUndefined(process.env[replacement]) : undefined) ??
         emptyToUndefined(process.env[key]) ??
         (alias ? emptyToUndefined(process.env[alias]) : undefined);
       return [key, value];

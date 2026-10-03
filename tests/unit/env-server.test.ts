@@ -7,10 +7,14 @@ describe("variables serveur", () => {
     process.env.PADDLE_ENV = "live";
     delete process.env.ANTHROPIC_API_KEY;
     process.env.ANTROPIC_API_KEY = " sk-ant-test ";
+    process.env.PAWAPAY_API_TOKEN = "ancien-jeton";
+    process.env.PAWAPAY_API_TOKEN2 = "nouveau-jeton";
     const { serverEnv } = await import("@/lib/env.server");
     expect(serverEnv.PAWAPAY_ENV).toBe("sandbox");
     expect(serverEnv.PADDLE_ENV).toBeUndefined();
     // Nom mal orthographié dans Vercel (variable secrète impossible à renommer).
     expect(serverEnv.ANTHROPIC_API_KEY).toBe("sk-ant-test");
+    // Nouveau jeton enregistré sous un second nom : il remplace l'ancien.
+    expect(serverEnv.PAWAPAY_API_TOKEN).toBe("nouveau-jeton");
   });
 });
