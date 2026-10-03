@@ -173,6 +173,28 @@ export class PawaPayProvider implements PaymentProvider {
     return value;
   }
 
+  /**
+   * Diagnostic d'un jeton refusé (401) : le même jeton est-il accepté par l'autre
+   * environnement pawaPay ? Ne renvoie qu'une conclusion, jamais le jeton.
+   */
+  async diagnoseToken(): Promise<string> {
+    const other =
+      this.base === PAWAPAY_API.production ? PAWAPAY_API.sandbox : PAWAPAY_API.production;
+    const otherName = other === PAWAPAY_API.sandbox ? "bac à sable (sandbox)" : "production";
+    try {
+      const response = await this.fetcher(`${other}/v2/active-conf?operationType=DEPOSIT`, {
+        headers: { Authorization: `Bearer ${this.token}`, Accept: "application/json" },
+        signal: AbortSignal.timeout(15_000),
+      });
+      if (response.ok) {
+        return `Jeton refusé ici mais accepté par l'environnement ${otherName} : c'est un jeton ${otherName}. Utilisez un jeton généré dans l'autre tableau de bord pawaPay, ou changez PAWAPAY_ENV.`;
+      }
+      return `Jeton refusé par les deux environnements pawaPay (${response.status} sur ${otherName}) : jeton incomplet, révoqué ou compte non activé.`;
+    } catch {
+      return `Jeton refusé ; vérification sur ${otherName} impossible (réseau).`;
+    }
+  }
+
   async verifyTransaction({
     reference,
   }: {

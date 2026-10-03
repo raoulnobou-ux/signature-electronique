@@ -93,6 +93,9 @@ export async function mobileMoneyCountries(): Promise<string[]> {
     if (countries.length) return countries;
   } catch (error) {
     await logAppError("billing.countries", error);
+    if (error instanceof Error && /pawaPay 401/.test(error.message)) {
+      await logAppError("billing.pawapay_token", await pawapay.diagnoseToken());
+    }
   }
   return ["CMR"];
 }

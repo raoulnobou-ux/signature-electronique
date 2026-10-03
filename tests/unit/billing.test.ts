@@ -558,3 +558,27 @@ describe("reçu PDF", () => {
     expect(paymentMethodLabel("card")).toBe("Carte bancaire");
   });
 });
+
+describe("pawaPay : diagnostic d'un jeton refusé", () => {
+  it("indique si le jeton appartient à l'autre environnement, sans le révéler", async () => {
+    const sandboxOk = vi.fn(async () => new Response("{}", { status: 200 }));
+    const provider = new PawaPayProvider(
+      "secret-token",
+      "production",
+      sandboxOk as unknown as typeof fetch,
+    );
+    const message = await provider.diagnoseToken();
+    expect((sandboxOk.mock.calls[0] as unknown as [string])[0]).toBe(
+      "https://api.sandbox.pawapay.io/v2/active-conf?operationType=DEPOSIT",
+    );
+    expect(message).toContain("c'est un jeton bac à sable");
+    expect(message).not.toContain("secret-token");
+
+    const refused = new PawaPayProvider(
+      "secret-token",
+      "production",
+      vi.fn(async () => new Response("{}", { status: 401 })) as unknown as typeof fetch,
+    );
+    expect(await refused.diagnoseToken()).toContain("refusé par les deux environnements");
+  });
+});
