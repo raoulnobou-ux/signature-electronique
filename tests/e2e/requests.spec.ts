@@ -37,6 +37,7 @@ async function createRequest(
   documentId: string,
   signers: { name: string; email: string }[],
   parallel = false,
+  asDraft = false,
 ) {
   await page.locator(`a[href$="/${documentId}/demande"]`).click();
   await expect(page).toHaveURL(/\/demande$/);
@@ -56,8 +57,13 @@ async function createRequest(
   await placeZone(page, "Date", 0.3, 0.9);
   await page.getByRole("button", { name: /Suivant/ }).click();
   await expect(page.getByText("Tout est prêt")).toBeVisible();
-  await page.getByRole("button", { name: "Envoyer la demande" }).first().click();
-  await expect(page).toHaveURL(/\/app\/demandes\/[0-9a-f-]+\?envoyee=1/, { timeout: 20_000 });
+  if (asDraft) {
+    await page.getByRole("button", { name: "Enregistrer le brouillon" }).last().click();
+    await expect(page).toHaveURL(/\/app\/demandes\/[0-9a-f-]+$/, { timeout: 20_000 });
+  } else {
+    await page.getByRole("button", { name: "Envoyer la demande" }).first().click();
+    await expect(page).toHaveURL(/\/app\/demandes\/[0-9a-f-]+\?envoyee=1/, { timeout: 20_000 });
+  }
   return new URL(page.url()).pathname.split("/").pop()!;
 }
 
@@ -252,4 +258,94 @@ test("lien de signature invalide ou forgé", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Lien invalide" })).toBeVisible();
   await page.goto("/s/court");
   await expect(page.getByRole("heading", { name: "Lien invalide" })).toBeVisible();
+});
+
+test("brouillon → modification → envoi, puis statuts Envoyé, Vu et En attente", async ({
+  page,
+  browser,
+}, info) => {
+  test.setTimeout(150_000);
+  const owner = await createConfirmedUser("brouillon");
+  await signInAs(page, owner.email);
+  const documentId = await importDocument(page);
+  const signers = [
+    { name: "Awa Ngono", email: `awa-b-${Date.now()}@example.com` },
+    { name: "Bruno Etoa", email: `bruno-b-${Date.now()}@example.com` },
+  ];
+  const draftId = await createRequest(page, documentId, signers, false, true);
+  const badge = page.locator("h1 + p").getByText(/^(Brouillon|Envoyé|Vu|En attente|Signé)$/);
+  await expect(badge).toHaveText("Brouillon");
+  await expect(page.getByText(/rien n'a encore été envoyé/)).toBeVisible();
+
+  // Un brouillon n'envoie rien et ne fige pas le document ; ses liens ne marchent pas.
+  const { data: draftSigners } = await adminClient()
+    .from("request_signers")
+    .select("id")
+    .eq("request_id", draftId)
+    .order("order_index");
+  const { data: doc } = await adminClient()
+    .from("documents")
+    .select("status")
+    .eq("id", documentId)
+    .single();
+  expect(doc!.status).not.toBe("pending");
+  const probe = await browser.newContext();
+  const probePage = await probe.newPage();
+  await probePage.goto(signerLink(draftSigners![0]!.id));
+  await expect(probePage.getByRole("button", { name: "Lire et signer" })).toHaveCount(0);
+  await probe.close();
+
+  // Modifier le brouillon : signataires et zones repris, nouvelle version enregistrée.
+  await page.getByRole("link", { name: "Modifier" }).click();
+  await expect(page).toHaveURL(/brouillon=/);
+  await expect(page.getByLabel("Nom complet").nth(1)).toHaveValue("Bruno Etoa");
+  await page.getByRole("button", { name: /Suivant/ }).click();
+  await expect(page.getByTestId("page-layer-0")).toBeVisible({ timeout: 20_000 });
+  await expect(
+    page.getByTestId("page-layer-0").locator('[data-field-type="signature"]'),
+  ).toHaveCount(2);
+  await page.getByRole("button", { name: /Suivant/ }).click();
+  await page.getByRole("button", { name: "Enregistrer le brouillon" }).last().click();
+  await expect(page).toHaveURL(/\/app\/demandes\/[0-9a-f-]+$/, { timeout: 20_000 });
+  const requestId = new URL(page.url()).pathname.split("/").pop()!;
+  expect(requestId).not.toBe(draftId);
+  const { data: old } = await adminClient()
+    .from("signature_requests")
+    .select("id")
+    .eq("id", draftId);
+  expect(old).toEqual([]);
+
+  // Envoi : « Envoyé ».
+  await page.getByRole("button", { name: "Envoyer maintenant" }).click();
+  await expect(badge).toHaveText("Envoyé", { timeout: 20_000 });
+  await page.goto("/app/demandes?statut=sent");
+  await expect(page.getByTestId("request-list")).toContainText("Envoyé");
+  await page.goto("/app/demandes?statut=signed");
+  await expect(page.getByText("Aucune demande avec ce statut.")).toBeVisible();
+
+  const { data: sent } = await adminClient()
+    .from("request_signers")
+    .select("id, status")
+    .eq("request_id", requestId)
+    .order("order_index");
+  expect(sent!.map((s) => s.status)).toEqual(["sent", "pending"]);
+
+  // Le premier signataire ouvre le document : « Vu ».
+  const viewer = await browser.newContext();
+  const viewerPage = await viewer.newPage();
+  await viewerPage.goto(signerLink(sent![0]!.id));
+  await expect(viewerPage.getByRole("button", { name: "Lire et signer" })).toBeVisible();
+  await viewer.close();
+  await page.goto(`/app/demandes/${requestId}`);
+  await expect(badge).toHaveText("Vu");
+  await expect(page.getByText(/Vu le \d/)).toBeVisible();
+
+  // Il signe : « En attente » (du second signataire).
+  const a = await signAs(browser, signerLink(sent![0]!.id), info.project.name === "mobile");
+  await expect(a.page.getByRole("heading", { name: "Merci, c'est signé !" })).toBeVisible({
+    timeout: 30_000,
+  });
+  await a.context.close();
+  await page.reload();
+  await expect(badge).toHaveText("En attente");
 });

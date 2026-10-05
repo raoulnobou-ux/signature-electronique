@@ -1,13 +1,16 @@
-/** Couleur des badges de statut d'une demande et d'un signataire. */
-export const REQUEST_STATUS_VARIANT = {
+import type { DisplayStatus } from "@/lib/requests/status";
+
+/** Couleur des badges de statut d'une demande (statut affiché) et d'un signataire. */
+export const DISPLAY_STATUS_VARIANT = {
   draft: "muted",
-  pending: "warning",
-  completed: "success",
+  sent: "default",
+  viewed: "warning",
+  waiting: "warning",
+  signed: "success",
   declined: "danger",
   expired: "muted",
   canceled: "muted",
-} as const;
-export type RequestStatus = keyof typeof REQUEST_STATUS_VARIANT;
+} as const satisfies Record<DisplayStatus, string>;
 
 export const SIGNER_STATUS_VARIANT = {
   pending: "muted",

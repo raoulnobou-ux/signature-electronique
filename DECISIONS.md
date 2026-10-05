@@ -309,6 +309,24 @@ Les dates des e-mails, des reçus, des certificats et des signatures suivent la 
 
 On reste sur deux langues (français, anglais) : en ajouter une est documenté (`docs/INTERNATIONAL.md`) mais demande une vraie traduction, pas une traduction automatique.
 
+**D117 — Signature à distance : brouillons et statuts lisibles.** Une demande peut être enregistrée en **brouillon**. Dans ce cas :
+
+- rien n'est envoyé ;
+- le document n'est pas figé ;
+- les liens personnels sont refusés tant que la demande n'est pas envoyée.
+
+Depuis le suivi, on peut ensuite la modifier (le constructeur est prérempli, puis la nouvelle version remplace l'ancienne), l'envoyer (la durée de validité repart du jour de l'envoi) ou la supprimer.
+
+Le statut affiché est déduit du statut en base et de celui des signataires (`displayRequestStatus`, fonction pure testée) :
+
+- Brouillon ;
+- Envoyé : invitations parties, personne n'a ouvert ;
+- Vu : au moins un signataire a ouvert ;
+- En attente : une partie a signé, on attend les autres ;
+- Signé, Refusé, Expiré, Annulé.
+
+La liste des demandes se filtre par statut, avec le nombre de demandes de chaque statut. Chaque signataire affiche aussi la date à laquelle il a vu le document. Les statuts en base sont inchangés, donc aucune migration.
+
 ## Sécurité des données — référence (audit du 2 octobre 2026)
 
 Récapitulatif de chaque mesure, à citer à un client ou un partenaire. Chacune est vérifiée par un test automatique, indiqué entre crochets.

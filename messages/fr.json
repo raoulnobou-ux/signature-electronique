@@ -1303,16 +1303,18 @@
     "metaTitle": "Demandes de signature",
     "status": {
       "draft": "Brouillon",
-      "pending": "En cours",
-      "completed": "Terminée",
-      "declined": "Refusée",
-      "expired": "Expirée",
-      "canceled": "Annulée"
+      "sent": "Envoyé",
+      "viewed": "Vu",
+      "waiting": "En attente",
+      "signed": "Signé",
+      "declined": "Refusé",
+      "expired": "Expiré",
+      "canceled": "Annulé"
     },
     "signerStatus": {
       "pending": "En attente de son tour",
-      "sent": "Invitation envoyée",
-      "opened": "Document ouvert",
+      "sent": "Envoyé",
+      "opened": "Vu",
       "signed": "Signé",
       "declined": "Refusé",
       "expired": "Expiré"
@@ -1399,7 +1401,9 @@
       "variable": "Champ variable",
       "variableHint": "Rempli par vous à chaque utilisation (nom, montant…).",
       "variableZone": "{label} · à remplir par vous",
-      "variablesCount": "{count, plural, =0 {Aucun champ variable} one {# champ variable} other {# champs variables}}"
+      "variablesCount": "{count, plural, =0 {Aucun champ variable} one {# champ variable} other {# champs variables}}",
+      "saveDraft": "Enregistrer le brouillon",
+      "draftSaved": "Brouillon enregistré. Vous pourrez l'envoyer plus tard."
     },
     "list": {
       "title": "Demandes de signature",
@@ -1411,7 +1415,10 @@
       "proTitle": "Faites signer vos partenaires en quelques clics",
       "proText": "Signataires multiples, suivi en temps réel, relances, certificat de preuve vérifiable : disponible avec le plan Pro.",
       "upgrade": "Passer au Pro",
-      "created": "Créée le {date}"
+      "created": "Créée le {date}",
+      "filter": "Filtrer par statut",
+      "all": "Toutes",
+      "noneForFilter": "Aucune demande avec ce statut."
     },
     "detail": {
       "metaTitle": "Suivi de la demande",
@@ -1455,9 +1462,17 @@
         "signer_declined": "Refusé",
         "request_completed": "Toutes les signatures réunies",
         "request_canceled": "Demande annulée",
-        "request_expired": "Demande expirée"
+        "request_expired": "Demande expirée",
+        "request_draft_saved": "Brouillon enregistré"
       },
-      "error": "Action impossible."
+      "error": "Action impossible.",
+      "sendDraft": "Envoyer maintenant",
+      "editDraft": "Modifier",
+      "deleteDraft": "Supprimer le brouillon",
+      "draftBanner": "Brouillon : rien n'a encore été envoyé. Vérifiez les signataires et les zones, puis envoyez la demande quand vous êtes prêt.",
+      "draftSent": "Demande envoyée.",
+      "draftDeleted": "Brouillon supprimé.",
+      "openedAt": "Vu le {date}"
     }
   },
   "templates": {

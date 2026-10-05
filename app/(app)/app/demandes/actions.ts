@@ -19,6 +19,10 @@ const createSchema = z.object({
   expiresInDays: z.number().int().min(1).max(90),
   signers: z.array(signerInputSchema).min(1).max(MAX_SIGNERS),
   fields: z.array(requestFieldSchema).min(1).max(300),
+  /** Enregistrer sans envoyer (statut « Brouillon ») : rien n'est envoyé, le document reste libre. */
+  asDraft: z.boolean().optional(),
+  /** Brouillon remplacé par cette version (modification d'un brouillon). */
+  draftId: z.uuid().optional(),
 });
 
 export type CreateRequestError =
@@ -74,6 +78,17 @@ export async function createSignatureRequest(
   if (doc.status === "pending") return { ok: false, error: "already_pending" };
   if (data.fields.some((f) => f.page >= (doc.page_count ?? 0)))
     return { ok: false, error: "invalid" };
+  if (data.draftId) {
+    const { data: draft } = await admin
+      .from("signature_requests")
+      .select("id")
+      .eq("id", data.draftId)
+      .eq("owner_id", account.userId)
+      .eq("document_id", doc.id)
+      .eq("status", "draft")
+      .maybeSingle();
+    if (!draft) return { ok: false, error: "not_found" };
+  }
 
   const requestId = randomUUID();
   const expiresAt = new Date(Date.now() + data.expiresInDays * 86_400_000).toISOString();
@@ -85,7 +100,7 @@ export async function createSignatureRequest(
     sender_name: account.profile.full_name || account.email,
     message: data.message || null,
     mode: data.mode,
-    status: "pending",
+    status: data.asDraft ? "draft" : "pending",
     expires_at: expiresAt,
     original_sha256: doc.sha256,
   });
@@ -132,14 +147,17 @@ export async function createSignatureRequest(
     return { ok: false, error: "server" };
   }
 
-  await admin.from("documents").update({ status: "pending" }).eq("id", doc.id);
+  // Nouvelle version d'un brouillon : l'ancienne disparaît (signataires et zones en cascade).
+  if (data.draftId) await admin.from("signature_requests").delete().eq("id", data.draftId);
+
+  if (!data.asDraft) await admin.from("documents").update({ status: "pending" }).eq("id", doc.id);
   await recordAudit({
     documentId: doc.id,
     requestId,
     actorType: "user",
     actorId: account.userId,
     actorLabel: account.profile.full_name || account.email,
-    eventType: "request.created",
+    eventType: data.asDraft ? "request.draft_saved" : "request.created",
     metadata: {
       mode: data.mode,
       signers: signers.length,
@@ -148,12 +166,14 @@ export async function createSignatureRequest(
     },
   });
 
-  const { data: request } = await admin
-    .from("signature_requests")
-    .select("*")
-    .eq("id", requestId)
-    .single();
-  if (request) await inviteNextSigners(admin, request);
+  if (!data.asDraft) {
+    const { data: request } = await admin
+      .from("signature_requests")
+      .select("*")
+      .eq("id", requestId)
+      .single();
+    if (request) await inviteNextSigners(admin, request);
+  }
 
   revalidatePath("/app/demandes");
   revalidatePath(`/app/documents/${doc.id}`);
@@ -237,6 +257,88 @@ export async function remindSigner(signerId: string): Promise<LinkResult> {
     emailed,
     whatsapp: whatsappUrl(signer.phone, signer.name, request.title ?? "le document", link),
   };
+}
+
+/** Brouillon de demande appartenant à l'utilisateur, prêt à être envoyé ou supprimé. */
+async function ownedDraft(requestId: string, userId: string) {
+  if (!z.uuid().safeParse(requestId).success) return null;
+  const { data } = await createAdminClient()
+    .from("signature_requests")
+    .select("*")
+    .eq("id", requestId)
+    .eq("owner_id", userId)
+    .eq("status", "draft")
+    .maybeSingle();
+  return data;
+}
+
+/**
+ * Envoie un brouillon : la durée de validité choisie repart d'aujourd'hui, le document est
+ * figé pendant la demande, puis le ou les premiers signataires sont invités.
+ */
+export async function sendDraftRequest(
+  requestId: string,
+): Promise<{ ok: true } | { ok: false; error: GuardDenial | "not_found" | "already_pending" }> {
+  const access = await guard("multi_signers");
+  if (!access.ok) return { ok: false, error: access.reason };
+  const { account } = access;
+  const draft = await ownedDraft(requestId, account.userId);
+  if (!draft) return { ok: false, error: "not_found" };
+  const admin = createAdminClient();
+  const { data: doc } = await admin
+    .from("documents")
+    .select("id, status, trashed_at, pdf_path")
+    .eq("id", draft.document_id)
+    .maybeSingle();
+  if (!doc || doc.trashed_at || !doc.pdf_path) return { ok: false, error: "not_found" };
+  if (doc.status === "pending") return { ok: false, error: "already_pending" };
+
+  const validity = draft.expires_at
+    ? new Date(draft.expires_at).getTime() - new Date(draft.created_at).getTime()
+    : 14 * 86_400_000;
+  const expiresAt = new Date(Date.now() + Math.max(86_400_000, validity)).toISOString();
+  const { data: request } = await admin
+    .from("signature_requests")
+    .update({ status: "pending", expires_at: expiresAt })
+    .eq("id", draft.id)
+    .eq("status", "draft")
+    .select("*")
+    .maybeSingle();
+  if (!request) return { ok: false, error: "not_found" };
+  await admin
+    .from("request_signers")
+    .update({ token_expires_at: expiresAt })
+    .eq("request_id", draft.id);
+  await admin.from("documents").update({ status: "pending" }).eq("id", doc.id);
+  await recordAudit({
+    documentId: doc.id,
+    requestId: draft.id,
+    actorType: "user",
+    actorId: account.userId,
+    actorLabel: account.profile.full_name || account.email,
+    eventType: "request.created",
+    metadata: { from_draft: true, expires_at: expiresAt },
+  });
+  await inviteNextSigners(admin, request);
+  revalidatePath("/app/demandes");
+  revalidatePath(`/app/demandes/${draft.id}`);
+  revalidatePath(`/app/documents/${doc.id}`);
+  return { ok: true };
+}
+
+/** Supprime un brouillon (jamais envoyé : aucun signataire n'a reçu de lien). */
+export async function deleteDraftRequest(requestId: string): Promise<{ ok: boolean }> {
+  const account = await getCurrentAccount();
+  if (!account) return { ok: false };
+  const draft = await ownedDraft(requestId, account.userId);
+  if (!draft) return { ok: false };
+  await createAdminClient()
+    .from("signature_requests")
+    .delete()
+    .eq("id", draft.id)
+    .eq("status", "draft");
+  revalidatePath("/app/demandes");
+  return { ok: true };
 }
 
 export async function cancelSignatureRequest(requestId: string): Promise<{ ok: boolean }> {

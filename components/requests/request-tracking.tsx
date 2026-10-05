@@ -6,10 +6,14 @@ import {
   CheckCircle2,
   Copy,
   Download,
+  Eye,
+  Trash2,
   FileDown,
   Mail,
   MessageCircle,
+  PencilLine,
   Radio,
+  Send,
   ShieldCheck,
   XCircle,
 } from "lucide-react";
@@ -20,9 +24,11 @@ import { useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
 import {
   cancelSignatureRequest,
+  deleteDraftRequest,
   getRequestFiles,
   getSignerLink,
   remindSigner,
+  sendDraftRequest,
 } from "@/app/(app)/app/demandes/actions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -36,12 +42,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { SIGNER_COLORS } from "@/lib/requests/fields";
-import {
-  REQUEST_STATUS_VARIANT,
-  SIGNER_STATUS_VARIANT,
-  type RequestStatus,
-  type SignerStatus,
-} from "./status";
+import { displayRequestStatus } from "@/lib/requests/status";
+import { DISPLAY_STATUS_VARIANT, SIGNER_STATUS_VARIANT, type SignerStatus } from "./status";
 
 type Signer = {
   id: string;
@@ -73,6 +75,7 @@ type Props = {
 };
 
 const KNOWN_EVENTS = [
+  "request.draft_saved",
   "request.created",
   "request.invitation_sent",
   "request.reminder_sent",
@@ -141,7 +144,30 @@ export function RequestTracking({ justSent, request, signers, events }: Props) {
       router.refresh();
     });
 
-  const status = request.status as RequestStatus;
+  const status = displayRequestStatus(request.status, signers);
+  const draft = request.status === "draft";
+  const sendDraft = () =>
+    start(async () => {
+      const result = await sendDraftRequest(request.id);
+      if (result.ok) {
+        toast.success(t("detail.draftSent"));
+        router.replace(`/app/demandes/${request.id}?envoyee=1`);
+        router.refresh();
+      } else
+        toast.error(
+          result.error === "already_pending"
+            ? t("builder.errors.already_pending")
+            : t("detail.error"),
+        );
+    });
+  const removeDraft = () =>
+    start(async () => {
+      const result = await deleteDraftRequest(request.id);
+      if (result.ok) {
+        toast.success(t("detail.draftDeleted"));
+        router.push("/app/demandes");
+      } else toast.error(t("detail.error"));
+    });
 
   return (
     <div className="mx-auto max-w-4xl space-y-8">
@@ -155,9 +181,7 @@ export function RequestTracking({ justSent, request, signers, events }: Props) {
           <div className="min-w-0 space-y-1">
             <h1 className="font-display text-3xl font-semibold tracking-tight">{request.title}</h1>
             <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
-              <Badge variant={REQUEST_STATUS_VARIANT[status] ?? "muted"}>
-                {t(`status.${status}`)}
-              </Badge>
+              <Badge variant={DISPLAY_STATUS_VARIANT[status]}>{t(`status.${status}`)}</Badge>
               <span>{t(`detail.mode.${request.mode}`)}</span>
               {request.completedAt ? (
                 <span>{t("detail.completedAt", { date: date(request.completedAt) })}</span>
@@ -172,7 +196,29 @@ export function RequestTracking({ justSent, request, signers, events }: Props) {
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            {status === "completed" && (
+            {draft && (
+              <>
+                <Button onClick={sendDraft} loading={pending}>
+                  <Send /> {t("detail.sendDraft")}
+                </Button>
+                <Button asChild variant="secondary">
+                  <Link
+                    href={`/app/documents/${request.documentId}/demande?brouillon=${request.id}`}
+                  >
+                    <PencilLine /> {t("detail.editDraft")}
+                  </Link>
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="text-destructive"
+                  disabled={pending}
+                  onClick={removeDraft}
+                >
+                  <Trash2 /> {t("detail.deleteDraft")}
+                </Button>
+              </>
+            )}
+            {status === "signed" && (
               <>
                 <Button onClick={() => download("document")} disabled={pending}>
                   <Download /> {t("detail.downloadSigned")}
@@ -204,6 +250,11 @@ export function RequestTracking({ justSent, request, signers, events }: Props) {
             )}
           </div>
         </div>
+        {draft && (
+          <p className="flex gap-2 rounded-2xl border border-border bg-secondary/50 p-4 text-sm text-muted-foreground">
+            <PencilLine className="mt-0.5 size-4 shrink-0" aria-hidden /> {t("detail.draftBanner")}
+          </p>
+        )}
         {justSent && live && (
           <p
             role="status"
@@ -246,6 +297,12 @@ export function RequestTracking({ justSent, request, signers, events }: Props) {
                     {t(`signerStatus.${sStatus}`)}
                   </Badge>
                 </div>
+                {s.openedAt && !s.signedAt && (
+                  <p className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
+                    <Eye className="size-3.5" aria-hidden />{" "}
+                    {t("detail.openedAt", { date: date(s.openedAt) })}
+                  </p>
+                )}
                 {s.signedAt && (
                   <p className="mt-2 text-xs text-muted-foreground">
                     {t("detail.signedAt", { date: date(s.signedAt) })}

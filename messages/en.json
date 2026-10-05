@@ -1303,16 +1303,18 @@
     "metaTitle": "Signature requests",
     "status": {
       "draft": "Draft",
-      "pending": "In progress",
-      "completed": "Completed",
+      "sent": "Sent",
+      "viewed": "Viewed",
+      "waiting": "Waiting",
+      "signed": "Signed",
       "declined": "Declined",
       "expired": "Expired",
-      "canceled": "Cancelled"
+      "canceled": "Canceled"
     },
     "signerStatus": {
       "pending": "Waiting for their turn",
-      "sent": "Invitation sent",
-      "opened": "Document opened",
+      "sent": "Sent",
+      "opened": "Viewed",
       "signed": "Signed",
       "declined": "Declined",
       "expired": "Expired"
@@ -1399,7 +1401,9 @@
       "variable": "Variable field",
       "variableHint": "Filled in by you each time (name, amount…).",
       "variableZone": "{label} · filled in by you",
-      "variablesCount": "{count, plural, =0 {No variable fields} one {# variable field} other {# variable fields}}"
+      "variablesCount": "{count, plural, =0 {No variable fields} one {# variable field} other {# variable fields}}",
+      "saveDraft": "Save as draft",
+      "draftSaved": "Draft saved. You can send it later."
     },
     "list": {
       "title": "Signature requests",
@@ -1411,7 +1415,10 @@
       "proTitle": "Get partners to sign in a few clicks",
       "proText": "Multiple signers, real-time tracking, reminders, verifiable proof certificate: available with the Pro plan.",
       "upgrade": "Upgrade to Pro",
-      "created": "Created on {date}"
+      "created": "Created on {date}",
+      "filter": "Filter by status",
+      "all": "All",
+      "noneForFilter": "No request with this status."
     },
     "detail": {
       "metaTitle": "Request tracking",
@@ -1455,9 +1462,17 @@
         "signer_declined": "Declined",
         "request_completed": "All signatures collected",
         "request_canceled": "Request cancelled",
-        "request_expired": "Request expired"
+        "request_expired": "Request expired",
+        "request_draft_saved": "Draft saved"
       },
-      "error": "Action not possible."
+      "error": "Action not possible.",
+      "sendDraft": "Send now",
+      "editDraft": "Edit",
+      "deleteDraft": "Delete draft",
+      "draftBanner": "Draft: nothing has been sent yet. Check the signers and fields, then send the request when you are ready.",
+      "draftSent": "Request sent.",
+      "draftDeleted": "Draft deleted.",
+      "openedAt": "Viewed on {date}"
     }
   },
   "templates": {

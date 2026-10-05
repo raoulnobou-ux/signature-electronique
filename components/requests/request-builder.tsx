@@ -63,6 +63,8 @@ export type BuilderPreset = {
   fields?: BuilderField[];
   message?: string;
   mode?: "sequential" | "parallel";
+  /** Durée de validité en jours (brouillon repris). */
+  days?: number;
 };
 
 export function RequestBuilder({
@@ -70,10 +72,13 @@ export function RequestBuilder({
   pdfUrl,
   preset,
   template,
+  draftId,
 }: {
   document: { id: string; title: string };
   pdfUrl: string;
   preset?: BuilderPreset;
+  /** Brouillon repris : sa nouvelle version le remplace. */
+  draftId?: string;
   /** Mode « modèle » : des rôles au lieu de personnes, zones variables, enregistrement. */
   template?: { id: string; name: string };
 }) {
@@ -91,7 +96,7 @@ export function RequestBuilder({
   );
   const [mode, setMode] = useState<"sequential" | "parallel">(preset?.mode ?? "sequential");
   const [message, setMessage] = useState(preset?.message ?? "");
-  const [days, setDays] = useState(14);
+  const [days, setDays] = useState(preset?.days ?? 14);
   const [sizes, setSizes] = useState<PageSize[]>([]);
   const [current, setCurrent] = useState(0);
   const [armed, setArmed] = useState<RequestFieldType | null>(null);
@@ -216,9 +221,12 @@ export function RequestBuilder({
         );
     });
 
-  const send = () =>
+  /** Envoi immédiat, ou enregistrement en brouillon (rien n'est envoyé). */
+  const submit = (asDraft: boolean) =>
     startSending(async () => {
       const result = await createSignatureRequest({
+        asDraft,
+        draftId,
         documentId: doc.id,
         mode: signers.length > 1 ? mode : "parallel",
         message: message.trim() || undefined,
@@ -242,8 +250,8 @@ export function RequestBuilder({
         })),
       });
       if (result.ok) {
-        toast.success(t("sent"));
-        router.push(`/app/demandes/${result.requestId}?envoyee=1`);
+        toast.success(asDraft ? t("draftSaved") : t("sent"));
+        router.push(`/app/demandes/${result.requestId}${asDraft ? "" : "?envoyee=1"}`);
       } else {
         toast.error(
           result.error === "missing_fields" || result.error === "invalid_phone"
@@ -342,9 +350,20 @@ export function RequestBuilder({
             <Save /> {t("saveTemplate")}
           </Button>
         ) : (
-          <Button size="sm" loading={sending} onClick={send}>
-            <Send /> {t("send")}
-          </Button>
+          <>
+            <Button
+              size="sm"
+              variant="ghost"
+              disabled={sending}
+              onClick={() => submit(true)}
+              className="hidden sm:inline-flex"
+            >
+              <Save /> {t("saveDraft")}
+            </Button>
+            <Button size="sm" loading={sending} onClick={() => submit(false)}>
+              <Send /> {t("send")}
+            </Button>
+          </>
         )}
       </header>
 
@@ -752,9 +771,25 @@ export function RequestBuilder({
                 <Save /> {t("saveTemplate")}
               </Button>
             ) : (
-              <Button size="lg" loading={sending} onClick={send} className="w-full sm:w-auto">
-                <Send /> {t("send")}
-              </Button>
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <Button
+                  size="lg"
+                  loading={sending}
+                  onClick={() => submit(false)}
+                  className="w-full sm:w-auto"
+                >
+                  <Send /> {t("send")}
+                </Button>
+                <Button
+                  size="lg"
+                  variant="secondary"
+                  disabled={sending}
+                  onClick={() => submit(true)}
+                  className="w-full sm:w-auto"
+                >
+                  <Save /> {t("saveDraft")}
+                </Button>
+              </div>
             )}
           </div>
         </div>
