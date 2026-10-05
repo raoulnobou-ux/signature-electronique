@@ -7,12 +7,15 @@ export async function LegalPage({
   title,
   updatedAt,
   draft = true,
+  translated = false,
   children,
 }: {
   title: string;
   updatedAt: string;
   /** Texte provisoire, à faire relire par un juriste avant l'ouverture publique. */
   draft?: boolean;
+  /** Contenu disponible dans la langue du visiteur (sinon : avertissement « en français »). */
+  translated?: boolean;
   children: ReactNode;
 }) {
   const english = (await getLocale()) === "en";
@@ -30,7 +33,7 @@ export async function LegalPage({
         <p className="text-sm text-muted-foreground">
           {english ? `Last updated: ${updatedAt}` : `Dernière mise à jour : ${updatedAt}`}
         </p>
-        {english && (
+        {english && !translated && (
           <p lang="en" className="rounded-xl border border-border bg-secondary/50 p-3 text-sm">
             This document is available in French only. The French version is the legally binding
             one.

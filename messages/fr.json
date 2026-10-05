@@ -61,7 +61,8 @@
     "securityPrivacy": "Sécurité et confidentialité",
     "follow": "Suivez QuickSign",
     "whatsapp": "Écrire sur WhatsApp",
-    "whatsappMessage": "Bonjour QuickSign, j'ai une question :"
+    "whatsappMessage": "Bonjour QuickSign, j'ai une question :",
+    "cookies": "Cookies"
   },
   "landing": {
     "hero": {
@@ -518,7 +519,8 @@
       "expired": "Votre session a expiré. Reconnectez-vous.",
       "signOut": "Se connecter avec un autre compte",
       "help": "Plus d'accès à votre application d'authentification ? Contactez le support depuis la page Contact."
-    }
+    },
+    "googleConsent": "En continuant avec Google, vous acceptez les <terms>conditions générales</terms> et la <privacy>politique de confidentialité</privacy>."
   },
   "app": {
     "nav": {

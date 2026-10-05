@@ -6,6 +6,7 @@ import { applyProfileLocale } from "@/lib/i18n/server";
 import { isLocale } from "@/i18n/config";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { publicEnv } from "@/lib/env";
+import { LEGAL_VERSION } from "@/config/legal";
 import { checkSignupAllowed, isDisposableEmail } from "@/lib/abuse";
 import { rateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/request";
@@ -67,6 +68,8 @@ export async function signUp(input: unknown): Promise<ActionResult<{ email: stri
         phone: data.phone,
         // Pays choisi avec le téléphone (prérempli par le pays détecté) et fuseau de l'appareil.
         country: data.country.toUpperCase(),
+        // CGU et politique de confidentialité acceptées (case obligatoire) : version datée.
+        terms_version: LEGAL_VERSION,
         timezone: data.timezone,
         account_type: data.accountType ?? null,
         org_name: data.orgName || null,

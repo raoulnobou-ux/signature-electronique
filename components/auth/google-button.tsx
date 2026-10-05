@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useTransition } from "react";
 import { signInWithGoogle } from "@/app/(auth)/actions";
@@ -50,6 +51,21 @@ export function GoogleButton({
         </svg>
         {t("google")}
       </Button>
+      {/* Consentement : la connexion Google vaut acceptation (datée à la 1re connexion). */}
+      <p className="text-center text-xs text-muted-foreground">
+        {t.rich("googleConsent", {
+          terms: (chunks) => (
+            <Link href="/cgu" className="underline underline-offset-2">
+              {chunks}
+            </Link>
+          ),
+          privacy: (chunks) => (
+            <Link href="/confidentialite" className="underline underline-offset-2">
+              {chunks}
+            </Link>
+          ),
+        })}
+      </p>
       <div className="flex items-center gap-3 text-xs text-muted-foreground" aria-hidden>
         <span className="h-px flex-1 bg-border" />
         {t("or")}

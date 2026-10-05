@@ -31,6 +31,7 @@ export async function SiteFooter() {
       links: [
         { href: "/cgu", label: t("footer.terms") },
         { href: "/confidentialite", label: t("footer.privacy") },
+        { href: "/cookies", label: t("footer.cookies") },
         { href: "/mentions-legales", label: t("footer.legalNotice") },
         { href: "/securite", label: t("footer.securityPrivacy") },
         { href: "/securite#validite-juridique", label: t("footer.legalValidity") },

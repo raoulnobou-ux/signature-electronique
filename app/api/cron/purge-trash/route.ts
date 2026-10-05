@@ -4,7 +4,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 
 /**
  * Tâche quotidienne : supprime définitivement les documents restés plus de 30 jours
- * dans la corbeille (lignes puis fichiers), et purge les compteurs de limitation.
+ * dans la corbeille (lignes puis fichiers), et purge les compteurs de limitation et les
+ * journaux anciens (durées de conservation de la politique de confidentialité).
  */
 export async function GET(request: Request) {
   if (!isAuthorizedCron(request))
@@ -26,6 +27,8 @@ export async function GET(request: Request) {
     }
   }
   await admin.rpc("purge_rate_limit_hits");
+  // Journaux techniques : 90 jours ; rappels de facturation : 2 ans ; messages de contact : 1 an.
+  await admin.rpc("purge_old_logs");
 
   return NextResponse.json({ documents: folders?.length ?? 0, files });
 }

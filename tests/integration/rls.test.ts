@@ -54,6 +54,77 @@ describe.skipIf(!hasLocalDb)("sécurité des données (RLS)", () => {
     });
   });
 
+  it("le consentement (version des CGU) est daté par le serveur et non modifiable", async () => {
+    const { data } = await admin().auth.admin.createUser({
+      email: `cgu-${Date.now()}-${Math.floor(Math.random() * 1e5)}@example.com`,
+      password: "Integration-2026",
+      email_confirm: true,
+      user_metadata: { full_name: "Cgu", terms_version: "2026-10-05" },
+    });
+    const { data: profile } = await admin()
+      .from("profiles")
+      .select("terms_version, terms_accepted_at")
+      .eq("id", data.user!.id)
+      .single();
+    expect(profile!.terms_version).toBe("2026-10-05");
+    expect(profile!.terms_accepted_at).toBeTruthy();
+    const forged = await alice.client
+      .from("profiles")
+      .update({ terms_accepted_at: "2000-01-01T00:00:00Z" } as never)
+      .eq("id", alice.id);
+    expect(forged.error).not.toBeNull();
+  });
+
+  it("supprimer un compte garde le registre des paiements, détaché du compte", async () => {
+    const carl = await userClient("registre");
+    const { data: payment } = await admin()
+      .from("payments")
+      .insert({
+        user_id: carl.id,
+        provider: "sandbox",
+        provider_ref: `ref-${Date.now()}`,
+        amount: 5000,
+        currency: "XAF",
+        status: "successful",
+        plan: "essential",
+        billing_cycle: "monthly",
+        kind: "new",
+      })
+      .select("id")
+      .single();
+    await admin().auth.admin.deleteUser(carl.id);
+    const { data: kept } = await admin()
+      .from("payments")
+      .select("user_id, amount")
+      .eq("id", payment!.id)
+      .single();
+    expect(kept).toEqual({ user_id: null, amount: 5000 });
+  });
+
+  it("les journaux techniques de plus de 90 jours sont purgés", async () => {
+    const { data: rows } = await admin()
+      .from("app_errors")
+      .insert([
+        {
+          scope: "test.old",
+          message: "ancien",
+          created_at: new Date(Date.now() - 91 * 86_400_000).toISOString(),
+        },
+        { scope: "test.recent", message: "récent", created_at: new Date().toISOString() },
+      ])
+      .select("id, scope");
+    const { error } = await admin().rpc("purge_old_logs");
+    expect(error).toBeNull();
+    const { data: left } = await admin()
+      .from("app_errors")
+      .select("scope")
+      .in(
+        "id",
+        rows!.map((r) => r.id),
+      );
+    expect(left!.map((r) => r.scope)).toEqual(["test.recent"]);
+  });
+
   it("le pays et la devise préférés ne sont modifiables que par leur propriétaire", async () => {
     const ok = await alice.client
       .from("profiles")

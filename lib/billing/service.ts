@@ -104,7 +104,8 @@ export async function issueReceipt(
   const { data: payment } = await admin.from("payments").select("*").eq("id", paymentId).single();
   if (!payment || payment.status !== "successful" || !payment.receipt_number) return;
   if (payment.receipt_path && !email) return;
-  if (!isPaidPlan(payment.plan)) return;
+  // Compte supprimé : le paiement reste au registre comptable, sans reçu à renvoyer.
+  if (!isPaidPlan(payment.plan) || !payment.user_id) return;
 
   const profile = await profileOf(admin, payment.user_id);
   const currency = payment.currency as Currency;
@@ -186,6 +187,8 @@ export async function settlePayment(input: {
     .maybeSingle();
   if (!payment) return { outcome: "unknown" };
   const userId = payment.user_id;
+  // Compte supprimé depuis le paiement : rien à activer.
+  if (!userId) return { outcome: "unknown" };
 
   if (payment.status === "successful") {
     await issueReceipt(payment.id, { email: false });

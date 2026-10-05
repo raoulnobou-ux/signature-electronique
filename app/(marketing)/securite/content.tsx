@@ -117,7 +117,7 @@ const fr: SecurityContent = {
     {
       question: "Combien de temps sont-elles conservées ?",
       answer:
-        "Vos documents restent disponibles tant que votre compte existe, même si l'abonnement expire (lecture seule). Un document mis à la corbeille est supprimé définitivement après 30 jours. Si vous supprimez votre compte, tous vos fichiers sont effacés immédiatement ; seul le journal d'audit des signatures est conservé, sans le contenu des documents, car il sert de preuve aux autres signataires.",
+        "Vos documents restent disponibles tant que votre compte existe, même sans abonnement (accès gratuit : consultation et téléchargement). Un document mis à la corbeille est supprimé définitivement après 30 jours. Si vous supprimez votre compte, tous vos fichiers sont effacés immédiatement ; seuls sont conservés le journal de preuve des signatures, sans le contenu des documents, car il sert aux autres signataires, et le registre comptable des paiements, détaché de votre compte. Détails dans la politique de confidentialité.",
     },
     {
       question: "Comment exporter ou supprimer mes données ?",
@@ -270,7 +270,7 @@ const en: SecurityContent = {
     {
       question: "How long is it kept?",
       answer:
-        "Your documents stay available as long as your account exists, even if your subscription lapses (read-only). A document moved to the trash is permanently deleted after 30 days. If you delete your account, all your files are erased immediately; only the signing audit log is kept, without document content, because it is evidence for the other signers.",
+        "Your documents stay available as long as your account exists, even without a subscription (free access: viewing and downloading). A document moved to the trash is permanently deleted after 30 days. If you delete your account, all your files are erased immediately; only the signature proof log, without document content, because the other signers rely on it, and the payment accounting register, detached from your account, are kept. Details in the privacy policy.",
     },
     {
       question: "How do I export or delete my data?",

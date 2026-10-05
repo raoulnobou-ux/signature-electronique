@@ -8,6 +8,7 @@ const pages = [
   { path: "/cgu", heading: /Conditions générales/ },
   { path: "/confidentialite", heading: /Politique de confidentialité/ },
   { path: "/mentions-legales", heading: /Mentions légales/ },
+  { path: "/cookies", heading: /Politique cookies/ },
 ];
 
 for (const { path, heading } of pages) {

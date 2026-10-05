@@ -1,6 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { applyProfileLocale } from "@/lib/i18n/server";
 import { sendWelcomeOnce } from "@/lib/auth/welcome";
+import { LEGAL_VERSION } from "@/config/legal";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { safeNextPath } from "@/lib/validation/auth";
 
@@ -16,6 +18,13 @@ export async function GET(request: NextRequest) {
     if (!error && data.user) {
       await sendWelcomeOnce(data.user.id);
       await applyProfileLocale(data.user.id);
+      // Compte Google : la mention « En continuant, vous acceptez les CGU et la politique de
+      // confidentialité » figure sous le bouton ; l'acceptation est datée à la 1re connexion.
+      await createAdminClient()
+        .from("profiles")
+        .update({ terms_version: LEGAL_VERSION, terms_accepted_at: new Date().toISOString() })
+        .eq("id", data.user.id)
+        .is("terms_accepted_at", null);
       // Compte Google : pas de formulaire d'inscription, le pays détecté complète le profil.
       const country = request.headers.get("x-vercel-ip-country")?.toUpperCase();
       if (country && /^[A-Z]{2}$/.test(country)) {

@@ -9,6 +9,7 @@ const routes = [
   "/cgu",
   "/confidentialite",
   "/mentions-legales",
+  "/cookies",
   "/inscription",
   "/connexion",
 ];

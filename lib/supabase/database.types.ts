@@ -474,7 +474,7 @@ export type Database = {
           status: string;
           subscription_id: string | null;
           updated_at: string;
-          user_id: string;
+          user_id: string | null;
         };
         Insert: {
           amount: number;
@@ -497,7 +497,7 @@ export type Database = {
           status: string;
           subscription_id?: string | null;
           updated_at?: string;
-          user_id: string;
+          user_id?: string | null;
         };
         Update: {
           amount?: number;
@@ -520,7 +520,7 @@ export type Database = {
           status?: string;
           subscription_id?: string | null;
           updated_at?: string;
-          user_id?: string;
+          user_id?: string | null;
         };
         Relationships: [
           {
@@ -656,6 +656,8 @@ export type Database = {
           phone: string | null;
           phone_verified_at: string | null;
           signature_block: Json | null;
+          terms_accepted_at: string | null;
+          terms_version: string | null;
           theme: string;
           timezone: string;
           trial_ends_at: string;
@@ -683,6 +685,8 @@ export type Database = {
           phone?: string | null;
           phone_verified_at?: string | null;
           signature_block?: Json | null;
+          terms_accepted_at?: string | null;
+          terms_version?: string | null;
           theme?: string;
           timezone?: string;
           trial_ends_at?: string;
@@ -710,6 +714,8 @@ export type Database = {
           phone?: string | null;
           phone_verified_at?: string | null;
           signature_block?: Json | null;
+          terms_accepted_at?: string | null;
+          terms_version?: string | null;
           theme?: string;
           timezone?: string;
           trial_ends_at?: string;
@@ -1253,6 +1259,7 @@ export type Database = {
       };
       my_usage_snapshot: { Args: Record<PropertyKey, never>; Returns: Json };
       owns_document: { Args: { p_document_id: string }; Returns: boolean };
+      purge_old_logs: { Args: Record<PropertyKey, never>; Returns: undefined };
       purge_rate_limit_hits: { Args: Record<PropertyKey, never>; Returns: undefined };
       purge_trashed_documents: {
         Args: { p_older_than?: string };

@@ -15,6 +15,17 @@ test.describe("anglais", () => {
     await expect(page.getByText("Compare plans")).toBeVisible();
     await page.goto("/securite");
     await expect(page.getByRole("heading", { name: "Legal validity" })).toBeVisible();
+    // Pages juridiques traduites (plus d'avertissement « en français seulement »).
+    for (const [path, title] of [
+      ["/confidentialite", "Privacy policy"],
+      ["/cgu", "Terms of use and sale"],
+      ["/cookies", "Cookie policy"],
+      ["/mentions-legales", "Legal notice"],
+    ] as const) {
+      await page.goto(path);
+      await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible();
+      await expect(page.getByText("available in French only")).toHaveCount(0);
+    }
     await context.close();
   });
 
@@ -40,10 +51,13 @@ test.describe("anglais", () => {
     expect(mail.html).toContain('lang="en"');
     const { data } = await adminClient()
       .from("profiles")
-      .select("locale")
+      .select("locale, terms_version, terms_accepted_at")
       .eq("email", email)
       .single();
     expect(data?.locale).toBe("en");
+    // Consentement aux CGU et à la politique de confidentialité : version et date gardées.
+    expect(data?.terms_version).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(data?.terms_accepted_at).toBeTruthy();
   });
 
   test("application en anglais : langue du profil appliquée à la connexion", async ({ page }) => {

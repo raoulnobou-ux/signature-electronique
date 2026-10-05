@@ -354,6 +354,25 @@ Les chiffres des cartes et du comparatif (documents, signatures, stockage, messa
 - il dispose de 45 secondes pour démarrer (`--libreoffice-start-timeout=45s`) ;
 - l'application réessaie une fois sur un 503, dans le même délai global de 90 secondes.
 
+**D121 — Juridique et données personnelles (RGPD).** Les pages juridiques sont réécrites en français et en anglais (`content/legal/*.tsx`), au plus près du fonctionnement réel :
+
+- confidentialité : responsable, données, finalités et bases légales, prestataires nommés avec leur localisation, transferts, durées de conservation, droits et plainte auprès de l'autorité du pays ;
+- CGU : accès gratuit, abonnement prépayé sans prélèvement automatique, Paddle revendeur officiel, droits impératifs des consommateurs préservés ;
+- nouvelle page **cookies**, avec l'inventaire réel : session, langue, thème, cache hors ligne ;
+- mentions légales.
+
+Elles gardent la mention « version provisoire — en cours de relecture juridique ». Aucune promesse de « conformité totale », ni de signature qualifiée ou avancée : QuickSign est présenté comme une signature électronique simple, dont la valeur repose sur la traçabilité.
+
+Pas de bandeau cookies : il n'y a ni mesure d'audience ni publicité, seulement des éléments strictement nécessaires. Si un outil de mesure est ajouté, un consentement préalable devient obligatoire.
+
+Consentement : la version des textes acceptés (`LEGAL_VERSION`) et sa date sont enregistrées dans le profil, à l'inscription ou à la première connexion Google (mention sous le bouton). Ces colonnes ne sont pas modifiables par l'utilisateur.
+
+Conservation :
+
+- à la suppression d'un compte, le registre des paiements est conservé pour la comptabilité, détaché du compte (`user_id` mis à null) ;
+- la tâche quotidienne purge les journaux d'erreur (90 jours), les messages de contact (1 an) et les rappels de facturation (2 ans) ;
+- le journal de preuve et le registre des paiements sont annoncés « 10 ans au plus » : leur purge au-delà de 10 ans est à mettre en place avant 2036, les plus anciennes données datant de 2026.
+
 ## Sécurité des données — référence (audit du 2 octobre 2026)
 
 Récapitulatif de chaque mesure, à citer à un client ou un partenaire. Chacune est vérifiée par un test automatique, indiqué entre crochets.

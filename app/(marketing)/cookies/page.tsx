@@ -1,10 +1,10 @@
 import { LegalRoute, legalMetadata } from "@/components/marketing/legal-route";
-import { privacyDoc } from "@/content/legal/privacy";
+import { cookiesDoc } from "@/content/legal/cookies";
 
 export async function generateMetadata() {
-  return legalMetadata(privacyDoc);
+  return legalMetadata(cookiesDoc);
 }
 
 export default function Page() {
-  return <LegalRoute doc={privacyDoc} />;
+  return <LegalRoute doc={cookiesDoc} />;
 }
