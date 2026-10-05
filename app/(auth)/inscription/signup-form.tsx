@@ -80,6 +80,8 @@ export function SignUpForm({ defaultCountry }: { defaultCountry: CountryCode }) 
         for (const [field, message] of Object.entries(result.fieldErrors)) {
           account.setError(field as keyof AccountStepInput, { message });
         }
+        // L'erreur est affichée sous le champ concerné.
+        return;
       }
       setFormError(result.error === "rate_limited" ? t("rateLimited") : t("genericError"));
     });

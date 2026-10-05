@@ -17,4 +17,8 @@ services:
       - "--api-timeout=60s"
       - "--api-body-limit=30MB"
       - "--libreoffice-restart-after=50"
+      # LibreOffice démarré dès le lancement, avec un délai de démarrage plus large :
+      # sans cela, la première conversion (ou celle après un redémarrage) peut échouer (503).
+      - "--libreoffice-auto-start=true"
+      - "--libreoffice-start-timeout=45s"
     restart: unless-stopped

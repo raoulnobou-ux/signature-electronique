@@ -398,7 +398,8 @@
     "passwordPolicy": "At least 8 characters, with at least one letter and one digit.",
     "acceptTerms": "Please accept the terms to continue.",
     "passwordMismatch": "The two passwords don't match.",
-    "samePassword": "Choose a password different from the old one."
+    "samePassword": "Choose a password different from the old one.",
+    "disposableEmail": "Temporary email addresses are not accepted. Please use your usual address."
   },
   "auth": {
     "side": {

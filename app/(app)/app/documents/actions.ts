@@ -48,6 +48,9 @@ export async function prepareUpload(
   const access = await guard("upload", { kind: "documentsStored" });
   if (!access.ok) return { ok: false, error: access.reason };
   const { account } = access;
+  // Imports nombreux en peu de temps (script, boucle) : pause, sans gêner un usage normal.
+  if (!(await rateLimit("upload", account.userId, 60, 3600)))
+    return { ok: false, error: "rate_limited" };
   if (account.entitlements.remaining.storageBytes < parsed.data.size)
     return { ok: false, error: "storage_full" };
 

@@ -1,0 +1,37 @@
+/**
+ * Domaines d'adresses e-mail jetables connus (boîtes temporaires publiques). Liste courte
+ * et volontairement prudente : on refuse seulement les services dont c'est l'unique usage,
+ * jamais un fournisseur de messagerie ordinaire. Ajouter un domaine ici suffit.
+ */
+export const DISPOSABLE_EMAIL_DOMAINS: readonly string[] = [
+  "10minutemail.com",
+  "10minutemail.net",
+  "20minutemail.com",
+  "dispostable.com",
+  "emailondeck.com",
+  "fakeinbox.com",
+  "getnada.com",
+  "guerrillamail.com",
+  "guerrillamail.net",
+  "guerrillamail.org",
+  "guerrillamailblock.com",
+  "maildrop.cc",
+  "mailinator.com",
+  "mailinator.net",
+  "mailnesia.com",
+  "mintemail.com",
+  "mohmal.com",
+  "moakt.com",
+  "sharklasers.com",
+  "spamgourmet.com",
+  "temp-mail.org",
+  "tempmail.com",
+  "tempmail.net",
+  "tempmailo.com",
+  "throwawaymail.com",
+  "trashmail.com",
+  "trashmail.de",
+  "yopmail.com",
+  "yopmail.fr",
+  "yopmail.net",
+];

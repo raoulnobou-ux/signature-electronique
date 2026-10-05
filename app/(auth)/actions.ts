@@ -6,6 +6,7 @@ import { applyProfileLocale } from "@/lib/i18n/server";
 import { isLocale } from "@/i18n/config";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { publicEnv } from "@/lib/env";
+import { checkSignupAllowed, isDisposableEmail } from "@/lib/abuse";
 import { rateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/request";
 import { createClient } from "@/lib/supabase/server";
@@ -47,10 +48,13 @@ export async function signUp(input: unknown): Promise<ActionResult<{ email: stri
     return { ok: false, error: "invalid", fieldErrors: fieldErrorsOf(parsed.error.issues) };
   const data = parsed.data;
 
-  // Limites par IP larges : au Cameroun, beaucoup d'utilisateurs partagent une même IP
-  // (NAT des opérateurs mobiles, cybercafés, bureaux). Les limites par compte restent strictes.
-  if (!(await rateLimit("signup", await ipKey(), 30, 3600)))
-    return { ok: false, error: "rate_limited" };
+  // Adresses jetables refusées : la vérification de l'e-mail doit avoir un sens.
+  if (isDisposableEmail(data.email))
+    return { ok: false, error: "invalid", fieldErrors: { email: "disposableEmail" } };
+  // Paliers progressifs par IP, larges car beaucoup d'utilisateurs partagent une IP
+  // (opérateurs mobiles, cybercafés, bureaux) ; les limites par compte restent strictes.
+  const allowed = await checkSignupAllowed(await ipKey());
+  if (!allowed.ok) return { ok: false, error: "rate_limited" };
 
   const supabase = await createClient();
   const { data: result, error } = await supabase.auth.signUp({

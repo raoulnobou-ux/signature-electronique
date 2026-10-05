@@ -131,3 +131,19 @@ test("un lien de confirmation invalide est refusé proprement", async ({ page })
   await expect(page).toHaveURL(/erreur=lien-invalide/);
   await expect(page.getByText(/n'est plus valide/)).toBeVisible();
 });
+
+test("inscription : une adresse e-mail jetable est refusée avec un message clair", async ({
+  page,
+}) => {
+  await page.goto("/inscription");
+  await page.getByLabel("Nom complet").fill("Test Jetable");
+  await page.getByLabel("Adresse e-mail").fill(`jetable-${Date.now()}@yopmail.com`);
+  await page.getByLabel("Mot de passe", { exact: true }).fill(PASSWORD);
+  await page.getByRole("checkbox").click();
+  await page.getByRole("button", { name: "Continuer" }).click();
+  await page.getByRole("button", { name: "Créer mon compte" }).click();
+  await expect(
+    page.getByText("Les adresses e-mail temporaires ne sont pas acceptées.", { exact: false }),
+  ).toBeVisible();
+  await expect(page.getByLabel("Adresse e-mail")).toBeVisible();
+});

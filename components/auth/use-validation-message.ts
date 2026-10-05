@@ -11,7 +11,8 @@ type ValidationKey =
   | "passwordPolicy"
   | "acceptTerms"
   | "passwordMismatch"
-  | "samePassword";
+  | "samePassword"
+  | "disposableEmail";
 
 /** Traduit une clé d'erreur de validation (zod ou serveur) ; texte générique si inconnue. */
 export function useValidationMessage() {

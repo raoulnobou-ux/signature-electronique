@@ -338,6 +338,22 @@ Les chiffres des cartes et du comparatif (documents, signatures, stockage, messa
 - les moyens de paiement : carte partout, Mobile Money en zone franc CFA ;
 - les prix sont fixés par marché sans conversion automatique, et les taxes éventuelles (TVA) sont calculées au paiement selon le pays (Paddle, revendeur officiel).
 
+**D119 — Anti-abus mesuré.** On renforce sans gêner les utilisateurs légitimes, dont beaucoup partagent une même adresse IP (opérateurs mobiles, cybercafés, écoles, entreprises) :
+
+- **E-mail vérifié** avant toute action (déjà en place, vérifié côté serveur par `guard`).
+- **Adresses jetables refusées** à l'inscription : liste courte de services dont c'est l'unique usage (`config/disposable-domains.ts`), message clair sous le champ.
+- **Inscriptions par IP en paliers** (`lib/abuse.ts`) :
+  - au-delà de 10 par heure, on laisse passer mais l'événement est noté dans `app_errors`, avec une empreinte de l'IP et jamais l'adresse en clair ;
+  - au-delà de 8 en 10 minutes, 30 par heure ou 100 par jour, refus temporaire avec invitation à réessayer.
+  - Jamais de blocage définitif.
+- **Import de fichiers** limité à 60 par heure et par compte. Les autres limites (connexion, mot de passe, 2FA, paiement, liens de signature, import par lien, assistant) étaient déjà en place.
+
+**D120 — Conversion Word fiable.** Sous charge, ou à la première conversion après un démarrage, LibreOffice pouvait mettre plus de 20 secondes à démarrer : Gotenberg répondait alors 503 et l'import du Word échouait. Trois corrections :
+
+- LibreOffice démarre avec le service (`--libreoffice-auto-start=true`) ;
+- il dispose de 45 secondes pour démarrer (`--libreoffice-start-timeout=45s`) ;
+- l'application réessaie une fois sur un 503, dans le même délai global de 90 secondes.
+
 ## Sécurité des données — référence (audit du 2 octobre 2026)
 
 Récapitulatif de chaque mesure, à citer à un client ou un partenaire. Chacune est vérifiée par un test automatique, indiqué entre crochets.

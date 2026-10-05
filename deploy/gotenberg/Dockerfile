@@ -12,5 +12,7 @@ CMD ["gotenberg", \
      "--api-timeout=60s", \
      "--api-body-limit=30MB", \
      "--libreoffice-restart-after=50", \
+     "--libreoffice-auto-start=true", \
+     "--libreoffice-start-timeout=45s", \
      "--chromium-auto-start=false", \
      "--log-level=warn"]

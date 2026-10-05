@@ -31,21 +31,30 @@ export const gotenbergConverter: DocumentConverter = {
       headers.Authorization = `Basic ${Buffer.from(`quicksign:${serverEnv.GOTENBERG_TOKEN}`).toString("base64")}`;
     }
 
-    let response: Response;
-    try {
-      response = await fetch(
-        `${serverEnv.GOTENBERG_URL.replace(/\/$/, "")}/forms/libreoffice/convert`,
-        {
+    const url = `${serverEnv.GOTENBERG_URL.replace(/\/$/, "")}/forms/libreoffice/convert`;
+    const deadline = Date.now() + 90_000;
+    const attempt = async () => {
+      try {
+        return await fetch(url, {
           method: "POST",
           body: form,
           headers,
-          signal: AbortSignal.timeout(90_000),
-        },
-      );
-    } catch (error) {
-      if (error instanceof Error && error.name === "TimeoutError")
-        throw new ConversionError("timeout");
-      throw new ConversionError("failed");
+          signal: AbortSignal.timeout(Math.max(5_000, deadline - Date.now())),
+        });
+      } catch (error) {
+        if (error instanceof Error && error.name === "TimeoutError")
+          throw new ConversionError("timeout");
+        throw new ConversionError("failed");
+      }
+    };
+
+    let response = await attempt();
+    // 503 : LibreOffice (re)démarrait (démarrage à froid, redémarrage périodique). Une seule
+    // nouvelle tentative, dans le même délai global : le service est alors prêt.
+    if (response.status === 503 && deadline - Date.now() > 10_000) {
+      await response.body?.cancel().catch(() => undefined);
+      await new Promise((resolve) => setTimeout(resolve, 1_000));
+      response = await attempt();
     }
     if (!response.ok) {
       console.error(

@@ -398,7 +398,8 @@
     "passwordPolicy": "8 caractères minimum, avec au moins une lettre et un chiffre.",
     "acceptTerms": "Veuillez accepter les conditions pour continuer.",
     "passwordMismatch": "Les deux mots de passe ne correspondent pas.",
-    "samePassword": "Choisissez un mot de passe différent de l'ancien."
+    "samePassword": "Choisissez un mot de passe différent de l'ancien.",
+    "disposableEmail": "Les adresses e-mail temporaires ne sont pas acceptées. Utilisez votre adresse habituelle."
   },
   "auth": {
     "side": {
