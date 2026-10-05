@@ -195,7 +195,7 @@ const fr: SecurityContent = {
       </ul>
     </>
   ),
-  ctaTrial: "Essayer gratuitement 6 jours",
+  ctaTrial: "Créer un compte gratuit",
   ctaContact: "Poser une question",
 };
 
@@ -338,7 +338,7 @@ const en: SecurityContent = {
       </ul>
     </>
   ),
-  ctaTrial: "Try free for 6 days",
+  ctaTrial: "Create a free account",
   ctaContact: "Ask a question",
 };
 

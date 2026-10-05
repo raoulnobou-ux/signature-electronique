@@ -56,9 +56,9 @@ test("le formulaire de contact valide puis envoie le message", async ({ page }) 
 
 test("la FAQ s'ouvre au clic", async ({ page }) => {
   await page.goto("/#faq");
-  const question = page.getByText(/carte bancaire pour l'essai/);
+  const question = page.getByText(/carte bancaire pour créer un compte/);
   await question.click();
-  await expect(page.getByText(/sans carte ni paiement/)).toBeVisible();
+  await expect(page.getByText(/Le compte est gratuit et sans carte/)).toBeVisible();
 });
 
 test("pied de page : réseaux sociaux, support et liens légaux sur chaque page publique", async ({

@@ -38,7 +38,7 @@ async function ipKey() {
 
 /**
  * Inscription (étapes « Compte » + « Profil » envoyées ensemble).
- * Le trigger Postgres crée le profil et démarre l'essai de 6 jours ; un e-mail de
+ * Le trigger Postgres crée le profil et ouvre l'accès gratuit ; un e-mail de
  * confirmation est envoyé (lien valable sur n'importe quel appareil).
  */
 export async function signUp(input: unknown): Promise<ActionResult<{ email: string }>> {

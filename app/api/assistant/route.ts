@@ -99,7 +99,7 @@ export async function POST(request: Request) {
   const account = await getCurrentAccount();
   if (!account) return fail("invalid", 401);
   const ent = account.entitlements;
-  if (!account.emailConfirmed || ent.readOnly) return fail("read_only");
+  if (!account.emailConfirmed || !ent.features.ai_assistant) return fail("read_only");
 
   const locale = await getLocale();
   const userText = input.quickAction

@@ -24,30 +24,42 @@ export async function SubscriptionOverview({
     getLocale(),
   ]);
   const ent = account.entitlements;
-  const planLabel = ent.state === "trial" ? t("plans.trial") : t(`plans.${ent.subscriptionPlan}`);
+  const planLabel =
+    ent.state === "free"
+      ? t("plans.free")
+      : ent.state === "trial"
+        ? t("plans.trial")
+        : t(`plans.${ent.subscriptionPlan}`);
   const stateVariant = {
+    free: "muted",
     trial: "brand",
     active: "success",
     grace: "warning",
-    expired: "danger",
   } as const;
   const date = format.dateTime(ent.periodEndsAt, { dateStyle: "long" });
 
   const usage = [
-    {
-      label: t("documents"),
-      used: account.usage.documentsSignedThisMonth,
-      total: ent.limits?.documentsPerMonth ?? null,
-    },
+    // Accès gratuit : documents importés (la signature demande un abonnement).
+    ent.state === "free"
+      ? {
+          label: t("documentsStored"),
+          used: account.usage.documentsStored,
+          total: ent.limits.documentsStored ?? null,
+        }
+      : {
+          label: t("documents"),
+          used: account.usage.documentsSignedThisMonth,
+          total: ent.limits.documentsPerMonth,
+        },
     {
       label: t("signatures"),
       used: account.usage.signatureAssetsCount,
-      total: ent.limits?.signatureAssets ?? null,
+      total: ent.limits.signatureAssets,
     },
     {
       label: t("ai"),
       used: account.usage.aiMessagesToday,
-      total: ent.limits?.aiMessagesPerDay ?? null,
+      total: ent.limits.aiMessagesPerDay,
     },
   ];
 
@@ -86,6 +98,8 @@ export async function SubscriptionOverview({
                 {t("trialEnds", { date })}
               </p>
             </div>
+          ) : ent.state === "free" ? (
+            <p className="text-sm text-muted-foreground">{t("freeBody")}</p>
           ) : (
             <p className="flex items-center gap-2 text-sm text-muted-foreground">
               <CalendarClock className="size-4" aria-hidden />
@@ -108,7 +122,7 @@ export async function SubscriptionOverview({
         </CardContent>
       </Card>
 
-      {!compact && ent.limits && (
+      {!compact && (
         <Card>
           <CardContent className="space-y-5">
             <p className="font-display text-lg font-semibold">{t("usage")}</p>

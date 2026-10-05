@@ -281,7 +281,7 @@ export function reminderBucket(periodEnd: Date, now: Date): 0 | 2 | 5 | null {
 
 /**
  * Tâche quotidienne de facturation : rappels (fin d'essai, renouvellement), passage en
- * grâce puis en lecture seule, bascules de plan programmées, paiements abandonnés.
+ * grâce puis en accès gratuit, bascules de plan programmées, paiements abandonnés.
  * Chaque étape est idempotente : relancer la tâche ne renvoie aucun e-mail en double.
  */
 export async function runBillingCron(now = new Date()): Promise<BillingCronSummary> {
@@ -320,10 +320,10 @@ export async function runBillingCron(now = new Date()): Promise<BillingCronSumma
       summary.trialEnding++;
   }
 
-  // 2. Essais terminés → lecture seule.
+  // 2. Essais terminés → accès gratuit.
   const { data: ended } = await admin
     .from("subscriptions")
-    .update({ status: "expired" })
+    .update({ plan: "free", status: "free" })
     .eq("status", "trialing")
     .lte("current_period_end", iso)
     .select("user_id, current_period_end");
@@ -413,7 +413,7 @@ export async function runBillingCron(now = new Date()): Promise<BillingCronSumma
     );
   }
 
-  // 6. Fin de grâce, ou annulation arrivée à terme → lecture seule.
+  // 6. Fin de grâce, ou annulation arrivée à terme → accès gratuit (documents conservés).
   const graceLimit = new Date(now.getTime() - GRACE_PERIOD_DAYS * DAY).toISOString();
   const expiredRows = [
     ...((

@@ -9,13 +9,13 @@ import type { ShellAccount } from "./types";
 
 /**
  * Bandeau d'état du compte, en haut de chaque page :
- * fin d'essai proche (≤ 2 jours), période de grâce, ou lecture seule.
+ * fin d'essai proche (≤ 2 jours), période de grâce, ou accès gratuit (sans abonnement).
  */
 export function AccessBanner({ account }: { account: ShellAccount }) {
   const t = useTranslations("app.trial");
   const format = useFormatter();
 
-  let tone: "info" | "warning" | "danger" | null = null;
+  let tone: "info" | "warning" | null = null;
   let icon = Clock;
   let text = "";
   let cta = t("choosePlan");
@@ -37,10 +37,10 @@ export function AccessBanner({ account }: { account: ShellAccount }) {
       graceEnd: format.dateTime(new Date(account.graceEndsAt), { dateStyle: "long" }),
     });
     cta = t("renew");
-  } else if (account.state === "expired") {
-    tone = "danger";
+  } else if (account.state === "free") {
+    tone = "info";
     icon = Lock;
-    text = t("expired");
+    text = t("free");
     cta = t("upgrade");
   }
 
@@ -54,7 +54,6 @@ export function AccessBanner({ account }: { account: ShellAccount }) {
         "flex flex-col gap-3 border-b px-4 py-3 text-sm sm:flex-row sm:items-center sm:px-6",
         tone === "info" && "border-ring/30 bg-accent",
         tone === "warning" && "border-warning/30 bg-warning/10",
-        tone === "danger" && "border-destructive/30 bg-destructive/10",
       )}
     >
       <Icon
@@ -62,12 +61,11 @@ export function AccessBanner({ account }: { account: ShellAccount }) {
           "hidden size-4 shrink-0 sm:block",
           tone === "info" && "text-accent-foreground",
           tone === "warning" && "text-warning",
-          tone === "danger" && "text-destructive",
         )}
         aria-hidden
       />
       <p className="flex-1">
-        {account.state === "expired" && <strong className="mr-1">{t("expiredTitle")} —</strong>}
+        {account.state === "free" && <strong className="mr-1">{t("freeTitle")} —</strong>}
         {account.state === "grace" && <strong className="mr-1">{t("graceTitle")} —</strong>}
         {text}
       </p>

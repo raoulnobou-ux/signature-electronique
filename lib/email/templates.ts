@@ -15,33 +15,34 @@ export function welcomeEmail({ fullName, locale }: { fullName: string } & L) {
   const name = firstName(fullName);
   if (isEn(locale))
     return {
-      subject: "Welcome to QuickSign — your 6-day trial starts now",
+      subject: "Welcome to QuickSign — your account is ready",
       ...renderEmail(
         {
-          preheader: "Your free trial is active: every Pro feature for 6 days.",
+          preheader: "Your free account is active: try QuickSign with your first document.",
           title: name ? `Welcome, ${name}!` : "Welcome to QuickSign!",
           paragraphs: [
-            `Your account is active. For ${siteConfig.trialDays} days, you get every Pro feature for free: signatures, stamps, multiple signers, AI assistant.`,
+            "Your account is active. For free, you can import a document, open the editor and create your signature. Subscribe whenever you are ready to sign and export: signatures, stamps, multiple signers, AI assistant.",
             "To get started: create your signature, add your organization's stamp, then import your first document. It takes less than a minute.",
             "Any questions? Just reply to this email, we're happy to help.",
           ],
-          cta: { label: "Sign my first document", url: `${siteConfig.url}/app/bienvenue` },
+          cta: { label: "Import my first document", url: `${siteConfig.url}/app/bienvenue` },
           footnote: "You are receiving this email because you just created a QuickSign account.",
         },
         locale,
       ),
     };
   return {
-    subject: "Bienvenue sur QuickSign — votre essai de 6 jours commence",
+    subject: "Bienvenue sur QuickSign — votre compte est prêt",
     ...renderEmail({
-      preheader: "Votre essai gratuit est actif : toutes les fonctionnalités Pro pendant 6 jours.",
+      preheader:
+        "Votre compte gratuit est actif : découvrez QuickSign avec votre premier document.",
       title: name ? `Bienvenue, ${name} !` : "Bienvenue sur QuickSign !",
       paragraphs: [
-        `Votre compte est activé. Pendant ${siteConfig.trialDays} jours, vous profitez gratuitement de toutes les fonctionnalités du plan Pro : signatures, cachets, envoi à plusieurs signataires, assistant IA.`,
+        "Votre compte est activé. Gratuitement, vous pouvez importer un document, ouvrir l'éditeur et créer votre signature. Abonnez-vous quand vous êtes prêt pour signer et exporter : signatures, cachets, envoi à plusieurs signataires, assistant IA.",
         "Pour bien démarrer : créez votre signature, ajoutez le cachet de votre structure, puis importez votre premier document. Comptez moins d'une minute.",
         "Une question ? Répondez simplement à cet e-mail, nous vous aidons avec plaisir.",
       ],
-      cta: { label: "Signer mon premier document", url: `${siteConfig.url}/app/bienvenue` },
+      cta: { label: "Importer mon premier document", url: `${siteConfig.url}/app/bienvenue` },
       footnote: "Vous recevez cet e-mail car vous venez de créer un compte QuickSign.",
     }),
   };
@@ -79,7 +80,7 @@ export function trialEndingEmail({
           title: "Only 2 trial days left",
           paragraphs: [
             greeting(fullName, locale),
-            `Your free Pro trial ends on ${endDate}. To keep signing without interruption, choose a plan: Essential at 5,000 FCFA or Pro at 15,000 FCFA per month, payable by Mobile Money (MTN, Orange) or card.`,
+            `Your free Pro trial ends on ${endDate}. To keep signing without interruption, choose a plan, priced in your currency and payable by card or Mobile Money.`,
             "Your remaining trial days are kept: your subscription will start when the trial ends.",
           ],
           cta: { label: "Choose my plan", url: renewUrl() },
@@ -94,7 +95,7 @@ export function trialEndingEmail({
       title: "Plus que 2 jours d'essai",
       paragraphs: [
         greeting(fullName),
-        `Votre essai gratuit du plan Pro se termine le ${endDate}. Pour continuer à signer sans interruption, choisissez un plan : Essentiel à 5 000 FCFA ou Pro à 15 000 FCFA par mois, payables par Mobile Money (MTN, Orange) ou carte.`,
+        `Votre essai gratuit du plan Pro se termine le ${endDate}. Pour continuer à signer sans interruption, choisissez un plan, au prix de votre pays, payable par carte ou Mobile Money.`,
         "Les jours d'essai restants sont conservés : votre abonnement commencera à la fin de l'essai.",
       ],
       cta: { label: "Choisir mon plan", url: renewUrl() },
@@ -102,7 +103,7 @@ export function trialEndingEmail({
   };
 }
 
-/** L'essai est terminé : compte en lecture seule. */
+/** L'essai est terminé : le compte passe en accès gratuit. */
 export function trialEndedEmail({ fullName, locale }: { fullName: string } & L) {
   if (isEn(locale))
     return {
@@ -113,7 +114,7 @@ export function trialEndedEmail({ fullName, locale }: { fullName: string } & L) 
           title: "Your trial has ended",
           paragraphs: [
             greeting(fullName, locale),
-            "Your free trial has come to an end. Your account is now read-only: you can still view and download your signed documents. Nothing is deleted.",
+            "Your free trial has come to an end. Your account now has free access: you can still view and download your documents. Nothing is deleted.",
             "To sign new documents, choose a plan in a few seconds.",
           ],
           cta: { label: "Reactivate my account", url: renewUrl() },
@@ -128,7 +129,7 @@ export function trialEndedEmail({ fullName, locale }: { fullName: string } & L) 
       title: "Votre essai est terminé",
       paragraphs: [
         greeting(fullName),
-        "Votre essai gratuit est arrivé à son terme. Votre compte passe en lecture seule : vous pouvez toujours consulter et télécharger vos documents signés. Rien n'est supprimé.",
+        "Votre essai gratuit est arrivé à son terme. Votre compte passe en accès gratuit : vous pouvez toujours consulter et télécharger vos documents. Rien n'est supprimé.",
         "Pour signer de nouveaux documents, choisissez un plan en quelques secondes.",
       ],
       cta: { label: "Réactiver mon compte", url: renewUrl() },
@@ -246,7 +247,7 @@ export function renewalReminderEmail({
           paragraphs: [
             greeting(fullName, locale),
             `Your ${planLabel} plan expires on ${endDate}. Renew it (${price}) to keep signing without interruption. The new period starts at the end of the current one: you don't lose a single day.`,
-            "After the due date, you still have 3 days to renew before your account becomes read-only.",
+            "After the due date, you still have 3 days to renew before signing is paused.",
           ],
           cta: { label: "Renew now", url: renewUrl() },
         },
@@ -267,7 +268,7 @@ export function renewalReminderEmail({
       paragraphs: [
         greeting(fullName),
         `Votre plan ${planLabel} arrive à échéance le ${endDate}. Renouvelez-le (${price}) pour continuer à signer sans interruption. La nouvelle période commencera à la fin de l'actuelle : vous ne perdez aucun jour.`,
-        "Après l'échéance, vous disposez encore de 3 jours pour renouveler avant le passage en lecture seule.",
+        "Après l'échéance, vous disposez encore de 3 jours pour renouveler avant la suspension de la signature.",
       ],
       cta: { label: "Renouveler maintenant", url: renewUrl() },
     }),
@@ -285,11 +286,11 @@ export function graceStartedEmail({
       subject: "Action required: renew your QuickSign subscription",
       ...renderEmail(
         {
-          preheader: `Access kept until ${graceEnd}, then read-only.`,
+          preheader: `Full access kept until ${graceEnd}.`,
           title: "Your subscription has expired",
           paragraphs: [
             greeting(fullName, locale),
-            `We haven't received the renewal payment yet. Your full access is kept until ${graceEnd}; after that, your account will become read-only (no data deleted).`,
+            `We haven't received the renewal payment yet. Your full access is kept until ${graceEnd}; after that, your account returns to free access (no data deleted).`,
           ],
           cta: { label: "Renew now", url: renewUrl() },
         },
@@ -299,11 +300,11 @@ export function graceStartedEmail({
   return {
     subject: "Action requise : renouvelez votre abonnement QuickSign",
     ...renderEmail({
-      preheader: `Accès maintenu jusqu'au ${graceEnd}, puis lecture seule.`,
+      preheader: `Accès complet maintenu jusqu'au ${graceEnd}.`,
       title: "Votre abonnement est arrivé à échéance",
       paragraphs: [
         greeting(fullName),
-        `Nous n'avons pas encore reçu le paiement de renouvellement. Votre accès complet est maintenu jusqu'au ${graceEnd} ; ensuite, votre compte passera en lecture seule (aucune donnée supprimée).`,
+        `Nous n'avons pas encore reçu le paiement de renouvellement. Votre accès complet est maintenu jusqu'au ${graceEnd} ; ensuite, votre compte repassera en accès gratuit (aucune donnée supprimée).`,
       ],
       cta: { label: "Renouveler maintenant", url: renewUrl() },
     }),
@@ -313,14 +314,14 @@ export function graceStartedEmail({
 export function subscriptionExpiredEmail({ fullName, locale }: { fullName: string } & L) {
   if (isEn(locale))
     return {
-      subject: "Your QuickSign account is read-only",
+      subject: "Your QuickSign subscription has ended",
       ...renderEmail(
         {
           preheader: "Your documents are kept. Reactivate your plan whenever you like.",
-          title: "Your account is read-only",
+          title: "Your subscription has ended",
           paragraphs: [
             greeting(fullName, locale),
-            "Your subscription has expired. You can still view and download your signed documents; signing, importing and the assistant are suspended.",
+            "Your subscription has expired and your account is back on free access. You can still view and download your documents; signing and export are paused.",
             "All your data is kept: reactivate your plan at any time to pick up where you left off.",
           ],
           cta: { label: "Reactivate my plan", url: renewUrl() },
@@ -329,13 +330,13 @@ export function subscriptionExpiredEmail({ fullName, locale }: { fullName: strin
       ),
     };
   return {
-    subject: "Votre compte QuickSign est en lecture seule",
+    subject: "Votre abonnement QuickSign est terminé",
     ...renderEmail({
       preheader: "Vos documents sont conservés. Réactivez votre plan quand vous voulez.",
-      title: "Votre compte est en lecture seule",
+      title: "Votre abonnement est terminé",
       paragraphs: [
         greeting(fullName),
-        "Votre abonnement a expiré. Vous pouvez toujours consulter et télécharger vos documents signés ; la signature, l'import et l'assistant sont suspendus.",
+        "Votre abonnement a expiré et votre compte repasse en accès gratuit. Vous pouvez toujours consulter et télécharger vos documents ; la signature et l'export sont suspendus.",
         "Toutes vos données sont conservées : réactivez votre plan à tout moment pour reprendre là où vous en étiez.",
       ],
       cta: { label: "Réactiver mon plan", url: renewUrl() },

@@ -116,7 +116,7 @@ describe("devis de paiement", () => {
     ).toMatchObject({ kind: "new", amount: 29 });
     expect(
       quoteCheckout(
-        sub({ state: "expired" }),
+        sub({ state: "free" }),
         { plan: "pro", cycle: "monthly", currency: "XAF" },
         prices,
         NOW,

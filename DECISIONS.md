@@ -260,6 +260,26 @@ Le Cameroun ne fait pas partie des pays où Paddle refuse de vendre. Les pays re
 
 Pays inconnu : tous les moyens configurés. Le client garde toujours la main sur la devise. Un passage au Pro au prorata reste dans la devise de l'abonnement en cours.
 
+**D112 — Accès gratuit limité à la place de l'essai de 6 jours.** Un essai complet de 6 jours laissait signer de vrais documents gratuitement, puis bloquait tout en lecture seule. Le nouveau parcours est : inscription → e-mail vérifié → accueil → accès gratuit → choix d'un plan → paiement → accès complet.
+
+L'accès gratuit (état `free`) comprend :
+
+- le tableau de bord et le profil ;
+- l'import d'**un** document (quota `documentsStored`) ;
+- l'éditeur en découverte : placer des champs, créer **une** signature, brouillon enregistré ;
+- 5 messages par jour à l'assistant.
+
+La signature finale, donc l'export du PDF signé, demande un abonnement. C'est vérifié côté serveur (`guard("sign")`) et par la RLS (`can_write`). Il en va de même pour les cachets, les demandes de signature, les modèles, la signature en lot et l'équipe. Une nouvelle fonctionnalité `edit` sépare la découverte (éditeur, signature en bibliothèque) de la signature (`sign`).
+
+L'état « lecture seule » disparaît : un abonnement échu, annulé ou un essai terminé repasse en accès gratuit. Les documents existants restent consultables et téléchargeables, rien n'est supprimé.
+
+Comptes existants :
+
+- les essais en cours sont honorés jusqu'à leur fin, puis passent en gratuit (tâche quotidienne) ;
+- les essais déjà terminés sont passés en gratuit par la migration.
+
+**D113 — Limites de l'accès gratuit dans plans_config.** Une ligne `plan = 'free'` (devise XAF, prix 0, jamais affichée) porte ses limites, comme les plans payants. On les modifie dans Supabase sans redéployer. Valeurs de repli dans le code : `FREE_LIMITS` (`lib/entitlements/plans.ts`). La RLS du brouillon de l'éditeur (`placed_fields`) n'exige plus d'abonnement, seulement la propriété du document. Les documents et les signatures sont créés par le serveur après la vérification des droits.
+
 ## Sécurité des données — référence (audit du 2 octobre 2026)
 
 Récapitulatif de chaque mesure, à citer à un client ou un partenaire. Chacune est vérifiée par un test automatique, indiqué entre crochets.

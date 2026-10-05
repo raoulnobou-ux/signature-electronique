@@ -113,6 +113,7 @@ Le schéma complet (tables, Row Level Security, buckets privés, trigger de cré
 
 ## Abonnements et paiements
 
+- **Accès gratuit avant paiement** : un document, l'éditeur en découverte, une signature, l'assistant (5 messages par jour). Signer et exporter demandent un abonnement. Limites dans `plans_config` (ligne `free`) ; détails dans [`docs/PAIEMENTS.md`](docs/PAIEMENTS.md#accès-avant-paiement).
 - Page `/app/abonnement` : plan actuel, usage, choix du plan (mensuel ou annuel ; FCFA, euro, dollar ou livre), récapitulatif exact (prorata), historique et reçus PDF.
 - Plusieurs prestataires derrière une même interface (`lib/billing/providers/`), activés par `PAYMENT_PROVIDERS`. Guide complet : [`docs/PAIEMENTS.md`](docs/PAIEMENTS.md).
   - **Carte bancaire → Paddle** (EUR, USD, GBP ; carte, PayPal, Apple Pay, Google Pay ; Paddle est revendeur officiel et gère la TVA) :
@@ -125,7 +126,7 @@ Le schéma complet (tables, Row Level Security, buckets privés, trigger de cré
 - Les moyens de paiement proposés dépendent du pays du visiteur. Les prix sont fixés par marché dans `plans_config`, sans conversion automatique.
 - Le retour client arrive sur `/api/billing/return` ; aucun plan n'est activé sans revérification de la transaction par l'API du prestataire.
 - Sans prestataire, `PAYMENTS_SANDBOX=true` active un paiement simulé (développement, tests e2e) ; jamais en production.
-- Tâche planifiée quotidienne : `/api/cron/billing` (rappels J-5/J-2/J, fin d'essai, grâce de 3 jours, lecture seule), déclarée dans `vercel.json`.
+- Tâche planifiée quotidienne : `/api/cron/billing` (rappels J-5/J-2/J, fin des anciens essais, grâce de 3 jours, retour à l'accès gratuit), déclarée dans `vercel.json`.
 - Les prix se modifient dans la table `plans_config` sans redéployer.
 
 ## Authentification

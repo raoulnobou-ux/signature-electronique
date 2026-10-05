@@ -26,7 +26,7 @@ export default async function SignaturesPage() {
       <Suspense>
         <SignaturesView
           assets={assets}
-          readOnly={ent.readOnly}
+          readOnly={!ent.features.edit}
           stampsAllowed={ent.features.stamps}
           limit={ent.limits?.signatureAssets ?? null}
           inTeam={Boolean(membership)}

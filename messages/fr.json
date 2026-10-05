@@ -2,7 +2,7 @@
   "common": {
     "appName": "QuickSign",
     "tagline": "Signez, faites signer, terminé. En 30 secondes.",
-    "startTrial": "Essayer gratuitement 6 jours",
+    "startTrial": "Créer un compte gratuit",
     "signIn": "Se connecter",
     "signUp": "Créer un compte",
     "signOut": "Se déconnecter",
@@ -69,7 +69,7 @@
       "titleStart": "Signez, faites signer, terminé.",
       "titleHighlight": "En 30 secondes.",
       "subtitle": "Fini l'impression, le scan et les allers-retours. Ouvrez votre Word ou PDF, apposez votre signature et le cachet de votre structure, puis envoyez un PDF signé et horodaté — même depuis votre téléphone.",
-      "ctaPrimary": "Essayer gratuitement 6 jours",
+      "ctaPrimary": "Commencer gratuitement",
       "ctaSecondary": "Voir comment ça marche",
       "reassurance1": "Sans carte bancaire",
       "reassurance2": "Paiement Mobile Money",
@@ -219,7 +219,7 @@
     "pricing": {
       "eyebrow": "Tarifs",
       "title": "Un prix juste, en FCFA ou en dollars.",
-      "subtitle": "Commencez par 6 jours d'essai avec toutes les fonctionnalités Pro. Sans carte bancaire.",
+      "subtitle": "Créez votre compte gratuitement et découvrez QuickSign avec un document. Abonnez-vous pour signer et exporter.",
       "monthly": "Mensuel",
       "yearly": "Annuel",
       "yearlyBadge": "2 mois offerts",
@@ -228,8 +228,8 @@
       "perYear": "/ an",
       "equivalentMonthly": "soit {amount} / mois",
       "popular": "Le plus choisi",
-      "cta": "Commencer l'essai gratuit",
-      "trialNote": "6 jours gratuits, puis {price}. Annulable à tout moment.",
+      "cta": "Commencer gratuitement",
+      "trialNote": "Compte gratuit pour découvrir, puis {price} pour signer. Annulable à tout moment.",
       "paymentMethods": "Paiement par MTN MoMo, Orange Money ou carte Visa / Mastercard.",
       "plans": {
         "essential": {
@@ -278,16 +278,16 @@
           "a": "QuickSign produit une signature électronique simple. Sa valeur de preuve repose sur la traçabilité : horodatage, empreinte numérique du document, journal d'audit et certificat de signature. Elle convient à la grande majorité des documents courants (contrats, attestations, courriers). Certains actes exigent une forme particulière (actes notariés, certains actes administratifs) : en cas de doute, vérifiez auprès d'un juriste."
         },
         {
-          "q": "Faut-il une carte bancaire pour l'essai gratuit ?",
-          "a": "Non. L'essai de 6 jours démarre dès votre inscription, sans carte ni paiement, avec toutes les fonctionnalités du plan Pro."
+          "q": "Faut-il une carte bancaire pour créer un compte ?",
+          "a": "Non. Le compte est gratuit et sans carte : vous découvrez l'application, importez un document et préparez votre signature. Un abonnement est nécessaire pour signer et exporter."
         },
         {
           "q": "Comment puis-je payer ?",
           "a": "Par MTN Mobile Money ou Orange Money (via pawaPay), ou par carte Visa / Mastercard (via Paddle), nos partenaires de paiement sécurisés. QuickSign ne voit ni ne stocke jamais vos informations de paiement."
         },
         {
-          "q": "Que se passe-t-il à la fin de l'essai ?",
-          "a": "Votre compte passe en lecture seule : vous pouvez toujours consulter et télécharger vos documents signés. Rien n'est supprimé. Choisissez un plan quand vous voulez pour signer à nouveau."
+          "q": "Que comprend l'accès gratuit ?",
+          "a": "Le tableau de bord, votre profil, l'éditeur avec un document importé et une signature, et quelques questions à l'assistant. La signature finale, l'export du PDF signé et les fonctions avancées demandent un abonnement. Si un abonnement prend fin, vos documents restent consultables et téléchargeables : rien n'est supprimé."
         },
         {
           "q": "Mes documents sont-ils en sécurité ?",
@@ -314,13 +314,13 @@
     "finalCta": {
       "title": "Votre prochain document signé dans 30 secondes.",
       "subtitle": "Rejoignez les structures qui ont dit adieu à l'imprimante et au scanner.",
-      "cta": "Essayer gratuitement 6 jours",
+      "cta": "Commencer gratuitement",
       "secondary": "Voir les tarifs"
     }
   },
   "pricingPage": {
     "metaTitle": "Tarifs",
-    "metaDescription": "Essentiel à 5 000 FCFA / mois, Pro à 15 000 FCFA / mois. 6 jours d'essai gratuit, paiement Mobile Money ou carte.",
+    "metaDescription": "Prix par pays en FCFA, euros, dollars ou livres. Compte gratuit pour découvrir, paiement par carte ou Mobile Money.",
     "compareTitle": "Comparer les plans",
     "feature": "Fonctionnalité",
     "included": "Inclus",
@@ -389,7 +389,7 @@
     "side": {
       "title": "La signature électronique qui vous fait gagner des heures.",
       "points": [
-        "6 jours d'essai, toutes les fonctionnalités Pro",
+        "Compte gratuit, sans carte bancaire",
         "Aucune carte bancaire demandée",
         "Vos documents restent privés et chiffrés"
       ],
@@ -440,7 +440,7 @@
     "signUp": {
       "metaTitle": "Créer un compte",
       "title": "Créez votre compte",
-      "subtitle": "6 jours gratuits, sans carte bancaire.",
+      "subtitle": "Gratuit, sans carte bancaire.",
       "steps": ["Compte", "Profil", "Confirmation"],
       "profileTitle": "Parlez-nous de votre structure",
       "profileSubtitle": "Facultatif — vous pourrez compléter plus tard.",
@@ -450,7 +450,7 @@
       "haveAccount": "Déjà un compte ?",
       "emailTaken": "Un compte existe déjà avec cette adresse. Connectez-vous ou réinitialisez votre mot de passe.",
       "checkEmailTitle": "Vérifiez votre boîte e-mail",
-      "checkEmailBody": "Nous avons envoyé un lien de confirmation à <email></email>. Cliquez dessus pour activer votre compte et démarrer vos 6 jours d'essai.",
+      "checkEmailBody": "Nous avons envoyé un lien de confirmation à <email></email>. Cliquez dessus pour activer votre compte.",
       "checkEmailTip": "Rien reçu ? Regardez dans les courriers indésirables, ou renvoyez l'e-mail.",
       "resend": "Renvoyer l'e-mail",
       "resent": "E-mail renvoyé.",
@@ -536,11 +536,11 @@
       "choosePlan": "Choisir un plan",
       "endingSoon": "Votre essai se termine {when}. Choisissez un plan pour continuer à signer sans interruption.",
       "graceTitle": "Paiement en attente",
-      "grace": "Votre abonnement a expiré le {date}. Renouvelez avant le {graceEnd} pour ne pas passer en lecture seule.",
+      "grace": "Votre abonnement a expiré le {date}. Renouvelez avant le {graceEnd} pour continuer à signer.",
       "renew": "Renouveler",
-      "expiredTitle": "Compte en lecture seule",
-      "expired": "Vous pouvez consulter et télécharger vos documents. Choisissez un plan pour signer à nouveau — rien n'a été supprimé.",
-      "upgrade": "Choisir un plan"
+      "upgrade": "Choisir un plan",
+      "freeTitle": "Accès gratuit",
+      "free": "Découvrez QuickSign avec un document. Abonnez-vous pour signer, exporter et débloquer toutes les fonctions. Vos documents ne sont jamais supprimés."
     },
     "greeting": {
       "morning": "Bonjour",
@@ -578,7 +578,7 @@
       "metaTitle": "Bienvenue",
       "title": "Bienvenue, {name} !",
       "titleNoName": "Bienvenue sur QuickSign !",
-      "subtitle": "Votre essai Pro de 6 jours est actif. Voici comment signer votre premier document en moins d'une minute.",
+      "subtitle": "Votre compte est prêt. Importez un document et préparez votre signature : un abonnement vous permettra de signer et d'exporter.",
       "steps": {
         "signature": {
           "title": "Créez votre signature",
@@ -676,7 +676,7 @@
         "themeDark": "Sombre",
         "themeLight": "Clair",
         "notifications": "Notifications par e-mail",
-        "notificationsBody": "Rappels d'essai et d'abonnement, activité de vos demandes de signature."
+        "notificationsBody": "Rappels d'abonnement, activité de vos demandes de signature."
       },
       "danger": {
         "exportTitle": "Exporter mes données",
@@ -699,13 +699,14 @@
       "plans": {
         "trial": "Essai Pro",
         "essential": "Essentiel",
-        "pro": "Pro"
+        "pro": "Pro",
+        "free": "Gratuit"
       },
       "status": {
         "trial": "Essai en cours",
         "active": "Actif",
         "grace": "Paiement en attente",
-        "expired": "Expiré"
+        "free": "Accès gratuit"
       },
       "trialEnds": "Fin de l'essai : {date}",
       "ends": "Se termine le : {date}",
@@ -780,7 +781,7 @@
         "title": "Gérer l'abonnement",
         "cancel": "Annuler l'abonnement",
         "cancelTitle": "Annuler votre abonnement ?",
-        "cancelBody": "Vous gardez l'accès complet jusqu'au {date}. Ensuite, votre compte passera en lecture seule : vos documents restent consultables et téléchargeables.",
+        "cancelBody": "Vous gardez l'accès complet jusqu'au {date}. Ensuite, votre compte repasse en accès gratuit : vos documents restent consultables et téléchargeables.",
         "cancelConfirm": "Confirmer l'annulation",
         "keep": "Garder mon abonnement",
         "resume": "Reprendre l'abonnement",
@@ -836,7 +837,9 @@
         "back": "Retour à l'abonnement",
         "notFound": "Ce paiement est introuvable ou déjà traité.",
         "notConfigured": "Le paiement par carte n'est pas encore disponible."
-      }
+      },
+      "freeBody": "Un document, l'éditeur et l'assistant pour découvrir. Choisissez un plan pour signer et exporter.",
+      "documentsStored": "Documents importés"
     }
   },
   "documents": {
@@ -951,7 +954,7 @@
         "conversion_failed": "La conversion de ce document Word a échoué. Essayez de l'enregistrer en PDF depuis Word.",
         "conversion_unavailable": "La conversion Word est momentanément indisponible. Importez un PDF en attendant.",
         "storage_full": "Espace de stockage plein. Libérez de la place ou passez au plan supérieur.",
-        "read_only": "Votre compte est en lecture seule. Choisissez un plan pour importer de nouveaux documents.",
+        "read_only": "Choisissez un plan pour importer des documents.",
         "feature_not_in_plan": "Cette fonctionnalité n'est pas incluse dans votre plan.",
         "email_unverified": "Confirmez d'abord votre adresse e-mail.",
         "unauthenticated": "Votre session a expiré. Reconnectez-vous.",
@@ -961,7 +964,8 @@
         "timeout": "Le téléchargement a pris trop de temps.",
         "rate_limited": "Trop d'imports en peu de temps. Réessayez plus tard.",
         "network": "Connexion interrompue. Vérifiez votre réseau et réessayez.",
-        "generic": "L'import a échoué. Réessayez."
+        "generic": "L'import a échoué. Réessayez.",
+        "quota_exceeded": "L'accès gratuit comprend un document. Abonnez-vous pour en importer d'autres."
       }
     },
     "scanner": {
@@ -1225,12 +1229,13 @@
     },
     "errors": {
       "no_fields": "Ajoutez au moins une signature ou un élément.",
-      "read_only": "Votre compte est en lecture seule. Choisissez un plan pour signer.",
+      "read_only": "La signature et l'export demandent un abonnement. Choisissez un plan pour signer ce document.",
       "quota_exceeded": "Vous avez atteint votre quota de documents signés ce mois-ci. Passez au plan Pro pour signer sans limite.",
       "feature_not_in_plan": "Le cachet d'entreprise est inclus dans le plan Pro.",
       "email_unverified": "Confirmez votre adresse e-mail avant de signer.",
       "asset_not_found": "Une des images utilisées n'existe plus. Remplacez-la.",
-      "generic": "La signature a échoué. Réessayez."
+      "generic": "La signature a échoué. Réessayez.",
+      "choosePlan": "Choisir un plan"
     },
     "success": {
       "title": "Document signé !",
@@ -1330,7 +1335,7 @@
         "feature_not_in_plan": "Les demandes de signature sont incluses dans le plan Pro.",
         "already_pending": "Une demande est déjà en cours pour ce document.",
         "not_found": "Document introuvable.",
-        "read_only": "Votre compte est en lecture seule.",
+        "read_only": "Les demandes de signature demandent un abonnement.",
         "generic": "L'envoi a échoué. Réessayez.",
         "missingTemplate": "Chaque rôle a besoin d'au moins une zone de signature ou de paraphe."
       },
@@ -1714,7 +1719,7 @@
       "quota": "Vous avez utilisé vos 20 messages du jour (plan Essentiel). Revenez demain, ou passez au Pro pour un usage illimité.",
       "rate_limited": "Trop de messages en peu de temps. Patientez une minute.",
       "refusal": "Je ne peux pas répondre à cette demande.",
-      "read_only": "Votre compte est en lecture seule : l'assistant est suspendu. Réactivez un plan pour l'utiliser.",
+      "read_only": "L'assistant demande un abonnement. Choisissez un plan pour l'utiliser.",
       "feature_not_in_plan": "Cette fonction de l'assistant est incluse dans le plan Pro.",
       "invalid": "Message invalide.",
       "provider_auth": "L'assistant est momentanément indisponible. Notre équipe a été prévenue : réessayez un peu plus tard.",

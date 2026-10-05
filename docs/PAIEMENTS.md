@@ -74,3 +74,36 @@ Prix par marché, sans conversion automatique :
 ## Ajouter un pays au Mobile Money
 
 `PAWAPAY_COUNTRIES` (codes alpha-3), ou l'activer sur le compte pawaPay (lu par `GET /v2/active-conf`). Les pays connus sont dans `lib/billing/cfa.ts`.
+
+## Accès avant paiement
+
+Parcours : inscription → e-mail vérifié → accueil → **accès gratuit** → choix d'un plan → paiement → accès complet.
+
+|                                                     | Accès gratuit     | Essentiel | Pro            |
+| --------------------------------------------------- | ----------------- | --------- | -------------- |
+| Tableau de bord, profil                             | oui               | oui       | oui            |
+| Documents importés                                  | 1                 | illimité  | illimité       |
+| Éditeur (placer, créer sa signature)                | oui (1 signature) | oui (5)   | oui (illimité) |
+| Signature finale, export du PDF signé               | non               | 50 / mois | illimité       |
+| Assistant                                           | 5 / jour          | 20 / jour | illimité       |
+| Cachets, demandes à plusieurs, modèles, lot, équipe | non               | non       | oui            |
+
+Les droits sont calculés par `getEntitlements` (`lib/entitlements/index.ts`) et vérifiés côté serveur par `guard(fonction, quota)` avant chaque action. L'interface ne fait qu'afficher ce que le serveur autorise.
+
+## Modifier les limites
+
+Supabase → Table Editor → `plans_config`, colonne `limits` (JSON) :
+
+- ligne `free` / `XAF` : l'accès gratuit ;
+- lignes `essential` / `XAF` et `pro` / `XAF` : les plans payants.
+
+| Clé                 | Signification                                                         |
+| ------------------- | --------------------------------------------------------------------- |
+| `documentsStored`   | documents conservés hors corbeille (`null` = illimité)                |
+| `documentsPerMonth` | documents signés par mois (`null` = illimité, `0` = signature fermée) |
+| `signatureAssets`   | signatures et paraphes en bibliothèque                                |
+| `aiMessagesPerDay`  | messages à l'assistant par jour                                       |
+| `storageBytes`      | espace de stockage, en octets                                         |
+| `teamMembers`       | places dans l'équipe                                                  |
+
+Les changements s'appliquent à la requête suivante, sans redéploiement. Les valeurs de repli (`DEFAULT_LIMITS`, `FREE_LIMITS`) ne servent que si la base est injoignable.

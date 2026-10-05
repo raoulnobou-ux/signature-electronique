@@ -178,7 +178,7 @@ test("équipe : création, invitation, adhésion et plan Pro partagé", async ({
   const context = await browser.newContext();
   const memberPage = await context.newPage();
   await signInAs(memberPage, member.email);
-  await expect(memberPage.getByText("Lecture seule").first()).toBeVisible();
+  await expect(memberPage.getByText("Accès gratuit").first()).toBeVisible();
   await memberPage.goto(`/invitation/${token}`);
   await memberPage.getByRole("button", { name: "Rejoindre l'équipe" }).click();
   await expect(memberPage).toHaveURL(/\/app\/equipe$/);
@@ -187,7 +187,7 @@ test("équipe : création, invitation, adhésion et plan Pro partagé", async ({
   await expect(
     memberPage.getByText("Plan Pro inclus grâce à votre équipe « Cabinet Test »"),
   ).toBeVisible();
-  await expect(memberPage.getByText("Lecture seule")).toHaveCount(0);
+  await expect(memberPage.getByText("Accès gratuit")).toHaveCount(0);
   await context.close();
 
   await page.reload();

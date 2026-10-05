@@ -61,14 +61,14 @@ test("une fausse image (texte renommé en .png) est refusée", async ({ page }) 
 });
 
 test("export des données et suppression du compte", async ({ page }) => {
-  const user = await createConfirmedUser("suppr");
+  const user = await createConfirmedUser("suppr", undefined, "free");
   await signInAs(page, user.email);
 
   const response = await page.request.get("/api/account/export");
   expect(response.status()).toBe(200);
   const body = await response.json();
   expect(body.account.email).toBe(user.email);
-  expect(body.subscription.plan).toBe("trial");
+  expect(body.subscription.plan).toBe("free");
 
   await page.goto("/app/parametres?onglet=zone-sensible");
   await page.getByRole("button", { name: "Supprimer mon compte" }).click();
@@ -82,18 +82,18 @@ test("export des données et suppression du compte", async ({ page }) => {
   expect(data.user).toBeNull();
 });
 
-test("à la fin de l'essai, le compte passe en lecture seule", async ({ page }) => {
-  const user = await createConfirmedUser("expire");
+test("à la fin d'un ancien essai, le compte passe en accès gratuit", async ({ page }) => {
+  const user = await createConfirmedUser("expire", undefined, "trial");
   await adminClient()
     .from("subscriptions")
     .update({ current_period_end: new Date(Date.now() - 60_000).toISOString() })
     .eq("user_id", user.id);
 
   await signInAs(page, user.email);
-  await expect(page.getByText("Compte en lecture seule")).toBeVisible();
+  await expect(page.getByText("Accès gratuit —")).toBeVisible();
   await expect(page.getByRole("link", { name: "Choisir un plan" }).first()).toBeVisible();
 
-  // Garde-fou en base : impossible de créer un document, même en contournant l'interface.
+  // Garde-fou en base : aucune écriture réservée aux abonnés, même en contournant l'interface.
   const { error } = await adminClient().rpc("can_write", { p_user_id: user.id });
   expect(error).toBeNull();
   const { data: canWrite } = await adminClient().rpc("can_write", { p_user_id: user.id });
@@ -101,7 +101,7 @@ test("à la fin de l'essai, le compte passe en lecture seule", async ({ page }) 
 });
 
 test("la jauge d'essai et le bandeau de fin d'essai apparaissent à J-2", async ({ page }) => {
-  const user = await createConfirmedUser("jmoins2");
+  const user = await createConfirmedUser("jmoins2", undefined, "trial");
   await adminClient()
     .from("subscriptions")
     .update({ current_period_end: new Date(Date.now() + 36 * 3600_000).toISOString() })

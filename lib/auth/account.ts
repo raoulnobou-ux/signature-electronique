@@ -36,6 +36,7 @@ const EMPTY_USAGE: UsageSnapshot = {
   aiMessagesToday: 0,
   signatureAssetsCount: 0,
   storageBytesUsed: 0,
+  documentsStored: 0,
 };
 
 function toUsage(value: unknown): UsageSnapshot {
@@ -46,6 +47,7 @@ function toUsage(value: unknown): UsageSnapshot {
     aiMessagesToday: n(v.aiMessagesToday),
     signatureAssetsCount: n(v.signatureAssetsCount),
     storageBytesUsed: n(v.storageBytesUsed),
+    documentsStored: n(v.documentsStored),
   };
 }
 
@@ -79,9 +81,11 @@ export const getCurrentAccount = cache(async (): Promise<Account | null> => {
   }
 
   const sub = subscriptionRes.data;
-  const limits: Partial<Record<PaidPlan, PlanLimits>> = {};
+  // Limites et quotas de chaque plan, et de l'accès gratuit (ligne « free »), dans plans_config.
+  const limits: Partial<Record<PaidPlan | "free", PlanLimits>> = {};
   for (const row of limitsRes.data ?? []) {
-    if (isPaidPlan(row.plan)) limits[row.plan] = row.limits as unknown as PlanLimits;
+    if (isPaidPlan(row.plan) || row.plan === "free")
+      limits[row.plan] = row.limits as unknown as PlanLimits;
   }
   const usage = usageRes.error ? EMPTY_USAGE : toUsage(usageRes.data);
 

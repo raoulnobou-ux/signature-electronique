@@ -223,6 +223,7 @@ function UploadRow({ item, onRetry }: { item: UploadItem; onRetry: () => void })
     "conversion_unavailable",
     "storage_full",
     "read_only",
+    "quota_exceeded",
     "feature_not_in_plan",
     "email_unverified",
     "unauthenticated",

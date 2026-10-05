@@ -93,7 +93,7 @@ export async function getCheckoutQuote(
   const end = new Date(ctx.subscription.current_period_end);
   const startsAt =
     quote.kind !== "upgrade" &&
-    ctx.account.entitlements.state !== "expired" &&
+    ctx.account.entitlements.state !== "free" &&
     ctx.account.entitlements.state !== "grace" &&
     end > new Date()
       ? end
@@ -216,6 +216,7 @@ async function paidSubscriptionContext() {
   if (
     !ctx.subscription ||
     ctx.subscription.plan === "trial" ||
+    ctx.subscription.plan === "free" ||
     ctx.account.entitlements.state !== "active"
   ) {
     return { ok: false, reason: "not_allowed" } as Fail;

@@ -227,7 +227,7 @@ export function DesignSystemShowcase() {
             <Button disabled>Désactivé</Button>
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            <Button size="lg">Essayer gratuitement 6 jours</Button>
+            <Button size="lg">Commencer gratuitement</Button>
             <Button size="sm" variant="secondary">
               Petit
             </Button>

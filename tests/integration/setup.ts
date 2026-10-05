@@ -15,9 +15,14 @@ export const hasLocalDb = /127\.0\.0\.1|localhost/.test(url) && Boolean(serviceK
 export const admin = () =>
   createClient<Database>(url, serviceKey, { auth: { persistSession: false } });
 
-/** Crée un utilisateur confirmé et renvoie un client connecté en son nom (soumis à la RLS). */
+/**
+ * Crée un utilisateur confirmé et renvoie un client connecté en son nom (soumis à la RLS).
+ * Accès : « trial » (défaut, ancien essai de 6 jours encore en cours, fonctions Pro) ou
+ * « free » (accès gratuit d'une inscription).
+ */
 export async function userClient(
   label: string,
+  access: "trial" | "free" = "trial",
 ): Promise<{ id: string; client: SupabaseClient<Database> }> {
   const email = `${label}-${Date.now()}-${Math.floor(Math.random() * 1e5)}@example.com`;
   const password = "Integration-2026";
@@ -28,6 +33,19 @@ export async function userClient(
     user_metadata: { full_name: label },
   });
   if (error || !data.user) throw error;
+  if (access === "trial") {
+    const now = Date.now();
+    const { error: subError } = await admin()
+      .from("subscriptions")
+      .update({
+        plan: "trial",
+        status: "trialing",
+        current_period_start: new Date(now).toISOString(),
+        current_period_end: new Date(now + 6 * 86_400_000).toISOString(),
+      })
+      .eq("user_id", data.user.id);
+    if (subError) throw subError;
+  }
   const client = createClient<Database>(url, anonKey, { auth: { persistSession: false } });
   const { error: signInError } = await client.auth.signInWithPassword({ email, password });
   if (signInError) throw signInError;

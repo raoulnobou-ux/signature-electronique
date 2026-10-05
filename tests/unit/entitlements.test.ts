@@ -15,6 +15,7 @@ const noUsage: UsageSnapshot = {
   aiMessagesToday: 0,
   signatureAssetsCount: 0,
   storageBytesUsed: 0,
+  documentsStored: 0,
 };
 
 function sub(overrides: Partial<SubscriptionSnapshot>): SubscriptionSnapshot {
@@ -54,13 +55,12 @@ describe("essai gratuit", () => {
     ).toBe(5);
   });
 
-  it("passe en lecture seule dès la fin de l'essai, sans période de grâce", () => {
+  it("passe en accès gratuit dès la fin de l'essai, sans période de grâce", () => {
     const ent = getEntitlements({ subscription: sub({}), usage: noUsage, now: at(6) });
-    expect(ent.state).toBe("expired");
+    expect(ent.state).toBe("free");
     expect(ent.readOnly).toBe(true);
     expect(ent.effectivePlan).toBeNull();
     expect(ent.trialDaysRemaining).toBe(0);
-    expect(Object.values(ent.features).some(Boolean)).toBe(false);
     expect(checkAccess(ent, "sign")).toEqual({ ok: false, reason: "read_only" });
   });
 });
@@ -87,6 +87,7 @@ describe("abonnement Essentiel", () => {
         aiMessagesToday: 20,
         signatureAssetsCount: 2,
         storageBytesUsed: 0,
+        documentsStored: 0,
       },
       now: NOW,
     });
@@ -139,16 +140,14 @@ describe("fin de période et grâce", () => {
     expect(inGrace.graceEndsAt?.toISOString()).toBe(at(3).toISOString());
 
     const after = getEntitlements({ subscription: s, usage: noUsage, now: at(3) });
-    expect(after.state).toBe("expired");
+    expect(after.state).toBe("free");
     expect(after.readOnly).toBe(true);
   });
 
   it("applique la même grâce à un paiement échoué (past_due)", () => {
     const s = sub({ plan: "essential", status: "past_due", currentPeriodEnd: at(-1) });
     expect(getEntitlements({ subscription: s, usage: noUsage, now: NOW }).state).toBe("grace");
-    expect(getEntitlements({ subscription: s, usage: noUsage, now: at(2.5) }).state).toBe(
-      "expired",
-    );
+    expect(getEntitlements({ subscription: s, usage: noUsage, now: at(2.5) }).state).toBe("free");
   });
 
   it("garde l'accès jusqu'à la fin de la période payée après une annulation", () => {
@@ -162,7 +161,7 @@ describe("fin de période et grâce", () => {
     expect(before.state).toBe("active");
     expect(before.effectivePlan).toBe("pro");
     expect(before.cancelAtPeriodEnd).toBe(true);
-    expect(getEntitlements({ subscription: s, usage: noUsage, now: at(10) }).state).toBe("expired");
+    expect(getEntitlements({ subscription: s, usage: noUsage, now: at(10) }).state).toBe("free");
   });
 
   it("conserve le plan Pro jusqu'au terme en cas de rétrogradation programmée", () => {
@@ -177,18 +176,19 @@ describe("fin de période et grâce", () => {
     expect(ent.scheduledPlan).toBe("essential");
   });
 
-  it("un compte expiré n'a plus aucun quota mais n'est pas supprimé", () => {
+  it("un abonnement échu repasse en accès gratuit, sans rien supprimer", () => {
     const ent = getEntitlements({
       subscription: sub({ plan: "essential", status: "expired", currentPeriodEnd: at(-30) }),
-      usage: noUsage,
+      usage: { ...noUsage, documentsStored: 12 },
       now: NOW,
     });
+    expect(ent.state).toBe("free");
     expect(ent.readOnly).toBe(true);
-    expect(ent.remaining).toEqual({
-      documentsThisMonth: 0,
-      aiMessagesToday: 0,
-      signatureAssets: 0,
-      storageBytes: 0,
+    // Les documents existants restent ; aucun nouvel import au-delà du quota gratuit.
+    expect(ent.remaining.documentsStored).toBe(0);
+    expect(checkAccess(ent, "upload", { kind: "documentsStored" })).toEqual({
+      ok: false,
+      reason: "quota_exceeded",
     });
   });
 });
@@ -203,7 +203,7 @@ describe("annulation et changements de plan programmés (Phase 6)", () => {
     });
     expect(getEntitlements({ subscription: s, usage: noUsage, now: NOW }).state).toBe("active");
     const after = getEntitlements({ subscription: s, usage: noUsage, now: at(1.5) });
-    expect(after.state).toBe("expired");
+    expect(after.state).toBe("free");
     expect(after.graceEndsAt).toBeNull();
   });
 
@@ -237,5 +237,73 @@ describe("annulation et changements de plan programmés (Phase 6)", () => {
     expect(getEntitlements({ subscription: s, usage: noUsage, now: at(4) }).effectivePlan).toBe(
       "essential",
     );
+  });
+});
+
+describe("accès gratuit (sans abonnement)", () => {
+  const free = sub({ plan: "free", status: "free", currentPeriodEnd: at(-1) });
+
+  it("ouvre la découverte : un document, l'éditeur, une signature, l'assistant", () => {
+    const ent = getEntitlements({ subscription: free, usage: noUsage, now: NOW });
+    expect(ent.state).toBe("free");
+    expect(ent.effectivePlan).toBeNull();
+    expect(ent.trialDaysRemaining).toBeNull();
+    expect(checkAccess(ent, "upload", { kind: "documentsStored" })).toEqual({ ok: true });
+    expect(checkAccess(ent, "edit", { kind: "signatureAssets" })).toEqual({ ok: true });
+    expect(checkAccess(ent, "ai_assistant", { kind: "aiMessagesToday" })).toEqual({ ok: true });
+    expect(ent.limits.aiMessagesPerDay).toBe(5);
+  });
+
+  it("réserve la signature, l'export et les fonctions payantes aux abonnés", () => {
+    const ent = getEntitlements({ subscription: free, usage: noUsage, now: NOW });
+    for (const feature of ["sign", "stamps", "multi_signers", "templates", "team"] as const) {
+      expect(checkAccess(ent, feature)).toEqual({ ok: false, reason: "read_only" });
+    }
+  });
+
+  it("limite à un document et une signature", () => {
+    const ent = getEntitlements({
+      subscription: free,
+      usage: { ...noUsage, documentsStored: 1, signatureAssetsCount: 1 },
+      now: NOW,
+    });
+    expect(checkAccess(ent, "upload", { kind: "documentsStored" })).toEqual({
+      ok: false,
+      reason: "quota_exceeded",
+    });
+    expect(checkAccess(ent, "edit", { kind: "signatureAssets" })).toEqual({
+      ok: false,
+      reason: "quota_exceeded",
+    });
+  });
+
+  it("prend les limites de la ligne « free » de plans_config", () => {
+    const ent = getEntitlements({
+      subscription: free,
+      usage: { ...noUsage, documentsStored: 2 },
+      limits: {
+        free: {
+          documentsPerMonth: 0,
+          signatureAssets: 2,
+          storageBytes: 1,
+          aiMessagesPerDay: 0,
+          teamMembers: 1,
+          documentsStored: 3,
+        },
+      },
+      now: NOW,
+    });
+    expect(ent.remaining.documentsStored).toBe(1);
+    expect(ent.remaining.aiMessagesToday).toBe(0);
+  });
+
+  it("les abonnés importent sans limite de nombre de documents", () => {
+    const ent = getEntitlements({
+      subscription: sub({ plan: "essential", status: "active", currentPeriodEnd: at(20) }),
+      usage: { ...noUsage, documentsStored: 500 },
+      now: NOW,
+    });
+    expect(ent.remaining.documentsStored).toBeNull();
+    expect(checkAccess(ent, "sign")).toEqual({ ok: true });
   });
 });

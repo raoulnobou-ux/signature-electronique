@@ -53,7 +53,7 @@ export async function createSignatureAsset(
 
   // Les cachets sont une fonctionnalité Pro ; les signatures/paraphes comptent dans la limite du plan.
   const access = await guard(
-    meta.data.type === "stamp" ? "stamps" : "sign",
+    meta.data.type === "stamp" ? "stamps" : "edit",
     meta.data.type === "stamp" ? undefined : { kind: "signatureAssets" },
   );
   if (!access.ok)
@@ -284,7 +284,7 @@ export async function duplicateSignatureAsset(
   if (!found) return { ok: false };
   const { asset } = found;
   const access = await guard(
-    asset.type === "stamp" ? "stamps" : "sign",
+    asset.type === "stamp" ? "stamps" : "edit",
     asset.type === "stamp" ? undefined : { kind: "signatureAssets" },
   );
   if (!access.ok)

@@ -33,23 +33,25 @@ export default function TermsPage() {
         requise avant toute signature.
       </p>
 
-      <h2>3. Essai gratuit</h2>
+      <h2>3. Accès gratuit</h2>
       <p>
-        Toute nouvelle inscription bénéficie d&apos;un essai gratuit de 6 jours donnant accès aux
-        fonctionnalités du plan Pro, sans moyen de paiement. À l&apos;issue de l&apos;essai, le
-        compte passe en lecture seule : vous conservez l&apos;accès à vos documents et pouvez les
-        télécharger, mais ne pouvez plus signer, importer ni utiliser l&apos;assistant, jusqu&apos;à
-        la souscription d&apos;un plan. Aucune donnée n&apos;est supprimée du fait de la fin de
-        l&apos;essai.
+        L&apos;inscription est gratuite et ne demande aucun moyen de paiement. L&apos;accès gratuit
+        permet de découvrir le service : tableau de bord, profil, import d&apos;un document,
+        préparation de sa signature dans l&apos;éditeur et quelques questions à l&apos;assistant. La
+        signature finale, l&apos;export du document signé et les fonctions avancées demandent la
+        souscription d&apos;un plan. À la fin d&apos;un abonnement, le compte repasse en accès
+        gratuit : vous conservez l&apos;accès à vos documents et pouvez les télécharger. Aucune
+        donnée n&apos;est supprimée du fait de la fin d&apos;un abonnement.
       </p>
 
       <h2>4. Plans, prix et paiement</h2>
       <p>
         Les plans (Essentiel, Pro), leurs fonctionnalités, limites et prix sont présentés sur la
-        page <Link href="/tarifs">Tarifs</Link>. Les prix sont indiqués en francs CFA (XAF) ou en
-        dollars américains (USD), toutes taxes applicables précisées au moment du paiement. Le
-        paiement s&apos;effectue par Mobile Money ou carte bancaire via notre prestataire de
-        paiement ; QuickSign n&apos;a jamais accès à vos données de carte.
+        page <Link href="/tarifs">Tarifs</Link>. Les prix sont indiqués en francs CFA (XAF), en
+        euros (EUR), en dollars américains (USD) ou en livres sterling (GBP), toutes taxes
+        applicables précisées au moment du paiement. Le paiement s&apos;effectue par Mobile Money ou
+        carte bancaire via notre prestataire de paiement ; QuickSign n&apos;a jamais accès à vos
+        données de carte.
       </p>
       <ul>
         <li>

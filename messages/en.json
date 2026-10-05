@@ -2,7 +2,7 @@
   "common": {
     "appName": "QuickSign",
     "tagline": "Sign, get it signed, done. In 30 seconds.",
-    "startTrial": "Try free for 6 days",
+    "startTrial": "Create a free account",
     "signIn": "Sign in",
     "signUp": "Create an account",
     "signOut": "Sign out",
@@ -69,7 +69,7 @@
       "titleStart": "Sign, get it signed, done.",
       "titleHighlight": "In 30 seconds.",
       "subtitle": "No more printing, scanning and back-and-forth. Open your Word or PDF file, add your signature and your organization's stamp, then send a signed, timestamped PDF — even from your phone.",
-      "ctaPrimary": "Try free for 6 days",
+      "ctaPrimary": "Start for free",
       "ctaSecondary": "See how it works",
       "reassurance1": "No credit card",
       "reassurance2": "Mobile Money payment",
@@ -204,7 +204,7 @@
     "pricing": {
       "eyebrow": "Pricing",
       "title": "A fair price, in CFA francs or US dollars.",
-      "subtitle": "Start with a 6-day trial including every Pro feature. No credit card.",
+      "subtitle": "Create your account for free and try QuickSign with one document. Subscribe to sign and export.",
       "monthly": "Monthly",
       "yearly": "Yearly",
       "yearlyBadge": "2 months free",
@@ -213,8 +213,8 @@
       "perYear": "/ year",
       "equivalentMonthly": "i.e. {amount} / month",
       "popular": "Most popular",
-      "cta": "Start the free trial",
-      "trialNote": "6 days free, then {price}. Cancel anytime.",
+      "cta": "Start for free",
+      "trialNote": "Free account to explore, then {price} to sign. Cancel anytime.",
       "paymentMethods": "Pay with MTN MoMo, Orange Money or Visa / Mastercard.",
       "plans": {
         "essential": {
@@ -263,16 +263,16 @@
           "a": "QuickSign produces a simple electronic signature. Its evidential value relies on traceability: timestamp, digital fingerprint of the document, audit log and signature certificate. It is suitable for the vast majority of everyday documents (contracts, certificates, letters). Some deeds require a specific form (notarial deeds, certain administrative acts): if in doubt, check with a legal professional."
         },
         {
-          "q": "Do I need a credit card for the free trial?",
-          "a": "No. The 6-day trial starts as soon as you sign up, with no card or payment, and includes every Pro feature."
+          "q": "Do I need a credit card to create an account?",
+          "a": "No. The account is free and needs no card: you can explore the app, import a document and prepare your signature. A subscription is required to sign and export."
         },
         {
           "q": "How can I pay?",
           "a": "With MTN Mobile Money or Orange Money (through pawaPay), or a Visa / Mastercard card (through Paddle), our secure payment partners. QuickSign never sees or stores your payment details."
         },
         {
-          "q": "What happens when the trial ends?",
-          "a": "Your account becomes read-only: you can still view and download your signed documents. Nothing is deleted. Choose a plan whenever you like to sign again."
+          "q": "What does free access include?",
+          "a": "The dashboard, your profile, the editor with one imported document and one signature, and a few questions to the assistant. Final signing, signed PDF export and advanced features require a subscription. If a subscription ends, your documents stay viewable and downloadable: nothing is deleted."
         },
         {
           "q": "Are my documents safe?",
@@ -299,13 +299,13 @@
     "finalCta": {
       "title": "Your next document, signed in 30 seconds.",
       "subtitle": "Join the organizations that said goodbye to the printer and the scanner.",
-      "cta": "Try free for 6 days",
+      "cta": "Start for free",
       "secondary": "See pricing"
     }
   },
   "pricingPage": {
     "metaTitle": "Pricing",
-    "metaDescription": "Essential at 5,000 FCFA / month, Pro at 15,000 FCFA / month. 6-day free trial, Mobile Money or card payment.",
+    "metaDescription": "Local prices in CFA francs, euros, dollars or pounds. Free account to explore, card or Mobile Money payment.",
     "compareTitle": "Compare plans",
     "feature": "Feature",
     "included": "Included",
@@ -374,7 +374,7 @@
     "side": {
       "title": "The e-signature that saves you hours.",
       "points": [
-        "6-day trial, every Pro feature",
+        "Free account, no credit card",
         "No credit card required",
         "Your documents stay private and encrypted"
       ],
@@ -425,7 +425,7 @@
     "signUp": {
       "metaTitle": "Create an account",
       "title": "Create your account",
-      "subtitle": "6 days free, no credit card.",
+      "subtitle": "Free, no credit card.",
       "steps": ["Account", "Profile", "Confirmation"],
       "profileTitle": "Tell us about your organization",
       "profileSubtitle": "Optional — you can complete it later.",
@@ -435,7 +435,7 @@
       "haveAccount": "Already have an account?",
       "emailTaken": "An account already exists with this address. Sign in or reset your password.",
       "checkEmailTitle": "Check your inbox",
-      "checkEmailBody": "We sent a confirmation link to <email></email>. Click it to activate your account and start your 6-day trial.",
+      "checkEmailBody": "We sent a confirmation link to <email></email>. Click it to activate your account.",
       "checkEmailTip": "Nothing received? Check your spam folder, or resend the email.",
       "resend": "Resend email",
       "resent": "Email sent again.",
@@ -521,11 +521,11 @@
       "choosePlan": "Choose a plan",
       "endingSoon": "Your trial ends {when}. Choose a plan to keep signing without interruption.",
       "graceTitle": "Payment pending",
-      "grace": "Your subscription expired on {date}. Renew before {graceEnd} to avoid going read-only.",
+      "grace": "Your subscription expired on {date}. Renew before {graceEnd} to keep signing.",
       "renew": "Renew",
-      "expiredTitle": "Read-only account",
-      "expired": "You can view and download your documents. Choose a plan to sign again — nothing has been deleted.",
-      "upgrade": "Choose a plan"
+      "upgrade": "Choose a plan",
+      "freeTitle": "Free access",
+      "free": "Try QuickSign with one document. Subscribe to sign, export and unlock every feature. Your documents are never deleted."
     },
     "greeting": {
       "morning": "Good morning",
@@ -563,7 +563,7 @@
       "metaTitle": "Welcome",
       "title": "Welcome, {name}!",
       "titleNoName": "Welcome to QuickSign!",
-      "subtitle": "Your 6-day Pro trial is active. Here's how to sign your first document in less than a minute.",
+      "subtitle": "Your account is ready. Import a document and prepare your signature: a subscription lets you sign and export.",
       "steps": {
         "signature": {
           "title": "Create your signature",
@@ -661,7 +661,7 @@
         "themeDark": "Dark",
         "themeLight": "Light",
         "notifications": "Email notifications",
-        "notificationsBody": "Trial and subscription reminders, activity on your signature requests."
+        "notificationsBody": "Subscription reminders, activity on your signature requests."
       },
       "danger": {
         "exportTitle": "Export my data",
@@ -684,13 +684,14 @@
       "plans": {
         "trial": "Pro trial",
         "essential": "Essential",
-        "pro": "Pro"
+        "pro": "Pro",
+        "free": "Free"
       },
       "status": {
         "trial": "Trial in progress",
         "active": "Active",
         "grace": "Payment pending",
-        "expired": "Expired"
+        "free": "Free access"
       },
       "trialEnds": "Trial ends: {date}",
       "ends": "Ends on: {date}",
@@ -765,7 +766,7 @@
         "title": "Manage subscription",
         "cancel": "Cancel subscription",
         "cancelTitle": "Cancel your subscription?",
-        "cancelBody": "You keep full access until {date}. After that, your account becomes read-only: your documents remain viewable and downloadable.",
+        "cancelBody": "You keep full access until {date}. After that, your account returns to free access: your documents remain viewable and downloadable.",
         "cancelConfirm": "Confirm cancellation",
         "keep": "Keep my subscription",
         "resume": "Resume subscription",
@@ -821,7 +822,9 @@
         "back": "Back to subscription",
         "notFound": "This payment can't be found or was already processed.",
         "notConfigured": "Card payment isn't available yet."
-      }
+      },
+      "freeBody": "One document, the editor and the assistant to explore. Choose a plan to sign and export.",
+      "documentsStored": "Imported documents"
     }
   },
   "documents": {
@@ -936,7 +939,7 @@
         "conversion_failed": "Converting this Word document failed. Try saving it as PDF from Word.",
         "conversion_unavailable": "Word conversion is temporarily unavailable. Import a PDF in the meantime.",
         "storage_full": "Storage full. Free up some space or upgrade your plan.",
-        "read_only": "Your account is read-only. Choose a plan to import new documents.",
+        "read_only": "Choose a plan to import documents.",
         "feature_not_in_plan": "This feature isn't included in your plan.",
         "email_unverified": "Confirm your email address first.",
         "unauthenticated": "Your session has expired. Please sign in again.",
@@ -946,7 +949,8 @@
         "timeout": "The download took too long.",
         "rate_limited": "Too many imports in a short time. Try again later.",
         "network": "Connection lost. Check your network and try again.",
-        "generic": "The import failed. Please try again."
+        "generic": "The import failed. Please try again.",
+        "quota_exceeded": "Free access includes one document. Subscribe to import more."
       }
     },
     "scanner": {
@@ -1210,12 +1214,13 @@
     },
     "errors": {
       "no_fields": "Add at least one signature or element.",
-      "read_only": "Your account is read-only. Choose a plan to sign.",
+      "read_only": "Signing and export require a subscription. Choose a plan to sign this document.",
       "quota_exceeded": "You've reached your quota of signed documents this month. Upgrade to Pro to sign without limits.",
       "feature_not_in_plan": "The company stamp is included in the Pro plan.",
       "email_unverified": "Confirm your email address before signing.",
       "asset_not_found": "One of the images used no longer exists. Replace it.",
-      "generic": "Signing failed. Please try again."
+      "generic": "Signing failed. Please try again.",
+      "choosePlan": "Choose a plan"
     },
     "success": {
       "title": "Document signed!",
@@ -1315,7 +1320,7 @@
         "feature_not_in_plan": "Signature requests are included in the Pro plan.",
         "already_pending": "A request is already in progress for this document.",
         "not_found": "Document not found.",
-        "read_only": "Your account is read-only.",
+        "read_only": "Signature requests require a subscription.",
         "generic": "Sending failed. Please try again.",
         "missingTemplate": "Each role needs at least one signature or initials zone."
       },
@@ -1699,7 +1704,7 @@
       "quota": "You've used your 20 messages for today (Essential plan). Come back tomorrow, or upgrade to Pro for unlimited use.",
       "rate_limited": "Too many messages in a short time. Wait a minute.",
       "refusal": "I can't answer this request.",
-      "read_only": "Your account is read-only: the assistant is suspended. Reactivate a plan to use it.",
+      "read_only": "The assistant requires a subscription. Choose a plan to use it.",
       "feature_not_in_plan": "This assistant feature is included in the Pro plan.",
       "invalid": "Invalid message.",
       "provider_auth": "The assistant is temporarily unavailable. Our team has been notified — please try again a little later.",

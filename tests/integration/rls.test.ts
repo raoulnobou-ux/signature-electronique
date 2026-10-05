@@ -13,15 +13,18 @@ describe.skipIf(!hasLocalDb)("sécurité des données (RLS)", () => {
     [alice, bob] = await Promise.all([userClient("alice"), userClient("bob")]);
   });
 
-  it("l'inscription crée un profil et un essai de 6 jours", async () => {
-    const { data } = await alice.client.from("subscriptions").select("*").single();
-    expect(data?.plan).toBe("trial");
-    expect(data?.status).toBe("trialing");
-    const days =
-      (new Date(data!.current_period_end).getTime() -
-        new Date(data!.current_period_start).getTime()) /
-      86_400_000;
-    expect(Math.round(days)).toBe(6);
+  it("l'inscription crée un profil et un accès gratuit, sans essai ni droit d'écriture payant", async () => {
+    const fresh = await userClient("fresh", "free");
+    const { data } = await fresh.client.from("subscriptions").select("*").single();
+    expect(data?.plan).toBe("free");
+    expect(data?.status).toBe("free");
+    const { data: profile } = await fresh.client.from("profiles").select("id").single();
+    expect(profile?.id).toBe(fresh.id);
+    const { data: canWrite } = await admin().rpc("can_write", { p_user_id: fresh.id });
+    expect(canWrite).toBe(false);
+    // Le quota gratuit compte les documents conservés.
+    const { data: usage } = await fresh.client.rpc("my_usage_snapshot");
+    expect(usage).toMatchObject({ documentsStored: 0 });
   });
 
   it("un utilisateur ne voit jamais le profil ni l'abonnement d'un autre", async () => {

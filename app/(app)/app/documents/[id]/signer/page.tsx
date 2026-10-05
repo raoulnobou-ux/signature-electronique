@@ -21,8 +21,8 @@ export async function generateMetadata(
 export default async function SignerPage(props: PageProps<"/app/documents/[id]/signer">) {
   const [{ id }, account] = await Promise.all([props.params, requireAccount()]);
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
-  // Compte en lecture seule : retour à la fiche (le bandeau explique pourquoi).
-  if (account.entitlements.readOnly) redirect(`/app/documents/${id}`);
+  // Accès gratuit : l'éditeur reste ouvert (découverte) ; la finalisation demande un abonnement.
+  if (!account.entitlements.features.edit) redirect(`/app/documents/${id}`);
 
   const supabase = await createClient();
   const { data: doc } = await supabase

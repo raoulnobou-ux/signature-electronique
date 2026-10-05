@@ -39,7 +39,7 @@ test("essai → Essentiel payé par Mobile Money → reçu PDF, jours d'essai co
 }) => {
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
-  const user = await createConfirmedUser("paie-essai");
+  const user = await createConfirmedUser("paie-essai", undefined, "trial");
   await signInAs(page, user.email);
   const { data: before } = await adminClient()
     .from("subscriptions")
@@ -87,13 +87,13 @@ test("essai → Essentiel payé par Mobile Money → reçu PDF, jours d'essai co
   expect(errors).toEqual([]);
 });
 
-test("compte expiré en lecture seule → paiement Pro → accès rétabli immédiatement", async ({
+test("abonnement échu (accès gratuit) → paiement Pro → accès rétabli immédiatement", async ({
   page,
 }) => {
   const user = await createConfirmedUser("paie-expire");
   await setSubscription(user.id, { status: "expired", current_period_end: iso(-8 * DAY) });
   await signInAs(page, user.email);
-  await expect(page.getByText("Lecture seule").first()).toBeVisible();
+  await expect(page.getByText("Accès gratuit").first()).toBeVisible();
 
   await choosePlan(page, "Choisir Pro");
   await expect(page.getByTestId("checkout-amount")).toHaveText(/15\s000\sFCFA/);
@@ -101,7 +101,7 @@ test("compte expiré en lecture seule → paiement Pro → accès rétabli immé
   await payInSandbox(page, "Orange Money");
 
   await expect(page.getByText("Paiement confirmé")).toBeVisible();
-  await expect(page.getByText("Lecture seule")).toHaveCount(0);
+  await expect(page.getByText("Accès gratuit")).toHaveCount(0);
   const { data: sub } = await adminClient()
     .from("subscriptions")
     .select("plan, status")
@@ -210,7 +210,7 @@ test("sécurité : webhook non configuré, tâche planifiée protégée, faux re
 test("le récapitulatif demande le moyen de paiement : Mobile Money (FCFA) ou carte (euro, dollar, livre)", async ({
   page,
 }) => {
-  const user = await createConfirmedUser("paie-moyen");
+  const user = await createConfirmedUser("paie-moyen", undefined, "free");
   await signInAs(page, user.email);
   await choosePlan(page, "Choisir Essentiel");
   const dialog = page.getByRole("dialog");

@@ -41,7 +41,7 @@ export default async function DocumentPage(props: PageProps<"/app/documents/[id]
 
   return (
     <DocumentDetail
-      readOnly={account.entitlements.readOnly}
+      readOnly={!account.entitlements.features.edit}
       pendingRequestId={pendingRequest?.id ?? null}
       canRequest={account.entitlements.features.multi_signers && doc.owner_id === account.userId}
       pdfUrl={signed.signedUrl}

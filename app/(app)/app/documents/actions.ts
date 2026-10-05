@@ -44,7 +44,8 @@ export async function prepareUpload(
   if (!parsed.success) return { ok: false, error: "invalid" };
   if (parsed.data.size > MAX_UPLOAD_BYTES) return { ok: false, error: "too_large" };
 
-  const access = await guard("upload");
+  // Accès gratuit : un document conservé (quota documentsStored).
+  const access = await guard("upload", { kind: "documentsStored" });
   if (!access.ok) return { ok: false, error: access.reason };
   const { account } = access;
   if (account.entitlements.remaining.storageBytes < parsed.data.size)
@@ -77,7 +78,7 @@ export async function finalizeUpload(
 ): Promise<{ ok: true; documentId: string; kind: string } | Fail<DocumentActionError>> {
   const parsed = finalizeSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: "invalid" };
-  const access = await guard("upload");
+  const access = await guard("upload", { kind: "documentsStored" });
   if (!access.ok) return { ok: false, error: access.reason };
 
   const { documentId, fileName, folderId } = parsed.data;
@@ -110,7 +111,7 @@ export async function importFromUrl(
     .object({ url: z.string().trim().min(8).max(2048), folderId: uuid.nullish() })
     .safeParse(input);
   if (!parsed.success) return { ok: false, error: "invalid_url" };
-  const access = await guard("upload");
+  const access = await guard("upload", { kind: "documentsStored" });
   if (!access.ok) return { ok: false, error: access.reason };
   const userId = access.account.userId;
   if (!(await rateLimit("import-url", userId, 20, 3600)))

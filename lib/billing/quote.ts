@@ -81,7 +81,7 @@ export function quoteCheckout(
 
   const price = prices[target.plan][target.currency][target.cycle];
   return {
-    kind: sub.state === "expired" || sub.state === "trial" ? "new" : "renewal",
+    kind: sub.state === "free" || sub.state === "trial" ? "new" : "renewal",
     plan: target.plan,
     cycle: target.cycle,
     currency: target.currency,

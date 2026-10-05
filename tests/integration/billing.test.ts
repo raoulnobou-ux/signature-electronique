@@ -86,6 +86,22 @@ describe.skipIf(!hasLocalDb)("paiements et abonnements (base réelle)", () => {
     );
   });
 
+  it("accès gratuit → premier abonnement : actif immédiatement, un mois à partir de maintenant", async () => {
+    const { id } = await userClient("gratuit-paye", "free");
+    const pay = await payment(id, { plan: "pro", cycle: "monthly", kind: "new", amount: 15000 });
+    const result = await complete(pay);
+    expect(result.data![0]).toMatchObject({ applied: true });
+    const after = await subscription(id);
+    expect(after).toMatchObject({ plan: "pro", status: "active", scheduled_plan: null });
+    const end = new Date();
+    end.setMonth(end.getMonth() + 1);
+    expect(Math.abs(new Date(after.current_period_end).getTime() - end.getTime())).toBeLessThan(
+      3600_000,
+    );
+    const { data: canWrite } = await admin().rpc("can_write", { p_user_id: id });
+    expect(canWrite).toBe(true);
+  });
+
   it("compte expiré : réactivation immédiate, période démarrant maintenant", async () => {
     const { id } = await userClient("reactivation");
     await setSubscription(id, { status: "expired", current_period_end: iso(-10 * DAY) });
@@ -194,7 +210,7 @@ describe.skipIf(!hasLocalDb)("paiements et abonnements (base réelle)", () => {
     expect(rpc.error).not.toBeNull();
   });
 
-  it("tâche quotidienne : grâce, lecture seule, fin d'essai — sans doublon d'e-mail", async () => {
+  it("tâche quotidienne : grâce, fin d'abonnement, fin d'essai — sans doublon d'e-mail", async () => {
     const lapsed = await userClient("cron-grace");
     const overdue = await userClient("cron-expire");
     const trial = await userClient("cron-essai");
@@ -220,7 +236,8 @@ describe.skipIf(!hasLocalDb)("paiements et abonnements (base réelle)", () => {
     await runBillingCron();
     expect((await subscription(lapsed.id)).status).toBe("past_due");
     expect((await subscription(overdue.id)).status).toBe("expired");
-    expect((await subscription(trial.id)).status).toBe("expired");
+    // Essai terminé : accès gratuit (plus de « lecture seule »).
+    expect(await subscription(trial.id)).toMatchObject({ plan: "free", status: "free" });
     expect((await subscription(canceled.id)).status).toBe("expired");
 
     const notices = async () =>

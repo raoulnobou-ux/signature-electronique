@@ -299,6 +299,15 @@ export function Editor({
           t(
             `errors.${known.includes(response.error) ? response.error : "generic"}` as "errors.generic",
           ),
+          // Accès gratuit : la finalisation mène au choix d'un plan.
+          response.error === "read_only"
+            ? {
+                action: {
+                  label: t("errors.choosePlan"),
+                  onClick: () => window.location.assign("/app/abonnement#plans"),
+                },
+              }
+            : undefined,
         );
         return;
       }

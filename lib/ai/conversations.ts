@@ -157,7 +157,7 @@ export function contextBlock(
           : "Pro"
         : ent.effectivePlan === "essential"
           ? "Essentiel"
-          : "expiré (lecture seule)";
+          : "accès gratuit (sans abonnement : un document, éditeur en découverte, pas de signature finale ni d'export)";
   const first = account.profile.full_name.split(/\s+/)[0] || "";
   return `<contexte>Prénom : ${first || "inconnu"} · Plan : ${plan} · Écran : ${path.slice(0, 120)} · Messages à l'assistant restants aujourd'hui : ${remaining === null ? "illimité" : remaining} · Langue de l'interface : ${locale === "en" ? "anglais (réponds en anglais)" : "français"}</contexte>`;
 }

@@ -112,6 +112,7 @@ export default async function DocumentsPage(props: PageProps<"/app/documents">) 
           tags={tags ?? []}
           filters={filters}
           readOnly={account.entitlements.readOnly}
+          canImport={account.entitlements.features.upload}
         />
       </Suspense>
     </div>

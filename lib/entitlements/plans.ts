@@ -1,19 +1,23 @@
 /** Catalogue des plans : fonctionnalités et limites par défaut (repli si plans_config est indisponible). */
 
 export type PaidPlan = "essential" | "pro";
-export type PlanId = "trial" | PaidPlan;
-export type SubscriptionStatus = "trialing" | "active" | "past_due" | "canceled" | "expired";
+/** « free » : accès gratuit limité ; « trial » : ancien essai de 6 jours (comptes existants). */
+export type PlanId = "free" | "trial" | PaidPlan;
+export type SubscriptionStatus =
+  "free" | "trialing" | "active" | "past_due" | "canceled" | "expired";
 export type BillingCycle = "monthly" | "yearly";
 export type { Currency } from "@/config/currencies";
 import type { Currency } from "@/config/currencies";
 
+/** Durée de l'ancien essai (comptes créés avant l'accès gratuit, honorés jusqu'à leur fin). */
 export const TRIAL_DAYS = 6;
 /** Jours pendant lesquels l'accès reste ouvert après la fin d'une période payée non renouvelée. */
 export const GRACE_PERIOD_DAYS = 3;
 
 export const FEATURES = [
-  "sign", // signer ses documents
+  "sign", // signer et exporter ses documents
   "upload", // importer des documents
+  "edit", // ouvrir l'éditeur, placer des champs, créer sa signature (découverte)
   "ai_assistant", // assistant IA (aide à l'utilisation)
   "ai_advanced", // outils IA avancés (analyse, zones, rédaction…)
   "stamps", // cachets d'entreprise
@@ -35,6 +39,8 @@ export interface PlanLimits {
   storageBytes: number;
   aiMessagesPerDay: number | null;
   teamMembers: number;
+  /** Documents conservés (hors corbeille) ; null = illimité. */
+  documentsStored?: number | null;
 }
 
 const GB = 1024 ** 3;
@@ -56,8 +62,23 @@ export const DEFAULT_LIMITS: Record<PaidPlan, PlanLimits> = {
   },
 };
 
+/**
+ * Accès gratuit (sans abonnement) : découverte de l'application avec un document.
+ * Repli si la ligne « free » de plans_config est indisponible.
+ */
+export const FREE_LIMITS: PlanLimits = {
+  documentsPerMonth: 0,
+  signatureAssets: 1,
+  storageBytes: 20 * 1024 ** 2,
+  aiMessagesPerDay: 5,
+  teamMembers: 1,
+  documentsStored: 1,
+};
+
+export const FREE_FEATURES: readonly Feature[] = ["upload", "edit", "ai_assistant"];
+
 export const PLAN_FEATURES: Record<PaidPlan, readonly Feature[]> = {
-  essential: ["sign", "upload", "ai_assistant"],
+  essential: ["sign", "upload", "edit", "ai_assistant"],
   pro: FEATURES,
 };
 

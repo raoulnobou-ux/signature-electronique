@@ -17,16 +17,55 @@ export function adminClient() {
   );
 }
 
+/**
+ * Accès du compte de test :
+ * - pro (défaut) : abonnement Pro actif 30 jours, pour tester les fonctionnalités ;
+ * - free : accès gratuit d'un nouveau compte (inscription) ;
+ * - trial : ancien essai de 6 jours encore en cours (comptes créés avant l'accès gratuit).
+ */
+export type TestAccess = "pro" | "free" | "trial";
+
+const DAY = 86_400_000;
+
 /** Crée un compte confirmé (sans passer par l'e-mail) et renvoie ses identifiants. */
-export async function createConfirmedUser(prefix = "user", fullName = "Awa Nkeng") {
+export async function createConfirmedUser(
+  prefix = "user",
+  fullName = "Awa Nkeng",
+  access: TestAccess = "pro",
+) {
   const email = uniqueEmail(prefix);
-  const { data, error } = await adminClient().auth.admin.createUser({
+  const admin = adminClient();
+  const { data, error } = await admin.auth.admin.createUser({
     email,
     password: TEST_PASSWORD,
     email_confirm: true,
     user_metadata: { full_name: fullName, phone: "+237690123456" },
   });
   if (error || !data.user) throw error ?? new Error("création impossible");
+  if (access !== "free") {
+    const now = Date.now();
+    const { error: subError } = await admin
+      .from("subscriptions")
+      .update(
+        access === "pro"
+          ? {
+              plan: "pro",
+              status: "active",
+              billing_cycle: "monthly",
+              currency: "XAF",
+              current_period_start: new Date(now).toISOString(),
+              current_period_end: new Date(now + 30 * DAY).toISOString(),
+            }
+          : {
+              plan: "trial",
+              status: "trialing",
+              current_period_start: new Date(now).toISOString(),
+              current_period_end: new Date(now + 6 * DAY).toISOString(),
+            },
+      )
+      .eq("user_id", data.user.id);
+    if (subError) throw subError;
+  }
   return { email, id: data.user.id };
 }
 

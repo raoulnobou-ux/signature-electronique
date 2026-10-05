@@ -1,6 +1,8 @@
 import {
   DEFAULT_LIMITS,
   FEATURES,
+  FREE_FEATURES,
+  FREE_LIMITS,
   GRACE_PERIOD_DAYS,
   PLAN_FEATURES,
   type Feature,
@@ -30,28 +32,33 @@ export interface UsageSnapshot {
   aiMessagesToday: number;
   signatureAssetsCount: number;
   storageBytesUsed: number;
+  /** Documents conservés (hors corbeille). */
+  documentsStored: number;
 }
 
 /**
  * État d'accès du compte :
- * - trial   : essai gratuit en cours (fonctionnalités Pro)
+ * - free    : accès gratuit limité (découverte, un document) : sans abonnement, essai
+ *             terminé ou abonnement échu. Les documents existants restent consultables.
+ * - trial   : ancien essai de 6 jours encore en cours (comptes existants, fonctions Pro)
  * - active  : abonnement payé en cours
  * - grace   : période payée terminée, renouvellement attendu (accès maintenu 3 jours)
- * - expired : lecture seule (consultation et téléchargement uniquement)
  */
-export type AccessState = "trial" | "active" | "grace" | "expired";
+export type AccessState = "free" | "trial" | "active" | "grace";
 
 export interface Entitlements {
   state: AccessState;
-  /** Plan dont les droits s'appliquent maintenant (Pro pendant l'essai), null si expiré. */
+  /** Plan payant dont les droits s'appliquent maintenant (Pro pendant l'essai), null en gratuit. */
   effectivePlan: PaidPlan | null;
   /** Plan enregistré sur l'abonnement. */
   subscriptionPlan: PlanId;
+  /** Sans abonnement : signature, export et fonctions payantes fermés (accès gratuit). */
   readOnly: boolean;
   features: Record<Feature, boolean>;
-  limits: PlanLimits | null;
-  /** Quotas restants : null = illimité ; 0 quand le compte est en lecture seule. */
+  limits: PlanLimits;
+  /** Quotas restants : null = illimité. */
   remaining: {
+    documentsStored: number | null;
     documentsThisMonth: number | null;
     aiMessagesToday: number | null;
     signatureAssets: number | null;
@@ -70,8 +77,8 @@ export interface Entitlements {
 export interface GetEntitlementsInput {
   subscription: SubscriptionSnapshot;
   usage: UsageSnapshot;
-  /** Limites lues dans plans_config ; repli sur DEFAULT_LIMITS. */
-  limits?: Partial<Record<PaidPlan, PlanLimits>>;
+  /** Limites lues dans plans_config ; repli sur DEFAULT_LIMITS et FREE_LIMITS. */
+  limits?: Partial<Record<PaidPlan | "free", PlanLimits>>;
   now?: Date;
 }
 
@@ -82,19 +89,20 @@ function resolveState(sub: SubscriptionSnapshot, now: Date): AccessState {
 
   switch (sub.status) {
     case "trialing":
-      return t < end ? "trial" : "expired";
+      return t < end ? "trial" : "free";
     case "active":
     case "past_due":
       if (t < end) return "active";
-      // Annulé : l'accès s'arrête à la fin de la période payée, sans grâce.
-      if (sub.cancelAtPeriodEnd) return "expired";
+      // Annulé : l'accès payant s'arrête à la fin de la période payée, sans grâce.
+      if (sub.cancelAtPeriodEnd) return "free";
       // Renouvellement non encore reçu (Mobile Money sans prélèvement automatique).
-      return t < graceEnd ? "grace" : "expired";
+      return t < graceEnd ? "grace" : "free";
     case "canceled":
       // Annulation effective à la fin de la période déjà payée, sans période de grâce.
-      return t < end ? "active" : "expired";
+      return t < end ? "active" : "free";
+    case "free":
     case "expired":
-      return "expired";
+      return "free";
   }
 }
 
@@ -116,7 +124,7 @@ export function getEntitlements({
 
   let effectivePlan: PaidPlan | null = null;
   if (state === "trial") effectivePlan = "pro";
-  else if (state !== "expired") {
+  else if (state !== "free") {
     const switched =
       subscription.scheduledPlan !== null &&
       subscription.scheduledPlanAt != null &&
@@ -126,14 +134,16 @@ export function getEntitlements({
       ? subscription.scheduledPlan
       : subscription.plan === "trial"
         ? "pro"
-        : subscription.plan;
+        : subscription.plan === "free"
+          ? null
+          : subscription.plan;
   }
 
   const readOnly = effectivePlan === null;
-  const planLimits = effectivePlan
+  const planLimits: PlanLimits = effectivePlan
     ? (limits?.[effectivePlan] ?? DEFAULT_LIMITS[effectivePlan])
-    : null;
-  const allowed = new Set<Feature>(effectivePlan ? PLAN_FEATURES[effectivePlan] : []);
+    : { ...FREE_LIMITS, ...limits?.free };
+  const allowed = new Set<Feature>(effectivePlan ? PLAN_FEATURES[effectivePlan] : FREE_FEATURES);
   const features = Object.fromEntries(FEATURES.map((f) => [f, allowed.has(f)])) as Record<
     Feature,
     boolean
@@ -152,17 +162,13 @@ export function getEntitlements({
     readOnly,
     features,
     limits: planLimits,
-    remaining: planLimits
-      ? {
-          documentsThisMonth: remainingOf(
-            planLimits.documentsPerMonth,
-            usage.documentsSignedThisMonth,
-          ),
-          aiMessagesToday: remainingOf(planLimits.aiMessagesPerDay, usage.aiMessagesToday),
-          signatureAssets: remainingOf(planLimits.signatureAssets, usage.signatureAssetsCount),
-          storageBytes: Math.max(0, planLimits.storageBytes - usage.storageBytesUsed),
-        }
-      : { documentsThisMonth: 0, aiMessagesToday: 0, signatureAssets: 0, storageBytes: 0 },
+    remaining: {
+      documentsStored: remainingOf(planLimits.documentsStored ?? null, usage.documentsStored),
+      documentsThisMonth: remainingOf(planLimits.documentsPerMonth, usage.documentsSignedThisMonth),
+      aiMessagesToday: remainingOf(planLimits.aiMessagesPerDay, usage.aiMessagesToday),
+      signatureAssets: remainingOf(planLimits.signatureAssets, usage.signatureAssetsCount),
+      storageBytes: Math.max(0, planLimits.storageBytes - usage.storageBytesUsed),
+    },
     trialDaysRemaining,
     periodEndsAt: periodEnd,
     graceEndsAt:
@@ -173,24 +179,30 @@ export function getEntitlements({
   };
 }
 
-/** Motif de refus, traduit dans l'interface. */
+/**
+ * Motif de refus, traduit dans l'interface :
+ * - read_only : fonction réservée aux abonnés (compte en accès gratuit) ;
+ * - feature_not_in_plan : fonction d'un plan supérieur ;
+ * - quota_exceeded : limite du plan (ou de l'accès gratuit) atteinte.
+ */
 export type DenialReason = "read_only" | "feature_not_in_plan" | "quota_exceeded";
 
 export type AccessCheck = { ok: true } | { ok: false; reason: DenialReason };
 
-export type QuotaKind = "documentsThisMonth" | "aiMessagesToday" | "signatureAssets";
+export type QuotaKind =
+  "documentsStored" | "documentsThisMonth" | "aiMessagesToday" | "signatureAssets";
 
 /**
- * Vérifie qu'une action est permise : compte non expiré, fonctionnalité incluse
- * dans le plan, et quota disponible (pour `amount` unités).
+ * Vérifie qu'une action est permise : fonctionnalité incluse dans le plan (ou dans
+ * l'accès gratuit), et quota disponible (pour `amount` unités).
  */
 export function checkAccess(
   ent: Entitlements,
   feature: Feature,
   quota?: { kind: QuotaKind; amount?: number },
 ): AccessCheck {
-  if (ent.readOnly) return { ok: false, reason: "read_only" };
-  if (!ent.features[feature]) return { ok: false, reason: "feature_not_in_plan" };
+  if (!ent.features[feature])
+    return { ok: false, reason: ent.readOnly ? "read_only" : "feature_not_in_plan" };
   if (quota) {
     const left = ent.remaining[quota.kind];
     if (left !== null && left < (quota.amount ?? 1)) return { ok: false, reason: "quota_exceeded" };

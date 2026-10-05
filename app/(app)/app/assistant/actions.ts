@@ -61,7 +61,7 @@ export async function createDocumentFromDraft(input: {
     .object({ title: z.string().trim().min(1).max(160), body: z.string().min(1).max(30_000) })
     .safeParse(input);
   if (!parsed.success) return { ok: false };
-  const access = await guard("upload");
+  const access = await guard("upload", { kind: "documentsStored" });
   if (!access.ok) return { ok: false };
   const userId = access.account.userId;
   const bytes = await renderDraftPdf(parsed.data.title, parsed.data.body);

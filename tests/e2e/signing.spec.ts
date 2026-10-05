@@ -162,16 +162,49 @@ test("signer un document : placer, déplacer, dater, finaliser, télécharger", 
   expect(errors).toEqual([]);
 });
 
-test("un compte en lecture seule ne peut pas ouvrir l'éditeur ni signer", async ({ page }) => {
-  const user = await createConfirmedUser("lecture");
+test("accès gratuit : un document, l'éditeur s'ouvre, signer demande un abonnement", async ({
+  page,
+}) => {
+  const user = await createConfirmedUser("gratuit", undefined, "free");
   await signInAs(page, user.email);
   await importDocument(page, "annonce.pdf");
   const documentId = page.url().split("/").pop()!;
-  await adminClient()
-    .from("subscriptions")
-    .update({ current_period_end: new Date(Date.now() - 60_000).toISOString() })
-    .eq("user_id", user.id);
-  await page.goto(`/app/documents/${documentId}/signer`);
-  await expect(page).toHaveURL(new RegExp(`/app/documents/${documentId}$`));
-  await expect(page.locator(`a[href$="/${documentId}/signer"]`)).toHaveCount(0);
+
+  // Découverte : l'éditeur s'ouvre, la signature se crée et se place, le brouillon s'enregistre.
+  await page.locator(`a[href$="/${documentId}/signer"]`).click();
+  await expect(page).toHaveURL(/\/signer$/);
+  await expect(page.getByTestId("page-layer-0")).toBeVisible({ timeout: 20_000 });
+  await page.getByRole("button", { name: "Signature", exact: true }).first().click();
+  await drawSignature(page);
+  await page.getByRole("button", { name: "Enregistrer" }).click();
+  await expect(page.getByRole("dialog")).toBeHidden({ timeout: 10_000 });
+  const layer = page.getByTestId("page-layer-1");
+  const box = (await layer.boundingBox())!;
+  await layer.click({ position: { x: box.width * 0.7, y: box.height * 0.85 } });
+  await expect(layer.locator('[data-field-type="signature"]')).toBeVisible();
+  await expect(page.getByText("Brouillon enregistré")).toBeVisible({ timeout: 10_000 });
+
+  // La signature finale (et donc l'export) demande un abonnement : rien n'est signé.
+  await page.getByRole("button", { name: /Finaliser et signer/ }).click();
+  await page.getByRole("button", { name: "Signer le document" }).click();
+  await expect(page.getByText(/La signature et l'export demandent un abonnement/)).toBeVisible();
+  await expect(page.getByRole("button", { name: "Choisir un plan" })).toBeVisible();
+  const { data: doc } = await adminClient()
+    .from("documents")
+    .select("status, current_version")
+    .eq("id", documentId)
+    .single();
+  expect(doc).toEqual({ status: "draft", current_version: 0 });
+
+  // Un seul document en accès gratuit.
+  await page.goto("/app/documents?importer=1");
+  await page.getByTestId("upload-input").setInputFiles(fixture("annonce.pdf"));
+  await expect(page.getByText(/L'accès gratuit comprend un document/)).toBeVisible({
+    timeout: 30_000,
+  });
+  const { count } = await adminClient()
+    .from("documents")
+    .select("id", { count: "exact", head: true })
+    .eq("owner_id", user.id);
+  expect(count).toBe(1);
 });

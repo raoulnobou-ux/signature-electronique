@@ -109,6 +109,8 @@ type Props = {
   tags: TagItem[];
   filters: Filters;
   readOnly: boolean;
+  /** Import autorisé (abonnés, et un document en accès gratuit). */
+  canImport: boolean;
   /** Signature en lot (Pro). */
   bulkAllowed?: boolean;
 };
@@ -120,6 +122,7 @@ export function DocumentsView({
   tags,
   filters,
   readOnly,
+  canImport,
   bulkAllowed = false,
 }: Props) {
   const t = useTranslations("documents");
@@ -211,7 +214,7 @@ export function DocumentsView({
         title={filters.trash ? t("trash") : (currentFolder?.name ?? t("title"))}
         description={filters.trash ? t("trashHint") : t("subtitle")}
         actions={
-          !filters.trash && !readOnly ? (
+          !filters.trash && canImport ? (
             <Button data-tour="import" onClick={() => setParams({ importer: "1" })}>
               <Upload /> {t("import")}
             </Button>
@@ -427,7 +430,7 @@ export function DocumentsView({
                   title={t("empty.title")}
                   description={t("empty.body")}
                   action={
-                    !readOnly && (
+                    canImport && (
                       <Button onClick={() => setParams({ importer: "1" })}>
                         <Upload /> {t("import")}
                       </Button>

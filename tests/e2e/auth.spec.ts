@@ -5,7 +5,7 @@ const PASSWORD = "Ndole-Plantain-2026";
 
 test.describe.configure({ mode: "serial" });
 
-test("inscription en 2 étapes, confirmation par e-mail, essai de 6 jours", async ({ page }) => {
+test("inscription en 2 étapes, confirmation par e-mail, accès gratuit", async ({ page }) => {
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
   const email = uniqueEmail("awa");
@@ -55,7 +55,9 @@ test("inscription en 2 étapes, confirmation par e-mail, essai de 6 jours", asyn
   await page.getByRole("button", { name: "Explorer d'abord" }).click();
   await expect(page).toHaveURL(/\/app$/);
   await expect(page.getByRole("heading", { level: 1 })).toContainText("Awa");
-  await expect(page.getByText("6 jours restants").filter({ visible: true }).first()).toBeVisible();
+  // Accès gratuit limité : aucun essai, choix d'un plan proposé pour signer.
+  await expect(page.getByText("Accès gratuit —")).toBeVisible();
+  await expect(page.getByText(/jours? restants?/)).toHaveCount(0);
 
   expect(errors).toEqual([]);
 });
