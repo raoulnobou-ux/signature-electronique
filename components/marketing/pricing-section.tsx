@@ -1,13 +1,14 @@
 import { getTranslations } from "next-intl/server";
 import { ClientMessages } from "@/components/providers/client-messages";
-import { detectCurrency, getPrices } from "@/lib/pricing";
+import { detectCurrency, getPlanLimits, getPrices } from "@/lib/pricing";
 import { PricingPlans } from "./pricing-plans";
 import { Section, SectionHeading } from "./section";
 
 export async function PricingSection({ asPageHeader = false }: { asPageHeader?: boolean }) {
-  const [t, prices, currency] = await Promise.all([
+  const [t, prices, limits, currency] = await Promise.all([
     getTranslations("landing.pricing"),
     getPrices(),
+    getPlanLimits(),
     detectCurrency(),
   ]);
 
@@ -42,6 +43,7 @@ export async function PricingSection({ asPageHeader = false }: { asPageHeader?: 
         <ClientMessages namespaces={["landing.pricing"]}>
           <PricingPlans
             prices={prices}
+            limits={limits}
             defaultCurrency={currency}
             headingLevel={asPageHeader ? 2 : 3}
           />

@@ -8,8 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { CURRENCIES, CURRENCY_CODES } from "@/config/currencies";
 import { Button } from "@/components/ui/button";
 import type { BillingCycle, Currency, PaidPlan } from "@/lib/entitlements/plans";
-import { formatMoney } from "@/lib/format";
-import type { PriceTable } from "@/lib/pricing";
+import { formatBytes, formatMoney } from "@/lib/format";
+import type { LimitsTable, PriceTable } from "@/lib/pricing";
 import { cn } from "@/lib/utils";
 
 const PLANS: PaidPlan[] = ["essential", "pro"];
@@ -55,11 +55,14 @@ function Segmented<T extends string>({
 
 export function PricingPlans({
   prices,
+  limits,
   defaultCurrency,
   headingLevel = 3,
   checkout,
 }: {
   prices: PriceTable;
+  /** Limites lues dans plans_config : les chiffres affichés sont ceux appliqués. */
+  limits: LimitsTable;
   defaultCurrency: Currency;
   /** Niveau des titres de plans : 2 sur la page Tarifs (sous le h1), 3 dans la landing. */
   headingLevel?: 2 | 3;
@@ -77,6 +80,19 @@ export function PricingPlans({
   const locale = useLocale();
   const [cycle, setCycle] = useState<BillingCycle>("monthly");
   const [currency, setCurrency] = useState<Currency>(defaultCurrency);
+  /** Remplace {documents}, {signatures}, {storage}, {ai}, {team} par les limites du plan. */
+  const fill = (text: string, plan: keyof LimitsTable) => {
+    const l = limits[plan];
+    const values: Record<string, string> = {
+      documents: String(l.documentsPerMonth ?? t("unlimited")),
+      stored: String(l.documentsStored ?? t("unlimited")),
+      signatures: String(l.signatureAssets ?? t("unlimited")),
+      storage: formatBytes(l.storageBytes, locale),
+      ai: String(l.aiMessagesPerDay ?? t("unlimited")),
+      team: String(l.teamMembers),
+    };
+    return text.replace(/\{(\w+)\}/g, (match, key: string) => values[key] ?? match);
+  };
 
   return (
     <div className="space-y-10">
@@ -111,12 +127,29 @@ export function PricingPlans({
         />
       </div>
 
+      {!checkout && (
+        <div className="mx-auto flex max-w-4xl flex-col gap-4 rounded-3xl border border-dashed border-border p-6 sm:flex-row sm:items-center sm:p-7">
+          <div className="min-w-0 flex-1 space-y-1">
+            <PlanHeading className="font-display text-xl font-semibold">
+              {t("free.name")}{" "}
+              <span className="text-muted-foreground">· {formatMoney(0, currency, locale)}</span>
+            </PlanHeading>
+            <p className="text-sm text-muted-foreground">
+              {fill(t.raw("free.description"), "free")}
+            </p>
+          </div>
+          <Button asChild variant="secondary" size="lg" className="shrink-0">
+            <Link href="/inscription">{t("free.cta")}</Link>
+          </Button>
+        </div>
+      )}
+
       <ul className="mx-auto grid max-w-4xl gap-5 md:grid-cols-2">
         {PLANS.map((plan) => {
           const pro = plan === "pro";
           const price = prices[plan][currency][cycle];
           const monthlyEquivalent = prices[plan][currency].yearly / 12;
-          const features = t.raw(`plans.${plan}.features`) as string[];
+          const features = (t.raw(`plans.${plan}.features`) as string[]).map((f) => fill(f, plan));
           const priceLabel =
             formatMoney(price, currency, locale) +
             " " +
@@ -214,7 +247,10 @@ export function PricingPlans({
           );
         })}
       </ul>
-      <p className="text-center text-sm text-muted-foreground">{t("paymentMethods")}</p>
+      <div className="space-y-1 text-center text-sm text-muted-foreground">
+        <p>{t("paymentMethods")}</p>
+        <p className="text-xs">{t("priceNote")}</p>
+      </div>
     </div>
   );
 }

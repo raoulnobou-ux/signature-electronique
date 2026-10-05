@@ -18,7 +18,7 @@ import { toLocale } from "@/i18n/config";
 import { isPaidPlan, type BillingCycle, type Currency } from "@/lib/entitlements/plans";
 import { isCurrency } from "@/config/currencies";
 import { formatMoney } from "@/lib/format";
-import { detectCountry, detectCurrency, getPrices } from "@/lib/pricing";
+import { detectCountry, detectCurrency, getPlanLimits, getPrices } from "@/lib/pricing";
 import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 
@@ -105,6 +105,7 @@ export default async function BillingPage({ searchParams }: PageProps<"/app/abon
         <ClientMessages namespaces={["landing.pricing", "app"]}>
           <CheckoutPlans
             prices={prices}
+            limits={await getPlanLimits()}
             defaultCurrency={currency}
             options={options}
             countries={countries}

@@ -40,6 +40,31 @@ test("les tarifs basculent en annuel et dans chaque devise", async ({ page }) =>
   await expect(page.getByText("80 £").first()).toBeVisible();
 });
 
+test("tarifs : accès gratuit, comparatif en trois colonnes, prix sans conversion", async ({
+  page,
+}) => {
+  await page.goto("/tarifs");
+  // Carte « Gratuit » et mention des taxes calculées au paiement.
+  await expect(page.getByRole("heading", { name: /^Gratuit/ })).toBeVisible();
+  await expect(page.getByText(/1 document, l'éditeur, 1 signature et 5 questions/)).toBeVisible();
+  await expect(page.getByRole("link", { name: "Créer un compte gratuit" }).first()).toBeVisible();
+  await expect(page.getByText(/sans conversion automatique/)).toBeVisible();
+  // Chiffres des plans lus dans plans_config.
+  await expect(page.getByText("50 documents signés par mois")).toBeVisible();
+
+  const table = page.getByRole("table");
+  await expect(table.getByRole("columnheader")).toHaveText([
+    "Fonctionnalité",
+    "Gratuit",
+    "Essentiel",
+    "Pro",
+  ]);
+  const stored = table.getByRole("row", { name: /Documents conservés/ });
+  await expect(stored.getByRole("cell")).toHaveText(["1", "Illimité", "Illimité"]);
+  const storage = table.getByRole("row", { name: /Stockage/ });
+  await expect(storage.getByRole("cell")).toHaveText(["20 Mo", "1 Go", "20 Go"]);
+});
+
 test("le formulaire de contact valide puis envoie le message", async ({ page }) => {
   await page.goto("/contact");
   await page.getByRole("button", { name: "Envoyer le message" }).click();

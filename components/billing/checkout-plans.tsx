@@ -22,7 +22,7 @@ import type { Quote } from "@/lib/billing/quote";
 import type { AccessState } from "@/lib/entitlements";
 import type { BillingCycle, Currency, PaidPlan, PlanId } from "@/lib/entitlements/plans";
 import { formatMoney } from "@/lib/format";
-import type { PriceTable } from "@/lib/pricing";
+import type { LimitsTable, PriceTable } from "@/lib/pricing";
 import { cn } from "@/lib/utils";
 import { CFA_COUNTRIES } from "@/lib/billing/cfa";
 
@@ -36,6 +36,7 @@ type Selection = { plan: PaidPlan; cycle: BillingCycle; currency: Currency };
 /** Plans de l'espace Abonnement : devis exact (prorata) puis redirection vers le paiement. */
 export function CheckoutPlans({
   prices,
+  limits,
   defaultCurrency,
   options,
   countries,
@@ -44,6 +45,7 @@ export function CheckoutPlans({
   plan,
 }: {
   prices: PriceTable;
+  limits: LimitsTable;
   defaultCurrency: Currency;
   /** Moyens de paiement proposés (carte : EUR/USD/GBP ; Mobile Money : FCFA), selon le pays. */
   options: PaymentOption[];
@@ -133,6 +135,7 @@ export function CheckoutPlans({
     <>
       <PricingPlans
         prices={prices}
+        limits={limits}
         defaultCurrency={defaultCurrency}
         headingLevel={3}
         checkout={{ label: t("choose"), labelFor, disabled: !available, onSelect: select }}

@@ -59,7 +59,7 @@ export async function runMockTurn(input: {
     reply = "Voici un brouillon d'attestation. Relisez-le, puis créez le PDF en un clic.";
   } else if (/pro|essentiel|prix|plan/.test(q)) {
     reply =
-      "**Essentiel** (5 000 FCFA/mois) : signer vos propres documents, 50 par mois.\n\n**Pro** (15 000 FCFA/mois) : documents illimités, cachets, demandes de signature à plusieurs, certificat, modèles, équipe.";
+      "**Essentiel** (5 000 FCFA, 9 €, 10 $ ou 8 £ par mois) : signer vos propres documents, 50 par mois.\n\n**Pro** (15 000 FCFA, 25 €, 29 $ ou 22 £ par mois) : documents illimités, cachets, demandes de signature à plusieurs, certificat, modèles, équipe.";
   } else {
     reply =
       "Je suis QuickSign Copilot (mode démonstration). Je peux vous guider dans l'application, expliquer les plans et, avec le plan Pro, analyser vos documents.";

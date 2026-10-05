@@ -106,4 +106,4 @@ Supabase → Table Editor → `plans_config`, colonne `limits` (JSON) :
 | `storageBytes`      | espace de stockage, en octets                                         |
 | `teamMembers`       | places dans l'équipe                                                  |
 
-Les changements s'appliquent à la requête suivante, sans redéploiement. Les valeurs de repli (`DEFAULT_LIMITS`, `FREE_LIMITS`) ne servent que si la base est injoignable.
+Les changements s'appliquent à la requête suivante, sans redéploiement. La page Tarifs (cartes et comparatif) affiche ces mêmes valeurs, relues toutes les 5 minutes. Les valeurs de repli (`DEFAULT_LIMITS`, `FREE_LIMITS`) ne servent que si la base est injoignable.

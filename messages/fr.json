@@ -223,7 +223,7 @@
     },
     "pricing": {
       "eyebrow": "Tarifs",
-      "title": "Un prix juste, en FCFA ou en dollars.",
+      "title": "Un prix juste, dans votre devise.",
       "subtitle": "Créez votre compte gratuitement et découvrez QuickSign avec un document. Abonnez-vous pour signer et exporter.",
       "monthly": "Mensuel",
       "yearly": "Annuel",
@@ -235,7 +235,7 @@
       "popular": "Le plus choisi",
       "cta": "Commencer gratuitement",
       "trialNote": "Compte gratuit pour découvrir, puis {price} pour signer. Annulable à tout moment.",
-      "paymentMethods": "Paiement par MTN MoMo, Orange Money ou carte Visa / Mastercard.",
+      "paymentMethods": "Carte bancaire (Visa, Mastercard, PayPal, Apple Pay, Google Pay) partout ; Mobile Money (MTN, Orange…) en zone franc CFA.",
       "plans": {
         "essential": {
           "name": "Essentiel",
@@ -245,10 +245,10 @@
             "Signature dessinée, tapée ou importée",
             "Glisser-déposer et redimensionnement",
             "PDF signé et horodaté",
-            "5 signatures enregistrées",
-            "50 documents signés par mois",
-            "1 Go de stockage",
-            "Assistant IA : 20 messages par jour"
+            "{signatures} signatures enregistrées",
+            "{documents} documents signés par mois",
+            "{storage} de stockage",
+            "Assistant IA : {ai} messages par jour"
           ]
         },
         "pro": {
@@ -264,10 +264,17 @@
             "Envoi par WhatsApp et e-mail",
             "Signature en lot (20 documents d'un coup)",
             "Assistant IA avancé illimité",
-            "20 Go de stockage · équipe de 5 membres",
+            "{storage} de stockage · équipe de {team} membres",
             "Support prioritaire"
           ]
         }
+      },
+      "unlimited": "illimités",
+      "priceNote": "Prix fixés pour chaque marché, sans conversion automatique. Les taxes éventuelles (TVA) sont calculées au paiement selon votre pays.",
+      "free": {
+        "name": "Gratuit",
+        "description": "Pour découvrir : {stored} document, l'éditeur, {signatures} signature et {ai} questions par jour à l'assistant. Signer et exporter demandent un abonnement.",
+        "cta": "Créer un compte gratuit"
       }
     },
     "testimonials": {
@@ -345,7 +352,10 @@
       "whatsapp": "Envoi WhatsApp et e-mail",
       "bulk": "Signature en lot",
       "team": "Membres d'équipe",
-      "support": "Support prioritaire"
+      "support": "Support prioritaire",
+      "stored": "Documents conservés",
+      "editor": "Éditeur et brouillons",
+      "aiPerDay": "{count} / jour"
     }
   },
   "security": {

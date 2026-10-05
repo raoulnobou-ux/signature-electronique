@@ -223,7 +223,7 @@
     },
     "pricing": {
       "eyebrow": "Pricing",
-      "title": "A fair price, in CFA francs or US dollars.",
+      "title": "A fair price, in your currency.",
       "subtitle": "Create your account for free and try QuickSign with one document. Subscribe to sign and export.",
       "monthly": "Monthly",
       "yearly": "Yearly",
@@ -235,7 +235,7 @@
       "popular": "Most popular",
       "cta": "Start for free",
       "trialNote": "Free account to explore, then {price} to sign. Cancel anytime.",
-      "paymentMethods": "Pay with MTN MoMo, Orange Money or Visa / Mastercard.",
+      "paymentMethods": "Card (Visa, Mastercard, PayPal, Apple Pay, Google Pay) everywhere; Mobile Money (MTN, Orange…) in the CFA franc zone.",
       "plans": {
         "essential": {
           "name": "Essential",
@@ -245,10 +245,10 @@
             "Drawn, typed or uploaded signature",
             "Drag and drop, resize",
             "Signed, timestamped PDF",
-            "5 saved signatures",
-            "50 signed documents per month",
-            "1 GB of storage",
-            "AI assistant: 20 messages per day"
+            "{signatures} saved signatures",
+            "{documents} signed documents per month",
+            "{storage} of storage",
+            "AI assistant: {ai} messages per day"
           ]
         },
         "pro": {
@@ -264,10 +264,17 @@
             "Send via WhatsApp and email",
             "Bulk signing (20 documents at once)",
             "Unlimited advanced AI assistant",
-            "20 GB of storage · team of 5 members",
+            "{storage} of storage · team of {team} members",
             "Priority support"
           ]
         }
+      },
+      "unlimited": "unlimited",
+      "priceNote": "Prices set for each market, with no automatic conversion. Any applicable taxes (VAT) are calculated at checkout based on your country.",
+      "free": {
+        "name": "Free",
+        "description": "To explore: {stored} document, the editor, {signatures} signature and {ai} assistant questions per day. Signing and export require a subscription.",
+        "cta": "Create a free account"
       }
     },
     "testimonials": {
@@ -345,7 +352,10 @@
       "whatsapp": "Send via WhatsApp and email",
       "bulk": "Bulk signing",
       "team": "Team members",
-      "support": "Priority support"
+      "support": "Priority support",
+      "stored": "Stored documents",
+      "editor": "Editor and drafts",
+      "aiPerDay": "{count} / day"
     }
   },
   "security": {

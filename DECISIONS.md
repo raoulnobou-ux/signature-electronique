@@ -327,6 +327,17 @@ Le statut affiché est déduit du statut en base et de celui des signataires (`d
 
 La liste des demandes se filtre par statut, avec le nombre de demandes de chaque statut. Chaque signataire affiche aussi la date à laquelle il a vu le document. Les statuts en base sont inchangés, donc aucune migration.
 
+**D118 — Page Tarifs internationale et chiffres issus de plans_config.** La page Tarifs affiche :
+
+- l'accès gratuit (carte « Gratuit ») ;
+- les deux plans, dans la devise détectée et modifiable (FCFA, euro, dollar, livre) ;
+- un comparatif en trois colonnes (Gratuit, Essentiel, Pro).
+
+Les chiffres des cartes et du comparatif (documents, signatures, stockage, messages, équipe) viennent de `plans_config` via `getPlanLimits()`, comme ceux appliqués aux comptes : changer une limite en base change aussi la page, sans risque d'écart. Les noms des plans du comparatif sont traduits. Deux mentions accompagnent les prix :
+
+- les moyens de paiement : carte partout, Mobile Money en zone franc CFA ;
+- les prix sont fixés par marché sans conversion automatique, et les taxes éventuelles (TVA) sont calculées au paiement selon le pays (Paddle, revendeur officiel).
+
 ## Sécurité des données — référence (audit du 2 octobre 2026)
 
 Récapitulatif de chaque mesure, à citer à un client ou un partenaire. Chacune est vérifiée par un test automatique, indiqué entre crochets.

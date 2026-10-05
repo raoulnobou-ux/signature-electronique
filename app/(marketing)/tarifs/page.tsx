@@ -1,9 +1,11 @@
 import { Check, Minus } from "lucide-react";
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { Faq } from "@/components/marketing/faq";
 import { FinalCta } from "@/components/marketing/final-cta";
 import { PricingSection } from "@/components/marketing/pricing-section";
+import { formatBytes } from "@/lib/format";
+import { getPlanLimits } from "@/lib/pricing";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("pricingPage");
@@ -13,22 +15,65 @@ export async function generateMetadata(): Promise<Metadata> {
 type Cell = string | boolean;
 
 export default async function PricingPage() {
-  const t = await getTranslations("pricingPage");
+  const [t, tPlans, limits, locale] = await Promise.all([
+    getTranslations("pricingPage"),
+    getTranslations("landing.pricing"),
+    getPlanLimits(),
+    getLocale(),
+  ]);
   const r = (key: Parameters<typeof t>[0]) => t(key);
+  // Chiffres lus dans plans_config : ceux réellement appliqués aux comptes.
+  const count = (value: number | null | undefined) =>
+    value === null || value === undefined ? r("unlimited") : String(value);
+  const ai = (value: number | null) =>
+    value === null ? r("rows.aiPro") : t("rows.aiPerDay", { count: value });
+  const { free, essential, pro } = limits;
 
-  const rows: { label: string; essential: Cell; pro: Cell }[] = [
-    { label: r("rows.documents"), essential: "50", pro: r("unlimited") },
-    { label: r("rows.signatures"), essential: "5", pro: r("unlimited") },
-    { label: r("rows.storage"), essential: "1 Go", pro: "20 Go" },
-    { label: r("rows.ai"), essential: r("rows.aiEssential"), pro: r("rows.aiPro") },
-    { label: r("rows.stamps"), essential: false, pro: true },
-    { label: r("rows.multi"), essential: false, pro: true },
-    { label: r("rows.audit"), essential: false, pro: true },
-    { label: r("rows.templates"), essential: false, pro: true },
-    { label: r("rows.whatsapp"), essential: false, pro: true },
-    { label: r("rows.bulk"), essential: false, pro: true },
-    { label: r("rows.team"), essential: "1", pro: "5" },
-    { label: r("rows.support"), essential: false, pro: true },
+  const rows: { label: string; free: Cell; essential: Cell; pro: Cell }[] = [
+    {
+      label: r("rows.stored"),
+      free: count(free.documentsStored),
+      essential: count(essential.documentsStored),
+      pro: count(pro.documentsStored),
+    },
+    {
+      label: r("rows.documents"),
+      free: false,
+      essential: count(essential.documentsPerMonth),
+      pro: count(pro.documentsPerMonth),
+    },
+    { label: r("rows.editor"), free: true, essential: true, pro: true },
+    {
+      label: r("rows.signatures"),
+      free: count(free.signatureAssets),
+      essential: count(essential.signatureAssets),
+      pro: count(pro.signatureAssets),
+    },
+    {
+      label: r("rows.storage"),
+      free: formatBytes(free.storageBytes, locale),
+      essential: formatBytes(essential.storageBytes, locale),
+      pro: formatBytes(pro.storageBytes, locale),
+    },
+    {
+      label: r("rows.ai"),
+      free: ai(free.aiMessagesPerDay),
+      essential: ai(essential.aiMessagesPerDay),
+      pro: ai(pro.aiMessagesPerDay),
+    },
+    { label: r("rows.stamps"), free: false, essential: false, pro: true },
+    { label: r("rows.multi"), free: false, essential: false, pro: true },
+    { label: r("rows.audit"), free: false, essential: false, pro: true },
+    { label: r("rows.templates"), free: false, essential: false, pro: true },
+    { label: r("rows.whatsapp"), free: false, essential: false, pro: true },
+    { label: r("rows.bulk"), free: false, essential: false, pro: true },
+    {
+      label: r("rows.team"),
+      free: String(free.teamMembers),
+      essential: String(essential.teamMembers),
+      pro: String(pro.teamMembers),
+    },
+    { label: r("rows.support"), free: false, essential: false, pro: true },
   ];
 
   const renderCell = (value: Cell) =>
@@ -60,27 +105,45 @@ export default async function PricingPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border">
-                <th scope="col" className="p-4 text-left font-medium text-muted-foreground sm:px-6">
+                <th
+                  scope="col"
+                  className="p-3 text-left font-medium text-muted-foreground sm:px-6 sm:py-4"
+                >
                   {t("feature")}
                 </th>
-                <th scope="col" className="w-28 p-4 text-center font-display font-semibold sm:w-40">
-                  Essentiel
+                <th
+                  scope="col"
+                  className="w-20 p-2 text-center font-display font-semibold sm:w-32 sm:p-4"
+                >
+                  {tPlans("free.name")}
                 </th>
-                <th scope="col" className="w-28 p-4 text-center font-display font-semibold sm:w-40">
-                  <span className="text-gradient">Pro</span>
+                <th
+                  scope="col"
+                  className="w-20 p-2 text-center font-display font-semibold sm:w-32 sm:p-4"
+                >
+                  {tPlans("plans.essential.name")}
+                </th>
+                <th
+                  scope="col"
+                  className="w-20 p-2 text-center font-display font-semibold sm:w-32 sm:p-4"
+                >
+                  <span className="text-gradient">{tPlans("plans.pro.name")}</span>
                 </th>
               </tr>
             </thead>
             <tbody>
               {rows.map((row) => (
                 <tr key={row.label} className="border-b border-border last:border-0">
-                  <th scope="row" className="p-4 text-left font-normal sm:px-6">
+                  <th scope="row" className="p-3 text-left font-normal sm:px-6 sm:py-4">
                     {row.label}
                   </th>
-                  <td className="p-4 text-center text-muted-foreground">
+                  <td className="p-2 text-center text-muted-foreground sm:p-4">
+                    {renderCell(row.free)}
+                  </td>
+                  <td className="p-2 text-center text-muted-foreground sm:p-4">
                     {renderCell(row.essential)}
                   </td>
-                  <td className="p-4 text-center font-medium">{renderCell(row.pro)}</td>
+                  <td className="p-2 text-center font-medium sm:p-4">{renderCell(row.pro)}</td>
                 </tr>
               ))}
             </tbody>
