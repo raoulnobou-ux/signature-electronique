@@ -34,10 +34,16 @@ import {
 } from "@/lib/images/signature";
 import {
   renderStampSvg,
+  renderStatusStampSvg,
   STAMP_COLORS,
   STAMP_PRESETS,
   STAMP_SHAPES,
+  STATUS_COLORS,
+  STATUS_LABELS,
+  STATUS_STAMPS,
+  type StampColor,
   type StampOptions,
+  type StatusStamp,
 } from "@/lib/images/stamp";
 import { cn } from "@/lib/utils";
 
@@ -82,9 +88,9 @@ function CreatorDialog({
   const [name, setName] = useState("");
   const [saving, setSaving] = useState(false);
   const [celebrate, setCelebrate] = useState<string | null>(null);
-  const getImage = useRef<() => Promise<{ image: TrimmedImage; svg?: string } | null>>(
-    async () => null,
-  );
+  const getImage = useRef<
+    () => Promise<{ image: TrimmedImage; svg?: string; name?: string } | null>
+  >(async () => null);
 
   const save = async () => {
     const result = await getImage.current();
@@ -106,7 +112,7 @@ function CreatorDialog({
       form.append("png", await canvasToPngBlob(result.image.canvas), "signature.png");
       if (result.svg)
         form.append("svg", new Blob([result.svg], { type: "image/svg+xml" }), "signature.svg");
-      form.append("name", name.trim() || tc(`namePlaceholders.${type}`));
+      form.append("name", name.trim() || result.name || tc(`namePlaceholders.${type}`));
       form.append("type", type);
       form.append("method", method === "generate" ? "generated" : method);
       form.append("width", String(result.image.width));
@@ -598,10 +604,17 @@ async function rasterizeSvg(svg: string, scale = 3): Promise<TrimmedImage | null
   return trimCanvas(canvas, 6);
 }
 
-/** Générateur de cachet : nom, fonction, ville, date → rond, ovale ou rectangulaire. */
+/**
+ * Générateur de cachet : cachet de structure (nom, fonction, ville, date → rond, ovale ou
+ * rectangulaire) ou tampon de statut (« APPROUVÉ », « PAYÉ », « REÇU »…).
+ */
 function StampPad({ register }: { register: Register }) {
   const tc = useTranslations("signatures.creator.stamp");
   const locale = useLocale();
+  const [kind, setKind] = useState<"company" | "status">("company");
+  const [status, setStatus] = useState<StatusStamp>("approved");
+  const [statusColor, setStatusColor] = useState<StampColor>(STATUS_COLORS.approved);
+  const labels = STATUS_LABELS[locale === "en" ? "en" : "fr"];
   const [options, setOptions] = useState<StampOptions>({
     ...STAMP_PRESETS[0]!.options,
     organization: "",
@@ -617,114 +630,151 @@ function StampPad({ register }: { register: Register }) {
     }).format(new Date()),
   );
   const svg = useMemo(
-    () => renderStampSvg({ ...options, date: withDate ? today : "" }),
-    [options, withDate, today],
+    () =>
+      kind === "status"
+        ? renderStatusStampSvg({
+            label: labels[status],
+            color: statusColor,
+            date: withDate ? today : "",
+            organization: options.organization,
+            ink: options.ink,
+            seed: options.seed,
+          })
+        : renderStampSvg({ ...options, date: withDate ? today : "" }),
+    [kind, labels, status, statusColor, options, withDate, today],
   );
   const set = (patch: Partial<StampOptions>) => setOptions((o) => ({ ...o, ...patch }));
 
   useEffect(() => {
     register(async () => {
-      if (!options.organization.trim()) return null;
+      if (kind === "company" && !options.organization.trim()) return null;
       const image = await rasterizeSvg(svg);
-      return image ? { image, svg } : null;
+      if (!image) return null;
+      // Nom proposé dans la bibliothèque : le statut (« Payé »), sinon celui saisi.
+      return { image, svg, name: kind === "status" ? tc(`statuses.${status}`) : undefined };
     });
-  }, [register, svg, options.organization]);
+  }, [register, svg, kind, status, options.organization, tc]);
 
   return (
     <div className="grid gap-5 sm:grid-cols-[1fr_220px]">
       <div className="space-y-3">
-        <div role="radiogroup" aria-label={tc("presets.label")} className="flex flex-wrap gap-2">
-          {STAMP_PRESETS.map((preset) => (
+        <div
+          role="radiogroup"
+          aria-label={tc("kind")}
+          className="inline-flex rounded-full border border-border bg-secondary p-1"
+        >
+          {(["company", "status"] as const).map((k) => (
             <button
-              key={preset.id}
+              key={k}
               type="button"
               role="radio"
-              aria-checked={
-                preset.options.shape === options.shape &&
-                preset.options.color === options.color &&
-                preset.options.ink === options.ink
-              }
-              onClick={() => set(preset.options)}
-              className="cursor-pointer rounded-full border border-border px-3 py-1.5 text-xs font-medium aria-checked:border-brand-violet aria-checked:bg-accent"
+              aria-checked={kind === k}
+              onClick={() => setKind(k)}
+              className={cn(
+                "h-8 cursor-pointer rounded-full px-3 text-xs font-medium",
+                kind === k ? "bg-background-elevated shadow-soft" : "text-muted-foreground",
+              )}
             >
-              {tc(`presets.${preset.id as "classic" | "official" | "oval" | "clean"}`)}
+              {tc(`kinds.${k}`)}
             </button>
           ))}
         </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="stamp-org">{tc("organization")}</Label>
-          <Input
-            id="stamp-org"
-            value={options.organization}
-            maxLength={60}
-            placeholder={tc("organizationPlaceholder")}
-            onChange={(e) => set({ organization: e.target.value })}
+        {kind === "status" ? (
+          <StatusFields
+            status={status}
+            color={statusColor}
+            organization={options.organization}
+            onStatus={(next) => {
+              setStatus(next);
+              setStatusColor(STATUS_COLORS[next]);
+            }}
+            onColor={setStatusColor}
+            onOrganization={(organization) => set({ organization })}
           />
-        </div>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div className="space-y-1.5">
-            <Label htmlFor="stamp-title">{tc("title")}</Label>
-            <Input
-              id="stamp-title"
-              value={options.title}
-              maxLength={40}
-              placeholder={tc("titlePlaceholder")}
-              onChange={(e) => set({ title: e.target.value })}
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="stamp-city">{tc("city")}</Label>
-            <Input
-              id="stamp-city"
-              value={options.city}
-              maxLength={40}
-              placeholder={tc("cityPlaceholder")}
-              onChange={(e) => set({ city: e.target.value })}
-            />
-          </div>
-        </div>
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
-          <div
-            role="radiogroup"
-            aria-label={tc("shape")}
-            className="inline-flex rounded-full border border-border bg-secondary p-1"
-          >
-            {STAMP_SHAPES.map((shape) => (
-              <button
-                key={shape}
-                type="button"
-                role="radio"
-                aria-checked={options.shape === shape}
-                onClick={() => set({ shape })}
-                className={cn(
-                  "h-8 cursor-pointer rounded-full px-3 text-xs font-medium",
-                  options.shape === shape
-                    ? "bg-background-elevated shadow-soft"
-                    : "text-muted-foreground",
-                )}
-              >
-                {tc(`shapes.${shape}`)}
-              </button>
-            ))}
-          </div>
-          <div role="radiogroup" aria-label={tc("color")} className="flex gap-2">
-            {(Object.keys(STAMP_COLORS) as (keyof typeof STAMP_COLORS)[]).map((color) => (
-              <button
-                key={color}
-                type="button"
-                role="radio"
-                aria-checked={options.color === color}
-                aria-label={tc(`colors.${color}`)}
-                onClick={() => set({ color })}
-                className={cn(
-                  "size-7 cursor-pointer rounded-full ring-offset-2 ring-offset-popover",
-                  options.color === color && "ring-2 ring-ring",
-                )}
-                style={{ backgroundColor: STAMP_COLORS[color] }}
+        ) : (
+          <>
+            <div
+              role="radiogroup"
+              aria-label={tc("presets.label")}
+              className="flex flex-wrap gap-2"
+            >
+              {STAMP_PRESETS.map((preset) => (
+                <button
+                  key={preset.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={
+                    preset.options.shape === options.shape &&
+                    preset.options.color === options.color &&
+                    preset.options.ink === options.ink
+                  }
+                  onClick={() => set(preset.options)}
+                  className="cursor-pointer rounded-full border border-border px-3 py-1.5 text-xs font-medium aria-checked:border-brand-violet aria-checked:bg-accent"
+                >
+                  {tc(`presets.${preset.id as "classic" | "official" | "oval" | "clean"}`)}
+                </button>
+              ))}
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="stamp-org">{tc("organization")}</Label>
+              <Input
+                id="stamp-org"
+                value={options.organization}
+                maxLength={60}
+                placeholder={tc("organizationPlaceholder")}
+                onChange={(e) => set({ organization: e.target.value })}
               />
-            ))}
-          </div>
-        </div>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label htmlFor="stamp-title">{tc("title")}</Label>
+                <Input
+                  id="stamp-title"
+                  value={options.title}
+                  maxLength={40}
+                  placeholder={tc("titlePlaceholder")}
+                  onChange={(e) => set({ title: e.target.value })}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="stamp-city">{tc("city")}</Label>
+                <Input
+                  id="stamp-city"
+                  value={options.city}
+                  maxLength={40}
+                  placeholder={tc("cityPlaceholder")}
+                  onChange={(e) => set({ city: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
+              <div
+                role="radiogroup"
+                aria-label={tc("shape")}
+                className="inline-flex rounded-full border border-border bg-secondary p-1"
+              >
+                {STAMP_SHAPES.map((shape) => (
+                  <button
+                    key={shape}
+                    type="button"
+                    role="radio"
+                    aria-checked={options.shape === shape}
+                    onClick={() => set({ shape })}
+                    className={cn(
+                      "h-8 cursor-pointer rounded-full px-3 text-xs font-medium",
+                      options.shape === shape
+                        ? "bg-background-elevated shadow-soft"
+                        : "text-muted-foreground",
+                    )}
+                  >
+                    {tc(`shapes.${shape}`)}
+                  </button>
+                ))}
+              </div>
+              <InkColors value={options.color} onChange={(color) => set({ color })} />
+            </div>
+          </>
+        )}
         <div className="flex flex-wrap gap-x-6 gap-y-2">
           <label className="flex items-center gap-2 text-sm">
             <Switch
@@ -754,5 +804,83 @@ function StampPad({ register }: { register: Register }) {
         <figcaption className="sr-only">{tc("preview")}</figcaption>
       </figure>
     </div>
+  );
+}
+
+/** Couleurs d'encre des cachets. */
+function InkColors({
+  value,
+  onChange,
+}: {
+  value: StampColor;
+  onChange: (color: StampColor) => void;
+}) {
+  const tc = useTranslations("signatures.creator.stamp");
+  return (
+    <div role="radiogroup" aria-label={tc("color")} className="flex gap-2">
+      {(Object.keys(STAMP_COLORS) as StampColor[]).map((color) => (
+        <button
+          key={color}
+          type="button"
+          role="radio"
+          aria-checked={value === color}
+          aria-label={tc(`colors.${color}`)}
+          onClick={() => onChange(color)}
+          className={cn(
+            "size-7 cursor-pointer rounded-full ring-offset-2 ring-offset-popover",
+            value === color && "ring-2 ring-ring",
+          )}
+          style={{ backgroundColor: STAMP_COLORS[color] }}
+        />
+      ))}
+    </div>
+  );
+}
+
+/** Tampon de statut : choix du statut, de l'encre et de la structure (facultative). */
+function StatusFields({
+  status,
+  color,
+  organization,
+  onStatus,
+  onColor,
+  onOrganization,
+}: {
+  status: StatusStamp;
+  color: StampColor;
+  organization: string;
+  onStatus: (status: StatusStamp) => void;
+  onColor: (color: StampColor) => void;
+  onOrganization: (organization: string) => void;
+}) {
+  const tc = useTranslations("signatures.creator.stamp");
+  return (
+    <>
+      <div role="radiogroup" aria-label={tc("status")} className="flex flex-wrap gap-2">
+        {STATUS_STAMPS.map((s) => (
+          <button
+            key={s}
+            type="button"
+            role="radio"
+            aria-checked={status === s}
+            onClick={() => onStatus(s)}
+            className="cursor-pointer rounded-full border border-border px-3 py-1.5 text-xs font-medium aria-checked:border-brand-violet aria-checked:bg-accent"
+          >
+            {tc(`statuses.${s}`)}
+          </button>
+        ))}
+      </div>
+      <div className="space-y-1.5">
+        <Label htmlFor="status-org">{tc("statusOrganization")}</Label>
+        <Input
+          id="status-org"
+          value={organization}
+          maxLength={60}
+          placeholder={tc("organizationPlaceholder")}
+          onChange={(e) => onOrganization(e.target.value)}
+        />
+      </div>
+      <InkColors value={color} onChange={onColor} />
+    </>
   );
 }

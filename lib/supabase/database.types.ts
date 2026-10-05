@@ -653,6 +653,7 @@ export type Database = {
           org_sector: string | null;
           phone: string | null;
           phone_verified_at: string | null;
+          signature_block: Json | null;
           theme: string;
           timezone: string;
           trial_ends_at: string;
@@ -677,6 +678,7 @@ export type Database = {
           org_sector?: string | null;
           phone?: string | null;
           phone_verified_at?: string | null;
+          signature_block?: Json | null;
           theme?: string;
           timezone?: string;
           trial_ends_at?: string;
@@ -701,6 +703,7 @@ export type Database = {
           org_sector?: string | null;
           phone?: string | null;
           phone_verified_at?: string | null;
+          signature_block?: Json | null;
           theme?: string;
           timezone?: string;
           trial_ends_at?: string;
@@ -1227,6 +1230,7 @@ export type Database = {
       };
       is_team_admin: { Args: { p_team_id: string }; Returns: boolean };
       is_team_member: { Args: { p_team_id: string }; Returns: boolean };
+      mfa_satisfied: { Args: Record<PropertyKey, never>; Returns: boolean };
       my_team_sponsor: {
         Args: Record<PropertyKey, never>;
         Returns: {

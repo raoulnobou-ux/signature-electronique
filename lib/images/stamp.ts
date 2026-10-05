@@ -167,3 +167,94 @@ ${centerLines(center, cx, cy, color)}`
 </g>
 </svg>`;
 }
+
+// ---------------------------------------------------------------------------
+// Tampons de statut (« APPROUVÉ », « PAYÉ », « REÇU »…) : un mot en grandes capitales
+// dans un double cadre, avec date et nom de la structure facultatifs.
+// ---------------------------------------------------------------------------
+
+export const STATUS_STAMPS = [
+  "approved",
+  "paid",
+  "received",
+  "rejected",
+  "certified",
+  "confidential",
+  "urgent",
+] as const;
+export type StatusStamp = (typeof STATUS_STAMPS)[number];
+
+/** Libellés imprimés sur le tampon, dans la langue de l'utilisateur. */
+export const STATUS_LABELS: Record<"fr" | "en", Record<StatusStamp, string>> = {
+  fr: {
+    approved: "APPROUVÉ",
+    paid: "PAYÉ",
+    received: "REÇU",
+    rejected: "REFUSÉ",
+    certified: "COPIE CONFORME",
+    confidential: "CONFIDENTIEL",
+    urgent: "URGENT",
+  },
+  en: {
+    approved: "APPROVED",
+    paid: "PAID",
+    received: "RECEIVED",
+    rejected: "REJECTED",
+    certified: "CERTIFIED COPY",
+    confidential: "CONFIDENTIAL",
+    urgent: "URGENT",
+  },
+};
+
+/** Couleur d'encre usuelle de chaque statut (modifiable). */
+export const STATUS_COLORS: Record<StatusStamp, StampColor> = {
+  approved: "green",
+  paid: "red",
+  received: "blue",
+  rejected: "red",
+  certified: "blue",
+  confidential: "red",
+  urgent: "red",
+};
+
+export interface StatusStampOptions {
+  /** Texte principal (libellé d'un statut, ou texte libre). */
+  label: string;
+  color: StampColor;
+  /** Date (déjà formatée), ou vide. */
+  date?: string;
+  /** Nom de la structure en petit sous le statut, ou vide. */
+  organization?: string;
+  ink?: boolean;
+  seed?: number;
+}
+
+/** Construit le SVG d'un tampon de statut (fond transparent). */
+export function renderStatusStampSvg(input: StatusStampOptions): string {
+  const color = STAMP_COLORS[input.color] ?? STAMP_COLORS.red;
+  const label = clean(input.label, 24).toUpperCase() || "APPROUVÉ";
+  const date = clean(input.date, 32);
+  const organization = clean(input.organization, 60).toUpperCase();
+  const seed = Math.abs(Math.round(input.seed ?? 7)) % 1000;
+  const filter = input.ink ? inkFilter(seed) : "";
+  const group = input.ink ? ' filter="url(#ink)"' : "";
+  const font = 'font-family="Arial, Helvetica, sans-serif" letter-spacing="1"';
+  const w = 380;
+  const extra = (date ? 1 : 0) + (organization ? 1 : 0);
+  const h = 120 + extra * 28;
+  const lines = [
+    { text: label, size: fitFontSize(label, 320, 58, 22), weight: 800 },
+    ...(date ? [{ text: date, size: 20, weight: 600 }] : []),
+    ...(organization
+      ? [{ text: organization, size: fitFontSize(organization, 320, 16), weight: 600 }]
+      : []),
+  ];
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}">
+<defs>${filter}</defs>
+<g${group} ${font}>
+<rect x="6" y="6" width="${w - 12}" height="${h - 12}" rx="14" fill="none" stroke="${color}" stroke-width="7"/>
+<rect x="18" y="18" width="${w - 36}" height="${h - 36}" rx="8" fill="none" stroke="${color}" stroke-width="2"/>
+${centerLines(lines, w / 2, h / 2, color)}
+</g>
+</svg>`;
+}

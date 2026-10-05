@@ -6,6 +6,7 @@ import { recordAudit } from "@/lib/audit";
 import { guard, type GuardDenial } from "@/lib/auth/account";
 import { sha256Hex } from "@/lib/crypto";
 import { documentPaths } from "@/lib/documents/paths";
+import { signatureBlockSchema } from "@/lib/pdf/block";
 import { fieldsSchema, formatSignatureDate, isImageField, type Field } from "@/lib/pdf/fields";
 import { stampPdf } from "@/lib/pdf/stamp";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -255,4 +256,18 @@ export async function todayLabel(): Promise<string> {
   if (!access.ok) return formatSignatureDate(new Date(), "Africa/Douala");
   const { profile } = access.account;
   return formatSignatureDate(new Date(), profile.timezone, profile.city, profile.locale);
+}
+
+/** Enregistre le bloc professionnel (réutilisé pour les prochains documents). */
+export async function saveSignatureBlock(input: unknown): Promise<{ ok: boolean }> {
+  const parsed = signatureBlockSchema.safeParse(input);
+  if (!parsed.success) return { ok: false };
+  const access = await guard("edit");
+  if (!access.ok) return { ok: false };
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("profiles")
+    .update({ signature_block: parsed.data })
+    .eq("id", access.account.userId);
+  return { ok: !error };
 }

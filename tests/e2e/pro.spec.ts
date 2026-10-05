@@ -57,6 +57,77 @@ test("générateur de cachet : rond, texte circulaire, enregistré en PNG + SVG"
   expect(data!.svg_path).toMatch(/\.svg$/);
 });
 
+test("tampon de statut « Payé » puis bloc professionnel posé en une fois et signé", async ({
+  page,
+}) => {
+  test.setTimeout(120_000);
+  const user = await createConfirmedUser("bloc-pro", "Awa Nkeng");
+  await signInAs(page, user.email);
+
+  // Tampon de statut : « PAYÉ » en rouge, avec la structure.
+  await page.goto("/app/signatures");
+  await page.getByRole("button", { name: "Cachet", exact: true }).click();
+  await page.getByRole("radio", { name: "Tampon de statut" }).click();
+  await page.getByRole("radio", { name: "Payé" }).click();
+  await page.getByLabel("Structure (facultatif)").fill("Cabinet Nkeng");
+  await expect(page.getByTestId("stamp-preview")).toContainText("PAYÉ");
+  await expect(page.getByTestId("stamp-preview")).toContainText("CABINET NKENG");
+  await page.getByRole("button", { name: "Enregistrer" }).click();
+  await expect(page.getByRole("dialog")).toBeHidden({ timeout: 10_000 });
+  const { data: stamp } = await adminClient()
+    .from("signature_assets")
+    .select("type, name, svg_path")
+    .eq("owner_id", user.id)
+    .single();
+  expect(stamp).toMatchObject({ type: "stamp", name: "Payé" });
+
+  await drawSignature(page);
+  const documentId = await importDocument(page);
+  await page.goto(`/app/documents/${documentId}/signer`);
+  await expect(page.getByTestId("page-layer-0")).toBeVisible({ timeout: 20_000 });
+
+  // Bloc professionnel : réglé une fois, posé en un toucher.
+  await page
+    .getByRole("button", { name: /Bloc pro/ })
+    .first()
+    .click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog.getByLabel("Nom")).toHaveValue("Awa Nkeng");
+  await dialog.getByLabel("Fonction").fill("Directrice");
+  await dialog.getByLabel("Structure").fill("Cabinet Nkeng");
+  await dialog.getByRole("switch", { name: "Mon cachet" }).click();
+  await dialog.getByRole("button", { name: "Placer sur le document" }).click();
+  await expect(dialog).toBeHidden();
+  const layer = page.getByTestId("page-layer-0");
+  const box = (await layer.boundingBox())!;
+  await layer.click({ position: { x: box.width * 0.6, y: box.height * 0.5 } });
+  for (const type of ["signature", "name", "date", "stamp"]) {
+    await expect(layer.locator(`[data-field-type="${type}"]`)).toHaveCount(1);
+  }
+  await expect(layer.locator('[data-field-type="text"]')).toHaveCount(2);
+  await expect(page.getByText("Brouillon enregistré")).toBeVisible({ timeout: 10_000 });
+
+  // Le bloc est gardé dans le profil pour les prochains documents.
+  const { data: profile } = await adminClient()
+    .from("profiles")
+    .select("signature_block")
+    .eq("id", user.id)
+    .single();
+  expect(profile!.signature_block).toMatchObject({
+    name: "Awa Nkeng",
+    title: "Directrice",
+    company: "Cabinet Nkeng",
+    stamp: true,
+  });
+
+  await page.getByRole("button", { name: /Finaliser et signer/ }).click();
+  await expect(page.getByRole("dialog")).toContainText("6 éléments");
+  await page.getByRole("button", { name: "Signer le document" }).click();
+  await expect(page.getByRole("heading", { name: "Document signé !" })).toBeVisible({
+    timeout: 30_000,
+  });
+});
+
 test("modèle : rôles, champ variable, création en un clic puis envoi", async ({ page }) => {
   test.setTimeout(120_000);
   const user = await createConfirmedUser("modele");

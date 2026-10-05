@@ -280,6 +280,22 @@ Comptes existants :
 
 **D113 — Limites de l'accès gratuit dans plans_config.** Une ligne `plan = 'free'` (devise XAF, prix 0, jamais affichée) porte ses limites, comme les plans payants. On les modifie dans Supabase sans redéployer. Valeurs de repli dans le code : `FREE_LIMITS` (`lib/entitlements/plans.ts`). La RLS du brouillon de l'éditeur (`placed_fields`) n'exige plus d'abonnement, seulement la propriété du document. Les documents et les signatures sont créés par le serveur après la vérification des droits.
 
+**D114 — Tampons de statut.** Le générateur de cachets propose deux types :
+
+- le cachet de structure (rond, ovale ou rectangulaire, déjà en place) ;
+- le tampon de statut : APPROUVÉ, PAYÉ, REÇU, REFUSÉ, COPIE CONFORME, CONFIDENTIEL, URGENT.
+
+Le tampon de statut a son libellé en français ou en anglais selon la langue, une encre usuelle par statut (modifiable), une date et un nom de structure facultatifs. Le rendu est un SVG pur (`renderStatusStampSvg`, textes échappés), enregistré en PNG et SVG comme les autres cachets. C'est un cachet ordinaire de la bibliothèque : plusieurs par compte, un par défaut, et dans l'éditeur on le place, déplace, redimensionne, pivote et règle son opacité. Réservé au plan Pro, comme tous les cachets.
+
+**D115 — Bloc professionnel.** L'outil « Bloc professionnel » de l'éditeur pose en un toucher, sur le point choisi et sans sortir de la page :
+
+- la signature par défaut ;
+- le nom, la fonction et la structure ;
+- la date du jour ;
+- le cachet par défaut.
+
+Les choix sont enregistrés dans `profiles.signature_block` (JSON validé par zod et par une contrainte de taille) et proposés au document suivant. Chaque élément devient un champ ordinaire, modifiable séparément, plutôt qu'une image figée. Ainsi, la date reste celle du jour de signature et le nom reste du texte net dans le PDF. La disposition est une fonction pure testée (`layoutSignatureBlock`). Si la signature ou le cachet manque, l'éditeur ouvre sa création puis revient au bloc.
+
 ## Sécurité des données — référence (audit du 2 octobre 2026)
 
 Récapitulatif de chaque mesure, à citer à un client ou un partenaire. Chacune est vérifiée par un test automatique, indiqué entre crochets.

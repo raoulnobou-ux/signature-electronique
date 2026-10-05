@@ -1154,6 +1154,22 @@
           "official": "Official",
           "oval": "Red oval",
           "clean": "Clean"
+        },
+        "kind": "Stamp type",
+        "kinds": {
+          "company": "Organization stamp",
+          "status": "Status stamp"
+        },
+        "status": "Status",
+        "statusOrganization": "Organization (optional)",
+        "statuses": {
+          "approved": "Approved",
+          "paid": "Paid",
+          "received": "Received",
+          "rejected": "Rejected",
+          "certified": "Certified copy",
+          "confidential": "Confidential",
+          "urgent": "Urgent"
         }
       }
     },
@@ -1173,7 +1189,9 @@
       "text": "Text",
       "checkbox": "Checkbox",
       "name": "Name",
-      "mention": "Note"
+      "mention": "Note",
+      "block": "Professional block",
+      "blockShort": "Pro block"
     },
     "placeHint": "Tap the page where you want to place: {tool}",
     "cancelPlace": "Cancel",
@@ -1234,6 +1252,21 @@
       "view": "View document",
       "shareText": "Here is the document “{title}”, signed with QuickSign.",
       "emailSubject": "Signed document: {title}"
+    },
+    "block": {
+      "title": "Professional block",
+      "body": "Signature, name, job title, organization, date and stamp, placed in one go. Your choices are kept for your next documents.",
+      "name": "Name",
+      "jobTitle": "Job title",
+      "jobTitlePlaceholder": "Head of administration",
+      "company": "Organization",
+      "includeSignature": "My signature",
+      "includeDate": "Today's date ({date})",
+      "includeStamp": "My stamp",
+      "stampPro": "The stamp is included in the Pro plan.",
+      "hint": "Once placed, each item can be moved, resized or deleted on its own.",
+      "cancel": "Cancel",
+      "place": "Place on the document"
     }
   },
   "requests": {

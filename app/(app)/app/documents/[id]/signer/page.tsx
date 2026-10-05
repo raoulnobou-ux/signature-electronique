@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { Editor } from "@/components/editor/editor";
 import type { EditorField } from "@/components/editor/state";
 import { requireAccount } from "@/lib/auth/account";
+import { readSignatureBlock } from "@/lib/pdf/block";
 import { formatSignatureDate, type FieldType } from "@/lib/pdf/fields";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -69,6 +70,7 @@ export default async function SignerPage(props: PageProps<"/app/documents/[id]/s
       )}
       assets={assets}
       stampsAllowed={account.entitlements.features.stamps}
+      signatureBlock={readSignatureBlock(account.profile.signature_block, account.profile)}
       defaults={{
         name: account.profile.full_name,
         dateLabel: formatSignatureDate(

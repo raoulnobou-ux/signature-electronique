@@ -2,6 +2,7 @@
 
 import {
   ArrowLeft,
+  BriefcaseBusiness,
   CalendarDays,
   CheckSquare,
   Cloud,
@@ -32,6 +33,7 @@ import { toast } from "sonner";
 import {
   finalizeSignature,
   saveDraft,
+  saveSignatureBlock,
   type FinalizeResult,
 } from "@/app/(app)/app/documents/[id]/signer/actions";
 import type { AssetType, SignatureAsset } from "@/app/(app)/app/signatures/actions";
@@ -51,8 +53,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Tooltip } from "@/components/ui/tooltip";
+import { layoutSignatureBlock, type SignatureBlock } from "@/lib/pdf/block";
 import { isImageField, mentionsFor, type FieldType } from "@/lib/pdf/fields";
 import { cn } from "@/lib/utils";
+import { BlockDialog } from "./block-dialog";
 import { Confetti } from "./confetti";
 import { PageLayer } from "./page-layer";
 import { defaultSize, newFieldId, useEditorState, type EditorField } from "./state";
@@ -64,6 +68,8 @@ type Props = {
   assets: SignatureAsset[];
   defaults: { name: string; dateLabel: string };
   stampsAllowed: boolean;
+  /** Bloc professionnel enregistré (ou proposé à partir du profil). */
+  signatureBlock: SignatureBlock;
 };
 
 const TOOLS: { type: FieldType; icon: LucideIcon }[] = [
@@ -86,6 +92,7 @@ export function Editor({
   assets: initialAssets,
   defaults,
   stampsAllowed,
+  signatureBlock,
 }: Props) {
   const t = useTranslations("editor");
   const locale = useLocale();
@@ -93,6 +100,12 @@ export function Editor({
   const { fields, selected, update, select } = editor;
   const [assets, setAssets] = useState(initialAssets);
   const [armed, setArmed] = useState<FieldType | null>(null);
+  const [block, setBlock] = useState(signatureBlock);
+  const [blockOpen, setBlockOpen] = useState(false);
+  /** Bloc professionnel prêt à poser (au prochain toucher de la page). */
+  const [blockArmed, setBlockArmed] = useState(false);
+  /** Création d'une signature ou d'un cachet demandée par le bloc : on y revient ensuite. */
+  const [blockPending, setBlockPending] = useState(false);
   const [sizes, setSizes] = useState<PageSize[]>([]);
   const [creatorFor, setCreatorFor] = useState<AssetType | null>(null);
   const [lastSave, setLastSave] = useState({ revision: 0, ok: true });
@@ -182,11 +195,67 @@ export function Editor({
         return;
       }
     }
+    setBlockArmed(false);
     setArmed((current) => (current === type ? null : type));
     select(null);
   };
 
+  /** Bloc réglé : enregistré pour les prochains documents, puis prêt à poser. */
+  const armBlock = (next: SignatureBlock) => {
+    if (next.signature && !defaultAsset("signature")) {
+      toast.message(t("needAsset.signature"));
+      setBlock(next);
+      setBlockOpen(false);
+      setBlockPending(true);
+      setCreatorFor("signature");
+      return;
+    }
+    if (next.stamp && !defaultAsset("stamp")) {
+      toast.message(t("needAsset.stamp"));
+      setBlock(next);
+      setBlockOpen(false);
+      setBlockPending(true);
+      setCreatorFor("stamp");
+      return;
+    }
+    setBlock(next);
+    setBlockOpen(false);
+    setArmed(null);
+    setBlockArmed(true);
+    select(null);
+    void saveSignatureBlock(next);
+  };
+
+  const placeBlock = (page: number, x: number, y: number) => {
+    const size = sizes[page];
+    if (!size) return;
+    const assetRef = (type: AssetType) => {
+      const asset = defaultAsset(type);
+      return asset
+        ? {
+            assetId: asset.id,
+            aspect: asset.width && asset.height ? asset.width / asset.height : 1,
+          }
+        : null;
+    };
+    const placed = layoutSignatureBlock(block, {
+      page,
+      centerX: x,
+      centerY: y,
+      pageAspect: size.width / size.height,
+      signature: assetRef("signature"),
+      stamp: stampsAllowed ? assetRef("stamp") : null,
+      dateLabel: defaults.dateLabel,
+      newId: newFieldId,
+    });
+    setBlockArmed(false);
+    if (!placed.length) return;
+    update([...fields, ...placed]);
+    select(placed[0]!.id);
+  };
+
   const place = (page: number, x: number, y: number) => {
+    if (blockArmed) return placeBlock(page, x, y);
     if (!armed) return;
     const asset = isImageField(armed) ? defaultAsset(armed as AssetType) : null;
     const field = createField(armed, page, x, y, asset);
@@ -327,7 +396,7 @@ export function Editor({
       fields={fields}
       selectedId={editor.selectedId}
       assetUrls={assetUrls}
-      armed={armed !== null}
+      armed={armed !== null || blockArmed}
       onPlace={place}
       onSelect={select}
       onChange={(field, done, original) => {
@@ -417,15 +486,34 @@ export function Editor({
               onClick={() => armTool(type)}
             />
           ))}
+          <button
+            type="button"
+            onClick={() => setBlockOpen(true)}
+            aria-pressed={blockArmed}
+            className={cn(
+              "mt-2 flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-border px-3 py-2.5 text-left text-sm font-medium transition-colors hover:bg-secondary",
+              blockArmed && "border-transparent bg-brand-gradient text-white",
+            )}
+          >
+            <BriefcaseBusiness className="size-4 shrink-0" aria-hidden />
+            {t("tools.block")}
+          </button>
         </aside>
 
         {/* Document */}
         <div className="relative min-w-0 flex-1">
-          {armed && (
+          {(armed || blockArmed) && (
             <div className="absolute inset-x-0 top-12 z-20 flex justify-center px-3">
               <div className="flex animate-in items-center gap-3 rounded-full glass bg-popover py-1.5 pr-1.5 pl-4 text-sm shadow-lift fade-in slide-in-from-top-2">
-                {t("placeHint", { tool: t(`tools.${armed}`) })}
-                <Button size="sm" variant="ghost" onClick={() => setArmed(null)}>
+                {t("placeHint", { tool: t(armed ? `tools.${armed}` : "tools.block") })}
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => {
+                    setArmed(null);
+                    setBlockArmed(false);
+                  }}
+                >
                   {t("cancelPlace")}
                 </Button>
               </div>
@@ -494,20 +582,49 @@ export function Editor({
             {t(`tools.${type}`)}
           </button>
         ))}
+        <button
+          type="button"
+          onClick={() => setBlockOpen(true)}
+          aria-pressed={blockArmed}
+          className={cn(
+            "flex min-w-16 shrink-0 cursor-pointer flex-col items-center gap-1 rounded-xl px-2 py-2 text-[11px] font-medium",
+            blockArmed ? "bg-brand-gradient text-white" : "text-muted-foreground",
+          )}
+        >
+          <BriefcaseBusiness className="size-5" aria-hidden />
+          {t("tools.blockShort")}
+        </button>
       </nav>
+
+      <BlockDialog
+        open={blockOpen}
+        onOpenChange={setBlockOpen}
+        initial={block}
+        stampsAllowed={stampsAllowed}
+        dateLabel={defaults.dateLabel}
+        onPlace={armBlock}
+      />
 
       <SignatureCreator
         open={creatorFor !== null}
         type={creatorFor ?? "signature"}
         allowTypeChange={false}
         stampsAllowed={stampsAllowed}
-        onOpenChange={(open) => !open && setCreatorFor(null)}
+        onOpenChange={(open) => {
+          if (open) return;
+          setCreatorFor(null);
+          // Fenêtre fermée sans création : le bloc n'attend plus rien.
+          setBlockPending(false);
+        }}
         onCreated={(asset) => {
           setAssets((all) => [
             ...all,
             { ...asset, isDefault: !all.some((a) => a.type === asset.type) || asset.isDefault },
           ]);
-          setArmed(asset.type);
+          if (blockPending) {
+            setBlockPending(false);
+            setBlockOpen(true);
+          } else setArmed(asset.type);
         }}
       />
 

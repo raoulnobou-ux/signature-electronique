@@ -1169,6 +1169,22 @@
           "official": "Officiel",
           "oval": "Ovale rouge",
           "clean": "Net"
+        },
+        "kind": "Type de cachet",
+        "kinds": {
+          "company": "Cachet de structure",
+          "status": "Tampon de statut"
+        },
+        "status": "Statut",
+        "statusOrganization": "Structure (facultatif)",
+        "statuses": {
+          "approved": "Approuvé",
+          "paid": "Payé",
+          "received": "Reçu",
+          "rejected": "Refusé",
+          "certified": "Copie conforme",
+          "confidential": "Confidentiel",
+          "urgent": "Urgent"
         }
       }
     },
@@ -1188,7 +1204,9 @@
       "text": "Texte",
       "checkbox": "Case à cocher",
       "name": "Nom",
-      "mention": "Mention"
+      "mention": "Mention",
+      "block": "Bloc professionnel",
+      "blockShort": "Bloc pro"
     },
     "placeHint": "Touchez la page à l'endroit voulu pour placer : {tool}",
     "cancelPlace": "Annuler",
@@ -1249,6 +1267,21 @@
       "view": "Voir le document",
       "shareText": "Voici le document « {title} », signé avec QuickSign.",
       "emailSubject": "Document signé : {title}"
+    },
+    "block": {
+      "title": "Bloc professionnel",
+      "body": "Signature, nom, fonction, structure, date et cachet, posés en une fois. Vos choix sont gardés pour les prochains documents.",
+      "name": "Nom",
+      "jobTitle": "Fonction",
+      "jobTitlePlaceholder": "Directrice administrative",
+      "company": "Structure",
+      "includeSignature": "Ma signature",
+      "includeDate": "Date du jour ({date})",
+      "includeStamp": "Mon cachet",
+      "stampPro": "Le cachet est inclus dans le plan Pro.",
+      "hint": "Après l'avoir posé, chaque élément se déplace, se redimensionne ou se supprime séparément.",
+      "cancel": "Annuler",
+      "place": "Placer sur le document"
     }
   },
   "requests": {
