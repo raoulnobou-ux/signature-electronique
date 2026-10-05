@@ -1,7 +1,8 @@
 import "server-only";
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { publicEnv } from "@/lib/env";
-import type { CheckoutRequest, PaymentProvider, VerifiedTransaction } from "./provider";
+import { CURRENCY_CODES, type Currency } from "@/config/currencies";
+import type { CheckoutRequest, PaymentMethod, PaymentProvider, VerifiedTransaction } from "./types";
 
 /**
  * Prestataire « bac à sable » pour le développement et les tests automatisés, quand aucune
@@ -23,8 +24,18 @@ function sign(secret: string, reference: string, outcome: string, method: string
 
 export class SandboxProvider implements PaymentProvider {
   readonly name = "sandbox";
+  readonly method: PaymentMethod;
+  readonly currencies: readonly Currency[];
 
-  constructor(private readonly secret: string) {}
+  /** Simule un moyen de paiement réel (carte ou Mobile Money) pour ses devises. */
+  constructor(
+    private readonly secret: string,
+    method: PaymentMethod = "mobile_money",
+    currencies: readonly Currency[] = CURRENCY_CODES,
+  ) {
+    this.method = method;
+    this.currencies = currencies;
+  }
 
   transactionId(reference: string, outcome: SandboxOutcome, method: SandboxMethod): string {
     return `sbx_${outcome}_${method}_${sign(this.secret, reference, outcome, method)}`;

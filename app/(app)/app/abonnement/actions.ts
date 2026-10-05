@@ -4,11 +4,12 @@ import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { getLocale } from "next-intl/server";
 import { z } from "zod";
+import { isCurrency } from "@/config/currencies";
 import { recordAudit } from "@/lib/audit";
 import { getCurrentAccount, type Account } from "@/lib/auth/account";
 import { getPaymentProvider, getSandboxProvider, mobileMoneyCountries } from "@/lib/billing";
 import { quoteCheckout, type Quote } from "@/lib/billing/quote";
-import { SANDBOX_METHODS, SANDBOX_OUTCOMES } from "@/lib/billing/sandbox";
+import { SANDBOX_METHODS, SANDBOX_OUTCOMES } from "@/lib/billing/providers/sandbox";
 import { PLAN_LABELS, paymentDescription } from "@/lib/billing/service";
 import type { BillingCycle, Currency, PlanId } from "@/lib/entitlements/plans";
 import { publicEnv } from "@/lib/env";
@@ -20,7 +21,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 const targetSchema = z.object({
   plan: z.enum(["essential", "pro"]),
   cycle: z.enum(["monthly", "yearly"]),
-  currency: z.enum(["XAF", "USD"]),
+  currency: z.string().refine(isCurrency),
   /** Pays du numéro Mobile Money (paiement en FCFA). */
   country: z
     .string()
@@ -126,7 +127,7 @@ export async function startCheckout(
     return { ok: false, reason: "rate_limited" };
 
   const quote = await computeQuote(account, subscription, parsed.data);
-  // FCFA → pawaPay (Mobile Money) ; dollars → Paddle (carte, international).
+  // FCFA → Mobile Money (pawaPay) ; euro, dollar, livre → carte (Paddle).
   const provider = getPaymentProvider(quote.currency);
   if (!provider) return { ok: false, reason: "payments_unavailable" };
   // Mobile Money : uniquement un pays proposé (activé sur le compte pawaPay).

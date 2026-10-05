@@ -7,8 +7,8 @@ import {
   type TransactionStatus,
   type VerifiedTransaction,
   type WebhookEvent,
-} from "./provider";
-import { safeEqual } from "./util";
+} from "../types";
+import { safeEqual } from "../../util";
 
 /**
  * Paddle Billing : paiements internationaux (carte, PayPal, Apple Pay, Google Pay) en
@@ -76,8 +76,44 @@ type PaddleTransaction = {
   payments?: { status?: string; method_details?: { type?: string } | null }[] | null;
 };
 
+/**
+ * Pays depuis lesquels Paddle refuse les paiements (sanctions internationales et règles
+ * anti-blanchiment ; liste publique de Paddle, à tenir à jour).
+ */
+export const PADDLE_BLOCKED_COUNTRIES = new Set([
+  "AF",
+  "AQ",
+  "BY",
+  "MM",
+  "CF",
+  "CU",
+  "CD",
+  "HT",
+  "IR",
+  "IQ",
+  "LY",
+  "ML",
+  "NI",
+  "KP",
+  "RU",
+  "SO",
+  "SS",
+  "SD",
+  "SY",
+  "VE",
+  "YE",
+  "ZW",
+]);
+
 export class PaddleProvider implements PaymentProvider {
   readonly name = "paddle";
+  readonly method = "card" as const;
+  /** Devises de facturation proposées par carte (Paddle n'accepte pas le franc CFA). */
+  readonly currencies = ["EUR", "USD", "GBP"] as const;
+
+  supportsCountry(country: string): boolean {
+    return !PADDLE_BLOCKED_COUNTRIES.has(country.toUpperCase());
+  }
   private readonly base: string;
 
   constructor(

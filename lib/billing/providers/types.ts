@@ -43,12 +43,35 @@ export interface WebhookEvent {
   payload: unknown;
 }
 
+/** Moyen de paiement proposé au client. */
+export type PaymentMethod = "card" | "mobile_money";
+
+/** Moyen de paiement proposé à un client, avec ses devises. */
+export interface PaymentOption {
+  method: PaymentMethod;
+  /** Devises proposées pour ce moyen de paiement. */
+  currencies: Currency[];
+  /** Mode test du prestataire (aucun argent réel). */
+  testMode: boolean;
+}
+
 /**
- * Couche d'abstraction des paiements : pawaPay (Mobile Money, FCFA) et Paddle (carte,
- * international, dollars) ; un autre prestataire s'ajoute sans toucher au reste de l'application.
+ * Prestataire de paiement. L'application ne connaît que cette interface :
+ * - providers/card/ : paiement international par carte (Paddle aujourd'hui) ;
+ * - providers/african/ : moyens de paiement locaux africains (pawaPay, Mobile Money) ;
+ * - un nouveau prestataire s'ajoute en implémentant cette interface puis en le déclarant
+ *   dans le registre (lib/billing/index.ts), sans toucher aux écrans ni aux actions.
+ * Le navigateur n'appelle jamais un prestataire : il appelle notre serveur, qui crée le
+ * paiement, puis revérifie toute transaction auprès du prestataire (webhook ou retour).
  */
 export interface PaymentProvider {
+  /** Identifiant stocké dans payments.provider et subscriptions.provider. */
   readonly name: string;
+  readonly method: PaymentMethod;
+  /** Devises acceptées par ce prestataire. */
+  readonly currencies: readonly Currency[];
+  /** Le prestataire accepte-t-il un client de ce pays (ISO alpha-2) ? Absent = partout. */
+  supportsCountry?(country: string): boolean;
   /** URL du paiement, et l'identifiant de transaction du prestataire s'il est déjà connu. */
   createCheckout(request: CheckoutRequest): Promise<{ url: string; transactionId?: string }>;
   /**
@@ -62,6 +85,10 @@ export interface PaymentProvider {
   }): Promise<VerifiedTransaction | null>;
   /** Authentifie et décode un webhook ; null si la requête n'est pas authentique. */
   parseWebhook(headers: Headers, rawBody: string): WebhookEvent | null;
+  /** Arrête le renouvellement automatique d'un abonnement récurrent (si le prestataire en gère). */
+  cancelSubscription?(providerSubscriptionId: string): Promise<void>;
+  /** Rembourse une transaction (si le prestataire le permet). */
+  refund?(input: { transactionId: string; reason: string }): Promise<void>;
 }
 
 export class PaymentProviderError extends Error {

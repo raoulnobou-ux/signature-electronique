@@ -6,14 +6,14 @@ import {
   fromMinorUnits,
   mapTransactionStatus,
   verifyPaddleSignature,
-} from "@/lib/billing/paddle";
+} from "@/lib/billing/providers/card/paddle";
 import {
   PawaPayProvider,
   customerMessage,
   mapDepositStatus,
   cfaDepositCountries,
   pawapayApiUrl,
-} from "@/lib/billing/pawapay";
+} from "@/lib/billing/providers/african/pawapay";
 import { sameCfaCurrency, suggestedCountry } from "@/lib/billing/cfa";
 import {
   quoteCheckout,
@@ -22,7 +22,7 @@ import {
   type QuoteSubscription,
 } from "@/lib/billing/quote";
 import { paymentMethodLabel, renderReceipt } from "@/lib/billing/receipt";
-import { SandboxProvider } from "@/lib/billing/sandbox";
+import { SandboxProvider } from "@/lib/billing/providers/sandbox";
 import { reminderBucket } from "@/lib/billing/service";
 import { DEFAULT_PRICES } from "@/lib/entitlements/plans";
 
@@ -81,7 +81,7 @@ describe("devis de paiement", () => {
       prices,
       NOW,
     );
-    expect(q).toMatchObject({ kind: "upgrade", cycle: "yearly", currency: "USD", amount: 85 });
+    expect(q).toMatchObject({ kind: "upgrade", cycle: "yearly", currency: "USD", amount: 95 });
   });
 
   it("montant minimal pour un prorata presque nul", () => {
@@ -113,7 +113,7 @@ describe("devis de paiement", () => {
         prices,
         NOW,
       ),
-    ).toMatchObject({ kind: "new", amount: 26 });
+    ).toMatchObject({ kind: "new", amount: 29 });
     expect(
       quoteCheckout(
         sub({ state: "expired" }),
@@ -146,6 +146,9 @@ describe("devis de paiement", () => {
   it("arrondis par devise", () => {
     expect(roundAmount(6666.67, "XAF")).toBe(6670);
     expect(roundAmount(8.501, "USD")).toBe(8.51);
+    expect(roundAmount(12.5, "EUR")).toBe(12.5);
+    expect(roundAmount(7.001, "GBP")).toBe(7.01);
+    expect(roundAmount(101, "XAF")).toBe(105);
   });
 });
 

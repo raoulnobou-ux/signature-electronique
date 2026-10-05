@@ -1,6 +1,8 @@
 import "server-only";
 import { createClient } from "@supabase/supabase-js";
 import { headers } from "next/headers";
+import { isCurrency } from "@/config/currencies";
+import { defaultCurrencyForCountry } from "@/config/markets";
 import { DEFAULT_PRICES, isPaidPlan, type Currency } from "@/lib/entitlements/plans";
 import { publicEnv } from "@/lib/env";
 import type { Database } from "@/lib/supabase/database.types";
@@ -9,22 +11,18 @@ import type { PriceTable } from "@/lib/billing/quote";
 
 export type { PriceTable };
 
-/**
- * Pays où l'on affiche les prix en FCFA par défaut (zone CEMAC, dont le Cameroun).
- * Les autres visiteurs voient les prix en dollars ; ils peuvent basculer à tout moment.
- */
-const FCFA_COUNTRIES = new Set(["CM", "GA", "CG", "TD", "CF", "GQ"]);
+/** Pays du visiteur (code ISO alpha-2) détecté par l'hébergeur, s'il est connu. */
+export async function detectCountry(): Promise<string | null> {
+  const country = (await headers()).get("x-vercel-ip-country");
+  return country && /^[A-Za-z]{2}$/.test(country) ? country.toUpperCase() : null;
+}
 
 /**
- * Devise par défaut : pays détecté par l'hébergeur (en-tête Vercel), sinon langue du
- * navigateur (français → FCFA, autre → USD).
+ * Devise par défaut selon le marché du visiteur (config/markets.ts) : FCFA en zone CFA,
+ * euro en zone euro, livre au Royaume-Uni, dollar ailleurs. Toujours modifiable.
  */
 export async function detectCurrency(): Promise<Currency> {
-  const h = await headers();
-  const country = h.get("x-vercel-ip-country");
-  if (country) return FCFA_COUNTRIES.has(country.toUpperCase()) ? "XAF" : "USD";
-  const lang = h.get("accept-language")?.split(",")[0]?.slice(0, 2).toLowerCase();
-  return !lang || lang === "fr" ? "XAF" : "USD";
+  return defaultCurrencyForCountry(await detectCountry());
 }
 
 /**
@@ -47,7 +45,7 @@ export async function getPrices(): Promise<PriceTable> {
       .select("plan, currency, monthly_price, yearly_price");
     if (error) throw error;
     for (const row of data) {
-      if (!isPaidPlan(row.plan) || (row.currency !== "XAF" && row.currency !== "USD")) continue;
+      if (!isPaidPlan(row.plan) || !isCurrency(row.currency)) continue;
       prices[row.plan][row.currency] = { monthly: row.monthly_price, yearly: row.yearly_price };
     }
   } catch (error) {

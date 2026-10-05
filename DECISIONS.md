@@ -235,6 +235,31 @@ _Mesure (Lighthouse mobile, build de production) :_ performance 94, accessibilit
 
 **D97 — Paiement : le client choisit son moyen de paiement et son pays.** Le récapitulatif demande « Mobile Money (FCFA) ou carte (dollars) ». Pour le Mobile Money, il demande aussi le pays du numéro. Les pays proposés sont ceux où le compte pawaPay accepte des dépôts en franc CFA (`GET /v2/active-conf`, en cache 10 minutes), ou ceux de `PAWAPAY_COUNTRIES`. Le numéro du profil ne sert qu'à présélectionner le pays : il n'est jamais transmis, et le client saisit chez pawaPay le numéro avec lequel il paie. Un pays de l'UEMOA paie en XOF au même montant (parité XAF/XOF), et la vérification accepte l'un pour l'autre. Une mention « Mode test » s'affiche quand le prestataire est en bac à sable (paiement validé automatiquement par les numéros de test).
 
+## Produit international (octobre 2026)
+
+**D108 — Plusieurs prestataires de paiement, derrière une seule interface.** Aucun prestataire ne couvre seul la carte internationale et le Mobile Money africain. Chacun implémente `PaymentProvider` (`lib/billing/providers/`) avec :
+
+- son moyen de paiement (`card` ou `mobile_money`) ;
+- ses devises ;
+- les pays où il vend ;
+- la création du paiement, la revérification de la transaction et la lecture des notifications ;
+- en option, l'annulation et le remboursement.
+
+Le registre (`lib/billing/index.ts`) choisit le prestataire selon le moyen de paiement et la devise. `PAYMENT_PROVIDERS` active ou désactive un prestataire sans toucher au code. Ajouter un prestataire : voir `docs/PAIEMENTS.md`.
+
+**D109 — Paddle pour la carte bancaire internationale.** Paddle est revendeur officiel (merchant of record) : il encaisse, calcule et reverse la TVA et les taxes de vente de chaque pays, gère la fraude, les remboursements et les factures conformes. Pour une petite équipe basée au Cameroun, c'est le choix le plus réaliste : Stripe n'ouvre pas de compte marchand camerounais, et un revendeur officiel évite d'avoir à déclarer soi-même la TVA de chaque pays client.
+
+Le Cameroun ne fait pas partie des pays où Paddle refuse de vendre. Les pays refusés par Paddle (`PADDLE_BLOCKED_COUNTRIES`) ne voient pas la carte. pawaPay reste le prestataire africain (Mobile Money, zone franc CFA), séparé.
+
+**D110 — Prix par marché, sans conversion automatique.** Chaque plan a un prix fixe par devise dans `plans_config` (FCFA, euro, dollar, livre), arrondi à un montant « rond » propre au marché, plutôt qu'un taux de change qui varierait chaque jour. La base n'impose plus la liste des devises, seulement un code ISO à trois lettres : elle vit dans `config/currencies.ts`. `payments.amount` passe en décimal (`numeric(12,2)`), parce qu'un prorata par carte a des centimes ; l'ancienne colonne entière l'aurait refusé.
+
+**D111 — Moyens de paiement selon le pays.** Le pays du visiteur (en-tête `x-vercel-ip-country`) décide :
+
+- de la devise affichée par défaut : FCFA en zone franc CFA, euro en zone euro, livre au Royaume-Uni, dollar ailleurs ;
+- des moyens de paiement proposés : la carte partout où Paddle vend, avec un choix entre euro, dollar et livre ; le Mobile Money en zone franc CFA.
+
+Pays inconnu : tous les moyens configurés. Le client garde toujours la main sur la devise. Un passage au Pro au prorata reste dans la devise de l'abonnement en cours.
+
 ## Sécurité des données — référence (audit du 2 octobre 2026)
 
 Récapitulatif de chaque mesure, à citer à un client ou un partenaire. Chacune est vérifiée par un test automatique, indiqué entre crochets.

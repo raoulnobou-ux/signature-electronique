@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import { CURRENCIES, CURRENCY_CODES } from "@/config/currencies";
 import { Button } from "@/components/ui/button";
 import type { BillingCycle, Currency, PaidPlan } from "@/lib/entitlements/plans";
 import { formatMoney } from "@/lib/format";
@@ -103,10 +104,10 @@ export function PricingPlans({
           label={t("currencyLabel")}
           value={currency}
           onChange={setCurrency}
-          options={[
-            { value: "XAF", label: "FCFA" },
-            { value: "USD", label: "USD" },
-          ]}
+          options={CURRENCY_CODES.map((code) => ({
+            value: code,
+            label: code === "XAF" ? "FCFA" : code,
+          }))}
         />
       </div>
 
@@ -156,9 +157,8 @@ export function PricingPlans({
                 {cycle === "yearly" &&
                   t("equivalentMonthly", {
                     amount: formatMoney(
-                      currency === "XAF"
-                        ? Math.round(monthlyEquivalent)
-                        : Math.round(monthlyEquivalent * 100) / 100,
+                      Math.round(monthlyEquivalent * 10 ** CURRENCIES[currency].decimals) /
+                        10 ** CURRENCIES[currency].decimals,
                       currency,
                       locale,
                     ),

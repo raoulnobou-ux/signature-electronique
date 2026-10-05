@@ -739,16 +739,15 @@
         "amount": "To pay",
         "method": "How would you like to pay?",
         "methods": {
-          "XAF": {
-            "title": "Mobile Money — in CFA francs (XAF)",
-            "body": "MTN Mobile Money, Orange Money… on pawaPay's secure page."
+          "locked": "Upgrading to Pro is paid in your current subscription's currency.",
+          "mobile_money": {
+            "title": "Mobile Money — in CFA francs",
+            "body": "MTN Mobile Money, Orange Money… on the secure pawaPay page."
           },
-          "USD": {
-            "title": "Card — in US dollars (USD)",
-            "body": "Visa, Mastercard, PayPal, Apple Pay, Google Pay, on Paddle's secure form."
-          },
-          "unavailable": "Not available yet.",
-          "locked": "Upgrading to Pro is paid in your current subscription's currency."
+          "card": {
+            "title": "Card",
+            "body": "Visa, Mastercard, PayPal, Apple Pay, Google Pay, on the secure Paddle form."
+          }
         },
         "country": "Country of your Mobile Money number",
         "countryHint": "You'll enter the number you pay with on pawaPay's secure page (it can differ from your account's number).",
@@ -759,7 +758,8 @@
         "pay": "Pay {amount}",
         "secure": "Secure payment. QuickSign never sees or stores your card details.",
         "redirecting": "Redirecting to payment…",
-        "cancel": "Cancel"
+        "cancel": "Cancel",
+        "currency": "Payment currency"
       },
       "manage": {
         "title": "Manage subscription",

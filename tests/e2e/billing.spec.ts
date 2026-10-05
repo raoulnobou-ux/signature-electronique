@@ -207,7 +207,7 @@ test("sécurité : webhook non configuré, tâche planifiée protégée, faux re
   expect(sub!.status).toBe("expired");
 });
 
-test("le récapitulatif demande le moyen de paiement : Mobile Money (FCFA) ou carte (dollars)", async ({
+test("le récapitulatif demande le moyen de paiement : Mobile Money (FCFA) ou carte (euro, dollar, livre)", async ({
   page,
 }) => {
   const user = await createConfirmedUser("paie-moyen");
@@ -216,7 +216,7 @@ test("le récapitulatif demande le moyen de paiement : Mobile Money (FCFA) ou ca
   const dialog = page.getByRole("dialog");
   await expect(dialog.getByText("Comment voulez-vous payer ?")).toBeVisible();
   const mobile = dialog.getByRole("radio", { name: /Mobile Money — en FCFA/ });
-  const card = dialog.getByRole("radio", { name: /Carte bancaire — en dollars/ });
+  const card = dialog.getByRole("radio", { name: /Carte bancaire/ });
   await expect(mobile).toBeChecked();
   await expect(page.getByTestId("checkout-amount")).toContainText("FCFA");
   // Mobile Money : choix du pays (le numéro se saisit sur la page du prestataire).
@@ -227,8 +227,15 @@ test("le récapitulatif demande le moyen de paiement : Mobile Money (FCFA) ou ca
 
   await card.check();
   await expect(card).toBeChecked();
-  await expect(page.getByTestId("checkout-amount")).toContainText("$");
   await expect(country).toBeHidden();
+  // Carte : choix de la devise, le montant suit les prix du marché (pas de conversion).
+  const currency = dialog.getByLabel("Devise de paiement");
+  await currency.selectOption("EUR");
+  await expect(page.getByTestId("checkout-amount")).toHaveText(/9\s€/);
+  await currency.selectOption("GBP");
+  await expect(page.getByTestId("checkout-amount")).toHaveText(/8\s£/);
+  await currency.selectOption("USD");
+  await expect(page.getByTestId("checkout-amount")).toHaveText(/10\s\$/);
   await mobile.check();
   await expect(page.getByTestId("checkout-amount")).toContainText("FCFA");
 });

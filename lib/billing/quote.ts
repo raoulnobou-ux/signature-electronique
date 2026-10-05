@@ -1,3 +1,4 @@
+import { CURRENCIES } from "@/config/currencies";
 import type { AccessState } from "@/lib/entitlements";
 import type { BillingCycle, Currency, PaidPlan, PlanId } from "@/lib/entitlements/plans";
 
@@ -26,12 +27,15 @@ export interface Quote {
 }
 
 /** Montant minimal accepté pour un paiement (les opérateurs refusent les très petits montants). */
-export const MIN_AMOUNT: Record<Currency, number> = { XAF: 100, USD: 1 };
+export const MIN_AMOUNT = Object.fromEntries(
+  Object.entries(CURRENCIES).map(([code, c]) => [code, c.minAmount]),
+) as Record<Currency, number>;
 
-/** Arrondi à l'unité de la devise : FCFA entiers (au supérieur, par 5), dollars au centime. */
+/** Arrondi au pas de la devise, au supérieur : FCFA par 5, euros, dollars et livres au centime. */
 export function roundAmount(value: number, currency: Currency): number {
-  if (currency === "XAF") return Math.ceil(value / 5) * 5;
-  return Math.ceil(value * 100) / 100;
+  const step = CURRENCIES[currency].roundingStep;
+  const rounded = Math.ceil(Math.round((value / step) * 1e6) / 1e6) * step;
+  return Number(rounded.toFixed(CURRENCIES[currency].decimals));
 }
 
 /**

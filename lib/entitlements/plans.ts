@@ -4,7 +4,8 @@ export type PaidPlan = "essential" | "pro";
 export type PlanId = "trial" | PaidPlan;
 export type SubscriptionStatus = "trialing" | "active" | "past_due" | "canceled" | "expired";
 export type BillingCycle = "monthly" | "yearly";
-export type Currency = "XAF" | "USD";
+export type { Currency } from "@/config/currencies";
+import type { Currency } from "@/config/currencies";
 
 export const TRIAL_DAYS = 6;
 /** Jours pendant lesquels l'accès reste ouvert après la fin d'une période payée non renouvelée. */
@@ -60,10 +61,23 @@ export const PLAN_FEATURES: Record<PaidPlan, readonly Feature[]> = {
   pro: FEATURES,
 };
 
-/** Prix par défaut (FCFA et dollars entiers). La source de vérité est la table plans_config. */
+/**
+ * Prix par défaut, par marché (unités entières de chaque devise ; annuel = 10 mois).
+ * La source de vérité est la table plans_config : ces valeurs ne servent que de repli.
+ */
 export const DEFAULT_PRICES: Record<PaidPlan, Record<Currency, Record<BillingCycle, number>>> = {
-  essential: { XAF: { monthly: 5000, yearly: 50000 }, USD: { monthly: 9, yearly: 90 } },
-  pro: { XAF: { monthly: 15000, yearly: 150000 }, USD: { monthly: 26, yearly: 260 } },
+  essential: {
+    XAF: { monthly: 5000, yearly: 50000 },
+    EUR: { monthly: 9, yearly: 90 },
+    USD: { monthly: 10, yearly: 100 },
+    GBP: { monthly: 8, yearly: 80 },
+  },
+  pro: {
+    XAF: { monthly: 15000, yearly: 150000 },
+    EUR: { monthly: 25, yearly: 250 },
+    USD: { monthly: 29, yearly: 290 },
+    GBP: { monthly: 22, yearly: 220 },
+  },
 };
 
 /** Garde de type pour les valeurs lues en base (colonnes texte contraintes par CHECK). */

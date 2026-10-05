@@ -11,12 +11,12 @@ import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Card, CardContent } from "@/components/ui/card";
 import { requireAccount } from "@/lib/auth/account";
-import { getPaymentProvider, mobileMoneyCountries, testModes } from "@/lib/billing";
+import { mobileMoneyCountries, paymentOptions } from "@/lib/billing";
 import { suggestedCountry } from "@/lib/billing/cfa";
 import { paymentDescription } from "@/lib/billing/service";
 import { isPaidPlan, type BillingCycle, type Currency } from "@/lib/entitlements/plans";
 import { formatMoney } from "@/lib/format";
-import { detectCurrency, getPrices } from "@/lib/pricing";
+import { detectCountry, detectCurrency, getPrices } from "@/lib/pricing";
 import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 
@@ -40,15 +40,17 @@ const STATUS_VARIANT = {
 
 export default async function BillingPage({ searchParams }: PageProps<"/app/abonnement">) {
   const locale = await getRequestLocale();
-  const [account, t, format, prices, detected, params, supabase] = await Promise.all([
-    requireAccount(),
-    getTranslations("app.billing"),
-    getFormatter(),
-    getPrices(),
-    detectCurrency(),
-    searchParams,
-    createClient(),
-  ]);
+  const [account, t, format, prices, detected, visitorCountry, params, supabase] =
+    await Promise.all([
+      requireAccount(),
+      getTranslations("app.billing"),
+      getFormatter(),
+      getPrices(),
+      detectCurrency(),
+      detectCountry(),
+      searchParams,
+      createClient(),
+    ]);
 
   const { data: payments } = await supabase
     .from("payments")
@@ -64,12 +66,12 @@ export default async function BillingPage({ searchParams }: PageProps<"/app/abon
       ? (params.paiement as keyof typeof RESULTS)
       : null;
   const result = resultKey ? RESULTS[resultKey] : null;
-  const methods = {
-    XAF: getPaymentProvider("XAF") !== null,
-    USD: getPaymentProvider("USD") !== null,
-  };
-  const available = methods.XAF || methods.USD;
-  const countries = methods.XAF ? await mobileMoneyCountries() : [];
+  // Moyens de paiement proposés dans le pays du visiteur (carte, Mobile Money en zone CFA).
+  const options = paymentOptions(visitorCountry);
+  const available = options.length > 0;
+  const countries = options.some((o) => o.method === "mobile_money")
+    ? await mobileMoneyCountries()
+    : [];
   const currency = (subscription?.currency as Currency | null) ?? detected;
 
   return (
@@ -100,9 +102,8 @@ export default async function BillingPage({ searchParams }: PageProps<"/app/abon
           <CheckoutPlans
             prices={prices}
             defaultCurrency={currency}
-            methods={methods}
+            options={options}
             countries={countries}
-            testMode={testModes()}
             defaultCountry={suggestedCountry(account.profile.phone, countries)}
             state={account.entitlements.state}
             plan={account.entitlements.subscriptionPlan}

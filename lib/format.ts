@@ -1,12 +1,14 @@
+import { CURRENCIES } from "@/config/currencies";
 import type { Currency } from "@/lib/entitlements/plans";
 
 /** « 5 000 FCFA », « 9 $ » (fr) ou « $9 » (en). Les espaces insécables sont conservés. */
 export function formatMoney(amount: number, currency: Currency, locale = "fr"): string {
+  const config = CURRENCIES[currency];
   return new Intl.NumberFormat(locale === "fr" ? "fr-FR" : "en-US", {
     style: "currency",
     currency,
-    currencyDisplay: currency === "USD" ? "narrowSymbol" : "symbol",
-    maximumFractionDigits: currency === "XAF" ? 0 : 2,
+    currencyDisplay: config.symbolDisplay,
+    maximumFractionDigits: config.decimals,
     minimumFractionDigits: 0,
   }).format(amount);
 }

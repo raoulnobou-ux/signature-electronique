@@ -1,12 +1,27 @@
 import "server-only";
 import { serverEnv } from "@/lib/env.server";
-import type { Currency } from "@/lib/entitlements/plans";
+import { CURRENCY_CODES, type Currency } from "@/config/currencies";
+import { isCfaCountry } from "@/config/markets";
 import { logAppError } from "@/lib/monitoring/app-errors";
 import { CFA_COUNTRIES } from "./cfa";
-import { PaddleProvider } from "./paddle";
-import { PAWAPAY_API, PawaPayProvider, pawapayApiUrl } from "./pawapay";
-import type { PaymentProvider } from "./provider";
-import { SandboxProvider } from "./sandbox";
+import { PaddleProvider } from "./providers/card/paddle";
+import { PAWAPAY_API, PawaPayProvider, pawapayApiUrl } from "./providers/african/pawapay";
+import type { PaymentMethod, PaymentOption, PaymentProvider } from "./providers/types";
+import { SandboxProvider } from "./providers/sandbox";
+
+export type { PaymentOption };
+
+/**
+ * Prestataires activés : PAYMENT_PROVIDERS (ex. « paddle,pawapay ») ; vide = tous ceux dont
+ * les clés sont configurées. Retirer un nom désactive le prestataire sans toucher au code.
+ */
+export function providerEnabled(name: string): boolean {
+  const list = (serverEnv.PAYMENT_PROVIDERS ?? "")
+    .split(",")
+    .map((p) => p.trim().toLowerCase())
+    .filter(Boolean);
+  return list.length === 0 || list.includes(name);
+}
 
 let pawapay: PawaPayProvider | null | undefined;
 let paddle: PaddleProvider | null | undefined;
@@ -25,9 +40,10 @@ export function pawapayBaseUrl(): string {
 /** pawaPay : Mobile Money (FCFA), dès que PAWAPAY_API_TOKEN est défini. */
 export function getPawaPay(): PawaPayProvider | null {
   if (pawapay === undefined) {
-    pawapay = serverEnv.PAWAPAY_API_TOKEN
-      ? new PawaPayProvider(serverEnv.PAWAPAY_API_TOKEN, pawapayBaseUrl())
-      : null;
+    pawapay =
+      serverEnv.PAWAPAY_API_TOKEN && providerEnabled("pawapay")
+        ? new PawaPayProvider(serverEnv.PAWAPAY_API_TOKEN, pawapayBaseUrl())
+        : null;
   }
   return pawapay;
 }
@@ -43,13 +59,14 @@ export function paddleEnvironment(): "sandbox" | "production" {
 /** Paddle : carte et paiements internationaux (dollars), dès que PADDLE_API_KEY est défini. */
 export function getPaddle(): PaddleProvider | null {
   if (paddle === undefined) {
-    paddle = serverEnv.PADDLE_API_KEY
-      ? new PaddleProvider(
-          serverEnv.PADDLE_API_KEY,
-          paddleEnvironment(),
-          serverEnv.PADDLE_WEBHOOK_SECRET,
-        )
-      : null;
+    paddle =
+      serverEnv.PADDLE_API_KEY && providerEnabled("paddle")
+        ? new PaddleProvider(
+            serverEnv.PADDLE_API_KEY,
+            paddleEnvironment(),
+            serverEnv.PADDLE_WEBHOOK_SECRET,
+          )
+        : null;
   }
   return paddle;
 }
@@ -65,14 +82,57 @@ export function getSandboxProvider(): SandboxProvider | null {
   return sandbox;
 }
 
+/** Prestataires réels configurés et activés, par moyen de paiement. */
+function realProviders(): PaymentProvider[] {
+  return [getPaddle(), getPawaPay()].filter((p): p is NonNullable<typeof p> => p !== null);
+}
+
 /**
- * Prestataire d'un paiement selon sa devise : pawaPay pour le FCFA (Mobile Money),
- * Paddle pour le dollar (carte, international) ; sinon le bac à sable s'il est actif ;
- * sinon null : l'interface indique que le paiement n'est pas encore disponible.
+ * Prestataire pour un moyen de paiement et une devise : le premier prestataire réel qui
+ * les accepte, sinon le bac à sable (développement), sinon null (paiement indisponible).
  */
-export function getPaymentProvider(currency: Currency): PaymentProvider | null {
-  const real = currency === "XAF" ? getPawaPay() : getPaddle();
+export function getProvider(method: PaymentMethod, currency: Currency): PaymentProvider | null {
+  const real = realProviders().find((p) => p.method === method && p.currencies.includes(currency));
   return real ?? getSandboxProvider();
+}
+
+/**
+ * Moyen de paiement naturel d'une devise : le franc CFA se paie par Mobile Money (seul
+ * moyen local disponible pour cette devise), les autres devises par carte.
+ */
+export function methodForCurrency(currency: Currency): PaymentMethod {
+  return currency === "XAF" ? "mobile_money" : "card";
+}
+
+/** Prestataire d'un paiement dans une devise donnée (moyen de paiement naturel de la devise). */
+export function getPaymentProvider(currency: Currency): PaymentProvider | null {
+  return getProvider(methodForCurrency(currency), currency);
+}
+
+/**
+ * Moyens de paiement proposés à un client selon son pays (code ISO alpha-2, ou null si
+ * inconnu) : la carte partout où le prestataire l'accepte ; le Mobile Money dans les pays
+ * de la zone franc CFA. Pays inconnu : tous les moyens configurés.
+ */
+export function paymentOptions(country: string | null): PaymentOption[] {
+  const sandbox = getSandboxProvider();
+  const options: PaymentOption[] = [];
+  for (const method of ["card", "mobile_money"] as const) {
+    const real = realProviders().filter(
+      (p) => p.method === method && (!country || (p.supportsCountry?.(country) ?? true)),
+    );
+    const currencies = [...new Set(real.flatMap((p) => [...p.currencies]))];
+    if (currencies.length) {
+      options.push({ method, currencies, testMode: testModes()[currencies[0]!] });
+    } else if (sandbox && (method === "card" || !country || isCfaCountry(country))) {
+      options.push({
+        method,
+        currencies: method === "card" ? ["EUR", "USD", "GBP"] : ["XAF"],
+        testMode: true,
+      });
+    }
+  }
+  return options;
 }
 
 /**
@@ -102,11 +162,12 @@ export async function mobileMoneyCountries(): Promise<string[]> {
 
 /** Paiements de test (aucun argent réel) : bac à sable du prestataire de chaque devise. */
 export function testModes(): Record<Currency, boolean> {
-  const pawapay = getPawaPay();
-  return {
-    XAF: pawapay ? pawapayBaseUrl() !== PAWAPAY_API.production : getSandboxProvider() !== null,
-    USD: getPaddle() ? paddleEnvironment() === "sandbox" : getSandboxProvider() !== null,
-  };
+  const sandbox = getSandboxProvider() !== null;
+  const mobile = getPawaPay() ? pawapayBaseUrl() !== PAWAPAY_API.production : sandbox;
+  const card = getPaddle() ? paddleEnvironment() === "sandbox" : sandbox;
+  return Object.fromEntries(
+    CURRENCY_CODES.map((c) => [c, methodForCurrency(c) === "mobile_money" ? mobile : card]),
+  ) as Record<Currency, boolean>;
 }
 
 /** Prestataire qui a créé un paiement (payments.provider), pour le revérifier. */

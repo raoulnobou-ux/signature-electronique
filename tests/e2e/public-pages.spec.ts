@@ -26,14 +26,18 @@ for (const { path, heading } of pages) {
   });
 }
 
-test("les tarifs basculent en annuel et en dollars", async ({ page }) => {
+test("les tarifs basculent en annuel et dans chaque devise", async ({ page }) => {
   await page.goto("/tarifs");
   await page.getByRole("radio", { name: /FCFA/ }).click();
   await expect(page.getByText("5 000 FCFA").first()).toBeVisible();
   await page.getByRole("radio", { name: /Annuel/ }).click();
   await expect(page.getByText("50 000 FCFA").first()).toBeVisible();
   await page.getByRole("radio", { name: "USD" }).click();
-  await expect(page.getByText("90 $").first()).toBeVisible();
+  await expect(page.getByText("100 $").first()).toBeVisible();
+  await page.getByRole("radio", { name: "EUR" }).click();
+  await expect(page.getByText("90 €").first()).toBeVisible();
+  await page.getByRole("radio", { name: "GBP" }).click();
+  await expect(page.getByText("80 £").first()).toBeVisible();
 });
 
 test("le formulaire de contact valide puis envoie le message", async ({ page }) => {

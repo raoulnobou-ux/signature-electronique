@@ -17,6 +17,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
+import type { PaymentMethod, PaymentOption } from "@/lib/billing/providers/types";
 import type { Quote } from "@/lib/billing/quote";
 import type { AccessState } from "@/lib/entitlements";
 import type { BillingCycle, Currency, PaidPlan, PlanId } from "@/lib/entitlements/plans";
@@ -25,28 +26,30 @@ import type { PriceTable } from "@/lib/pricing";
 import { cn } from "@/lib/utils";
 import { CFA_COUNTRIES } from "@/lib/billing/cfa";
 
+const METHOD_ICONS: Record<PaymentMethod, typeof CreditCard> = {
+  card: CreditCard,
+  mobile_money: Smartphone,
+};
+
 type Selection = { plan: PaidPlan; cycle: BillingCycle; currency: Currency };
 
 /** Plans de l'espace Abonnement : devis exact (prorata) puis redirection vers le paiement. */
 export function CheckoutPlans({
   prices,
   defaultCurrency,
-  methods,
+  options,
   countries,
   defaultCountry,
-  testMode,
   state,
   plan,
 }: {
   prices: PriceTable;
   defaultCurrency: Currency;
-  /** Moyens de paiement configurés : FCFA → Mobile Money (pawaPay), USD → carte (Paddle). */
-  methods: Record<Currency, boolean>;
+  /** Moyens de paiement proposés (carte : EUR/USD/GBP ; Mobile Money : FCFA), selon le pays. */
+  options: PaymentOption[];
   /** Pays proposés pour le Mobile Money (ISO alpha-3), et celui présélectionné. */
   countries: string[];
   defaultCountry: string;
-  /** Prestataire en bac à sable : aucun argent réel n'est débité. */
-  testMode: Record<Currency, boolean>;
   state: AccessState;
   plan: PlanId;
 }) {
@@ -57,6 +60,8 @@ export function CheckoutPlans({
   const [selection, setSelection] = useState<Selection | null>(null);
   const [country, setCountry] = useState(defaultCountry);
   const regionNames = new Intl.DisplayNames([locale], { type: "region" });
+  const currencyNames = new Intl.DisplayNames([locale], { type: "currency" });
+  const currencyName = (code: Currency) => `${currencyNames.of(code) ?? code} (${code})`;
   const countryName = (code: string) => {
     const alpha2 = CFA_COUNTRIES[code]?.alpha2;
     return (alpha2 && regionNames.of(alpha2)) || code;
@@ -79,11 +84,14 @@ export function CheckoutPlans({
     return t("labels.choose", { plan: planName(p) });
   };
 
-  const available = methods.XAF || methods.USD;
+  const available = options.length > 0;
+  const optionFor = (currency: Currency) => options.find((o) => o.currencies.includes(currency));
 
   const select = (p: PaidPlan, cycle: BillingCycle, shown: Currency) => {
-    // Devise affichée si son moyen de paiement est disponible, sinon l'autre.
-    const currency = methods[shown] ? shown : shown === "XAF" ? "USD" : "XAF";
+    // Devise affichée si un moyen de paiement l'accepte, sinon la première devise par carte.
+    const fallback = options.find((o) => o.method === "card") ?? options[0];
+    const currency = optionFor(shown) ? shown : fallback?.currencies[0];
+    if (!currency) return;
     setSelection({ plan: p, cycle, currency });
     setQuote(null);
     startQuote(async () => {
@@ -96,8 +104,8 @@ export function CheckoutPlans({
     });
   };
 
-  /** Choix du moyen de paiement : nouveau devis dans la devise correspondante. */
-  const chooseMethod = (currency: Currency) => {
+  /** Choix du moyen de paiement ou de la devise : nouveau devis dans cette devise. */
+  const chooseCurrency = (currency: Currency) => {
     if (!selection || selection.currency === currency) return;
     select(selection.plan, selection.cycle, currency);
   };
@@ -106,7 +114,9 @@ export function CheckoutPlans({
     if (!selection) return;
     startPaying(async () => {
       const result = await startCheckout(
-        selection.currency === "XAF" ? { ...selection, country } : selection,
+        optionFor(selection.currency)?.method === "mobile_money"
+          ? { ...selection, country }
+          : selection,
       );
       if (result.ok) {
         toast.message(t("checkout.redirecting"));
@@ -116,6 +126,7 @@ export function CheckoutPlans({
   };
 
   const q = quote?.quote;
+  const selected = q ? optionFor(q.currency) : undefined;
   const periodEnd = quote ? new Date(quote.endsAt) : null;
 
   return (
@@ -182,15 +193,15 @@ export function CheckoutPlans({
               </p>
               <fieldset className="space-y-2">
                 <legend className="mb-2 text-sm font-medium">{t("checkout.method")}</legend>
-                {(["XAF", "USD"] as const).map((currency) => {
-                  const Icon = currency === "XAF" ? Smartphone : CreditCard;
+                {options.map((option) => {
+                  const Icon = METHOD_ICONS[option.method];
+                  const checked = option.currencies.includes(q.currency);
                   // Le prorata garde la devise de l'abonnement en cours.
-                  const locked = q.kind === "upgrade" && q.currency !== currency;
-                  const disabled = !methods[currency] || locked || loadingQuote;
-                  const checked = q.currency === currency;
+                  const locked = q.kind === "upgrade" && !checked;
+                  const disabled = locked || loadingQuote;
                   return (
                     <label
-                      key={currency}
+                      key={option.method}
                       className={cn(
                         "flex cursor-pointer items-start gap-3 rounded-xl border p-3 transition-colors",
                         checked ? "border-primary bg-primary/5" : "border-border",
@@ -203,26 +214,44 @@ export function CheckoutPlans({
                         className="mt-1 accent-[var(--color-primary)]"
                         checked={checked}
                         disabled={disabled}
-                        onChange={() => chooseMethod(currency)}
+                        onChange={() => chooseCurrency(option.currencies[0]!)}
                       />
                       <Icon className="mt-0.5 size-5 shrink-0 text-muted-foreground" aria-hidden />
                       <span>
                         <span className="block text-sm font-medium">
-                          {t(`checkout.methods.${currency}.title`)}
+                          {t(`checkout.methods.${option.method}.title`)}
                         </span>
                         <span className="block text-xs text-muted-foreground">
-                          {!methods[currency]
-                            ? t("checkout.methods.unavailable")
-                            : locked
-                              ? t("checkout.methods.locked")
-                              : t(`checkout.methods.${currency}.body`)}
+                          {locked
+                            ? t("checkout.methods.locked")
+                            : t(`checkout.methods.${option.method}.body`)}
                         </span>
                       </span>
                     </label>
                   );
                 })}
               </fieldset>
-              {q.currency === "XAF" && countries.length > 0 && (
+              {selected && selected.currencies.length > 1 && q.kind !== "upgrade" && (
+                <div className="space-y-1.5">
+                  <label htmlFor="payment-currency" className="text-sm font-medium">
+                    {t("checkout.currency")}
+                  </label>
+                  <select
+                    id="payment-currency"
+                    value={q.currency}
+                    disabled={loadingQuote}
+                    onChange={(event) => chooseCurrency(event.target.value as Currency)}
+                    className="h-11 w-full rounded-xl border border-input bg-background px-3 text-sm"
+                  >
+                    {selected.currencies.map((code) => (
+                      <option key={code} value={code}>
+                        {currencyName(code)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+              {selected?.method === "mobile_money" && countries.length > 0 && (
                 <div className="space-y-1.5">
                   <label htmlFor="mobile-money-country" className="text-sm font-medium">
                     {t("checkout.country")}
@@ -242,7 +271,7 @@ export function CheckoutPlans({
                   <p className="text-xs text-muted-foreground">{t("checkout.countryHint")}</p>
                 </div>
               )}
-              {testMode[q.currency] && (
+              {selected?.testMode && (
                 <p
                   role="note"
                   className="rounded-xl border border-warning/30 bg-warning/10 px-3 py-2 text-sm"

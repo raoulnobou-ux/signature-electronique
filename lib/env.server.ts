@@ -26,6 +26,8 @@ const serverSchema = z.object({
   GOTENBERG_TOKEN: z.string().optional(),
   RESEND_API_KEY: z.string().optional(),
   EMAIL_FROM: z.string().default("QuickSign <bonjour@quicksign.app>"),
+  /** Prestataires de paiement activés (« paddle,pawapay ») ; vide = tous ceux configurés. */
+  PAYMENT_PROVIDERS: z.string().optional(),
   /** pawaPay (Mobile Money, FCFA) : jeton d'API. */
   PAWAPAY_API_TOKEN: z.string().optional(),
   PAWAPAY_ENV: providerEnv,

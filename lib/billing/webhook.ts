@@ -2,7 +2,7 @@ import "server-only";
 import { NextResponse } from "next/server";
 import type { Json } from "@/lib/supabase/database.types";
 import { createAdminClient } from "@/lib/supabase/admin";
-import type { PaymentProvider } from "./provider";
+import type { PaymentProvider } from "./providers/types";
 import { settlePayment } from "./service";
 
 /**

@@ -2,7 +2,7 @@
 
 > Signez, faites signer, terminé. En 30 secondes.
 
-QuickSign est une application web (SaaS) de signature électronique pensée pour les entreprises, cabinets, écoles et administrations du Cameroun et d'Afrique francophone : import Word/PDF, signature et cachet en quelques gestes, PDF signé horodaté, paiement Mobile Money, envoi par WhatsApp, assistant IA.
+QuickSign est une application web (SaaS) de signature électronique pensée pour les entreprises, cabinets, écoles et administrations, partout dans le monde : import Word/PDF, signature et cachet en quelques gestes, PDF signé horodaté, paiement par carte ou Mobile Money, envoi par WhatsApp, assistant IA.
 
 - Cahier des charges : [`SPEC.md`](SPEC.md)
 - Décisions d'architecture : [`DECISIONS.md`](DECISIONS.md)
@@ -113,10 +113,16 @@ Le schéma complet (tables, Row Level Security, buckets privés, trigger de cré
 
 ## Abonnements et paiements
 
-- Page `/app/abonnement` : plan actuel, usage, choix du plan (mensuel/annuel, FCFA/USD), récapitulatif exact (prorata), historique et reçus PDF.
-- Deux prestataires, choisis selon la devise :
-  - **FCFA → pawaPay** (Mobile Money MTN, Orange… sur la page de paiement hébergée de pawaPay) : `PAWAPAY_API_TOKEN` (et `PAWAPAY_ENV=sandbox` pour les essais). Callback de dépôt : `https://<domaine>/api/webhooks/pawapay`.
-  - **Dollars → Paddle** (carte, PayPal, Apple Pay, Google Pay ; Paddle est revendeur officiel et gère la TVA) : `PADDLE_API_KEY`, `PADDLE_CLIENT_TOKEN`, `PADDLE_WEBHOOK_SECRET`. Lien de paiement par défaut : `https://<domaine>/app/abonnement/paiement` ; notifications : `https://<domaine>/api/webhooks/paddle`.
+- Page `/app/abonnement` : plan actuel, usage, choix du plan (mensuel ou annuel ; FCFA, euro, dollar ou livre), récapitulatif exact (prorata), historique et reçus PDF.
+- Plusieurs prestataires derrière une même interface (`lib/billing/providers/`), activés par `PAYMENT_PROVIDERS`. Guide complet : [`docs/PAIEMENTS.md`](docs/PAIEMENTS.md).
+  - **Carte bancaire → Paddle** (EUR, USD, GBP ; carte, PayPal, Apple Pay, Google Pay ; Paddle est revendeur officiel et gère la TVA) :
+    - variables `PADDLE_API_KEY`, `PADDLE_CLIENT_TOKEN`, `PADDLE_WEBHOOK_SECRET` ;
+    - lien de paiement par défaut : `https://<domaine>/app/abonnement/paiement` ;
+    - notifications : `https://<domaine>/api/webhooks/paddle`.
+  - **Mobile Money → pawaPay** (FCFA, zone franc CFA ; MTN, Orange… sur la page de paiement hébergée de pawaPay) :
+    - variable `PAWAPAY_API_TOKEN` (et `PAWAPAY_ENV=sandbox` pour les essais) ;
+    - callback de dépôt : `https://<domaine>/api/webhooks/pawapay`.
+- Les moyens de paiement proposés dépendent du pays du visiteur. Les prix sont fixés par marché dans `plans_config`, sans conversion automatique.
 - Le retour client arrive sur `/api/billing/return` ; aucun plan n'est activé sans revérification de la transaction par l'API du prestataire.
 - Sans prestataire, `PAYMENTS_SANDBOX=true` active un paiement simulé (développement, tests e2e) ; jamais en production.
 - Tâche planifiée quotidienne : `/api/cron/billing` (rappels J-5/J-2/J, fin d'essai, grâce de 3 jours, lecture seule), déclarée dans `vercel.json`.

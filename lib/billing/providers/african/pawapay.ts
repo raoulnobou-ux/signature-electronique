@@ -1,5 +1,6 @@
 import "server-only";
-import { CFA_COUNTRIES } from "./cfa";
+import { isCfaCountry } from "@/config/markets";
+import { CFA_COUNTRIES } from "../../cfa";
 import {
   PaymentProviderError,
   type CheckoutRequest,
@@ -7,7 +8,7 @@ import {
   type TransactionStatus,
   type VerifiedTransaction,
   type WebhookEvent,
-} from "./provider";
+} from "../types";
 
 /**
  * pawaPay (API v2) : Mobile Money en Afrique (MTN, Orange, Airtel…), pour les paiements
@@ -99,6 +100,14 @@ type Deposit = {
 
 export class PawaPayProvider implements PaymentProvider {
   readonly name = "pawapay";
+  readonly method = "mobile_money" as const;
+  /** Prix en FCFA ; payé en XAF ou en XOF (même valeur) selon le pays. */
+  readonly currencies = ["XAF"] as const;
+
+  /** Mobile Money en franc CFA : pays de la zone CFA uniquement. */
+  supportsCountry(country: string): boolean {
+    return isCfaCountry(country);
+  }
   private readonly base: string;
   private countriesCache: { value: string[]; until: number } | null = null;
 
