@@ -39,7 +39,7 @@ const A4: [number, number] = [595.28, 841.89];
 const LEFT = 50;
 const RIGHT = A4[0] - 50;
 
-export function formatInstant(date: Date, timeZone = "Africa/Douala"): string {
+export function formatInstant(date: Date, timeZone = "UTC"): string {
   const local = new Intl.DateTimeFormat("fr-FR", {
     dateStyle: "long",
     timeStyle: "medium",
@@ -70,7 +70,7 @@ function wrap(font: PDFFont, text: string, size: number, width: number): string[
  * cadre juridique, et QR code vers la page publique de vérification.
  */
 export async function renderCertificate(data: CertificateData): Promise<Uint8Array> {
-  const tz = data.timeZone ?? "Africa/Douala";
+  const tz = data.timeZone ?? "UTC";
   const pdf = await PDFDocument.create();
   const regular = await pdf.embedFont(StandardFonts.Helvetica);
   const bold = await pdf.embedFont(StandardFonts.HelveticaBold);

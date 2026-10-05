@@ -2,7 +2,7 @@
 
 import { ChevronDown } from "lucide-react";
 import { useLocale } from "next-intl";
-import { forwardRef, useMemo, type ComponentProps } from "react";
+import { forwardRef, useMemo, useState, type ComponentProps } from "react";
 import { Input } from "@/components/ui/input";
 import { countryOptions, flagEmoji, type CountryCode } from "@/lib/phone";
 import { useIsClient } from "@/lib/use-is-client";
@@ -18,7 +18,7 @@ type PhoneInputProps = Omit<ComponentProps<"input">, "onChange" | "value"> & {
 
 /**
  * Sélecteur de pays (select natif : léger, parfait au doigt) + numéro national.
- * Le Cameroun (+237) est proposé par défaut ; la normalisation E.164 se fait à la validation.
+ * Le pays du visiteur est proposé par défaut ; la normalisation E.164 se fait à la validation.
  */
 export const PhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(function PhoneInput(
   { country, onCountryChange, value, onValueChange, countryLabel, className, ...props },
@@ -27,7 +27,9 @@ export const PhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(function
   const locale = useLocale();
   const isClient = useIsClient();
   // Les noms de pays dépendent des données ICU (Node ≠ navigateur) : liste complète côté client seulement.
-  const options = useMemo(() => countryOptions(locale), [locale]);
+  // Le pays initial (détecté ou enregistré) passe en tête de liste ; il ne bouge plus ensuite.
+  const [preferred] = useState(country);
+  const options = useMemo(() => countryOptions(locale, preferred), [locale, preferred]);
   const visibleOptions = isClient ? options : options.filter((o) => o.code === country);
   const current = options.find((o) => o.code === country);
   const firstOther = options.findIndex((o) => !o.favorite);

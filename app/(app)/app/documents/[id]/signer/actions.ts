@@ -253,7 +253,7 @@ async function currentSize(documentId: string): Promise<number> {
 /** Date préremplie pour le champ « Date » (fuseau et ville de l'utilisateur). */
 export async function todayLabel(): Promise<string> {
   const access = await guard("edit");
-  if (!access.ok) return formatSignatureDate(new Date(), "Africa/Douala");
+  if (!access.ok) return formatSignatureDate(new Date(), "UTC");
   const { profile } = access.account;
   return formatSignatureDate(new Date(), profile.timezone, profile.city, profile.locale);
 }

@@ -27,6 +27,49 @@ describe.skipIf(!hasLocalDb)("sécurité des données (RLS)", () => {
     expect(usage).toMatchObject({ documentsStored: 0 });
   });
 
+  it("l'inscription garde le pays et le fuseau de l'appareil, et rejette les valeurs invalides", async () => {
+    const make = async (meta: Record<string, unknown>) => {
+      const { data } = await admin().auth.admin.createUser({
+        email: `intl-${Date.now()}-${Math.floor(Math.random() * 1e5)}@example.com`,
+        password: "Integration-2026",
+        email_confirm: true,
+        user_metadata: { full_name: "Intl", ...meta },
+      });
+      const { data: profile } = await admin()
+        .from("profiles")
+        .select("country, timezone, phone, currency")
+        .eq("id", data.user!.id)
+        .single();
+      return profile;
+    };
+    expect(await make({ country: "fr", timezone: "Europe/Paris" })).toEqual({
+      country: "FR",
+      timezone: "Europe/Paris",
+      phone: null,
+      currency: null,
+    });
+    expect(await make({ country: "France", timezone: "Nowhere/City" })).toMatchObject({
+      country: null,
+      timezone: "UTC",
+    });
+  });
+
+  it("le pays et la devise préférés ne sont modifiables que par leur propriétaire", async () => {
+    const ok = await alice.client
+      .from("profiles")
+      .update({ country: "CA", currency: "USD" })
+      .eq("id", alice.id);
+    expect(ok.error).toBeNull();
+    const bad = await alice.client
+      .from("profiles")
+      .update({ currency: "dollars" })
+      .eq("id", alice.id);
+    expect(bad.error).not.toBeNull();
+    await bob.client.from("profiles").update({ country: "ZZ" }).eq("id", alice.id);
+    const { data } = await admin().from("profiles").select("country").eq("id", alice.id).single();
+    expect(data!.country).toBe("CA");
+  });
+
   it("un utilisateur ne voit jamais le profil ni l'abonnement d'un autre", async () => {
     const profiles = await alice.client.from("profiles").select("id");
     expect(profiles.data?.map((p) => p.id)).toEqual([alice.id]);

@@ -626,7 +626,8 @@ function StampPad({ register }: { register: Register }) {
   const [today] = useState(() =>
     new Intl.DateTimeFormat(locale === "en" ? "en-GB" : "fr-FR", {
       dateStyle: "short",
-      timeZone: "Africa/Douala",
+      // Fuseau de l'appareil : la date du cachet est celle que voit l'utilisateur.
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     }).format(new Date()),
   );
   const svg = useMemo(

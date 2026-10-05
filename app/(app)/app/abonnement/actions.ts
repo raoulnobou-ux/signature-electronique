@@ -12,6 +12,7 @@ import { quoteCheckout, type Quote } from "@/lib/billing/quote";
 import { SANDBOX_METHODS, SANDBOX_OUTCOMES } from "@/lib/billing/providers/sandbox";
 import { PLAN_LABELS, paymentDescription } from "@/lib/billing/service";
 import type { BillingCycle, Currency, PlanId } from "@/lib/entitlements/plans";
+import { toLocale } from "@/i18n/config";
 import { publicEnv } from "@/lib/env";
 import { logAppError } from "@/lib/monitoring/app-errors";
 import { getPrices } from "@/lib/pricing";
@@ -167,7 +168,7 @@ export async function startCheckout(
       reference,
       amount: quote.amount,
       currency: quote.currency,
-      description: paymentDescription(quote.plan, quote.cycle, quote.kind),
+      description: paymentDescription(quote.plan, quote.cycle, quote.kind, toLocale(locale)),
       productName: `QuickSign ${PLAN_LABELS[quote.plan]}`,
       language: locale === "en" ? "en" : "fr",
       customer: {

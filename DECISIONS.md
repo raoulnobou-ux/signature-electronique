@@ -296,6 +296,19 @@ Le tampon de statut a son libellé en français ou en anglais selon la langue, u
 
 Les choix sont enregistrés dans `profiles.signature_block` (JSON validé par zod et par une contrainte de taille) et proposés au document suivant. Chaque élément devient un champ ordinaire, modifiable séparément, plutôt qu'une image figée. Ainsi, la date reste celle du jour de signature et le nom reste du texte net dans le PDF. La disposition est une fonction pure testée (`layoutSignatureBlock`). Si la signature ou le cachet manque, l'éditeur ouvre sa création puis revient au bloc.
 
+**D116 — Profil international.** Le profil porte :
+
+- la langue (déjà en place) ;
+- le pays de résidence (`country`, ISO alpha-2) ;
+- le fuseau horaire (déjà en place, désormais rempli depuis l'appareil) ;
+- une devise préférée facultative (`currency`).
+
+L'inscription n'impose plus de téléphone. Le pays détecté préremplit l'indicatif et le pays du profil, et le fuseau de l'appareil est enregistré (UTC s'il est invalide, vérifié en SQL contre `pg_timezone_names`). Le pays du profil, à défaut celui détecté, décide des moyens de paiement et du pays Mobile Money présélectionné. La devise de l'abonnement, à défaut la préférence, à défaut le pays, décide de la devise affichée.
+
+Les dates des e-mails, des reçus, des certificats et des signatures suivent la langue et le fuseau du destinataire : plus aucune date n'est calculée à l'heure de Douala par défaut. Les reçus PDF sont en français ou en anglais.
+
+On reste sur deux langues (français, anglais) : en ajouter une est documenté (`docs/INTERNATIONAL.md`) mais demande une vraie traduction, pas une traduction automatique.
+
 ## Sécurité des données — référence (audit du 2 octobre 2026)
 
 Récapitulatif de chaque mesure, à citer à un client ou un partenaire. Chacune est vérifiée par un test automatique, indiqué entre crochets.

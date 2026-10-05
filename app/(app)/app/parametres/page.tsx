@@ -32,6 +32,8 @@ export default async function SettingsPage() {
     phoneCountry: (phone?.country as CountryCode | undefined) ?? null,
     avatarUrl: p.avatar_url,
     timezone: p.timezone,
+    country: p.country,
+    currency: p.currency,
     accountType: (p.account_type as AccountType | null) ?? null,
     orgName: p.org_name ?? "",
     orgSector: p.org_sector ?? "",

@@ -21,7 +21,10 @@ export const accountStepSchema = z.object({
   fullName: z.string().trim().min(2, "tooShort").max(120, "tooLong"),
   email,
   country: z.string().length(2),
-  phone: z.string().trim().min(1, "required"),
+  /** Facultatif : sert aux rappels WhatsApp et à présélectionner le pays de paiement. */
+  phone: z.string().trim().max(30, "tooLong"),
+  /** Fuseau de l'appareil (dates des signatures et des e-mails). */
+  timezone: z.string().max(64).optional(),
   password,
   acceptTerms: z.literal(true, "acceptTerms"),
 });
@@ -33,16 +36,33 @@ export const profileStepSchema = z.object({
   city: z.string().trim().max(80, "tooLong").optional(),
 });
 
-/** Schéma complet envoyé au serveur ; le téléphone y est normalisé en E.164. */
+/** Numéro vide (facultatif) ou valide pour le pays choisi. */
+export function phoneOk(phone: string, country: string): boolean {
+  return !phone.trim() || toE164(phone, country as CountryCode) !== null;
+}
+
+/** Fuseau horaire IANA reconnu (sinon UTC à l'enregistrement). */
+export function validTimezone(timezone: string | undefined): string | null {
+  if (!timezone) return null;
+  try {
+    new Intl.DateTimeFormat("en", { timeZone: timezone });
+    return timezone;
+  } catch {
+    return null;
+  }
+}
+
+/** Schéma complet envoyé au serveur ; le téléphone (s'il est donné) est normalisé en E.164. */
 export const signUpSchema = accountStepSchema
   .extend(profileStepSchema.shape)
   .transform((data, ctx) => {
+    if (!data.phone) return { ...data, phone: null, timezone: validTimezone(data.timezone) };
     const e164 = toE164(data.phone, data.country as CountryCode);
     if (!e164) {
       ctx.addIssue({ code: "custom", path: ["phone"], message: "phone" });
       return z.NEVER;
     }
-    return { ...data, phone: e164 };
+    return { ...data, phone: e164, timezone: validTimezone(data.timezone) };
   });
 
 export type AccountStepInput = z.input<typeof accountStepSchema>;

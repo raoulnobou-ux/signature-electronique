@@ -111,6 +111,10 @@ Le schéma complet (tables, Row Level Security, buckets privés, trigger de cré
 - Essentiel : questions d'usage et visites guidées, 20 messages/jour. Pro : analyse de documents (résumé, points clés, points d'attention, zones de signature, traduction), rédaction, préparation de demandes, relances — toujours confirmées par l'utilisateur.
 - Sans clé, `AI_MOCK=true` active un assistant simulé (développement, tests e2e) ; jamais en production.
 
+## International
+
+Langue, pays de résidence, fuseau horaire et devise préférée par utilisateur. Téléphone international facultatif. Dates dans la langue et le fuseau de chacun. Guide : [`docs/INTERNATIONAL.md`](docs/INTERNATIONAL.md) (ajouter une langue, une devise, un pays).
+
 ## Cachets et bloc professionnel
 
 - Cachets de structure (rond, ovale, rectangle) et tampons de statut (Approuvé, Payé, Reçu, Refusé, Copie conforme, Confidentiel, Urgent), générés ou importés. Plusieurs cachets par compte, un par défaut.

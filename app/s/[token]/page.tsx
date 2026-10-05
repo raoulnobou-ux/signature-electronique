@@ -31,12 +31,7 @@ export default async function SignPage(props: PageProps<"/s/[token]">) {
     pdfUrl = signed?.signedUrl ?? null;
     // Date et mention dans la langue du document (celle de l'expéditeur).
     const docLocale = owner?.locale ?? "fr";
-    const today = formatSignatureDate(
-      new Date(),
-      owner?.timezone ?? "Africa/Douala",
-      null,
-      docLocale,
-    );
+    const today = formatSignatureDate(new Date(), owner?.timezone ?? "UTC", null, docLocale);
     fields = ctx.fields.map((f) => {
       const type = f.type as RequestFieldType;
       return {

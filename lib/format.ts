@@ -13,8 +13,8 @@ export function formatMoney(amount: number, currency: Currency, locale = "fr"): 
   }).format(amount);
 }
 
-/** « 28 septembre 2026 » */
-export function formatLongDate(date: Date, locale = "fr", timeZone = "Africa/Douala"): string {
+/** « 28 septembre 2026 » / « 28 September 2026 », dans le fuseau de l'utilisateur. */
+export function formatLongDate(date: Date, locale = "fr", timeZone = "UTC"): string {
   return new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-GB", {
     day: "numeric",
     month: "long",

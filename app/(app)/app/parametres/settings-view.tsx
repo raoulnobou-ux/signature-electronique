@@ -39,7 +39,9 @@ import {
 import { Input, Textarea } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { DEFAULT_COUNTRY, type CountryCode } from "@/lib/phone";
+import { CURRENCY_CODES } from "@/config/currencies";
+import { countryOptions, DEFAULT_COUNTRY, isCountryCode, type CountryCode } from "@/lib/phone";
+import { useIsClient } from "@/lib/use-is-client";
 import { cn } from "@/lib/utils";
 import { ACCOUNT_TYPES, type AccountType } from "@/lib/validation/auth";
 import {
@@ -61,6 +63,9 @@ export type SettingsProfile = {
   phoneCountry: CountryCode | null;
   avatarUrl: string | null;
   timezone: string;
+  /** Pays de résidence (ISO alpha-2) et devise préférée, ou null. */
+  country: string | null;
+  currency: string | null;
   accountType: AccountType | null;
   orgName: string;
   orgSector: string;
@@ -170,7 +175,14 @@ function ProfileTab({ profile }: { profile: SettingsProfile }) {
   const { pending, run } = useSave();
   const fileRef = useRef<HTMLInputElement>(null);
   const [fullName, setFullName] = useState(profile.fullName);
-  const [country, setCountry] = useState<CountryCode>(profile.phoneCountry ?? DEFAULT_COUNTRY);
+  const [country, setCountry] = useState<CountryCode>(
+    profile.phoneCountry ??
+      (isCountryCode(profile.country) ? profile.country : null) ??
+      DEFAULT_COUNTRY,
+  );
+  const [residence, setResidence] = useState(profile.country ?? "");
+  const [currency, setCurrency] = useState(profile.currency ?? "");
+  const isClient = useIsClient();
   const [phone, setPhone] = useState(profile.phoneNational);
   const [timezone, setTimezone] = useState(profile.timezone);
   const locale = useLocale();
@@ -194,6 +206,7 @@ function ProfileTab({ profile }: { profile: SettingsProfile }) {
               <input
                 ref={fileRef}
                 type="file"
+                data-testid="avatar-input"
                 accept="image/png,image/jpeg,image/webp"
                 className="hidden"
                 onChange={(e) => {
@@ -235,7 +248,7 @@ function ProfileTab({ profile }: { profile: SettingsProfile }) {
           onSubmit={(e) => {
             e.preventDefault();
             run(
-              () => updateProfile({ fullName, country, phone, timezone }),
+              () => updateProfile({ fullName, country, phone, timezone, residence, currency }),
               () => router.refresh(),
             );
           }}
@@ -263,6 +276,42 @@ function ProfileTab({ profile }: { profile: SettingsProfile }) {
               onValueChange={setPhone}
             />
           </FormField>
+          <div className="grid gap-5 sm:grid-cols-2">
+            <FormField id="residence" label={t("profile.country")} hint={t("profile.countryHint")}>
+              <select
+                id="residence"
+                value={residence}
+                onChange={(e) => setResidence(e.target.value)}
+                className="h-11 w-full rounded-xl border border-input bg-background-elevated/60 px-3 text-base sm:text-sm"
+              >
+                <option value="">{t("profile.countryUnset")}</option>
+                {/* Noms des pays selon les données ICU du navigateur (affichés côté client). */}
+                {(isClient
+                  ? countryOptions(locale, profile.country)
+                  : countryOptions(locale, profile.country).filter((c) => c.code === residence)
+                ).map((c) => (
+                  <option key={c.code} value={c.code}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </FormField>
+            <FormField id="currency" label={t("profile.currency")} hint={t("profile.currencyHint")}>
+              <select
+                id="currency"
+                value={currency}
+                onChange={(e) => setCurrency(e.target.value)}
+                className="h-11 w-full rounded-xl border border-input bg-background-elevated/60 px-3 text-base sm:text-sm"
+              >
+                <option value="">{t("profile.currencyAuto")}</option>
+                {CURRENCY_CODES.map((code) => (
+                  <option key={code} value={code}>
+                    {code === "XAF" ? "FCFA (XAF)" : code}
+                  </option>
+                ))}
+              </select>
+            </FormField>
+          </div>
           <div className="grid gap-5 sm:grid-cols-2">
             <FormField id="timezone" label={t("profile.timezone")}>
               <select

@@ -14,7 +14,9 @@ import { requireAccount } from "@/lib/auth/account";
 import { mobileMoneyCountries, paymentOptions } from "@/lib/billing";
 import { suggestedCountry } from "@/lib/billing/cfa";
 import { paymentDescription } from "@/lib/billing/service";
+import { toLocale } from "@/i18n/config";
 import { isPaidPlan, type BillingCycle, type Currency } from "@/lib/entitlements/plans";
+import { isCurrency } from "@/config/currencies";
 import { formatMoney } from "@/lib/format";
 import { detectCountry, detectCurrency, getPrices } from "@/lib/pricing";
 import { createClient } from "@/lib/supabase/server";
@@ -67,12 +69,14 @@ export default async function BillingPage({ searchParams }: PageProps<"/app/abon
       : null;
   const result = resultKey ? RESULTS[resultKey] : null;
   // Moyens de paiement proposés dans le pays du visiteur (carte, Mobile Money en zone CFA).
-  const options = paymentOptions(visitorCountry);
+  const options = paymentOptions(account.profile.country ?? visitorCountry);
   const available = options.length > 0;
   const countries = options.some((o) => o.method === "mobile_money")
     ? await mobileMoneyCountries()
     : [];
-  const currency = (subscription?.currency as Currency | null) ?? detected;
+  // Devise affichée : celle de l'abonnement, sinon la préférence du profil, sinon le pays.
+  const preferred = isCurrency(account.profile.currency) ? account.profile.currency : null;
+  const currency = (subscription?.currency as Currency | null) ?? preferred ?? detected;
 
   return (
     <div className="mx-auto max-w-5xl space-y-12">
@@ -104,7 +108,11 @@ export default async function BillingPage({ searchParams }: PageProps<"/app/abon
             defaultCurrency={currency}
             options={options}
             countries={countries}
-            defaultCountry={suggestedCountry(account.profile.phone, countries)}
+            defaultCountry={suggestedCountry(
+              account.profile.phone,
+              countries,
+              account.profile.country,
+            )}
             state={account.entitlements.state}
             plan={account.entitlements.subscriptionPlan}
           />
@@ -131,7 +139,12 @@ export default async function BillingPage({ searchParams }: PageProps<"/app/abon
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium">
                         {isPaidPlan(p.plan)
-                          ? paymentDescription(p.plan, p.billing_cycle as BillingCycle, p.kind)
+                          ? paymentDescription(
+                              p.plan,
+                              p.billing_cycle as BillingCycle,
+                              p.kind,
+                              toLocale(locale),
+                            )
                           : p.plan}
                       </p>
                       <p className="text-xs text-muted-foreground">

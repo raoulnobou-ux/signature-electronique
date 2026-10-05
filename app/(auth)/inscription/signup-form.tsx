@@ -15,11 +15,12 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Stepper } from "@/components/ui/stepper";
-import { DEFAULT_COUNTRY, toE164, type CountryCode } from "@/lib/phone";
+import { type CountryCode } from "@/lib/phone";
 import { cn } from "@/lib/utils";
 import {
   ACCOUNT_TYPES,
   accountStepSchema,
+  phoneOk,
   profileStepSchema,
   type AccountStepInput,
   type ProfileStepInput,
@@ -28,7 +29,7 @@ import { resendConfirmation, signUp } from "../actions";
 
 type Step = 0 | 1 | 2;
 
-export function SignUpForm() {
+export function SignUpForm({ defaultCountry }: { defaultCountry: CountryCode }) {
   const t = useTranslations("auth");
   const tCommon = useTranslations("common");
   const v = useValidationMessage();
@@ -39,13 +40,19 @@ export function SignUpForm() {
 
   const account = useForm<AccountStepInput>({
     resolver: zodResolver(
-      accountStepSchema.refine((d) => toE164(d.phone, d.country as CountryCode) !== null, {
+      accountStepSchema.refine((d) => phoneOk(d.phone, d.country), {
         path: ["phone"],
         message: "phone",
       }),
     ),
     mode: "onTouched",
-    defaultValues: { fullName: "", email: "", country: DEFAULT_COUNTRY, phone: "", password: "" },
+    defaultValues: {
+      fullName: "",
+      email: "",
+      country: defaultCountry,
+      phone: "",
+      password: "",
+    },
   });
   const profile = useForm<ProfileStepInput>({ resolver: zodResolver(profileStepSchema) });
   const country = useWatch({ control: account.control, name: "country" }) as CountryCode;
@@ -53,7 +60,11 @@ export function SignUpForm() {
   const submit = (profileValues: ProfileStepInput) => {
     setFormError(null);
     startTransition(async () => {
-      const result = await signUp({ ...account.getValues(), ...profileValues });
+      const result = await signUp({
+        ...account.getValues(),
+        ...profileValues,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      });
       if (result.ok) {
         setSentTo(result.data.email);
         setStep(2);
@@ -168,7 +179,7 @@ export function SignUpForm() {
                     value={field.value}
                     onValueChange={field.onChange}
                     onBlur={field.onBlur}
-                    placeholder="6 90 12 34 56"
+
                     aria-invalid={!!account.formState.errors.phone}
                   />
                 )}

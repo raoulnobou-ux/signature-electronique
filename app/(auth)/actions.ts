@@ -61,6 +61,9 @@ export async function signUp(input: unknown): Promise<ActionResult<{ email: stri
       data: {
         full_name: data.fullName,
         phone: data.phone,
+        // Pays choisi avec le téléphone (prérempli par le pays détecté) et fuseau de l'appareil.
+        country: data.country.toUpperCase(),
+        timezone: data.timezone,
         account_type: data.accountType ?? null,
         org_name: data.orgName || null,
         org_sector: data.orgSector || null,

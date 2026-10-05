@@ -640,7 +640,9 @@ export type Database = {
           account_type: string | null;
           avatar_url: string | null;
           city: string | null;
+          country: string | null;
           created_at: string;
+          currency: string | null;
           email: string;
           email_notifications: boolean;
           full_name: string;
@@ -665,7 +667,9 @@ export type Database = {
           account_type?: string | null;
           avatar_url?: string | null;
           city?: string | null;
+          country?: string | null;
           created_at?: string;
+          currency?: string | null;
           email?: string;
           email_notifications?: boolean;
           full_name?: string;
@@ -690,7 +694,9 @@ export type Database = {
           account_type?: string | null;
           avatar_url?: string | null;
           city?: string | null;
+          country?: string | null;
           created_at?: string;
+          currency?: string | null;
           email?: string;
           email_notifications?: boolean;
           full_name?: string;

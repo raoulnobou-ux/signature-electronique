@@ -18,7 +18,52 @@ export interface ReceiptData {
   reference: string;
   transactionId: string;
   seller: { name: string; url: string; email: string };
+  /** Fuseau du client pour les dates du reçu (UTC par défaut). */
+  timeZone?: string;
+  /** Langue du reçu (celle du client). */
+  locale?: "fr" | "en";
 }
+
+const RECEIPT_TEXT = {
+  fr: {
+    title: "Reçu de paiement",
+    number: "N°",
+    paid: "PAYÉ",
+    issuedBy: "Émis par",
+    billedTo: "Facturé à",
+    description: "Description",
+    amount: "Montant",
+    period: (from: string, to: string) => `Période du ${from} au ${to}`,
+    total: "Total payé",
+    method: "Moyen de paiement",
+    reference: "Référence",
+    transaction: "Transaction",
+    thanks:
+      "Merci pour votre confiance. Ce reçu atteste du paiement de votre abonnement QuickSign.",
+    keep: "Conservez-le pour votre comptabilité. Aucune donnée de carte n'est conservée par QuickSign.",
+    docTitle: "Reçu",
+    card: "Carte bancaire",
+  },
+  en: {
+    title: "Payment receipt",
+    number: "No.",
+    paid: "PAID",
+    issuedBy: "Issued by",
+    billedTo: "Billed to",
+    description: "Description",
+    amount: "Amount",
+    period: (from: string, to: string) => `Period from ${from} to ${to}`,
+    total: "Total paid",
+    method: "Payment method",
+    reference: "Reference",
+    transaction: "Transaction",
+    thanks:
+      "Thank you for your trust. This receipt confirms the payment of your QuickSign subscription.",
+    keep: "Keep it for your records. QuickSign never stores card details.",
+    docTitle: "Receipt",
+    card: "Card",
+  },
+} as const;
 
 const INK = rgb(0.043, 0.059, 0.102);
 const MUTED = rgb(0.4, 0.44, 0.52);
@@ -26,7 +71,10 @@ const LINE = rgb(0.9, 0.91, 0.94);
 const BRAND = [rgb(0.388, 0.4, 0.945), rgb(0.545, 0.361, 0.965), rgb(0.133, 0.827, 0.933)];
 
 /** Libellé lisible du moyen de paiement renvoyé par le prestataire. */
-export function paymentMethodLabel(method: string | null | undefined): string {
+export function paymentMethodLabel(
+  method: string | null | undefined,
+  locale: "fr" | "en" = "fr",
+): string {
   // Opérateurs pawaPay (MTN_MOMO_CMR, ORANGE_CMR…), moyens Paddle (card, paypal…) et
   // libellés du bac à sable.
   const m = (method ?? "").toLowerCase();
@@ -38,7 +86,8 @@ export function paymentMethodLabel(method: string | null | undefined): string {
   if (m.includes("paypal")) return "PayPal";
   if (m.includes("apple_pay")) return "Apple Pay";
   if (m.includes("google_pay")) return "Google Pay";
-  if (m.includes("card") || m.includes("visa") || m.includes("master")) return "Carte bancaire";
+  if (m.includes("card") || m.includes("visa") || m.includes("master"))
+    return RECEIPT_TEXT[locale].card;
   return method || "—";
 }
 
@@ -69,6 +118,9 @@ function rightText(
 
 /** Reçu de paiement numéroté (A4, polices standard : léger et lisible partout). */
 export async function renderReceipt(data: ReceiptData): Promise<Uint8Array> {
+  const lang = data.locale ?? "fr";
+  const L = RECEIPT_TEXT[lang];
+  const date = (d: Date) => formatLongDate(d, lang, data.timeZone);
   const pdf = await PDFDocument.create();
   const page = pdf.addPage([595.28, 841.89]);
   const regular = await pdf.embedFont(StandardFonts.Helvetica);
@@ -86,15 +138,15 @@ export async function renderReceipt(data: ReceiptData): Promise<Uint8Array> {
   text(page, bold, "Q", left + 9.5, height - 69, 16, rgb(1, 1, 1));
   text(page, bold, data.seller.name, left + 40, height - 68, 18);
 
-  text(page, bold, "Reçu de paiement", left, height - 130, 24);
-  text(page, regular, `N° ${data.number}`, left, height - 152, 11, MUTED);
-  rightText(page, bold, "PAYÉ", right, height - 130, 14, rgb(0.02, 0.59, 0.41));
-  rightText(page, regular, formatLongDate(data.paidAt), right, height - 152, 11, MUTED);
+  text(page, bold, L.title, left, height - 130, 24);
+  text(page, regular, `${L.number} ${data.number}`, left, height - 152, 11, MUTED);
+  rightText(page, bold, L.paid, right, height - 130, 14, rgb(0.02, 0.59, 0.41));
+  rightText(page, regular, date(data.paidAt), right, height - 152, 11, MUTED);
 
   // Émetteur / client
   let y = height - 200;
-  text(page, bold, "Émis par", left, y, 10, MUTED);
-  text(page, bold, "Facturé à", width / 2, y, 10, MUTED);
+  text(page, bold, L.issuedBy, left, y, 10, MUTED);
+  text(page, bold, L.billedTo, width / 2, y, 10, MUTED);
   y -= 18;
   text(page, bold, data.seller.name, left, y, 11);
   text(page, bold, data.customer.name || data.customer.email, width / 2, y, 11);
@@ -116,16 +168,16 @@ export async function renderReceipt(data: ReceiptData): Promise<Uint8Array> {
     height: 26,
     color: rgb(0.965, 0.969, 0.984),
   });
-  text(page, bold, "Description", left + 12, y, 10, MUTED);
-  rightText(page, bold, "Montant", right - 12, y, 10, MUTED);
+  text(page, bold, L.description, left + 12, y, 10, MUTED);
+  rightText(page, bold, L.amount, right - 12, y, 10, MUTED);
   y -= 36;
   text(page, bold, data.description, left + 12, y, 12);
-  rightText(page, bold, formatMoney(data.amount, data.currency), right - 12, y, 12);
+  rightText(page, bold, formatMoney(data.amount, data.currency, lang), right - 12, y, 12);
   y -= 16;
   text(
     page,
     regular,
-    `Période du ${formatLongDate(data.periodStart)} au ${formatLongDate(data.periodEnd)}`,
+    L.period(date(data.periodStart), date(data.periodEnd)),
     left + 12,
     y,
     10,
@@ -134,15 +186,15 @@ export async function renderReceipt(data: ReceiptData): Promise<Uint8Array> {
   y -= 22;
   page.drawLine({ start: { x: left, y }, end: { x: right, y }, thickness: 1, color: LINE });
   y -= 26;
-  text(page, bold, "Total payé", left + 12, y, 13);
-  rightText(page, bold, formatMoney(data.amount, data.currency), right - 12, y, 13);
+  text(page, bold, L.total, left + 12, y, 13);
+  rightText(page, bold, formatMoney(data.amount, data.currency, lang), right - 12, y, 13);
 
   // Détails du paiement
   y -= 56;
   const rows: [string, string][] = [
-    ["Moyen de paiement", data.method],
-    ["Référence", data.reference],
-    ["Transaction", data.transactionId],
+    [L.method, data.method],
+    [L.reference, data.reference],
+    [L.transaction, data.transactionId],
   ];
   for (const [label, value] of rows) {
     text(page, regular, label, left, y, 10, MUTED);
@@ -150,26 +202,10 @@ export async function renderReceipt(data: ReceiptData): Promise<Uint8Array> {
     y -= 18;
   }
 
-  text(
-    page,
-    regular,
-    "Merci pour votre confiance. Ce reçu atteste du paiement de votre abonnement QuickSign.",
-    left,
-    90,
-    9,
-    MUTED,
-  );
-  text(
-    page,
-    regular,
-    "Conservez-le pour votre comptabilité. Aucune donnée de carte n'est conservée par QuickSign.",
-    left,
-    76,
-    9,
-    MUTED,
-  );
+  text(page, regular, L.thanks, left, 90, 9, MUTED);
+  text(page, regular, L.keep, left, 76, 9, MUTED);
 
-  pdf.setTitle(`Reçu ${data.number}`);
+  pdf.setTitle(`${L.docTitle} ${data.number}`);
   pdf.setAuthor(data.seller.name);
   pdf.setProducer("QuickSign");
   pdf.setCreator("QuickSign");

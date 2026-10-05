@@ -23,7 +23,7 @@ import {
 } from "@/lib/billing/quote";
 import { paymentMethodLabel, renderReceipt } from "@/lib/billing/receipt";
 import { SandboxProvider } from "@/lib/billing/providers/sandbox";
-import { reminderBucket } from "@/lib/billing/service";
+import { paymentDescription, reminderBucket } from "@/lib/billing/service";
 import { DEFAULT_PRICES } from "@/lib/entitlements/plans";
 
 vi.mock("@/lib/audit", () => ({ recordAudit: vi.fn() }));
@@ -559,6 +559,32 @@ describe("reçu PDF", () => {
     expect(pdf.getTitle()).toBe("Reçu QS-2026-000042");
     expect(pdf.getProducer()).toBe("QuickSign");
     expect(paymentMethodLabel("card")).toBe("Carte bancaire");
+  });
+
+  it("en anglais, dans la devise et le fuseau du client", async () => {
+    const bytes = await renderReceipt({
+      number: "QS-2026-000043",
+      paidAt: NOW,
+      customer: { name: "John Smith", email: "john@example.com" },
+      description: paymentDescription("pro", "yearly", "new", "en"),
+      periodStart: NOW,
+      periodEnd: new Date(NOW.getTime() + 365 * DAY),
+      amount: 250,
+      currency: "EUR",
+      method: paymentMethodLabel("card", "en"),
+      reference: "QS-1a2b",
+      transactionId: "txn_1",
+      seller: { name: "QuickSign", url: "https://quicksign.app", email: "support@quicksign.app" },
+      timeZone: "Europe/Paris",
+      locale: "en",
+    });
+    const pdf = await PDFDocument.load(bytes, { updateMetadata: false });
+    expect(pdf.getTitle()).toBe("Receipt QS-2026-000043");
+    expect(paymentMethodLabel("card", "en")).toBe("Card");
+    expect(paymentDescription("pro", "yearly", "new", "en")).toBe("Pro subscription — yearly");
+    expect(paymentDescription("essential", "monthly", "upgrade")).toBe(
+      "Abonnement Essentiel — mensuel (passage au Pro, au prorata)",
+    );
   });
 });
 

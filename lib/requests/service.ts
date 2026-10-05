@@ -297,7 +297,7 @@ export async function submitSignerSignature(
     signerName: signer.name,
     values: input.values,
     signedAt,
-    timeZone: owner?.timezone ?? "Africa/Douala",
+    timeZone: owner?.timezone ?? "UTC",
   });
   if (built.error) return { ok: false, error: built.error };
 
@@ -518,7 +518,7 @@ export async function completeRequest(requestId: string): Promise<void> {
     originalSha256: request.original_sha256 ?? firstVersion?.sha256 ?? "",
     finalSha256: doc.sha256 ?? "",
     verifyUrl: verifyUrl(requestId),
-    timeZone: owner?.timezone ?? "Africa/Douala",
+    timeZone: owner?.timezone ?? "UTC",
     signers: signers.map((s) => ({
       name: s.name,
       email: s.email,

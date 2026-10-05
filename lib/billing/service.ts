@@ -31,7 +31,16 @@ const DAY = 24 * 60 * 60 * 1000;
 export const PLAN_LABELS: Record<PaidPlan, string> = { essential: "Essentiel", pro: "Pro" };
 export const CYCLE_LABELS: Record<BillingCycle, string> = { monthly: "mensuel", yearly: "annuel" };
 
-export function paymentDescription(plan: PaidPlan, cycle: BillingCycle, kind: string): string {
+export function paymentDescription(
+  plan: PaidPlan,
+  cycle: BillingCycle,
+  kind: string,
+  locale: Locale = "fr",
+): string {
+  if (locale === "en") {
+    const base = `${plan === "pro" ? "Pro" : "Essential"} subscription — ${cycle}`;
+    return kind === "upgrade" ? `${base} (upgrade to Pro, prorated)` : base;
+  }
   const base = `Abonnement ${PLAN_LABELS[plan]} — ${CYCLE_LABELS[cycle]}`;
   return kind === "upgrade" ? `${base} (passage au Pro, au prorata)` : base;
 }
@@ -41,7 +50,7 @@ type Admin = ReturnType<typeof createAdminClient>;
 async function profileOf(admin: Admin, userId: string) {
   const { data } = await admin
     .from("profiles")
-    .select("email, full_name, org_name, locale")
+    .select("email, full_name, org_name, locale, timezone")
     .eq("id", userId)
     .single();
   return data;
@@ -67,7 +76,7 @@ async function notify(
   userId: string,
   kind: string,
   reference: string,
-  build: (profile: { email: string; full_name: string; locale: Locale }) => {
+  build: (profile: { email: string; full_name: string; locale: Locale; timezone: string }) => {
     subject: string;
     html: string;
     text: string;
@@ -108,13 +117,15 @@ export async function issueReceipt(
       email: profile?.email ?? "",
       organization: profile?.org_name ?? null,
     },
-    description: paymentDescription(payment.plan, cycle, payment.kind),
+    description: paymentDescription(payment.plan, cycle, payment.kind, toLocale(profile?.locale)),
     periodStart: new Date(payment.period_start ?? payment.updated_at),
     periodEnd: new Date(payment.period_end ?? payment.updated_at),
     amount: Number(payment.amount),
     currency,
-    method: paymentMethodLabel(payment.payment_method),
+    method: paymentMethodLabel(payment.payment_method, toLocale(profile?.locale)),
     reference: payment.provider_ref,
+    timeZone: profile?.timezone ?? "UTC",
+    locale: toLocale(profile?.locale),
     transactionId: payment.provider_tx_id ?? "—",
     seller: { name: siteConfig.name, url: siteConfig.url, email: siteConfig.supportEmail },
   });
@@ -135,7 +146,11 @@ export async function issueReceipt(
       fullName: profile.full_name,
       planLabel: planName(payment.plan, locale),
       amount: formatMoney(Number(payment.amount), currency, locale),
-      periodEnd: formatLongDate(new Date(payment.period_end ?? Date.now()), locale),
+      periodEnd: formatLongDate(
+        new Date(payment.period_end ?? Date.now()),
+        locale,
+        profile.timezone,
+      ),
       receiptNumber: payment.receipt_number,
       locale,
     });
@@ -312,7 +327,7 @@ export async function runBillingCron(now = new Date()): Promise<BillingCronSumma
       await notify(admin, sub.user_id, "trial_ending", sub.current_period_end, (p) =>
         trialEndingEmail({
           fullName: p.full_name,
-          endDate: formatLongDate(end, p.locale),
+          endDate: formatLongDate(end, p.locale, p.timezone),
           locale: p.locale,
         }),
       )
@@ -381,7 +396,7 @@ export async function runBillingCron(now = new Date()): Promise<BillingCronSumma
           renewalReminderEmail({
             fullName: p.full_name,
             planLabel: planName(plan, p.locale),
-            endDate: formatLongDate(end, p.locale),
+            endDate: formatLongDate(end, p.locale, p.timezone),
             daysLeft: bucket,
             price: formatMoney(price, currency, p.locale),
             locale: p.locale,
@@ -407,7 +422,7 @@ export async function runBillingCron(now = new Date()): Promise<BillingCronSumma
     await notify(admin, sub.user_id, "grace", sub.current_period_end, (p) =>
       graceStartedEmail({
         fullName: p.full_name,
-        graceEnd: formatLongDate(graceEnd, p.locale),
+        graceEnd: formatLongDate(graceEnd, p.locale, p.timezone),
         locale: p.locale,
       }),
     );

@@ -1,15 +1,22 @@
 import {
   getCountries,
   getCountryCallingCode,
+  isSupportedCountry,
   parsePhoneNumberFromString,
   type CountryCode,
 } from "libphonenumber-js/min";
 
 export type { CountryCode };
 
+/** Pays par défaut quand le pays du visiteur est inconnu (développement local). */
 export const DEFAULT_COUNTRY: CountryCode = "CM";
 
-/** Pays proposés en tête de liste : Cameroun, Afrique francophone, diaspora. */
+/** Code pays reconnu pour la numérotation (ISO 3166-1 alpha-2). */
+export function isCountryCode(value: unknown): value is CountryCode {
+  return typeof value === "string" && isSupportedCountry(value);
+}
+
+/** Pays proposés en tête de liste (après le pays choisi) : marchés principaux. */
 const FAVORITES: CountryCode[] = [
   "CM",
   "CI",
@@ -46,7 +53,7 @@ export type CountryOption = {
   favorite: boolean;
 };
 
-export function countryOptions(locale = "fr"): CountryOption[] {
+export function countryOptions(locale = "fr", preferred?: string | null): CountryOption[] {
   const names = new Intl.DisplayNames([locale], { type: "region" });
   const all = getCountries().map((code) => ({
     code,
@@ -54,11 +61,13 @@ export function countryOptions(locale = "fr"): CountryOption[] {
     dialCode: `+${getCountryCallingCode(code)}`,
     favorite: FAVORITES.includes(code),
   }));
-  const favorites = FAVORITES.map((code) => all.find((c) => c.code === code)).filter(
-    (c): c is CountryOption => Boolean(c),
-  );
+  const first = isCountryCode(preferred) && !FAVORITES.includes(preferred) ? [preferred] : [];
+  const favorites = [...first, ...FAVORITES]
+    .map((code) => all.find((c) => c.code === code))
+    .filter((c): c is CountryOption => Boolean(c))
+    .map((c) => ({ ...c, favorite: true }));
   const others = all
-    .filter((c) => !c.favorite)
+    .filter((c) => !c.favorite && !first.includes(c.code))
     .sort((a, b) => a.name.localeCompare(b.name, locale));
   return [...favorites, ...others];
 }

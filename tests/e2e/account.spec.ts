@@ -14,7 +14,7 @@ test("modifier son profil, sa structure et sa photo", async ({ page }) => {
 
   // Photo de profil (PNG réel)
   await page
-    .locator('input[type="file"]')
+    .getByTestId("avatar-input")
     .setInputFiles(path.join(__dirname, "fixtures", "avatar.png"));
   await expect(page.getByRole("button", { name: "Retirer" })).toBeVisible();
 
@@ -52,7 +52,7 @@ test("une fausse image (texte renommé en .png) est refusée", async ({ page }) 
   const user = await createConfirmedUser("avatar");
   await signInAs(page, user.email);
   await page.goto("/app/parametres");
-  await page.locator('input[type="file"]').setInputFiles({
+  await page.getByTestId("avatar-input").setInputFiles({
     name: "photo.png",
     mimeType: "image/png",
     buffer: Buffer.from("<script>alert(1)</script>"),
@@ -108,4 +108,26 @@ test("la jauge d'essai et le bandeau de fin d'essai apparaissent à J-2", async 
     .eq("user_id", user.id);
   await signInAs(page, user.email);
   await expect(page.getByText(/Votre essai se termine/)).toBeVisible();
+});
+
+test("pays et devise préférés : la page Abonnement s'affiche dans la devise choisie", async ({
+  page,
+}) => {
+  const user = await createConfirmedUser("devise", undefined, "free");
+  await signInAs(page, user.email);
+  await page.goto("/app/parametres");
+  await page.getByLabel("Pays de résidence").selectOption("FR");
+  await page.getByLabel("Devise préférée").selectOption("EUR");
+  await page.getByRole("button", { name: "Enregistrer" }).first().click();
+  await expect(page.getByText("Modifications enregistrées.").first()).toBeVisible();
+  const { data } = await adminClient()
+    .from("profiles")
+    .select("country, currency")
+    .eq("id", user.id)
+    .single();
+  expect(data).toEqual({ country: "FR", currency: "EUR" });
+
+  await page.goto("/app/abonnement");
+  await expect(page.getByRole("radio", { name: "EUR" })).toHaveAttribute("aria-checked", "true");
+  await expect(page.getByText("9 €").first()).toBeVisible();
 });

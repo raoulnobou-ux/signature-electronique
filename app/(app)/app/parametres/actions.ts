@@ -6,7 +6,8 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { publicEnv } from "@/lib/env";
 import { IMAGE_MIME, sniffFileType } from "@/lib/files/sniff";
-import { toE164, type CountryCode } from "@/lib/phone";
+import { isCurrency } from "@/config/currencies";
+import { isCountryCode, toE164, type CountryCode } from "@/lib/phone";
 import { rateLimit } from "@/lib/rate-limit";
 import { purgeUserFiles } from "@/lib/storage/purge";
 import { avatarPath, avatarUrl } from "@/lib/storage/avatars";
@@ -31,6 +32,10 @@ const profileSchema = z.object({
   timezone: z
     .string()
     .refine((tz) => Intl.supportedValuesOf("timeZone").includes(tz) || tz === "UTC"),
+  /** Pays de résidence (facultatif) : moyens de paiement et devise proposés. */
+  residence: z.string().refine((c) => c === "" || isCountryCode(c)),
+  /** Devise préférée (facultatif) ; vide = selon le pays. */
+  currency: z.string().refine((c) => c === "" || isCurrency(c)),
 });
 
 export async function updateProfile(input: unknown): Promise<SettingsResult> {
@@ -52,7 +57,13 @@ export async function updateProfile(input: unknown): Promise<SettingsResult> {
     .single();
   const { error } = await supabase
     .from("profiles")
-    .update({ full_name: parsed.data.fullName, phone, timezone: parsed.data.timezone })
+    .update({
+      full_name: parsed.data.fullName,
+      phone,
+      timezone: parsed.data.timezone,
+      country: parsed.data.residence || null,
+      currency: parsed.data.currency || null,
+    })
     .eq("id", user.id);
   if (error) return { ok: false, error: "server" };
 
@@ -211,4 +222,17 @@ export async function deleteAccount(confirmation: string): Promise<SettingsResul
   }
   await supabase.auth.signOut({ scope: "local" });
   redirect("/?compte-supprime=1");
+}
+
+/** Fuseau de l'appareil, enregistré seulement si le profil est encore en UTC (par défaut). */
+export async function syncTimezone(timezone: unknown): Promise<void> {
+  const parsed = profileSchema.shape.timezone.safeParse(timezone);
+  if (!parsed.success || parsed.data === "UTC") return;
+  const { supabase, user } = await currentUser();
+  if (!user) return;
+  await supabase
+    .from("profiles")
+    .update({ timezone: parsed.data })
+    .eq("id", user.id)
+    .eq("timezone", "UTC");
 }

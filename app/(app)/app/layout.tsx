@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { AppShell } from "@/components/app/app-shell";
+import { TimezoneSync } from "@/components/app/timezone-sync";
 import type { ShellAccount } from "@/components/app/types";
 import { AppShellProviders } from "@/components/providers/app-shell-providers";
 import { ClientMessages } from "@/components/providers/client-messages";
@@ -45,6 +46,7 @@ export default async function AppLayout({ children }: LayoutProps<"/app">) {
     >
       <AppShellProviders>
         <AppShell account={shellAccount}>{children}</AppShell>
+        {account.profile.timezone === "UTC" && <TimezoneSync />}
       </AppShellProviders>
     </ClientMessages>
   );

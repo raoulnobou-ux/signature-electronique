@@ -16,6 +16,15 @@ export async function GET(request: NextRequest) {
     if (!error && data.user) {
       await sendWelcomeOnce(data.user.id);
       await applyProfileLocale(data.user.id);
+      // Compte Google : pas de formulaire d'inscription, le pays détecté complète le profil.
+      const country = request.headers.get("x-vercel-ip-country")?.toUpperCase();
+      if (country && /^[A-Z]{2}$/.test(country)) {
+        await supabase
+          .from("profiles")
+          .update({ country })
+          .eq("id", data.user.id)
+          .is("country", null);
+      }
       if (data.user.factors?.some((f) => f.status === "verified")) {
         return NextResponse.redirect(
           new URL(`/connexion/verification?next=${encodeURIComponent(next)}`, origin),

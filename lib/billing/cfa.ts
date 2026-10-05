@@ -32,11 +32,18 @@ export function sameCfaCurrency(a: string, b: string): boolean {
 }
 
 /**
- * Pays présélectionné dans le choix du pays : celui de l'indicatif du numéro du profil,
- * s'il fait partie des pays proposés, sinon le premier proposé. Le numéro lui-même n'est
- * jamais transmis : le client saisit sur la page pawaPay le numéro avec lequel il paie.
+ * Pays présélectionné dans le choix du pays : le pays du profil (alpha-2), sinon celui de
+ * l'indicatif du numéro, s'il fait partie des pays proposés, sinon le premier proposé.
+ * Le numéro lui-même n'est jamais transmis : le client saisit sur la page pawaPay le
+ * numéro avec lequel il paie.
  */
-export function suggestedCountry(phone: string | null | undefined, countries: string[]): string {
+export function suggestedCountry(
+  phone: string | null | undefined,
+  countries: string[],
+  profileCountry?: string | null,
+): string {
+  const fromProfile = countries.find((code) => CFA_COUNTRIES[code]?.alpha2 === profileCountry);
+  if (fromProfile) return fromProfile;
   const digits = (phone ?? "").replace(/\D/g, "");
   const match = countries.find((code) => {
     const dial = CFA_COUNTRIES[code]?.dial;
