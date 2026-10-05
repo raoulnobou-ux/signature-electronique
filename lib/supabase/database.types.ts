@@ -1243,6 +1243,17 @@ export type Database = {
       is_team_admin: { Args: { p_team_id: string }; Returns: boolean };
       is_team_member: { Args: { p_team_id: string }; Returns: boolean };
       mfa_satisfied: { Args: Record<PropertyKey, never>; Returns: boolean };
+      my_sessions: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          created_at: string;
+          current: boolean;
+          id: string;
+          ip: string;
+          last_active_at: string;
+          user_agent: string;
+        }[];
+      };
       my_team_sponsor: {
         Args: Record<PropertyKey, never>;
         Returns: {
@@ -1259,6 +1270,7 @@ export type Database = {
       };
       my_usage_snapshot: { Args: Record<PropertyKey, never>; Returns: Json };
       owns_document: { Args: { p_document_id: string }; Returns: boolean };
+      owns_folder: { Args: { p_folder_id: string }; Returns: boolean };
       purge_old_logs: { Args: Record<PropertyKey, never>; Returns: undefined };
       purge_rate_limit_hits: { Args: Record<PropertyKey, never>; Returns: undefined };
       purge_trashed_documents: {

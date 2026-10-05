@@ -91,9 +91,11 @@ export function DocumentDetail({
           </div>
         </div>
         <div className="flex shrink-0 flex-wrap gap-2">
-          <Button variant="secondary" onClick={() => void download("pdf")}>
-            <Download /> {t("actions.download")}
-          </Button>
+          {!doc.trashed && (
+            <Button variant="secondary" onClick={() => void download("pdf")}>
+              <Download /> {t("actions.download")}
+            </Button>
+          )}
           {pendingRequestId ? (
             <Button asChild>
               <Link href={`/app/demandes/${pendingRequestId}`}>

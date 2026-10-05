@@ -123,7 +123,13 @@ export async function createSignatureAsset(
     return { ok: false, error: "server" };
   }
 
-  const { data: signed } = await admin.storage.from("signatures").createSignedUrl(imagePath, 3600);
+  const { data: signed } = await admin.storage.from("signatures").createSignedUrl(imagePath, 1800);
+  await recordAudit({
+    actorType: "user",
+    actorId: userId,
+    eventType: "asset.created",
+    metadata: { asset_id: data.id, type: data.type, method: data.method },
+  });
   revalidatePath("/app/signatures");
   return {
     ok: true,
@@ -257,6 +263,12 @@ export async function deleteSignatureAsset(id: string): Promise<{ ok: boolean }>
   const { asset, supabase, userId } = found;
   const { error } = await supabase.from("signature_assets").delete().eq("id", id);
   if (error) return { ok: false };
+  await recordAudit({
+    actorType: "user",
+    actorId: userId,
+    eventType: "asset.deleted",
+    metadata: { asset_id: id, type: asset.type },
+  });
   await createAdminClient()
     .storage.from("signatures")
     .remove([asset.image_path, ...(asset.svg_path ? [asset.svg_path] : [])]);

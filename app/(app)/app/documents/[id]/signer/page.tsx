@@ -36,7 +36,7 @@ export default async function SignerPage(props: PageProps<"/app/documents/[id]/s
   if (doc.status === "pending") redirect(`/app/documents/${id}`);
 
   const [{ data: signed }, { data: draft }, assets] = await Promise.all([
-    createAdminClient().storage.from("documents").createSignedUrl(doc.pdf_path, 3600),
+    createAdminClient().storage.from("documents").createSignedUrl(doc.pdf_path, 900),
     supabase
       .from("placed_fields")
       .select("*")

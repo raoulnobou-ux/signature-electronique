@@ -5,8 +5,8 @@ const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 
 /**
  * En-têtes de sécurité appliqués à toutes les réponses.
- * La politique CSP complète (avec nonces) est traitée à l'audit de sécurité (Phase 9) ;
- * on pose dès maintenant les directives qui ne dépendent pas des scripts.
+ * La CSP complète (nonce par requête) est posée par proxy.ts ; ici, les directives qui ne
+ * dépendent pas des scripts, pour toutes les réponses (y compris les fichiers statiques).
  */
 const securityHeaders = [
   { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
@@ -14,6 +14,10 @@ const securityHeaders = [
   { key: "X-Frame-Options", value: "DENY" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   { key: "Permissions-Policy", value: "camera=(self), microphone=(), geolocation=(), payment=()" },
+  // Isole la fenêtre de l'application des pages ouvertes depuis un autre site (onglets,
+  // fenêtres) : protection contre les attaques par fuite entre origines.
+  { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
+  { key: "X-Permitted-Cross-Domain-Policies", value: "none" },
   {
     key: "Content-Security-Policy",
     value: "frame-ancestors 'none'; object-src 'none'; base-uri 'self'",

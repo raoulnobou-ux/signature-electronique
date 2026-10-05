@@ -7,7 +7,9 @@ import { SubscriptionOverview } from "@/components/billing/subscription-overview
 import { requireAccount } from "@/lib/auth/account";
 import { createClient } from "@/lib/supabase/server";
 import type { AccountType } from "@/lib/validation/auth";
-import { SettingsView, type SettingsProfile } from "./settings-view";
+import { hasPassword } from "@/lib/auth/reauth";
+import { describeDevice } from "@/lib/requests/device";
+import { SettingsView, type SecurityInfo, type SettingsProfile } from "./settings-view";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("app.settings");
@@ -20,7 +22,24 @@ export default async function SettingsPage() {
     getTranslations("app.settings"),
     createClient(),
   ]);
-  const { data: factors } = await supabase.auth.mfa.listFactors();
+  const [{ data: factors }, { data: userData }, { data: sessionRows }] = await Promise.all([
+    supabase.auth.mfa.listFactors(),
+    supabase.auth.getUser(),
+    supabase.rpc("my_sessions"),
+  ]);
+  const user = userData.user;
+  // Sessions actives (lecture seule, ses propres sessions) : appareil résumé, jamais de jeton.
+  const security: SecurityInfo = {
+    hasPassword: user ? hasPassword(user) : false,
+    lastSignInAt: user?.last_sign_in_at ?? null,
+    sessions: (sessionRows ?? []).map((s) => ({
+      id: s.id,
+      device: describeDevice(s.user_agent),
+      ip: s.ip,
+      lastActiveAt: s.last_active_at,
+      current: s.current,
+    })),
+  };
   const twoFactorEnabled = Boolean(factors?.totp.some((f) => f.status === "verified"));
   const p = account.profile;
   const phone = p.phone ? parsePhoneNumberFromString(p.phone) : undefined;
@@ -51,6 +70,7 @@ export default async function SettingsPage() {
           profile={profile}
           billing={<SubscriptionOverview account={account} />}
           twoFactorEnabled={twoFactorEnabled}
+          security={security}
         />
       </Suspense>
     </div>

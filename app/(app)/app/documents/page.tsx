@@ -83,7 +83,7 @@ export default async function DocumentsPage(props: PageProps<"/app/documents">) 
   if (thumbPaths.length) {
     const { data } = await createAdminClient()
       .storage.from("documents")
-      .createSignedUrls(thumbPaths, 3600);
+      .createSignedUrls(thumbPaths, 900);
     for (const item of data ?? [])
       if (item.path && item.signedUrl) thumbs.set(item.path, item.signedUrl);
   }

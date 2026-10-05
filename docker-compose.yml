@@ -21,4 +21,23 @@ services:
       # sans cela, la première conversion (ou celle après un redémarrage) peut échouer (503).
       - "--libreoffice-auto-start=true"
       - "--libreoffice-start-timeout=45s"
+      # Surface minimale (identique à la production, cf. deploy/gotenberg/Dockerfile).
+      - "--chromium-disable-routes=true"
+      - "--pdfengines-disable-routes=true"
+      - "--api-disable-download-from=true"
+      - "--webhook-deny-private-ips=true"
+      - "--webhook-deny-public-ips=true"
+      - "--libreoffice-max-queue-size=20"
+      - "--prometheus-disable-collect=true"
+    # Isolation : système de fichiers en lecture seule (sauf /tmp), aucun privilège,
+    # mémoire et processus bornés.
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 1g
+    pids_limit: 256
     restart: unless-stopped

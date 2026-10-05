@@ -25,7 +25,7 @@ export default async function SignPage(props: PageProps<"/s/[token]">) {
   if (ctx?.state === "ready") {
     const admin = createAdminClient();
     const [{ data: signed }, { data: owner }] = await Promise.all([
-      admin.storage.from("documents").createSignedUrl(ctx.document.pdfPath, 3600),
+      admin.storage.from("documents").createSignedUrl(ctx.document.pdfPath, 900),
       admin.from("profiles").select("timezone, locale").eq("id", ctx.request.owner_id).single(),
     ]);
     pdfUrl = signed?.signedUrl ?? null;

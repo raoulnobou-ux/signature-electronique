@@ -568,22 +568,32 @@ export async function completeRequest(requestId: string): Promise<void> {
       content: Buffer.from(certificate).toString("base64"),
     },
   ];
-  let downloadUrl: string | null = null;
-  if (finalBytes && finalBytes.byteLength <= ATTACHMENT_LIMIT) {
+  // Document trop lourd pour être joint : jamais d'URL de stockage longue durée par e-mail.
+  // Chaque signataire reçoit son lien personnel (expirant, révocable, vérifié à chaque
+  // téléchargement) ; le propriétaire, le lien vers la demande dans son espace (connexion).
+  const attached = Boolean(finalBytes && finalBytes.byteLength <= ATTACHMENT_LIMIT);
+  if (attached) {
     attachments.unshift({
       filename: `${safeTitle} (signé).pdf`,
-      content: Buffer.from(finalBytes).toString("base64"),
+      content: Buffer.from(finalBytes!).toString("base64"),
     });
-  } else {
-    const { data } = await admin.storage
-      .from("documents")
-      .createSignedUrl(doc.pdf_path!, 7 * 24 * 3600, { download: `${safeTitle} (signé).pdf` });
-    downloadUrl = data?.signedUrl ?? null;
   }
   const recipients = [
-    ...signers.filter((s) => s.email).map((s) => ({ name: s.name, email: s.email! })),
+    ...signers
+      .filter((s) => s.email)
+      .map((s) => ({
+        name: s.name,
+        email: s.email!,
+        downloadUrl: attached ? null : `${signerLink(s.id, s.token_version)}/document`,
+      })),
     ...(owner?.email && !signers.some((s) => s.email?.toLowerCase() === owner.email.toLowerCase())
-      ? [{ name: owner.full_name, email: owner.email }]
+      ? [
+          {
+            name: owner.full_name,
+            email: owner.email,
+            downloadUrl: attached ? null : requestUrl(requestId),
+          },
+        ]
       : []),
   ];
   for (const recipient of recipients) {
@@ -593,7 +603,7 @@ export async function completeRequest(requestId: string): Promise<void> {
       documentTitle: request.title ?? doc.title,
       signerCount: signers.length,
       verifyUrl: verifyUrl(requestId),
-      downloadUrl,
+      downloadUrl: recipient.downloadUrl,
     });
     await sendEmail({ to: recipient.email, ...message, attachments });
   }

@@ -42,7 +42,7 @@ export default async function NewRequestPage(props: PageProps<"/app/documents/[i
   }
   const { data: signed } = await createAdminClient()
     .storage.from("documents")
-    .createSignedUrl(doc.pdf_path, 3600);
+    .createSignedUrl(doc.pdf_path, 900);
   if (!signed) notFound();
 
   const searchParams = await props.searchParams;

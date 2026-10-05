@@ -29,6 +29,7 @@ import { toolsFor } from "@/lib/ai/tools";
 import { checkAccess } from "@/lib/entitlements";
 import { rateLimit } from "@/lib/rate-limit";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { isSameOriginRequest } from "@/lib/security/origin";
 import { createClient } from "@/lib/supabase/server";
 
 export const maxDuration = 300;
@@ -93,6 +94,10 @@ const fail = (code: Extract<AssistantEvent, { type: "error" }>["code"], status =
  * exécutés côté serveur sur ses seules données, historique enregistré, quota décompté.
  */
 export async function POST(request: Request) {
+  // Requête venue d'un autre site (CSRF) : refusée avant toute lecture de session.
+  if (!isSameOriginRequest(request)) return fail("invalid", 403);
+  // Corps limité (message, chemin, identifiants) : rien ne justifie plus de 64 Ko.
+  if (Number(request.headers.get("content-length") ?? 0) > 64 * 1024) return fail("invalid", 413);
   const parsed = bodySchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return fail("invalid", 400);
   const input = parsed.data;
@@ -233,7 +238,17 @@ export async function POST(request: Request) {
         (rows ?? [])
           .flatMap((r) => r.content as unknown as DocumentRef[])
           .find((b) => b?.type === "document_ref") ?? null;
-      if (lastRef) ctx.attachedDocumentId = lastRef.documentId;
+      if (lastRef) {
+        // Document joint plus tôt : seulement s'il est toujours accessible.
+        const { data: still } = await supabase
+          .from("documents")
+          .select("id")
+          .eq("id", lastRef.documentId)
+          .is("trashed_at", null)
+          .maybeSingle();
+        if (still) ctx.attachedDocumentId = lastRef.documentId;
+        else lastRef = null;
+      }
     }
     let result: TurnResult;
     if (backend.kind === "mock") {
@@ -250,7 +265,21 @@ export async function POST(request: Request) {
         emit,
       });
     } else {
-      const history = await loadHistory(conversationId!, cache);
+      // Accès revérifié pour chaque document de l'historique (RLS, hors corbeille).
+      const readable = new Map<string, boolean>();
+      const canRead = async (documentId: string) => {
+        if (!readable.has(documentId)) {
+          const { data } = await supabase
+            .from("documents")
+            .select("id")
+            .eq("id", documentId)
+            .is("trashed_at", null)
+            .maybeSingle();
+          readable.set(documentId, Boolean(data));
+        }
+        return readable.get(documentId)!;
+      };
+      const history = await loadHistory(conversationId!, cache, canRead);
       const userContent: Anthropic.Beta.BetaContentBlockParam[] = [
         ...(ref ? await documentBlocks(ref, cache) : []),
         { type: "text", text },

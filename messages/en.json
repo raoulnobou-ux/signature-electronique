@@ -177,48 +177,28 @@
           "tab": "Firms",
           "title": "Lawyers, notaries, accountants, architects",
           "description": "Engagement letters, fee agreements, powers of attorney, reports: sign and stamp every document in seconds, with an audit trail that reassures your clients.",
-          "examples": [
-            "Engagement letter",
-            "Fee agreement",
-            "Power of attorney",
-            "Expert report"
-          ]
+          "examples": ["Engagement letter", "Fee agreement", "Power of attorney", "Expert report"]
         },
         {
           "key": "school",
           "tab": "Schools",
           "title": "Schools, institutes and universities",
           "description": "Enrollment certificates, transcripts, notices and circulars signed by management in bulk, with the institution's stamp.",
-          "examples": [
-            "Enrollment certificate",
-            "Transcript",
-            "Notice",
-            "Circular"
-          ]
+          "examples": ["Enrollment certificate", "Transcript", "Notice", "Circular"]
         },
         {
           "key": "business",
           "tab": "SMEs & NGOs",
           "title": "Companies, NGOs and associations",
           "description": "Contracts, purchase orders, meeting minutes, travel orders: get partners to sign remotely and keep every version safe.",
-          "examples": [
-            "Service agreement",
-            "Purchase order",
-            "Meeting minutes",
-            "Travel order"
-          ]
+          "examples": ["Service agreement", "Purchase order", "Meeting minutes", "Travel order"]
         },
         {
           "key": "admin",
           "tab": "Public sector",
           "title": "Public services and local authorities",
           "description": "Memos, letters and announcements signed and circulated faster, with a clear history of who signed what and when.",
-          "examples": [
-            "Internal memo",
-            "Official letter",
-            "Announcement",
-            "Internal decision"
-          ]
+          "examples": ["Internal memo", "Official letter", "Announcement", "Internal decision"]
         }
       ]
     },
@@ -458,11 +438,7 @@
       "metaTitle": "Create an account",
       "title": "Create your account",
       "subtitle": "Free, no credit card.",
-      "steps": [
-        "Account",
-        "Profile",
-        "Confirmation"
-      ],
+      "steps": ["Account", "Profile", "Confirmation"],
       "profileTitle": "Tell us about your organization",
       "profileSubtitle": "Optional — you can complete it later.",
       "continue": "Continue",
@@ -677,7 +653,7 @@
         "passwordCta": "Change my password",
         "passwordSent": "A link has just been sent to you by email.",
         "sessionsTitle": "Signed-in devices",
-        "sessionsBody": "Sign QuickSign out of all your devices (phones, computers), including this one.",
+        "sessionsBody": "The devices currently signed in to your account. If you don't recognize one, sign it out and change your password.",
         "signOutAll": "Sign out everywhere",
         "twoFactorTitle": "Two-factor authentication",
         "twoFactorBody": "Protect your account: each time you sign in, a 6-digit code from your authenticator app (Google Authenticator, Microsoft Authenticator, Authy…) will be required in addition to your password.",
@@ -697,7 +673,12 @@
         "twoFactorDisableBody": "Enter a code from your app to confirm. Your account will then only be protected by your password.",
         "twoFactorInvalid": "Wrong or expired code.",
         "twoFactorRateLimited": "Too many attempts. Wait a few minutes.",
-        "twoFactorError": "The operation failed. Please try again."
+        "twoFactorError": "The operation failed. Please try again.",
+        "lastSignIn": "Last sign-in: {date}",
+        "thisDevice": "This device",
+        "lastActive": "active on {date}",
+        "signOutOthers": "Sign out other devices",
+        "signedOutOthers": "Other devices have been signed out."
       },
       "preferences": {
         "theme": "Theme",
@@ -717,7 +698,11 @@
         "deleteConfirmBody": "Type DELETE to confirm. Your documents and signatures will be erased and cannot be recovered.",
         "deleteConfirmWord": "DELETE",
         "deleteConfirmCta": "Delete permanently",
-        "deleteError": "Deletion failed. Contact support."
+        "deleteError": "Deletion failed. Contact support.",
+        "deletePassword": "Your current password",
+        "deleteBadPassword": "Incorrect password.",
+        "deleteRecentLogin": "For your security, sign in again (sign out, then sign in with Google) and retry within 10 minutes.",
+        "deleteRateLimited": "Too many attempts. Try again in a few minutes."
       }
     },
     "billing": {

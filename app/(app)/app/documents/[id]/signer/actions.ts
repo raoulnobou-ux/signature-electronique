@@ -226,7 +226,7 @@ export async function finalizeSignature(
   const fileName = `${doc.title.replace(/[\\/:*?"<>|]/g, "").slice(0, 150)} (signé).pdf`;
   const { data: signed } = await admin.storage
     .from("documents")
-    .createSignedUrl(path, 3600, { download: fileName });
+    .createSignedUrl(path, 300, { download: fileName });
 
   revalidatePath(`/app/documents/${documentId}`);
   revalidatePath("/app/documents");

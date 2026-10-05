@@ -41,7 +41,7 @@ export default async function BulkSignPage(props: PageProps<"/app/documents/lot"
   if (usable.length === 0) redirect("/app/documents");
 
   const [{ data: signed }, assets] = await Promise.all([
-    createAdminClient().storage.from("documents").createSignedUrl(usable[0]!.pdf_path!, 3600),
+    createAdminClient().storage.from("documents").createSignedUrl(usable[0]!.pdf_path!, 900),
     listSignatureAssets(),
   ]);
   if (!signed) redirect("/app/documents");

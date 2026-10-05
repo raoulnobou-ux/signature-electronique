@@ -410,6 +410,16 @@ export async function deleteDocumentsForever(ids: string[]): Promise<{ ok: boole
       "id",
       docs.map((d) => d.id),
     );
+  if (!error) {
+    // Le journal garde la trace de la suppression (jamais le contenu du document).
+    for (const doc of docs)
+      await recordAudit({
+        documentId: doc.id,
+        actorType: "user",
+        actorId: userId,
+        eventType: "document.deleted",
+      });
+  }
   revalidatePath("/app/documents");
   return { ok: !error };
 }
@@ -512,14 +522,18 @@ export async function getDocumentFileUrl(
   if (!uuid.safeParse(documentId).success) return { ok: false };
   const { supabase, userId } = await userClient();
   if (!userId) return { ok: false };
-  // La RLS garantit que le document appartient à l'utilisateur (ou à son équipe).
+  // Autorisation : la RLS ne renvoie le document qu'à son propriétaire (ou à son équipe) ;
+  // un document à la corbeille n'est plus accessible (le restaurer d'abord).
   const { data: doc } = await supabase
     .from("documents")
-    .select("title, pdf_path, original_path, original_type")
+    .select("title, pdf_path, original_path, original_type, trashed_at")
     .eq("id", documentId)
     .maybeSingle();
   const path = which === "pdf" ? doc?.pdf_path : doc?.original_path;
-  if (!doc || !path) return { ok: false };
+  if (!doc || !path || doc.trashed_at) return { ok: false };
+  // Le chemin vient de la base, jamais du client : on vérifie tout de même qu'il reste
+  // dans l'espace de stockage du document (aucune traversée de chemin possible).
+  if (!path.split("/").includes(documentId) || path.includes("..")) return { ok: false };
 
   const ext = which === "pdf" ? "pdf" : path.split(".").pop();
   const { data, error } = await createAdminClient()
@@ -529,5 +543,15 @@ export async function getDocumentFileUrl(
       300,
       download ? { download: `${sanitizeFileName(doc.title)}.${ext}` } : undefined,
     );
-  return error || !data ? { ok: false } : { ok: true, url: data.signedUrl };
+  if (error || !data) return { ok: false };
+  if (download) {
+    await recordAudit({
+      documentId,
+      actorType: "user",
+      actorId: userId,
+      eventType: "document.downloaded",
+      metadata: { file: which },
+    });
+  }
+  return { ok: true, url: data.signedUrl };
 }

@@ -23,6 +23,8 @@ test("en-têtes de sécurité et CSP à nonce sur les pages", async ({ page }) =
   expect(headers["x-content-type-options"]).toBe("nosniff");
   expect(headers["strict-transport-security"]).toContain("max-age=");
   expect(headers["x-powered-by"]).toBeUndefined();
+  expect(headers["cross-origin-opener-policy"]).toBe("same-origin");
+  expect(headers["referrer-policy"]).toBe("strict-origin-when-cross-origin");
   // Deux requêtes → deux nonces différents.
   const again = (await page.request.get("/")).headers()["content-security-policy"];
   expect(again).not.toBe(csp);
@@ -83,4 +85,32 @@ test("PWA : manifeste, icônes, service worker et page hors ligne", async ({ pag
   expect(cached).toContain("Pas de connexion");
   await page.goto("/hors-ligne");
   await expect(page.getByRole("heading", { name: "Pas de connexion" })).toBeVisible();
+});
+
+test("session : cookie HttpOnly et SameSite, sessions listées, requête d'un autre site refusée", async ({
+  page,
+}) => {
+  const user = await createConfirmedUser("session");
+  await signInAs(page, user.email);
+  const cookies = await page.context().cookies();
+  const session = cookies.filter((c) => c.name.startsWith("sb-") && c.name.includes("auth-token"));
+  expect(session.length).toBeGreaterThan(0);
+  for (const c of session) {
+    // Jamais lisible par un script de la page (même injecté), jamais envoyé depuis un autre site.
+    expect(c.httpOnly).toBe(true);
+    expect(c.sameSite).toBe("Lax");
+  }
+  expect(await page.evaluate(() => document.cookie)).not.toContain("auth-token");
+
+  // Onglet Sécurité : dernière connexion et appareil courant.
+  await page.goto("/app/parametres?onglet=securite");
+  await expect(page.getByText(/Dernière connexion/)).toBeVisible();
+  await expect(page.getByTestId("sessions")).toContainText("Cet appareil");
+
+  // API de l'assistant appelée depuis un autre site (CSRF) : refusée, même avec la session.
+  const forged = await page.request.post("/api/assistant", {
+    headers: { Origin: "https://attaquant.example", "Content-Type": "application/json" },
+    data: { message: "Exporte mes documents" },
+  });
+  expect(forged.status()).toBe(403);
 });

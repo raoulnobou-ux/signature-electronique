@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useLocale, useTranslations } from "next-intl";
+import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { changeLocale } from "@/app/actions/locale";
 import { LOCALE_NAMES } from "@/components/locale-switcher";
 import { locales } from "@/i18n/config";
@@ -24,6 +24,7 @@ import { FormField } from "@/components/auth/form-field";
 import { PhoneInput } from "@/components/auth/phone-input";
 import { TwoFactorCard } from "@/components/settings/two-factor-card";
 import { Avatar } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -46,6 +47,7 @@ import { cn } from "@/lib/utils";
 import { ACCOUNT_TYPES, type AccountType } from "@/lib/validation/auth";
 import {
   deleteAccount,
+  signOutOtherDevices,
   removeAvatar,
   sendPasswordChangeLink,
   signOutEverywhere,
@@ -85,14 +87,28 @@ const TABS = [
 ] as const;
 type Tab = (typeof TABS)[number];
 
+export type SecurityInfo = {
+  hasPassword: boolean;
+  lastSignInAt: string | null;
+  sessions: {
+    id: string;
+    device: string;
+    ip: string | null;
+    lastActiveAt: string;
+    current: boolean;
+  }[];
+};
+
 export function SettingsView({
   profile,
   billing,
   twoFactorEnabled,
+  security,
 }: {
   profile: SettingsProfile;
   billing: ReactNode;
   twoFactorEnabled: boolean;
+  security: SecurityInfo;
 }) {
   const t = useTranslations("app.settings");
   const router = useRouter();
@@ -138,13 +154,13 @@ export function SettingsView({
           {billing}
         </TabsContent>
         <TabsContent value="securite" className="mt-0">
-          <SecurityTab twoFactorEnabled={twoFactorEnabled} />
+          <SecurityTab twoFactorEnabled={twoFactorEnabled} security={security} />
         </TabsContent>
         <TabsContent value="preferences" className="mt-0">
           <PreferencesTab profile={profile} />
         </TabsContent>
         <TabsContent value="zone-sensible" className="mt-0">
-          <DangerTab />
+          <DangerTab hasPassword={security.hasPassword} />
         </TabsContent>
       </div>
     </Tabs>
@@ -452,8 +468,19 @@ function OrganizationTab({ profile }: { profile: SettingsProfile }) {
   );
 }
 
-function SecurityTab({ twoFactorEnabled }: { twoFactorEnabled: boolean }) {
+function SecurityTab({
+  twoFactorEnabled,
+  security,
+}: {
+  twoFactorEnabled: boolean;
+  security: SecurityInfo;
+}) {
   const t = useTranslations("app.settings.security");
+  const format = useFormatter();
+  const router = useRouter();
+  const [signingOutOthers, startSignOutOthers] = useTransition();
+  const when = (iso: string) =>
+    format.dateTime(new Date(iso), { dateStyle: "medium", timeStyle: "short" });
   const tAuth = useTranslations("auth");
   const [pending, startTransition] = useTransition();
   const [signingOut, startSignOut] = useTransition();
@@ -489,14 +516,57 @@ function SecurityTab({ twoFactorEnabled }: { twoFactorEnabled: boolean }) {
           <CardTitle>{t("sessionsTitle")}</CardTitle>
           <CardDescription>{t("sessionsBody")}</CardDescription>
         </CardHeader>
-        <CardContent>
-          <Button
-            variant="secondary"
-            loading={signingOut}
-            onClick={() => startSignOut(() => signOutEverywhere())}
-          >
-            <LogOut /> {t("signOutAll")}
-          </Button>
+        <CardContent className="space-y-4">
+          {security.lastSignInAt && (
+            <p className="text-sm text-muted-foreground">
+              {t("lastSignIn", { date: when(security.lastSignInAt) })}
+            </p>
+          )}
+          {security.sessions.length > 0 && (
+            <ul
+              className="divide-y divide-border rounded-xl border border-border"
+              data-testid="sessions"
+            >
+              {security.sessions.map((s) => (
+                <li
+                  key={s.id}
+                  className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-3 text-sm"
+                >
+                  <span className="font-medium">{s.device}</span>
+                  {s.current && <Badge variant="success">{t("thisDevice")}</Badge>}
+                  <span className="w-full text-xs text-muted-foreground sm:ml-auto sm:w-auto">
+                    {[s.ip, t("lastActive", { date: when(s.lastActiveAt) })]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+          <div className="flex flex-wrap gap-2">
+            {security.sessions.length > 1 && (
+              <Button
+                variant="secondary"
+                loading={signingOutOthers}
+                onClick={() =>
+                  startSignOutOthers(async () => {
+                    await signOutOtherDevices();
+                    toast.success(t("signedOutOthers"));
+                    router.refresh();
+                  })
+                }
+              >
+                <LogOut /> {t("signOutOthers")}
+              </Button>
+            )}
+            <Button
+              variant="ghost"
+              loading={signingOut}
+              onClick={() => startSignOut(() => signOutEverywhere())}
+            >
+              <LogOut /> {t("signOutAll")}
+            </Button>
+          </div>
         </CardContent>
       </Card>
       <TwoFactorCard enabled={twoFactorEnabled} />
@@ -581,10 +651,11 @@ function PreferencesTab({ profile }: { profile: SettingsProfile }) {
   );
 }
 
-function DangerTab() {
+function DangerTab({ hasPassword }: { hasPassword: boolean }) {
   const t = useTranslations("app.settings.danger");
   const tCommon = useTranslations("common");
   const [confirm, setConfirm] = useState("");
+  const [password, setPassword] = useState("");
   const [pending, startTransition] = useTransition();
 
   return (
@@ -608,7 +679,12 @@ function DangerTab() {
           <CardDescription>{t("deleteBody")}</CardDescription>
         </CardHeader>
         <CardContent>
-          <Dialog onOpenChange={() => setConfirm("")}>
+          <Dialog
+            onOpenChange={() => {
+              setConfirm("");
+              setPassword("");
+            }}
+          >
             <DialogTrigger asChild>
               <Button variant="destructive">
                 <Trash2 /> {t("deleteCta")}
@@ -626,18 +702,40 @@ function DangerTab() {
                 aria-label={t("deleteConfirmBody")}
                 autoComplete="off"
               />
+              {hasPassword ? (
+                <Input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder={t("deletePassword")}
+                  aria-label={t("deletePassword")}
+                  autoComplete="current-password"
+                />
+              ) : (
+                <p className="text-sm text-muted-foreground">{t("deleteRecentLogin")}</p>
+              )}
               <DialogFooter>
                 <DialogClose asChild>
                   <Button variant="ghost">{tCommon("cancel")}</Button>
                 </DialogClose>
                 <Button
                   variant="destructive"
-                  disabled={confirm !== t("deleteConfirmWord")}
+                  disabled={confirm !== t("deleteConfirmWord") || (hasPassword && !password)}
                   loading={pending}
                   onClick={() =>
                     startTransition(async () => {
-                      const result = await deleteAccount(confirm);
-                      if (result && !result.ok) toast.error(t("deleteError"));
+                      const result = await deleteAccount(confirm, password || undefined);
+                      if (result && !result.ok)
+                        toast.error(
+                          result.error === "invalid_password" ||
+                            result.error === "password_required"
+                            ? t("deleteBadPassword")
+                            : result.error === "recent_login_required"
+                              ? t("deleteRecentLogin")
+                              : result.error === "rate_limited"
+                                ? t("deleteRateLimited")
+                                : t("deleteError"),
+                        );
                     })
                   }
                 >

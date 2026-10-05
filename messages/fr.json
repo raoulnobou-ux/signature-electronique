@@ -213,12 +213,7 @@
           "tab": "Administrations",
           "title": "Services publics et collectivités",
           "description": "Notes de service, courriers et annonces signés et diffusés plus vite, avec un historique clair de qui a signé quoi et quand.",
-          "examples": [
-            "Note de service",
-            "Courrier officiel",
-            "Annonce",
-            "Décision interne"
-          ]
+          "examples": ["Note de service", "Courrier officiel", "Annonce", "Décision interne"]
         }
       ]
     },
@@ -458,11 +453,7 @@
       "metaTitle": "Créer un compte",
       "title": "Créez votre compte",
       "subtitle": "Gratuit, sans carte bancaire.",
-      "steps": [
-        "Compte",
-        "Profil",
-        "Confirmation"
-      ],
+      "steps": ["Compte", "Profil", "Confirmation"],
       "profileTitle": "Parlez-nous de votre structure",
       "profileSubtitle": "Facultatif — vous pourrez compléter plus tard.",
       "continue": "Continuer",
@@ -677,7 +668,7 @@
         "passwordCta": "Changer mon mot de passe",
         "passwordSent": "Un lien vient de vous être envoyé par e-mail.",
         "sessionsTitle": "Appareils connectés",
-        "sessionsBody": "Déconnectez QuickSign de tous vos appareils (téléphones, ordinateurs), y compris celui-ci.",
+        "sessionsBody": "Les appareils actuellement connectés à votre compte. Si vous n'en reconnaissez pas un, déconnectez-le et changez votre mot de passe.",
         "signOutAll": "Se déconnecter partout",
         "twoFactorTitle": "Double authentification",
         "twoFactorBody": "Protégez votre compte : à chaque connexion, un code à 6 chiffres de votre application d'authentification (Google Authenticator, Microsoft Authenticator, Authy…) vous sera demandé en plus du mot de passe.",
@@ -697,7 +688,12 @@
         "twoFactorDisableBody": "Saisissez un code de votre application pour confirmer. Votre compte ne sera plus protégé que par le mot de passe.",
         "twoFactorInvalid": "Code incorrect ou expiré.",
         "twoFactorRateLimited": "Trop de tentatives. Patientez quelques minutes.",
-        "twoFactorError": "L'opération a échoué. Réessayez."
+        "twoFactorError": "L'opération a échoué. Réessayez.",
+        "lastSignIn": "Dernière connexion : {date}",
+        "thisDevice": "Cet appareil",
+        "lastActive": "actif le {date}",
+        "signOutOthers": "Déconnecter les autres appareils",
+        "signedOutOthers": "Les autres appareils sont déconnectés."
       },
       "preferences": {
         "theme": "Thème",
@@ -717,7 +713,11 @@
         "deleteConfirmBody": "Tapez SUPPRIMER pour confirmer. Vos documents et signatures seront effacés et ne pourront pas être récupérés.",
         "deleteConfirmWord": "SUPPRIMER",
         "deleteConfirmCta": "Supprimer définitivement",
-        "deleteError": "La suppression a échoué. Contactez le support."
+        "deleteError": "La suppression a échoué. Contactez le support.",
+        "deletePassword": "Votre mot de passe actuel",
+        "deleteBadPassword": "Mot de passe incorrect.",
+        "deleteRecentLogin": "Par sécurité, reconnectez-vous (déconnexion puis connexion avec Google) puis recommencez dans les 10 minutes.",
+        "deleteRateLimited": "Trop de tentatives. Réessayez dans quelques minutes."
       }
     },
     "billing": {

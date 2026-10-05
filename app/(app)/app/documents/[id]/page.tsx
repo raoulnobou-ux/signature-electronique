@@ -36,7 +36,7 @@ export default async function DocumentPage(props: PageProps<"/app/documents/[id]
   // URL signée valable 30 min : le temps de lire le document tranquillement.
   const { data: signed } = await createAdminClient()
     .storage.from("documents")
-    .createSignedUrl(doc.pdf_path, 1800);
+    .createSignedUrl(doc.pdf_path, 900);
   if (!signed) notFound();
 
   return (

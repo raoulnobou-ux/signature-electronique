@@ -153,6 +153,7 @@ Langue, pays de résidence, fuseau horaire et devise préférée par utilisateur
 - **Français et anglais** : `messages/fr.json` et `messages/en.json` (mêmes clés, vérifié par les tests). Sélecteur dans le pied de page, les pages de connexion et Paramètres → Profil. En production, copier aussi les modèles bilingues `supabase/templates/confirmation.html` et `recovery.html` dans Supabase → Authentication → Email Templates.
 - **Double authentification** (application Google Authenticator, Authy…) : Paramètres → Sécurité. Activer « TOTP » dans Supabase → Authentication → Multi-Factor (actif par défaut sur Supabase hébergé).
 - **CSP stricte** avec nonce par requête (`proxy.ts`, `lib/security/csp.ts`), en-têtes HSTS, X-Frame-Options, etc.
+- **Audit de sécurité** : mesures, liste de contrôle, sauvegardes et points à faire auditer dans [`SECURITY.md`](SECURITY.md). En production Vercel, `npm run build` échoue si une variable critique manque (`scripts/build-guard.mjs`). Gotenberg doit être redéployé (`fly deploy` dans `deploy/gotenberg`) pour appliquer ses options de durcissement.
 - **PWA** : `app/manifest.ts`, `public/sw.js` (aucune donnée privée en cache), page `/hors-ligne`.
 
 ## Tests

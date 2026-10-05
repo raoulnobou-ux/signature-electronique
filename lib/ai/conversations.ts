@@ -66,15 +66,28 @@ export async function documentBlocks(
   return blocks;
 }
 
+/**
+ * Vérifie, au moment de chaque échange, que l'utilisateur a toujours accès au document
+ * (supprimé, mis à la corbeille, retiré de l'équipe…). Le chemin enregistré dans
+ * l'historique ne suffit jamais à relire un document.
+ */
+export type CanReadDocument = (documentId: string) => Promise<boolean>;
+
 async function expand(
   blocks: StoredBlock[],
   cache: Map<string, Awaited<ReturnType<typeof loadDocument>>>,
+  canRead: CanReadDocument,
 ): Promise<Block[]> {
   const out: Block[] = [];
   for (const block of blocks) {
-    if ((block as DocumentRef).type === "document_ref")
-      out.push(...(await documentBlocks(block as DocumentRef, cache)));
-    else out.push(block as Block);
+    const ref = block as DocumentRef;
+    if (ref.type !== "document_ref") out.push(block as Block);
+    else if (await canRead(ref.documentId)) out.push(...(await documentBlocks(ref, cache)));
+    else
+      out.push({
+        type: "text",
+        text: `Le document « ${ref.title} » n'est plus accessible : son contenu n'est plus transmis.`,
+      });
   }
   return out;
 }
@@ -82,6 +95,7 @@ async function expand(
 export async function loadHistory(
   conversationId: string,
   cache: Map<string, Awaited<ReturnType<typeof loadDocument>>>,
+  canRead: CanReadDocument,
 ): Promise<MessageParam[]> {
   const { data } = await createAdminClient()
     .from("ai_messages")
@@ -93,7 +107,7 @@ export async function loadHistory(
   for (const row of data ?? []) {
     history.push({
       role: row.role as "user" | "assistant",
-      content: await expand(row.content as StoredBlock[], cache),
+      content: await expand(row.content as StoredBlock[], cache, canRead),
     });
   }
   return history;

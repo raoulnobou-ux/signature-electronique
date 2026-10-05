@@ -381,7 +381,7 @@ Récapitulatif de chaque mesure, à citer à un client ou un partenaire. Chacune
 
 **D99 — Cloisonnement par la base (RLS).** La Row Level Security est active sur les 27 tables du schéma `public` (vérifié en production le 2 octobre 2026). Six tables sans politique (`payment_events`, `rate_limit_hits`, `contact_messages`, `billing_notices`, `ai_faq_cache`, `app_errors`) sont donc inaccessibles depuis le navigateur : serveur uniquement. Un utilisateur ne peut lire ni modifier les données d'un autre, même en changeant un identifiant dans une URL ou en appelant l'API directement [tests d'intégration `rls`, `pro`, `billing`, `assistant`, `mfa` ; e2e `security`]. Avec la double authentification activée, une session non vérifiée ne voit aucune donnée (politiques restrictives `mfa_satisfied()`).
 
-**D100 — Fichiers jamais publics.** Les cinq buckets (`documents`, `signatures`, `certificates`, `receipts`, `avatars`) sont privés. Les fichiers ne sont servis que par des URL signées : 2 à 5 minutes pour les téléchargements, 30 à 60 minutes pour l'affichage dans l'éditeur, et 7 jours uniquement pour le lien de téléchargement du document final envoyé par e-mail quand il dépasse la taille d'une pièce jointe. Les photos de profil, auparavant publiques, passent par `/api/avatars/…` : session requise, visibles par le seul propriétaire et les membres de sa propre équipe, puis URL signée de 10 minutes [e2e `account` : propriétaire 302, inconnu 404, sans session 401, ancienne adresse publique refusée].
+**D100 — Fichiers jamais publics.** Les cinq buckets (`documents`, `signatures`, `certificates`, `receipts`, `avatars`) sont privés. Les fichiers ne sont servis que par des URL signées : 2 à 5 minutes pour les téléchargements, 15 minutes pour l'affichage (30 pour les images de signature). Depuis D122, l'e-mail de fin ne contient plus d'URL signée de 7 jours, mais un lien vers la page du signataire ou de la demande, qui revérifie l'accès. Les photos de profil, auparavant publiques, passent par `/api/avatars/…` : session requise, visibles par le seul propriétaire et les membres de sa propre équipe, puis URL signée de 10 minutes [e2e `account` : propriétaire 302, inconnu 404, sans session 401, ancienne adresse publique refusée].
 
 **D101 — Liens de signature.** Le jeton fait 256 bits : HMAC-SHA256 de l'identifiant du signataire et d'une version, avec `LINK_SECRET`, encodé en base64url sur 43 caractères. La base ne stocke que son empreinte SHA-256. Chaque lien expire avec la demande (une date d'expiration est toujours fixée, et une tâche quotidienne fait expirer les demandes échues). Une relance ou une révocation change la version et invalide l'ancien lien. Une fois la signature faite, le lien ne permet plus que la consultation et le téléchargement. Toute forme de jeton invalide est rejetée avant toute requête en base [e2e `signing`, `requests`].
 
@@ -403,3 +403,47 @@ Récapitulatif de chaque mesure, à citer à un client ou un partenaire. Chacune
 - Relecture de l'ensemble des 1 358 textes français de l'interface (et de leurs équivalents anglais) : formulations « locales » remplacées pour le positionnement international, partenaires de paiement nommés, libellés plus précis (« Case à cocher », export).
 - Mesure en 3G lente (Chrome « Slow 3G », mobile) : texte de l'accueil visible à environ 3,3 s en première visite (333 Ko au total, dont 106 Ko pour React/Next et 69 Ko de polices en `font-display: swap`), pages suivantes quasi instantanées grâce au cache.
 - Aucun faux témoignage : la section ne s'affiche qu'avec de vrais avis (`content/testimonials.ts`).
+
+**D122 — Audit de sécurité du 5 octobre 2026 (défense en profondeur).** Démarche : auditer, identifier, renforcer, tester. Détail et liste de contrôle dans `SECURITY.md`. Failles trouvées et corrigées :
+
+- **Privilèges trop larges.** Le rôle `anon` gardait des droits sur toutes les tables (la RLS bloquait, mais une seule politique mal écrite aurait suffi). Retirés, sauf la lecture de `plans_config`. Le rôle `authenticated` perd l'écriture directe sur 16 tables écrites par le serveur seul (paiements, abonnements, journal, versions, équipes…). Migration `20261006000100_security_hardening_4.sql`.
+- **Dossier d'autrui.** Un utilisateur pouvait ranger son document, ou créer un sous-dossier, dans le dossier d'un autre en connaissant son identifiant. Politique `owns_folder()` ajoutée.
+- **Corbeille et équipe.** Un document mis à la corbeille restait lisible et téléchargeable par les membres de l'équipe. Il n'est plus visible que de son propriétaire ; le téléchargement d'un document à la corbeille est refusé.
+- **Lien de 7 jours dans l'e-mail de fin.** Remplacé par un lien vers la page du signataire ou de la demande. Toutes les autres URL signées sont ramenées à 15 minutes au plus (5 pour le téléchargement final).
+- **Assistant IA.** Un document cité dans une ancienne conversation restait envoyé au modèle après la perte d'accès (équipe quittée, document supprimé). L'accès est maintenant revérifié à chaque message. La route vérifie aussi l'origine (CSRF) et limite le corps à 64 Ko.
+- **Suppression du compte sans réauthentification.** Le mot de passe actuel est désormais exigé, ou une connexion Google de moins de 10 minutes. Cinq essais par 10 minutes au plus.
+
+Protections ajoutées :
+
+- cookies de session forcés en `HttpOnly`, `Secure` en production et `SameSite=Lax` ; suppression du client Supabase navigateur, devenu inutile ;
+- onglet Sécurité : dernière connexion, liste des sessions actives (fonction `my_sessions()`, limitée à l'utilisateur), « Déconnecter les autres appareils » et « Se déconnecter partout » ;
+- journal d'audit complété, sans contenu de document : téléchargement, suppression définitive, export des données, suppression du compte, déconnexions, demande de changement de mot de passe, création et suppression de signatures ;
+- export des données limité à 10 par heure ;
+- en-têtes `Cross-Origin-Opener-Policy: same-origin` et `X-Permitted-Cross-Domain-Policies: none` ;
+- Gotenberg durci : routes Chromium et PDF désactivées, téléchargement d'URL distantes interdit, webhooks vers des IP privées refusés, conteneur en lecture seule sans privilèges ni capacités, mémoire et processus limités ;
+- garde de déploiement `scripts/build-guard.mjs`, lancée avant le build (`prebuild`) : en production Vercel, elle fait échouer le build si une variable critique manque ou est faible (URL Supabase non HTTPS, clés absentes, `LINK_SECRET` de moins de 32 caractères, `CRON_SECRET` de moins de 16, `AI_MOCK=true`).
+
+Tests : `tests/integration/security.test.ts` couvre 12 scénarios avec de vrais comptes A et B :
+
+- lecture, modification et suppression par identifiant ;
+- visiteur anonyme ;
+- corbeille d'équipe ;
+- URL signée expirée ;
+- paiement ou abonnement forgé ;
+- `user_id` falsifié ;
+- dossier d'autrui ;
+- traversée de chemin ;
+- signatures et cachets ;
+- sessions ;
+- tables réservées au serveur.
+
+L'e2e `security` vérifie aussi les cookies, l'onglet Sécurité et le refus d'une origine étrangère. L'e2e `account` vérifie la suppression avec mot de passe.
+
+Restent hors du code (voir `SECURITY.md`) :
+
+- antivirus des fichiers importés ;
+- double authentification obligatoire pour les comptes administrateurs Supabase et Vercel ;
+- test de restauration de sauvegarde ;
+- test d'intrusion externe.
+
+Les 5 alertes `npm audit` restantes concernent uniquement les outils de développement (eslint).

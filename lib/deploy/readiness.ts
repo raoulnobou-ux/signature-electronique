@@ -82,6 +82,16 @@ export function productionChecks(env: Env): Check[] {
   return checks;
 }
 
+/**
+ * Sous-ensemble bloquant à la compilation de production (scripts/build-guard.mjs) :
+ * uniquement ce qui touche la sécurité. Les prestataires (e-mail, IA, paiement,
+ * conversion) se dégradent proprement s'ils manquent et ne bloquent pas le déploiement.
+ */
+export function securityChecks(env: Env): Check[] {
+  const ids = new Set(["supabase_url", "supabase_keys", "link_secret", "cron_secret", "no_mock"]);
+  return productionChecks(env).filter((c) => ids.has(c.id));
+}
+
 export function summarize(checks: Check[]): {
   ready: boolean;
   blocking: Check[];

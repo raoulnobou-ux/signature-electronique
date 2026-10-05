@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { recordAudit } from "@/lib/audit";
+import { rateLimit } from "@/lib/rate-limit";
 import { createClient } from "@/lib/supabase/server";
 
 /** Export des données personnelles (droit d'accès et de portabilité), au format JSON. */
@@ -8,6 +10,10 @@ export async function GET() {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
+  // Export complet (lourd) : quelques fois par heure suffisent.
+  if (!(await rateLimit("account-export", user.id, 10, 3600)))
+    return NextResponse.json({ error: "rate_limited" }, { status: 429 });
+  await recordAudit({ actorType: "user", actorId: user.id, eventType: "account.exported" });
 
   const [profile, subscription, payments, documents, versions, assets, requests, audit, templates] =
     await Promise.all([

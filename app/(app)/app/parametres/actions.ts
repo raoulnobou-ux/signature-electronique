@@ -4,6 +4,8 @@ import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { recordAudit } from "@/lib/audit";
+import { verifyReauthentication } from "@/lib/auth/reauth";
 import { publicEnv } from "@/lib/env";
 import { IMAGE_MIME, sniffFileType } from "@/lib/files/sniff";
 import { isCurrency } from "@/config/currencies";
@@ -200,19 +202,60 @@ export async function sendPasswordChangeLink(): Promise<SettingsResult> {
   const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
     redirectTo: `${publicEnv.NEXT_PUBLIC_APP_URL}/reinitialiser-mot-de-passe`,
   });
-  return error ? { ok: false, error: "server" } : { ok: true };
+  if (error) return { ok: false, error: "server" };
+  await recordAudit({
+    actorType: "user",
+    actorId: user.id,
+    eventType: "security.password_change_requested",
+  });
+  return { ok: true };
 }
 
 export async function signOutEverywhere() {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (user)
+    await recordAudit({
+      actorType: "user",
+      actorId: user.id,
+      eventType: "security.signed_out_all",
+    });
   await supabase.auth.signOut({ scope: "global" });
   redirect("/connexion?deconnecte=1");
 }
 
-export async function deleteAccount(confirmation: string): Promise<SettingsResult> {
+/** Ferme toutes les autres sessions (téléphone perdu, ordinateur partagé…), garde celle-ci. */
+export async function signOutOtherDevices(): Promise<SettingsResult> {
+  const { supabase, user } = await currentUser();
+  if (!user) return { ok: false, error: "unauthenticated" };
+  const { error } = await supabase.auth.signOut({ scope: "others" });
+  if (error) return { ok: false, error: "server" };
+  await recordAudit({
+    actorType: "user",
+    actorId: user.id,
+    eventType: "security.signed_out_others",
+  });
+  revalidatePath("/app/parametres");
+  return { ok: true };
+}
+
+export async function deleteAccount(
+  confirmation: string,
+  password?: string,
+): Promise<SettingsResult> {
   if (confirmation !== "SUPPRIMER") return { ok: false, error: "confirmation" };
   const { supabase, user } = await currentUser();
   if (!user) return { ok: false, error: "unauthenticated" };
+  // Action irréversible : mot de passe redemandé (ou connexion récente pour un compte Google).
+  const reauth = await verifyReauthentication(user, password);
+  if (!reauth.ok) return { ok: false, error: reauth.reason };
+  await recordAudit({
+    actorType: "user",
+    actorId: user.id,
+    eventType: "account.deleted",
+  });
 
   await purgeUserFiles(user.id);
   const { error } = await createAdminClient().auth.admin.deleteUser(user.id);

@@ -26,7 +26,7 @@ export default async function EditTemplatePage(props: PageProps<"/app/modeles/[i
   if (!template || template.owner_id !== account.userId || !template.pdf_path) notFound();
   const { data: signed } = await createAdminClient()
     .storage.from("documents")
-    .createSignedUrl(template.pdf_path, 3600);
+    .createSignedUrl(template.pdf_path, 900);
   if (!signed) notFound();
 
   const roles = templateRoleSchema.array().safeParse(template.roles);

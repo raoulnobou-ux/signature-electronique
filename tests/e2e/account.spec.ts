@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import path from "node:path";
-import { adminClient, createConfirmedUser, signInAs } from "./helpers/accounts";
+import { adminClient, createConfirmedUser, signInAs, TEST_PASSWORD } from "./helpers/accounts";
 
 test("modifier son profil, sa structure et sa photo", async ({ page }) => {
   const user = await createConfirmedUser("profil");
@@ -74,7 +74,15 @@ test("export des données et suppression du compte", async ({ page }) => {
   await page.getByRole("button", { name: "Supprimer mon compte" }).click();
   const confirm = page.getByRole("button", { name: "Supprimer définitivement" });
   await expect(confirm).toBeDisabled();
-  await page.getByRole("dialog").getByRole("textbox").fill("SUPPRIMER");
+  await page.getByRole("dialog").getByRole("textbox").first().fill("SUPPRIMER");
+  // Réauthentification : le mot de passe est redemandé (une session volée ne suffit pas).
+  await expect(confirm).toBeDisabled();
+  await page.getByLabel("Votre mot de passe actuel").fill("mauvais-mot-de-passe");
+  await confirm.click();
+  await expect(page.getByText("Mot de passe incorrect.")).toBeVisible();
+  const { data: stillThere } = await adminClient().auth.admin.getUserById(user.id);
+  expect(stillThere.user).not.toBeNull();
+  await page.getByLabel("Votre mot de passe actuel").fill(TEST_PASSWORD);
   await confirm.click();
   await expect(page).toHaveURL(/compte-supprime=1/);
 
