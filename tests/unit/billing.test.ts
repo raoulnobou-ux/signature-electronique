@@ -286,6 +286,40 @@ describe("Notch Pay (Mobile Money et carte, FCFA)", () => {
       await sandboxTx.verifyTransaction({ reference: DEPOSIT_ID, transactionId: TRX }),
     ).toMatchObject({ status: "failed", failureReason: "sandbox_transaction" });
 
+    // Notch Pay renvoie aussi « 1 » pour une transaction de test.
+    const sandboxOne = new NotchPayProvider(
+      "pk.live",
+      undefined,
+      jsonFetcher(200, {
+        transaction: {
+          reference: TRX,
+          merchant_reference: DEPOSIT_ID,
+          status: "complete",
+          sandbox: 1,
+        },
+      }) as unknown as typeof fetch,
+    );
+    expect(
+      (await sandboxOne.verifyTransaction({ reference: DEPOSIT_ID, transactionId: TRX }))?.status,
+    ).toBe("failed");
+    const testKey = new NotchPayProvider(
+      "pk_test.x",
+      undefined,
+      jsonFetcher(200, {
+        transaction: {
+          reference: TRX,
+          merchant_reference: DEPOSIT_ID,
+          status: "complete",
+          sandbox: "1",
+          amount: 5000,
+          currency: "XAF",
+        },
+      }) as unknown as typeof fetch,
+    );
+    expect(
+      (await testKey.verifyTransaction({ reference: DEPOSIT_ID, transactionId: TRX }))?.status,
+    ).toBe("successful");
+
     const missing = new NotchPayProvider(
       "pk.live",
       undefined,

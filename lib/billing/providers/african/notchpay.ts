@@ -25,7 +25,9 @@ export function isNotchPayTestKey(key: string): boolean {
 export function mapNotchPayStatus(status: string | undefined): TransactionStatus {
   const s = (status ?? "").toLowerCase();
   if (s === "complete") return "successful";
-  if (["failed", "rejected", "canceled", "cancelled", "abandoned", "expired", "refunded"].includes(s))
+  if (
+    ["failed", "rejected", "canceled", "cancelled", "abandoned", "expired", "refunded"].includes(s)
+  )
     return "failed";
   // pending, processing, hold, incomplete : encore en cours.
   return "pending";
@@ -56,7 +58,8 @@ type Transaction = {
   status?: string;
   amount?: number | string;
   currency?: string;
-  sandbox?: boolean;
+  /** Transaction de test : true, 1 ou « 1 » selon les réponses de Notch Pay. */
+  sandbox?: boolean | number | string;
   payment_method?: string | null;
   channel?: string | null;
 };
@@ -162,7 +165,9 @@ export class NotchPayProvider implements PaymentProvider {
     }
     let result = mapNotchPayStatus(tx.status);
     // Une transaction de test ne vaut jamais paiement avec une clé de production.
-    const sandboxWithLiveKey = tx.sandbox === true && !this.testMode;
+    const sandbox =
+      tx.sandbox === true || tx.sandbox === 1 || tx.sandbox === "1" || tx.sandbox === "true";
+    const sandboxWithLiveKey = sandbox && !this.testMode;
     if (sandboxWithLiveKey) result = "failed";
     return {
       status: result,
