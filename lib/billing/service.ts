@@ -283,7 +283,14 @@ export async function settlePayment(input: {
 }
 
 export type BillingCronSummary = Record<
-  "trialEnding" | "trialEnded" | "reminders" | "grace" | "expired" | "switched" | "abandoned",
+  | "trialEnding"
+  | "trialEnded"
+  | "reminders"
+  | "grace"
+  | "expired"
+  | "switched"
+  | "recovered"
+  | "abandoned",
   number
 >;
 
@@ -311,6 +318,7 @@ export async function runBillingCron(now = new Date()): Promise<BillingCronSumma
     grace: 0,
     expired: 0,
     switched: 0,
+    recovered: 0,
     abandoned: 0,
   };
   const iso = now.toISOString();
@@ -460,7 +468,26 @@ export async function runBillingCron(now = new Date()): Promise<BillingCronSumma
     );
   }
 
-  // 7. Paiements jamais finalisés (checkout abandonné) après 24 h.
+  // 7. Paiements restés en attente (navigateur fermé avant le retour, notification
+  // manquée) : revérifiés auprès du prestataire avant toute annulation.
+  const { data: pending } = await admin
+    .from("payments")
+    .select("provider_ref")
+    .eq("status", "pending")
+    .lte("created_at", new Date(now.getTime() - 10 * 60_000).toISOString())
+    .gte("created_at", new Date(now.getTime() - 7 * DAY).toISOString())
+    .order("created_at", { ascending: true })
+    .limit(50);
+  for (const row of pending ?? []) {
+    try {
+      const { outcome } = await settlePayment({ reference: row.provider_ref, transactionId: null });
+      if (outcome === "successful") summary.recovered++;
+    } catch (error) {
+      console.error("[billing] revérification d'un paiement en attente", error);
+    }
+  }
+
+  // 8. Paiements jamais finalisés (checkout abandonné) après 24 h.
   const { data: abandoned } = await admin
     .from("payments")
     .update({ status: "cancelled" })

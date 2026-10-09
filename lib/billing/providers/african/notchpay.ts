@@ -64,6 +64,17 @@ type Transaction = {
   channel?: string | null;
 };
 
+/**
+ * Moyen de paiement lisible pour le reçu : le canal (cm.mtn, cm.orange, card…) ; un
+ * identifiant interne (« pm.… ») n'est pas montré, « notchpay » le remplace.
+ */
+export function notchPayMethod(tx: { payment_method?: string | null; channel?: string | null }) {
+  for (const value of [tx.channel, tx.payment_method]) {
+    if (typeof value === "string" && value && !/^pm[._]/i.test(value)) return value.slice(0, 60);
+  }
+  return "notchpay";
+}
+
 export class NotchPayProvider implements PaymentProvider {
   readonly name = "notchpay";
   readonly method = "mobile_money" as const;
@@ -175,7 +186,7 @@ export class NotchPayProvider implements PaymentProvider {
       transactionId: tx.reference ?? id,
       amount: Number(tx.amount),
       currency: tx.currency ?? "",
-      method: tx.payment_method ?? tx.channel ?? null,
+      method: notchPayMethod(tx),
       failureReason: sandboxWithLiveKey
         ? "sandbox_transaction"
         : result === "failed"

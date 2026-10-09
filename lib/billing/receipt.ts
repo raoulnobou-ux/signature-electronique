@@ -84,6 +84,7 @@ export function paymentMethodLabel(
   if (m.includes("moov")) return "Moov Money";
   if (m.includes("mobilemoney") || m.includes("cm.mobile") || m.includes("wallet"))
     return "Mobile Money";
+  if (m === "notchpay") return "Notch Pay";
   if (m.includes("paypal")) return "PayPal";
   if (m.includes("apple_pay")) return "Apple Pay";
   if (m.includes("google_pay")) return "Google Pay";

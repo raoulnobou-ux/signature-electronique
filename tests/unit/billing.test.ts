@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
   NotchPayProvider,
   mapNotchPayStatus,
+  notchPayMethod,
   verifyNotchPaySignature,
 } from "@/lib/billing/providers/african/notchpay";
 import { sameCfaCurrency, suggestedCountry } from "@/lib/billing/cfa";
@@ -369,6 +370,9 @@ describe("Notch Pay (Mobile Money et carte, FCFA)", () => {
     expect(paymentMethodLabel("cm.mtn")).toBe("Mobile Money (MTN)");
     expect(paymentMethodLabel("cm.orange")).toBe("Orange Money");
     expect(paymentMethodLabel("cm.mobile")).toBe("Mobile Money");
+    expect(notchPayMethod({ payment_method: "pm.test_cETH", channel: null })).toBe("notchpay");
+    expect(notchPayMethod({ payment_method: "pm.x", channel: "cm.orange" })).toBe("cm.orange");
+    expect(paymentMethodLabel("notchpay")).toBe("Notch Pay");
     expect(paymentMethodLabel("card")).toBe("Carte bancaire");
     expect(paymentMethodLabel("paypal")).toBe("PayPal");
   });
