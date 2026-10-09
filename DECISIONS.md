@@ -447,3 +447,20 @@ Restent hors du code (voir `SECURITY.md`) :
 - test d'intrusion externe.
 
 Les 5 alertes `npm audit` restantes concernent uniquement les outils de développement (eslint).
+
+**D123 — Notch Pay, seul prestataire de paiement pour commencer (9 octobre 2026).** pawaPay et Paddle sont retirés : code, routes de notification (`/api/webhooks/pawapay`, `/api/webhooks/paddle`), page de paiement Paddle, variables d'environnement, CSP et textes juridiques. Notch Pay (`lib/billing/providers/african/notchpay.ts`) les remplace :
+
+- paiement en FCFA sur la page hébergée de Notch Pay : MTN Mobile Money, Orange Money ou carte bancaire ;
+- proposé dans tous les pays : tant qu'aucun prestataire n'accepte l'euro, le dollar ou la livre, le récapitulatif bascule sur le prix en FCFA ;
+- le client ne choisit plus de pays sur QuickSign, la page Notch Pay propose elle-même les moyens disponibles ;
+- clé publique `NOTCHPAY_PUBLIC_KEY` (`pk_test.…` = mode test affiché) ; `NOTCHPAY_WEBHOOK_SECRET` recommandée.
+
+Sécurité, inchangée dans son principe :
+
+- la transaction est toujours relue par l'API Notch Pay (`GET /payments/{référence}`) avant activation ;
+- elle doit porter notre référence (`merchant_reference`), son montant et sa devise sont revérifiés ;
+- une transaction de test est refusée avec une clé de production ;
+- l'identifiant Notch Pay noté à la création est préféré à celui reçu au retour du navigateur ;
+- la signature `x-notch-signature` (HMAC-SHA256, temps constant) est exigée dès que la clé de hachage est configurée.
+
+L'interface `PaymentProvider` et le registre restent prêts pour ajouter d'autres moyens de paiement au fur et à mesure (`docs/PAIEMENTS.md`). Les anciens paiements gardent leur prestataire et leurs reçus. Version des textes juridiques : `2026-10-09`.

@@ -54,7 +54,7 @@ Vérification : `curl https://<gotenberg>/health` renvoie 200 ; sans mot de pass
 
 > **Déjà fait** : projet Vercel `quicksign` (`prj_iTQoJMmqK9AcaqOuk0CBsGfFjPPu`, compte raoulnobou), région Paris (`cdg1`), Node 22, protection Vercel limitée aux aperçus. Variables déjà renseignées : `NEXT_PUBLIC_SUPABASE_URL` et `NEXT_PUBLIC_SUPABASE_ANON_KEY` (production → `quicksign-prod`, aperçus → `quicksign-preprod`), `LINK_SECRET`, `CRON_SECRET`, `GOTENBERG_TOKEN`, `EMAIL_FROM`. Sans `NEXT_PUBLIC_APP_URL`, l'application utilise son adresse `*.vercel.app`.
 >
-> **Reste à faire** : (a) Vercel → Account Settings → Authentication → connecter GitHub, puis projet `quicksign` → Settings → Git → connecter `raoulnobou-ux/signature-electronique` (branche de production : `claude/bonjour-s9n385`) ; (b) ajouter `SUPABASE_SERVICE_ROLE_KEY` (clé `service_role` de `quicksign-prod` pour _Production_, de `quicksign-preprod` pour _Preview_) ; (c) les clés des services : `ANTHROPIC_API_KEY`, `RESEND_API_KEY`, `PAWAPAY_API_TOKEN`, `PADDLE_*`, `GOTENBERG_URL`.
+> **Reste à faire** : (a) Vercel → Account Settings → Authentication → connecter GitHub, puis projet `quicksign` → Settings → Git → connecter `raoulnobou-ux/signature-electronique` (branche de production : `claude/bonjour-s9n385`) ; (b) ajouter `SUPABASE_SERVICE_ROLE_KEY` (clé `service_role` de `quicksign-prod` pour _Production_, de `quicksign-preprod` pour _Preview_) ; (c) les clés des services : `ANTHROPIC_API_KEY`, `RESEND_API_KEY`, `NOTCHPAY_PUBLIC_KEY`, `NOTCHPAY_WEBHOOK_SECRET`, `GOTENBERG_URL`.
 
 1. https://vercel.com/new → importer le dépôt GitHub `signature-electronique` (Framework : Next.js, aucune autre option).
 2. **Settings → Environment Variables** (environnement _Production_, et _Preview_ avec les clés de préproduction) :
@@ -67,7 +67,7 @@ Vérification : `curl https://<gotenberg>/health` renvoie 200 ; sans mot de pass
 | `GOTENBERG_URL`, `GOTENBERG_TOKEN`                                                       | étape 2                                           |
 | `RESEND_API_KEY`, `EMAIL_FROM`                                                           | étape 4 (ex. `QuickSign <bonjour@votre-domaine>`) |
 | `ANTHROPIC_API_KEY`                                                                      | console.anthropic.com → API Keys                  |
-| `PAWAPAY_API_TOKEN`, `PADDLE_API_KEY`, `PADDLE_CLIENT_TOKEN`, `PADDLE_WEBHOOK_SECRET`    | étape 5                                           |
+| `NOTCHPAY_PUBLIC_KEY`, `NOTCHPAY_WEBHOOK_SECRET`                                         | étape 5                                           |
 | `SENTRY_DSN`                                                                             | étape 6 (recommandé)                              |
 | `NEXT_PUBLIC_AUTH_GOOGLE_ENABLED`                                                        | `true` seulement si Google est configuré          |
 
@@ -80,26 +80,17 @@ Vérification : `curl https://<gotenberg>/health` renvoie 200 ; sans mot de pass
 3. Resend → **API Keys** → `RESEND_API_KEY`. Mettre `EMAIL_FROM` sur ce domaine vérifié.
 4. Mettre à jour `NEXT_PUBLIC_APP_URL` et les URL Supabase (étape 1.4) avec le domaine définitif, puis redéployer.
 
-## 5. Paiements — pawaPay (FCFA, Mobile Money) et Paddle (dollars, carte)
+## 5. Paiements — Notch Pay (FCFA : Mobile Money et carte)
 
-Le prestataire est choisi selon la devise du plan : **FCFA → pawaPay**, **dollars → Paddle**.
+Notch Pay est, pour commencer, le seul prestataire (https://business.notchpay.co) :
 
-**pawaPay** (https://dashboard.pawapay.io) :
+1. Créer le compte et faire valider l'entreprise (KYC) pour recevoir des paiements réels.
+2. **Paramètres → Clés API** : copier la **clé publique** dans Vercel → `NOTCHPAY_PUBLIC_KEY`. Commencer avec la clé de test (`pk_test.…`, aucun argent réel), puis la remplacer par la clé de production (`pk.…`).
+3. **Paramètres → Webhooks** : ajouter l'URL `https://<domaine>/api/webhooks/notchpay` (événements de paiement), puis copier sa **clé de hachage** dans `NOTCHPAY_WEBHOOK_SECRET` (signature vérifiée).
+4. Le client choisit son plan sur QuickSign, paie sur la page Notch Pay (MTN Mobile Money, Orange Money ou carte) et revient sur `/api/billing/return`. Aucun plan n'est activé sans relecture de la transaction par l'API Notch Pay.
+5. Redéployer après avoir changé une variable.
 
-1. Commencer en bac à sable (`PAWAPAY_ENV=sandbox`), puis passer en production une fois le compte validé (vide ou `production`).
-2. **API tokens** → générer un jeton → `PAWAPAY_API_TOKEN`.
-3. **Callback URLs** → dépôts (_Deposits_) : `https://<domaine>/api/webhooks/pawapay`.
-4. Le client choisit sur QuickSign le **pays** de son numéro (liste lue dans la configuration active du compte pawaPay, ou `PAWAPAY_COUNTRIES`), puis paie sur la page hébergée de pawaPay (opérateur, saisie du numéro avec lequel il paie) et revient sur `/api/billing/return`. Pays d'Afrique de l'Ouest : paiement en XOF au même montant (parité avec le XAF).
-
-**Paddle** (https://vendors.paddle.com, ou https://sandbox-vendors.paddle.com pour les essais) :
-
-1. **Checkout → Website approval** : faire approuver le domaine du site.
-2. **Checkout → Checkout settings → Default payment link** : `https://<domaine>/app/abonnement/paiement`.
-3. **Developer tools → Authentication** : créer une **clé d'API** (`PADDLE_API_KEY`) et un **jeton côté client** (`PADDLE_CLIENT_TOKEN`).
-4. **Developer tools → Notifications → New destination** : URL `https://<domaine>/api/webhooks/paddle`, événements `transaction.completed`, `transaction.paid`, `transaction.payment_failed` ; copier la clé secrète → `PADDLE_WEBHOOK_SECRET`.
-5. `PADDLE_ENV` : `sandbox` pour les essais (sinon déduit de la clé).
-
-**Test réel** : se connecter avec un compte de test, Abonnement → Essentiel mensuel → payer un petit montant (FCFA par Mobile Money, puis dollars par carte) → vérifier : plan actif, reçu PDF, e-mail reçu, ligne « Payé » dans l'historique. En cas d'échec, la cause exacte est dans la table `app_errors` (Supabase → Table editor). Pour tester sans payer le plein tarif, baisser temporairement le prix dans la table `plans_config` du projet de préproduction.
+**Test réel** : se connecter avec un compte de test, Abonnement → Essentiel mensuel → payer un petit montant (par Mobile Money, puis par carte) → vérifier : plan actif, reçu PDF, e-mail reçu, ligne « Payé » dans l'historique. En cas d'échec, la cause exacte est dans la table `app_errors` (Supabase → Table editor). Pour tester sans payer le plein tarif, baisser temporairement le prix dans la table `plans_config` du projet de préproduction.
 
 ## 6. Surveillance
 

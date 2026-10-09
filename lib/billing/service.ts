@@ -200,8 +200,8 @@ export async function settlePayment(input: {
   const expected = { amount: Number(payment.amount), currency: payment.currency as Currency };
   const tx = await provider.verifyTransaction({
     reference: payment.provider_ref,
-    // Identifiant fourni par le prestataire au retour, sinon celui noté à la création.
-    transactionId: input.transactionId ?? payment.provider_tx_id,
+    // Identifiant noté à la création (fiable), sinon celui reçu du prestataire.
+    transactionId: payment.provider_tx_id ?? input.transactionId,
     expected,
   });
   if (!tx) return { outcome: "pending", userId };

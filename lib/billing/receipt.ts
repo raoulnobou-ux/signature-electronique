@@ -75,14 +75,15 @@ export function paymentMethodLabel(
   method: string | null | undefined,
   locale: "fr" | "en" = "fr",
 ): string {
-  // Opérateurs pawaPay (MTN_MOMO_CMR, ORANGE_CMR…), moyens Paddle (card, paypal…) et
-  // libellés du bac à sable.
+  // Canaux Notch Pay (cm.mtn, cm.orange, cm.mobile, card…), anciens libellés des paiements
+  // déjà enregistrés (MTN_MOMO_CMR, paypal…) et libellés du bac à sable.
   const m = (method ?? "").toLowerCase();
   if (m.includes("momo") || m.includes("mtn")) return "Mobile Money (MTN)";
   if (m.startsWith("om") || m.includes("orange")) return "Orange Money";
   if (m.includes("airtel")) return "Airtel Money";
   if (m.includes("moov")) return "Moov Money";
-  if (m.includes("mobilemoney") || m.includes("wallet")) return "Mobile Money";
+  if (m.includes("mobilemoney") || m.includes("cm.mobile") || m.includes("wallet"))
+    return "Mobile Money";
   if (m.includes("paypal")) return "PayPal";
   if (m.includes("apple_pay")) return "Apple Pay";
   if (m.includes("google_pay")) return "Google Pay";

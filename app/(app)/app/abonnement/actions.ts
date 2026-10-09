@@ -128,17 +128,19 @@ export async function startCheckout(
     return { ok: false, reason: "rate_limited" };
 
   const quote = await computeQuote(account, subscription, parsed.data);
-  // FCFA → Mobile Money (pawaPay) ; euro, dollar, livre → carte (Paddle).
+  // FCFA → Notch Pay (Mobile Money ou carte) ; les autres devises attendent un prestataire.
   const provider = getPaymentProvider(quote.currency);
   if (!provider) return { ok: false, reason: "payments_unavailable" };
-  // Mobile Money : uniquement un pays proposé (activé sur le compte pawaPay).
+  // Pays du Mobile Money, quand le prestataire demande au client de le choisir.
   let country: string | undefined;
   if (quote.currency === "XAF") {
     const countries = await mobileMoneyCountries();
-    country = parsed.data.country ?? countries[0];
-    if (!country || !countries.includes(country)) return { ok: false, reason: "invalid" };
+    if (countries.length) {
+      country = parsed.data.country ?? countries[0];
+      if (!country || !countries.includes(country)) return { ok: false, reason: "invalid" };
+    }
   }
-  // Référence unique : UUID v4 (identifiant de dépôt exigé par pawaPay).
+  // Référence unique : UUID v4.
   const reference = randomUUID();
   const admin = createAdminClient();
   const { data: payment, error } = await admin
@@ -178,7 +180,6 @@ export async function startCheckout(
         city: account.profile.city,
       },
       redirectUrl: `${publicEnv.NEXT_PUBLIC_APP_URL}/api/billing/return?ref=${encodeURIComponent(reference)}`,
-      checkoutPageUrl: `${publicEnv.NEXT_PUBLIC_APP_URL}/app/abonnement/paiement`,
       country,
       meta: { user_id: account.userId, payment_id: payment.id, kind: quote.kind },
     });

@@ -171,11 +171,13 @@ test("sécurité : webhook non configuré, tâche planifiée protégée, faux re
   request,
   page,
 }) => {
-  // Sans clé pawaPay ni Paddle (bac à sable), les URL de notification refusent tout.
+  // Sans clé Notch Pay (bac à sable), l'URL de notification refuse tout ; les anciennes
+  // URL (pawaPay, Paddle) n'existent plus.
+  expect(
+    (await request.post("/api/webhooks/notchpay", { data: { data: { reference: "x" } } })).status(),
+  ).toBe(404);
   for (const provider of ["pawapay", "paddle"]) {
-    expect(
-      (await request.post(`/api/webhooks/${provider}`, { data: { depositId: "x" } })).status(),
-    ).toBe(404);
+    expect((await request.post(`/api/webhooks/${provider}`, { data: {} })).status()).toBe(404);
   }
   expect((await request.get("/api/cron/billing")).status()).toBe(401);
   const cron = await request.get("/api/cron/billing", {

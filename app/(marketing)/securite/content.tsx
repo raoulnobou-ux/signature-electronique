@@ -80,7 +80,7 @@ const fr: SecurityContent = {
     ],
     [
       "Paiements sécurisés",
-      "Les paiements sont traités par pawaPay (Mobile Money) et Paddle (carte bancaire), prestataires spécialisés. Aucune donnée de carte ni code PIN ne transite ni n'est stocké chez QuickSign.",
+      "Les paiements sont traités par Notch Pay (Mobile Money et carte bancaire), prestataire spécialisé. Aucune donnée de carte ni code PIN ne transite ni n'est stocké chez QuickSign.",
     ],
     [
       "IA sous votre contrôle",
@@ -112,7 +112,7 @@ const fr: SecurityContent = {
     {
       question: "Quels prestataires traitent mes données ?",
       answer:
-        "Uniquement ceux qui sont nécessaires au service : Supabase et Vercel (hébergement), Resend (envoi des e-mails), Anthropic (assistant IA, seulement à votre demande et sans entraînement sur vos données), pawaPay et Paddle (paiements). Aucune donnée n'est vendue ni utilisée à des fins publicitaires.",
+        "Uniquement ceux qui sont nécessaires au service : Supabase et Vercel (hébergement), Resend (envoi des e-mails), Anthropic (assistant IA, seulement à votre demande et sans entraînement sur vos données), Notch Pay (paiements). Aucune donnée n'est vendue ni utilisée à des fins publicitaires.",
     },
     {
       question: "Combien de temps sont-elles conservées ?",
@@ -233,7 +233,7 @@ const en: SecurityContent = {
     ],
     [
       "Secure payments",
-      "Payments are processed by pawaPay (Mobile Money) and Paddle (card), specialised providers. No card data or PIN ever passes through or is stored at QuickSign.",
+      "Payments are processed by Notch Pay (Mobile Money and card), a specialised provider. No card data or PIN ever passes through or is stored at QuickSign.",
     ],
     [
       "AI under your control",
@@ -265,7 +265,7 @@ const en: SecurityContent = {
     {
       question: "Which providers process my data?",
       answer:
-        "Only those the service needs: Supabase and Vercel (hosting), Resend (emails), Anthropic (AI assistant, only at your request and never trained on your data), pawaPay and Paddle (payments). No data is ever sold or used for advertising.",
+        "Only those the service needs: Supabase and Vercel (hosting), Resend (emails), Anthropic (AI assistant, only at your request and never trained on your data), Notch Pay (payments). No data is ever sold or used for advertising.",
     },
     {
       question: "How long is it kept?",

@@ -7,7 +7,7 @@ const mail = <a href={`mailto:${siteConfig.supportEmail}`}>{siteConfig.supportEm
 /**
  * Conditions générales d'utilisation et de vente. Elles décrivent le fonctionnement réel :
  * accès gratuit, abonnements prépayés sans prélèvement automatique, grâce de 3 jours,
- * Paddle revendeur officiel pour la carte, signature électronique simple.
+ * paiement via Notch Pay, signature électronique simple.
  */
 export const termsDoc: LegalDoc = {
   fr: {
@@ -53,14 +53,15 @@ export const termsDoc: LegalDoc = {
             <strong>Prix.</strong> Les plans, leurs limites et leurs prix sont présentés sur la page{" "}
             <Link href="/tarifs">Tarifs</Link>. Les prix sont fixés pour chaque devise proposée
             (franc CFA, euro, dollar américain, livre sterling), sans conversion automatique. Les
-            taxes éventuelles sont calculées et affichées au moment du paiement.
+            taxes éventuelles sont calculées et affichées au moment du paiement. Pour le moment, le
+            paiement s&apos;effectue en franc CFA ; d&apos;autres devises et moyens de paiement
+            seront ajoutés progressivement.
           </li>
           <li>
-            <strong>Paiement par carte.</strong> Il est traité par Paddle, qui agit en qualité de
-            revendeur officiel (merchant of record) : la vente vous est consentie par Paddle, dont
-            les conditions d&apos;achat s&apos;appliquent également, et la facture est émise par
-            Paddle. Le paiement Mobile Money est traité par pawaPay. QuickSign n&apos;a jamais accès
-            à vos données de carte ou de compte Mobile Money.
+            <strong>Paiement.</strong> Il est traité par Notch Pay, notre prestataire de paiement,
+            sur sa page sécurisée : Mobile Money (MTN, Orange) ou carte bancaire. QuickSign n&apos;a
+            jamais accès à vos données de carte ni à votre code Mobile Money, et vous remet un reçu
+            pour chaque paiement.
           </li>
           <li>
             <strong>Durée.</strong> L&apos;abonnement est payé d&apos;avance pour un mois ou un an.
@@ -196,13 +197,13 @@ export const termsDoc: LegalDoc = {
             <strong>Prices.</strong> Plans, their limits and prices are shown on the{" "}
             <Link href="/tarifs">Pricing</Link> page. Prices are set for each currency offered (CFA
             franc, euro, US dollar, pound sterling), with no automatic conversion. Any taxes are
-            calculated and shown at checkout.
+            calculated and shown at checkout. For now, payment is made in CFA francs; more
+            currencies and payment methods will be added over time.
           </li>
           <li>
-            <strong>Card payment.</strong> It is processed by Paddle, acting as merchant of record:
-            the sale is made to you by Paddle, whose buyer terms also apply, and Paddle issues the
-            invoice. Mobile Money payments are processed by pawaPay. QuickSign never has access to
-            your card or Mobile Money account details.
+            <strong>Payment.</strong> It is processed by Notch Pay, our payment provider, on its
+            secure page: Mobile Money (MTN, Orange) or card. QuickSign never has access to your card
+            details or Mobile Money PIN, and gives you a receipt for every payment.
           </li>
           <li>
             <strong>Term.</strong> A subscription is paid in advance for one month or one year.

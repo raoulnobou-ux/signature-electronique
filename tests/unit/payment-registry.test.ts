@@ -13,11 +13,7 @@ async function registry(env: Record<string, string | undefined>) {
   return import("@/lib/billing");
 }
 
-const BOTH = {
-  PADDLE_API_KEY: "pdl_live_apikey_test",
-  PAWAPAY_API_TOKEN: "token",
-  PAWAPAY_ENV: "production",
-};
+const NOTCHPAY = { NOTCHPAY_PUBLIC_KEY: "pk.live_test_value" };
 
 afterEach(() => vi.doUnmock("@/lib/env.server"));
 
@@ -38,36 +34,43 @@ describe("marchés", () => {
 });
 
 describe("registre des moyens de paiement", () => {
-  it("carte partout, Mobile Money en zone CFA", async () => {
-    const { paymentOptions } = await registry(BOTH);
-    expect(paymentOptions("CM").map((o) => o.method)).toEqual(["card", "mobile_money"]);
-    expect(paymentOptions("FR").map((o) => o.method)).toEqual(["card"]);
-    expect(paymentOptions("FR")[0]!.currencies).toEqual(["EUR", "USD", "GBP"]);
-    expect(paymentOptions(null).map((o) => o.method)).toEqual(["card", "mobile_money"]);
+  it("Notch Pay : un seul moyen, en FCFA, proposé dans tous les pays", async () => {
+    const { paymentOptions } = await registry(NOTCHPAY);
+    for (const country of ["CM", "SN", "FR", null]) {
+      expect(paymentOptions(country)).toEqual([
+        { method: "mobile_money", currencies: ["XAF"], testMode: false },
+      ]);
+    }
   });
 
-  it("aucune carte dans un pays où le prestataire ne vend pas", async () => {
-    const { paymentOptions } = await registry(BOTH);
-    expect(paymentOptions("RU")).toEqual([]);
+  it("clé de test : mode test affiché", async () => {
+    const { paymentOptions } = await registry({ NOTCHPAY_PUBLIC_KEY: "pk_test.abc" });
+    expect(paymentOptions("CM")[0]!.testMode).toBe(true);
+  });
+
+  it("FCFA → Notch Pay ; aucune autre devise tant qu'aucun prestataire carte n'est ajouté", async () => {
+    const { getPaymentProvider, providerByName } = await registry(NOTCHPAY);
+    expect(getPaymentProvider("XAF")?.name).toBe("notchpay");
+    for (const currency of ["EUR", "USD", "GBP"] as const) {
+      expect(getPaymentProvider(currency)).toBeNull();
+    }
+    // Anciens prestataires retirés : leurs paiements ne sont plus revérifiés.
+    expect(providerByName("pawapay")).toBeNull();
+    expect(providerByName("paddle")).toBeNull();
+  });
+
+  it("le client ne choisit pas de pays : la page Notch Pay propose les moyens disponibles", async () => {
+    const { mobileMoneyCountries } = await registry(NOTCHPAY);
+    expect(await mobileMoneyCountries()).toEqual([]);
   });
 
   it("PAYMENT_PROVIDERS désactive un prestataire sans toucher au code", async () => {
     const { paymentOptions, getPaymentProvider } = await registry({
-      ...BOTH,
-      PAYMENT_PROVIDERS: "pawapay",
+      ...NOTCHPAY,
+      PAYMENT_PROVIDERS: "autre",
     });
-    expect(paymentOptions("CM").map((o) => o.method)).toEqual(["mobile_money"]);
-    expect(getPaymentProvider("EUR")).toBeNull();
-    expect(getPaymentProvider("XAF")?.name).toBe("pawapay");
-  });
-
-  it("chaque devise va au bon prestataire", async () => {
-    const { getPaymentProvider, methodForCurrency } = await registry(BOTH);
-    expect(getPaymentProvider("XAF")?.name).toBe("pawapay");
-    for (const currency of ["EUR", "USD", "GBP"] as const) {
-      expect(methodForCurrency(currency)).toBe("card");
-      expect(getPaymentProvider(currency)?.name).toBe("paddle");
-    }
+    expect(paymentOptions("CM")).toEqual([]);
+    expect(getPaymentProvider("XAF")).toBeNull();
   });
 
   it("aucun prestataire configuré : paiement indisponible", async () => {

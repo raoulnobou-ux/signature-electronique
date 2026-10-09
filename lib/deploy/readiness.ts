@@ -50,21 +50,20 @@ export function productionChecks(env: Env): Check[] {
   );
   add("anthropic", set(env, "ANTHROPIC_API_KEY"), "ANTHROPIC_API_KEY : assistant IA");
   add(
-    "pawapay",
-    set(env, "PAWAPAY_API_TOKEN"),
-    "PAWAPAY_API_TOKEN : paiements Mobile Money (FCFA)",
+    "notchpay",
+    set(env, "NOTCHPAY_PUBLIC_KEY"),
+    "NOTCHPAY_PUBLIC_KEY : paiements Mobile Money et carte (Notch Pay)",
   );
   add(
-    "paddle",
-    set(env, "PADDLE_API_KEY") &&
-      set(env, "PADDLE_WEBHOOK_SECRET") &&
-      set(env, "PADDLE_CLIENT_TOKEN"),
-    "PADDLE_API_KEY, PADDLE_WEBHOOK_SECRET, PADDLE_CLIENT_TOKEN : paiements par carte (dollars)",
+    "notchpay_webhook",
+    set(env, "NOTCHPAY_WEBHOOK_SECRET"),
+    "NOTCHPAY_WEBHOOK_SECRET : signature des notifications Notch Pay (recommandé)",
+    "warning",
   );
   add(
     "payments_live",
-    env.PAWAPAY_ENV !== "sandbox" && env.PADDLE_ENV !== "sandbox",
-    "PAWAPAY_ENV et PADDLE_ENV : environnement de test, aucun paiement réel",
+    !(env.NOTCHPAY_PUBLIC_KEY ?? "").trim().startsWith("pk_test."),
+    "NOTCHPAY_PUBLIC_KEY : clé de test, aucun paiement réel",
     "warning",
   );
   add("no_mock", env.AI_MOCK !== "true", "AI_MOCK doit être vide en production");

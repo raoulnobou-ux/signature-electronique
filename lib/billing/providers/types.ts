@@ -16,10 +16,8 @@ export interface CheckoutRequest {
   customer: { email: string; name: string; phone: string | null; city?: string | null };
   /** URL de retour du navigateur après paiement. */
   redirectUrl: string;
-  /** Pays du numéro Mobile Money choisi par le client (ISO alpha-3, pawaPay). */
+  /** Pays du numéro Mobile Money choisi par le client (ISO alpha-3), si demandé. */
   country?: string;
-  /** Page de QuickSign qui ouvre le formulaire du prestataire (Paddle.js). */
-  checkoutPageUrl?: string;
   meta: Record<string, string>;
 }
 
@@ -57,8 +55,8 @@ export interface PaymentOption {
 
 /**
  * Prestataire de paiement. L'application ne connaît que cette interface :
- * - providers/card/ : paiement international par carte (Paddle aujourd'hui) ;
- * - providers/african/ : moyens de paiement locaux africains (pawaPay, Mobile Money) ;
+ * - providers/african/ : moyens de paiement africains (Notch Pay : Mobile Money et carte) ;
+ * - providers/card/ : à venir, paiement international par carte (euro, dollar, livre) ;
  * - un nouveau prestataire s'ajoute en implémentant cette interface puis en le déclarant
  *   dans le registre (lib/billing/index.ts), sans toucher aux écrans ni aux actions.
  * Le navigateur n'appelle jamais un prestataire : il appelle notre serveur, qui crée le

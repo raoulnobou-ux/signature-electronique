@@ -291,7 +291,7 @@
         },
         {
           "q": "Comment puis-je payer ?",
-          "a": "Par MTN Mobile Money ou Orange Money (via pawaPay), ou par carte Visa / Mastercard (via Paddle), nos partenaires de paiement sécurisés. QuickSign ne voit ni ne stocke jamais vos informations de paiement."
+          "a": "Par MTN Mobile Money, Orange Money ou carte bancaire, via Notch Pay, notre partenaire de paiement sécurisé. D'autres moyens de paiement seront ajoutés progressivement. QuickSign ne voit ni ne stocke jamais vos informations de paiement."
         },
         {
           "q": "Que comprend l'accès gratuit ?",
@@ -785,16 +785,16 @@
         "methods": {
           "locked": "Le passage au Pro se paie dans la devise de votre abonnement actuel.",
           "mobile_money": {
-            "title": "Mobile Money — en FCFA",
-            "body": "MTN Mobile Money, Orange Money… sur la page sécurisée pawaPay."
+            "title": "Mobile Money ou carte — en FCFA",
+            "body": "MTN Mobile Money, Orange Money ou carte bancaire, sur la page sécurisée Notch Pay."
           },
           "card": {
             "title": "Carte bancaire",
-            "body": "Visa, Mastercard, PayPal, Apple Pay, Google Pay, sur le formulaire sécurisé Paddle."
+            "body": "Visa, Mastercard, sur le formulaire sécurisé de notre partenaire de paiement."
           }
         },
         "country": "Pays de votre numéro Mobile Money",
-        "countryHint": "Vous saisirez sur la page sécurisée pawaPay le numéro avec lequel vous payez (il peut être différent de celui de votre compte).",
+        "countryHint": "Vous saisirez sur la page sécurisée de paiement le numéro avec lequel vous payez (il peut être différent de celui de votre compte).",
         "testMode": "Mode test : aucun argent réel n'est débité, et le paiement est validé automatiquement avec les numéros de test.",
         "prorata": "Passage immédiat au Pro, au prorata de la période en cours (jusqu'au {date}).",
         "startsNow": "Actif immédiatement, jusqu'au {date}.",
@@ -844,7 +844,7 @@
       "sandbox": {
         "metaTitle": "Paiement de test",
         "title": "Paiement de test",
-        "notice": "Mode test : aucun argent réel n'est débité. En production, cette étape est remplacée par la page sécurisée de pawaPay (Mobile Money) ou de Paddle (carte).",
+        "notice": "Mode test : aucun argent réel n'est débité. En production, cette étape est remplacée par la page sécurisée de Notch Pay (Mobile Money ou carte).",
         "method": "Moyen de paiement",
         "methods": {
           "mtn": "MTN Mobile Money",
@@ -857,15 +857,6 @@
         "notFound": "Ce paiement est introuvable ou déjà traité."
       },
       "sponsored": "Plan Pro inclus grâce à votre équipe « {team} ».",
-      "paddle": {
-        "metaTitle": "Paiement par carte",
-        "title": "Paiement par carte",
-        "opening": "Le formulaire de paiement sécurisé Paddle s'ouvre. S'il ne s'affiche pas, cliquez sur « Ouvrir le paiement ».",
-        "retry": "Ouvrir le paiement",
-        "back": "Retour à l'abonnement",
-        "notFound": "Ce paiement est introuvable ou déjà traité.",
-        "notConfigured": "Le paiement par carte n'est pas encore disponible."
-      },
       "freeBody": "Un document, l'éditeur et l'assistant pour découvrir. Choisissez un plan pour signer et exporter.",
       "documentsStored": "Documents importés"
     }

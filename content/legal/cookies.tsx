@@ -82,10 +82,9 @@ export const cookiesDoc: LegalDoc = {
 
         <h2>Paiement</h2>
         <p>
-          Sur la page de paiement par carte, le formulaire sécurisé de Paddle peut déposer ses
+          La page de paiement de Notch Pay s&apos;ouvre sur son propre site. Elle peut y déposer ses
           propres cookies, nécessaires au paiement et à la prévention de la fraude ; ils sont régis
-          par la politique de Paddle. La page de paiement Mobile Money de pawaPay s&apos;ouvre sur
-          son propre site.
+          par la politique de Notch Pay.
         </p>
 
         <h2>Vos choix</h2>
@@ -168,9 +167,8 @@ export const cookiesDoc: LegalDoc = {
 
         <h2>Payment</h2>
         <p>
-          On the card payment page, Paddle&apos;s secure form may set its own cookies, required for
-          payment and fraud prevention; they are governed by Paddle&apos;s policy. pawaPay&apos;s
-          Mobile Money payment page opens on its own website.
+          Notch Pay&apos;s payment page opens on its own website. It may set its own cookies there,
+          required for payment and fraud prevention; they are governed by Notch Pay&apos;s policy.
         </p>
 
         <h2>Your choices</h2>

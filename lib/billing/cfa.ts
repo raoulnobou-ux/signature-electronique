@@ -1,7 +1,7 @@
 /** Zone franc CFA : utilisable côté serveur et dans le navigateur (choix du pays). */
 
 /**
- * Pays de la zone franc CFA : code ISO alpha-3 (pawaPay) → devise et code alpha-2 (noms).
+ * Pays de la zone franc CFA : code ISO alpha-3 → devise et code alpha-2 (noms).
  * Le franc CFA d'Afrique centrale (XAF) et celui d'Afrique de l'Ouest (XOF) ont la même
  * valeur : un prix en FCFA se paie au même montant dans l'un ou l'autre.
  */
@@ -34,8 +34,8 @@ export function sameCfaCurrency(a: string, b: string): boolean {
 /**
  * Pays présélectionné dans le choix du pays : le pays du profil (alpha-2), sinon celui de
  * l'indicatif du numéro, s'il fait partie des pays proposés, sinon le premier proposé.
- * Le numéro lui-même n'est jamais transmis : le client saisit sur la page pawaPay le
- * numéro avec lequel il paie.
+ * Le numéro lui-même n'est jamais transmis : le client saisit sur la page du prestataire
+ * le numéro avec lequel il paie.
  */
 export function suggestedCountry(
   phone: string | null | undefined,

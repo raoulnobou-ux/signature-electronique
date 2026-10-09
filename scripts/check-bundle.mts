@@ -12,9 +12,7 @@ const SECRET_NAMES = [
   "ANTHROPIC_API_KEY",
   "ANTROPIC_API_KEY",
   "ANTHROPIC_WORKSPACE_ID",
-  "PAWAPAY_API_TOKEN",
-  "PADDLE_API_KEY",
-  "PADDLE_WEBHOOK_SECRET",
+  "NOTCHPAY_WEBHOOK_SECRET",
   "LINK_SECRET",
   "CRON_SECRET",
   "GOTENBERG_TOKEN",
@@ -23,7 +21,6 @@ const SECRET_NAMES = [
 ];
 const KEY_PATTERNS: [string, RegExp][] = [
   ["clé Anthropic", /sk-ant-[A-Za-z0-9_-]{10,}/],
-  ["clé Paddle", /pdl_(live|sdbx)_apikey_[A-Za-z0-9_]{10,}/],
   ["clé Resend", /\bre_[A-Za-z0-9]{16,}_[A-Za-z0-9]{8,}/],
 ];
 

@@ -46,5 +46,5 @@ Voir [`docs/PAIEMENTS.md`](PAIEMENTS.md#ajouter-une-devise) : `config/currencies
 ## Ajouter un pays ou changer sa devise par défaut
 
 - `config/markets.ts` : zone franc CFA, zone euro, et la devise par défaut d'un pays (dollar sinon).
-- Mobile Money : `lib/billing/cfa.ts` (pays, devise, indicatif) et `PAWAPAY_COUNTRIES`.
+- Mobile Money : `lib/billing/cfa.ts` (pays, devise, indicatif) ; les opérateurs proposés se règlent sur le compte Notch Pay.
 - Pays en tête de la liste des indicatifs : `FAVORITES` dans `lib/phone.ts`.

@@ -129,14 +129,9 @@ export const privacyDoc: LegalDoc = {
               <td>États-Unis</td>
             </tr>
             <tr>
-              <td>Paddle</td>
-              <td>Paiement par carte, en qualité de revendeur officiel (merchant of record)</td>
-              <td>Royaume-Uni</td>
-            </tr>
-            <tr>
-              <td>pawaPay</td>
-              <td>Paiement Mobile Money</td>
-              <td>Royaume-Uni ; opérateurs locaux</td>
+              <td>Notch Pay</td>
+              <td>Paiement Mobile Money et par carte</td>
+              <td>Cameroun ; opérateurs et réseaux de cartes</td>
             </tr>
             <tr>
               <td>Google</td>
@@ -148,9 +143,7 @@ export const privacyDoc: LegalDoc = {
         <p>
           Lorsque des données sont transférées hors de votre pays ou de l&apos;Union européenne, ces
           transferts s&apos;appuient sur les garanties prévues par les contrats de nos prestataires
-          (par exemple les clauses contractuelles types de la Commission européenne). Paddle traite
-          en outre les paiements par carte pour son propre compte, selon sa propre politique de
-          confidentialité.
+          (par exemple les clauses contractuelles types de la Commission européenne).
         </p>
 
         <h2>5. Durées de conservation</h2>
@@ -364,14 +357,9 @@ export const privacyDoc: LegalDoc = {
               <td>United States</td>
             </tr>
             <tr>
-              <td>Paddle</td>
-              <td>Card payments, as merchant of record</td>
-              <td>United Kingdom</td>
-            </tr>
-            <tr>
-              <td>pawaPay</td>
-              <td>Mobile Money payments</td>
-              <td>United Kingdom; local operators</td>
+              <td>Notch Pay</td>
+              <td>Mobile Money and card payments</td>
+              <td>Cameroon; operators and card networks</td>
             </tr>
             <tr>
               <td>Google</td>
@@ -383,8 +371,7 @@ export const privacyDoc: LegalDoc = {
         <p>
           When data is transferred outside your country or the European Union, these transfers rely
           on the safeguards provided in our providers&apos; contracts (for example the European
-          Commission&apos;s standard contractual clauses). Paddle also processes card payments on
-          its own behalf, under its own privacy policy.
+          Commission&apos;s standard contractual clauses).
         </p>
 
         <h2>5. Retention periods</h2>

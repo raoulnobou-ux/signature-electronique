@@ -2,18 +2,10 @@ import { createHmac } from "node:crypto";
 import { PDFDocument } from "pdf-lib";
 import { describe, expect, it, vi } from "vitest";
 import {
-  PaddleProvider,
-  fromMinorUnits,
-  mapTransactionStatus,
-  verifyPaddleSignature,
-} from "@/lib/billing/providers/card/paddle";
-import {
-  PawaPayProvider,
-  customerMessage,
-  mapDepositStatus,
-  cfaDepositCountries,
-  pawapayApiUrl,
-} from "@/lib/billing/providers/african/pawapay";
+  NotchPayProvider,
+  mapNotchPayStatus,
+  verifyNotchPaySignature,
+} from "@/lib/billing/providers/african/notchpay";
 import { sameCfaCurrency, suggestedCountry } from "@/lib/billing/cfa";
 import {
   quoteCheckout,
@@ -180,328 +172,181 @@ function jsonFetcher(status: number, body: unknown) {
   return vi.fn(async () => new Response(JSON.stringify(body), { status }));
 }
 
-describe("pawaPay (Mobile Money, FCFA)", () => {
-  it("crée une page de paiement pawaPay avec montant, téléphone et message valides", async () => {
-    const fetcher = jsonFetcher(200, { redirectUrl: "https://paywith.pawapay.io/?token=abc" });
-    const provider = new PawaPayProvider("tok", "sandbox", fetcher as unknown as typeof fetch);
-    const { url } = await provider.createCheckout(checkoutRequest);
-    expect(url).toBe("https://paywith.pawapay.io/?token=abc");
+describe("Notch Pay (Mobile Money et carte, FCFA)", () => {
+  const TRX = "trx.test_abc123";
+
+  it("crée le paiement au montant exact, avec notre référence et l'URL de retour", async () => {
+    const fetcher = jsonFetcher(201, {
+      status: "Accepted",
+      authorization_url: "https://pay.notchpay.co/trx.test_abc123",
+      transaction: { reference: TRX, merchant_reference: DEPOSIT_ID },
+    });
+    const provider = new NotchPayProvider("pk.live", undefined, fetcher as unknown as typeof fetch);
+    const result = await provider.createCheckout(checkoutRequest);
+    expect(result).toEqual({ url: "https://pay.notchpay.co/trx.test_abc123", transactionId: TRX });
     const [endpoint, init] = fetcher.mock.calls[0] as unknown as [string, RequestInit];
-    expect(endpoint).toBe("https://api.sandbox.pawapay.io/v2/paymentpage");
-    expect((init.headers as Record<string, string>).Authorization).toBe("Bearer tok");
+    expect(endpoint).toBe("https://api.notchpay.co/payments");
+    expect((init.headers as Record<string, string>).Authorization).toBe("pk.live");
     const body = JSON.parse(String(init.body));
     expect(body).toMatchObject({
-      depositId: DEPOSIT_ID,
-      returnUrl: checkoutRequest.redirectUrl,
-      amountDetails: { amount: "5000", currency: "XAF" },
-      country: "CMR",
-      language: "FR",
-    });
-    // Le numéro du compte n'est jamais imposé : le client saisit le sien chez pawaPay.
-    expect(body).not.toHaveProperty("phoneNumber");
-    expect(body.customerMessage).toMatch(/^[A-Za-z0-9 ]{4,22}$/);
-    expect(body.metadata).toEqual([{ user_id: "u" }, { payment_id: "p" }]);
-  });
-
-  it("refuse une référence qui n'est pas un UUID v4 ; erreur pawaPay remontée", async () => {
-    const provider = new PawaPayProvider(
-      "tok",
-      "production",
-      jsonFetcher(400, {
-        status: "REJECTED",
-        failureReason: { failureCode: "INVALID_AMOUNT", failureMessage: "Amount too small" },
-      }) as unknown as typeof fetch,
-    );
-    await expect(
-      provider.createCheckout({ ...checkoutRequest, reference: "QS-1" }),
-    ).rejects.toThrow(/UUID/);
-    await expect(provider.createCheckout(checkoutRequest)).rejects.toThrow(
-      /INVALID_AMOUNT — Amount too small/,
-    );
-  });
-
-  it("revérifie le dépôt par l'API ; dépôt introuvable → null", async () => {
-    const found = jsonFetcher(200, {
-      status: "FOUND",
-      data: {
-        depositId: DEPOSIT_ID,
-        status: "COMPLETED",
-        amount: "5000",
-        currency: "XAF",
-        providerTransactionId: "MP123",
-        payer: {
-          type: "MMO",
-          accountDetails: { phoneNumber: "237690000000", provider: "MTN_MOMO_CMR" },
-        },
-      },
-    });
-    const provider = new PawaPayProvider("tok", "production", found as unknown as typeof fetch);
-    const tx = await provider.verifyTransaction({ reference: DEPOSIT_ID, transactionId: null });
-    expect((found.mock.calls[0] as unknown as [string])[0]).toBe(
-      `https://api.pawapay.io/v2/deposits/${DEPOSIT_ID}`,
-    );
-    expect(tx).toMatchObject({
-      status: "successful",
       amount: 5000,
       currency: "XAF",
-      transactionId: "MP123",
-      method: "MTN_MOMO_CMR",
+      email: "a@b.cm",
+      reference: DEPOSIT_ID,
+      callback: checkoutRequest.redirectUrl,
+    });
+  });
+
+  it("ancienne route d'initialisation si /payments n'existe pas ; erreur remontée", async () => {
+    const fetcher = vi
+      .fn()
+      .mockResolvedValueOnce(new Response("{}", { status: 404 }))
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ authorization_url: "https://pay.notchpay.co/x" }), {
+          status: 201,
+        }),
+      );
+    const provider = new NotchPayProvider("pk.live", undefined, fetcher as unknown as typeof fetch);
+    expect((await provider.createCheckout(checkoutRequest)).url).toBe("https://pay.notchpay.co/x");
+    expect((fetcher.mock.calls[1] as unknown as [string])[0]).toBe(
+      "https://api.notchpay.co/payments/initialize",
+    );
+
+    const failing = new NotchPayProvider(
+      "pk.live",
+      undefined,
+      jsonFetcher(422, { message: "Invalid amount" }) as unknown as typeof fetch,
+    );
+    await expect(failing.createCheckout(checkoutRequest)).rejects.toThrow(
+      "Notch Pay 422: Invalid amount",
+    );
+    await expect(
+      failing.createCheckout({ ...checkoutRequest, reference: "pas-un-uuid" }),
+    ).rejects.toThrow("UUID v4");
+  });
+
+  it("revérifie la transaction par l'API et exige notre référence", async () => {
+    const complete = jsonFetcher(200, {
+      transaction: {
+        reference: TRX,
+        merchant_reference: DEPOSIT_ID,
+        status: "complete",
+        amount: 5000,
+        currency: "XAF",
+        sandbox: false,
+        payment_method: "cm.mtn",
+      },
+    });
+    const provider = new NotchPayProvider(
+      "pk.live",
+      undefined,
+      complete as unknown as typeof fetch,
+    );
+    const tx = await provider.verifyTransaction({ reference: DEPOSIT_ID, transactionId: TRX });
+    expect((complete.mock.calls[0] as unknown as [string])[0]).toBe(
+      `https://api.notchpay.co/payments/${TRX}`,
+    );
+    expect(tx).toEqual({
+      status: "successful",
+      reference: DEPOSIT_ID,
+      transactionId: TRX,
+      amount: 5000,
+      currency: "XAF",
+      method: "cm.mtn",
+      failureReason: null,
     });
 
-    const failed = new PawaPayProvider(
-      "tok",
-      "production",
+    // Transaction réussie d'un autre paiement : sa référence ne correspond pas.
+    const other = new NotchPayProvider(
+      "pk.live",
+      undefined,
       jsonFetcher(200, {
-        status: "FOUND",
-        data: {
-          depositId: DEPOSIT_ID,
-          status: "FAILED",
-          amount: "5000",
+        transaction: { reference: TRX, merchant_reference: "autre", status: "complete" },
+      }) as unknown as typeof fetch,
+    );
+    const mismatch = await other.verifyTransaction({ reference: DEPOSIT_ID, transactionId: TRX });
+    expect(mismatch?.reference).not.toBe(DEPOSIT_ID);
+
+    // Paiement de test présenté à une clé de production : jamais accepté.
+    const sandboxTx = new NotchPayProvider(
+      "pk.live",
+      undefined,
+      jsonFetcher(200, {
+        transaction: {
+          reference: TRX,
+          merchant_reference: DEPOSIT_ID,
+          status: "complete",
+          amount: 5000,
           currency: "XAF",
-          failureReason: { failureCode: "PAYER_LIMIT_REACHED", failureMessage: "Limite atteinte" },
+          sandbox: true,
         },
       }) as unknown as typeof fetch,
     );
     expect(
-      await failed.verifyTransaction({ reference: DEPOSIT_ID, transactionId: null }),
-    ).toMatchObject({ status: "failed", failureReason: "Limite atteinte" });
+      await sandboxTx.verifyTransaction({ reference: DEPOSIT_ID, transactionId: TRX }),
+    ).toMatchObject({ status: "failed", failureReason: "sandbox_transaction" });
 
-    const missing = new PawaPayProvider(
-      "tok",
-      "production",
-      jsonFetcher(200, { status: "NOT_FOUND" }) as unknown as typeof fetch,
+    const missing = new NotchPayProvider(
+      "pk.live",
+      undefined,
+      jsonFetcher(404, { message: "Not found" }) as unknown as typeof fetch,
     );
     expect(
       await missing.verifyTransaction({ reference: DEPOSIT_ID, transactionId: null }),
     ).toBeNull();
   });
 
-  it("notification : seule la référence est retenue, le contenu sera revérifié", () => {
-    const provider = new PawaPayProvider("tok", "production");
-    const event = provider.parseWebhook(
-      new Headers(),
-      JSON.stringify({ depositId: DEPOSIT_ID, status: "COMPLETED", amount: "1" }),
-    );
-    expect(event).toMatchObject({
-      key: `${DEPOSIT_ID}:COMPLETED`,
-      reference: DEPOSIT_ID,
-      transactionId: null,
+  it("notification : signature exigée si une clé est configurée ; seule la référence est retenue", () => {
+    const body = JSON.stringify({
+      id: "evt_1",
+      event: "payment.complete",
+      data: { reference: TRX, merchant_reference: DEPOSIT_ID, status: "complete" },
     });
-    expect(provider.parseWebhook(new Headers(), "pas du json")).toBeNull();
-    expect(provider.parseWebhook(new Headers(), JSON.stringify({ depositId: "x" }))).toBeNull();
+    const open = new NotchPayProvider("pk.live");
+    expect(open.parseWebhook(new Headers(), body)).toMatchObject({
+      key: "evt_1",
+      type: "payment.complete",
+      reference: DEPOSIT_ID,
+      transactionId: TRX,
+    });
+    expect(open.parseWebhook(new Headers(), "pas du json")).toBeNull();
+    expect(open.parseWebhook(new Headers(), JSON.stringify({ data: {} }))).toBeNull();
+
+    const secret = "webhook-hash";
+    const signed = new NotchPayProvider("pk.live", secret);
+    const signature = createHmac("sha256", secret).update(body).digest("hex");
+    expect(
+      signed.parseWebhook(new Headers({ "x-notch-signature": signature }), body)?.reference,
+    ).toBe(DEPOSIT_ID);
+    expect(signed.parseWebhook(new Headers(), body)).toBeNull();
+    expect(
+      signed.parseWebhook(new Headers({ "x-notch-signature": "0".repeat(64) }), body),
+    ).toBeNull();
+    expect(verifyNotchPaySignature(signature, `${body} `, secret)).toBe(false);
   });
 
-  it("adresse d'API de test : https et domaine pawapay.io uniquement", async () => {
-    expect(pawapayApiUrl("https://api.sandbox.pawapay.io/v2/")).toBe(
-      "https://api.sandbox.pawapay.io",
-    );
-    expect(pawapayApiUrl(" https://api.sandbox.pawapay.io ")).toBe(
-      "https://api.sandbox.pawapay.io",
-    );
-    expect(pawapayApiUrl("http://api.sandbox.pawapay.io")).toBeNull();
-    expect(pawapayApiUrl("https://pawapay.io.evil.com")).toBeNull();
-    expect(pawapayApiUrl("pas une adresse")).toBeNull();
-    expect(pawapayApiUrl(undefined)).toBeNull();
-    const fetcher = jsonFetcher(200, { redirectUrl: "https://paywith.pawapay.io/x" });
-    const provider = new PawaPayProvider(
-      "tok",
-      "https://api.sandbox.pawapay.io",
-      fetcher as unknown as typeof fetch,
-    );
-    await provider.createCheckout(checkoutRequest);
-    expect((fetcher.mock.calls[0] as unknown as [string])[0]).toBe(
-      "https://api.sandbox.pawapay.io/v2/paymentpage",
-    );
-  });
-
-  it("pays choisi par le client ; franc CFA de l'Ouest au même montant", async () => {
-    const fetcher = jsonFetcher(200, { redirectUrl: "https://paywith.pawapay.io/x" });
-    const provider = new PawaPayProvider("tok", "sandbox", fetcher as unknown as typeof fetch);
-    await provider.createCheckout({ ...checkoutRequest, country: "CIV" });
-    const body = JSON.parse(
-      String((fetcher.mock.calls[0] as unknown as [string, RequestInit])[1].body),
-    );
-    expect(body.country).toBe("CIV");
-    expect(body.amountDetails).toEqual({ amount: "5000", currency: "XOF" });
-    expect(sameCfaCurrency("XOF", "XAF")).toBe(true);
-    expect(sameCfaCurrency("USD", "XAF")).toBe(false);
-  });
-
-  it("pays proposés : ceux du compte pawaPay qui acceptent le franc CFA", async () => {
-    const conf = {
-      countries: [
-        {
-          country: "CMR",
-          providers: [
-            { provider: "MTN_MOMO_CMR", currencies: [{ currency: "XAF", operationTypes: {} }] },
-            { provider: "ORANGE_CMR", currencies: [{ currency: "XAF", operationTypes: {} }] },
-          ],
-        },
-        {
-          country: "CIV",
-          providers: [{ provider: "MTN_MOMO_CIV", currencies: [{ currency: "XOF" }] }],
-        },
-        {
-          country: "ZMB",
-          providers: [{ provider: "MTN_MOMO_ZMB", currencies: [{ currency: "ZMW" }] }],
-        },
-        { country: "GAB", providers: [] },
-      ],
-    };
-    expect(cfaDepositCountries(conf)).toEqual(["CMR", "CIV"]);
-    expect(cfaDepositCountries(null)).toEqual([]);
-    const fetcher = jsonFetcher(200, conf);
-    const provider = new PawaPayProvider("tok", "sandbox", fetcher as unknown as typeof fetch);
-    expect(await provider.depositCountries()).toEqual(["CMR", "CIV"]);
-    await provider.depositCountries();
-    expect(fetcher).toHaveBeenCalledTimes(1);
-    expect((fetcher.mock.calls[0] as unknown as [string])[0]).toBe(
-      "https://api.sandbox.pawapay.io/v2/active-conf?operationType=DEPOSIT",
-    );
-    // Présélection d'après l'indicatif du profil, sinon le premier pays proposé.
-    expect(suggestedCountry("+225 07 00 00 00 00", ["CMR", "CIV"])).toBe("CIV");
-    expect(suggestedCountry("+33 6 12 34 56 78", ["CMR", "CIV"])).toBe("CMR");
-    expect(suggestedCountry(null, [])).toBe("CMR");
-  });
-
-  it("statuts et message client", () => {
-    expect(mapDepositStatus("COMPLETED")).toBe("successful");
-    expect(mapDepositStatus("FAILED")).toBe("failed");
-    expect(mapDepositStatus("PROCESSING")).toBe("pending");
-    expect(mapDepositStatus("IN_RECONCILIATION")).toBe("pending");
-    expect(customerMessage("QuickSign Abonnement Pro — annuel (prorata)")).toBe(
-      "QuickSign Abonnement P",
-    );
-    expect(customerMessage("—")).toBe("QuickSign");
+  it("statuts et moyens de paiement", () => {
+    expect(mapNotchPayStatus("complete")).toBe("successful");
+    expect(mapNotchPayStatus("failed")).toBe("failed");
+    expect(mapNotchPayStatus("canceled")).toBe("failed");
+    expect(mapNotchPayStatus("expired")).toBe("failed");
+    expect(mapNotchPayStatus("pending")).toBe("pending");
+    expect(mapNotchPayStatus("processing")).toBe("pending");
+    expect(paymentMethodLabel("cm.mtn")).toBe("Mobile Money (MTN)");
+    expect(paymentMethodLabel("cm.orange")).toBe("Orange Money");
+    expect(paymentMethodLabel("cm.mobile")).toBe("Mobile Money");
+    expect(paymentMethodLabel("card")).toBe("Carte bancaire");
+    expect(paymentMethodLabel("paypal")).toBe("PayPal");
   });
 });
 
-describe("Paddle (carte, international)", () => {
-  const SECRET = "pdl_ntfset_secret";
-
-  it("crée une transaction au prix exact, liée à notre référence", async () => {
-    const fetcher = jsonFetcher(201, {
-      data: {
-        id: "txn_01abc",
-        status: "ready",
-        checkout: { url: "https://quicksign.app/app/abonnement/paiement?_ptxn=txn_01abc" },
-      },
-    });
-    const provider = new PaddleProvider(
-      "pdl_sdbx_apikey_x",
-      "sandbox",
-      SECRET,
-      fetcher as unknown as typeof fetch,
-    );
-    const result = await provider.createCheckout({
-      ...checkoutRequest,
-      amount: 9.99,
-      currency: "USD",
-      checkoutPageUrl: "https://quicksign.app/app/abonnement/paiement",
-    });
-    expect(result).toEqual({
-      url: "https://quicksign.app/app/abonnement/paiement?_ptxn=txn_01abc",
-      transactionId: "txn_01abc",
-    });
-    const [endpoint, init] = fetcher.mock.calls[0] as unknown as [string, RequestInit];
-    expect(endpoint).toBe("https://sandbox-api.paddle.com/transactions");
-    const body = JSON.parse(String(init.body));
-    expect(body.items[0].price.unit_price).toEqual({ amount: "999", currency_code: "USD" });
-    expect(body.items[0].price.product).toEqual({
-      name: "QuickSign Essentiel",
-      tax_category: "standard",
-    });
-    expect(body.custom_data).toMatchObject({ reference: DEPOSIT_ID, user_id: "u" });
-    expect(body.checkout).toEqual({ url: "https://quicksign.app/app/abonnement/paiement" });
-  });
-
-  it("une erreur de Paddle est remontée clairement", async () => {
-    const provider = new PaddleProvider(
-      "k",
-      "production",
-      SECRET,
-      jsonFetcher(400, {
-        error: { code: "transaction_checkout_url_domain_is_not_approved", detail: "Domain" },
-      }) as unknown as typeof fetch,
-    );
-    await expect(
-      provider.createCheckout({
-        ...checkoutRequest,
-        currency: "USD",
-        checkoutPageUrl: "https://x.y",
-      }),
-    ).rejects.toThrow(/transaction_checkout_url_domain_is_not_approved — Domain/);
-  });
-
-  it("revérifie la transaction et sa référence auprès de Paddle", async () => {
-    const tx = {
-      id: "txn_01abc",
-      status: "completed",
-      currency_code: "USD",
-      custom_data: { reference: DEPOSIT_ID },
-      details: { totals: { total: "1199", grand_total: "1199" } },
-      payments: [{ status: "captured", method_details: { type: "card" } }],
-    };
-    const fetcher = jsonFetcher(200, { data: tx });
-    const provider = new PaddleProvider(
-      "k",
-      "production",
-      SECRET,
-      fetcher as unknown as typeof fetch,
-    );
-    expect(
-      await provider.verifyTransaction({ reference: DEPOSIT_ID, transactionId: "txn_01abc" }),
-    ).toMatchObject({
-      status: "successful",
-      amount: 11.99,
-      currency: "USD",
-      method: "card",
-      transactionId: "txn_01abc",
-    });
-    expect((fetcher.mock.calls[0] as unknown as [string])[0]).toBe(
-      "https://api.paddle.com/transactions/txn_01abc",
-    );
-    // Transaction d'un autre paiement, ou identifiant absent : rien n'est accepté.
-    expect(
-      await provider.verifyTransaction({ reference: "autre", transactionId: "txn_01abc" }),
-    ).toBeNull();
-    expect(
-      await provider.verifyTransaction({ reference: DEPOSIT_ID, transactionId: null }),
-    ).toBeNull();
-  });
-
-  it("notification : signature Paddle-Signature vérifiée, horodatage récent exigé", () => {
-    const provider = new PaddleProvider("k", "production", SECRET);
-    const body = JSON.stringify({
-      event_id: "evt_1",
-      event_type: "transaction.completed",
-      data: { id: "txn_01abc", custom_data: { reference: DEPOSIT_ID } },
-    });
-    const ts = Math.floor(Date.now() / 1000);
-    const h1 = createHmac("sha256", SECRET).update(`${ts}:${body}`).digest("hex");
-    const signed = new Headers({ "Paddle-Signature": `ts=${ts};h1=${h1}` });
-    expect(provider.parseWebhook(signed, body)).toMatchObject({
-      key: "evt_1",
-      type: "transaction.completed",
-      reference: DEPOSIT_ID,
-      transactionId: "txn_01abc",
-    });
-    expect(provider.parseWebhook(signed, body.replace("txn_01abc", "txn_02xyz"))).toBeNull();
-    expect(provider.parseWebhook(new Headers(), body)).toBeNull();
-    expect(verifyPaddleSignature(`ts=${ts - 3600};h1=${h1}`, body, SECRET)).toBe(false);
-    expect(new PaddleProvider("k", "production", undefined).parseWebhook(signed, body)).toBeNull();
-  });
-
-  it("statuts, montants et moyens de paiement", () => {
-    expect(mapTransactionStatus("completed")).toBe("successful");
-    expect(mapTransactionStatus("paid")).toBe("successful");
-    expect(mapTransactionStatus("canceled")).toBe("failed");
-    expect(mapTransactionStatus("ready")).toBe("pending");
-    expect(fromMinorUnits("1999", "USD")).toBe(19.99);
-    expect(paymentMethodLabel("MTN_MOMO_CMR")).toBe("Mobile Money (MTN)");
-    expect(paymentMethodLabel("ORANGE_CMR")).toBe("Orange Money");
-    expect(paymentMethodLabel("card")).toBe("Carte bancaire");
-    expect(paymentMethodLabel("paypal")).toBe("PayPal");
+describe("franc CFA", () => {
+  it("XAF et XOF ont la même valeur ; pays suggéré d'après le profil ou l'indicatif", () => {
+    expect(sameCfaCurrency("XOF", "XAF")).toBe(true);
+    expect(sameCfaCurrency("EUR", "XAF")).toBe(false);
+    expect(suggestedCountry(null, ["CMR", "SEN"], "SN")).toBe("SEN");
+    expect(suggestedCountry("+221 77 000 00 00", ["CMR", "SEN"])).toBe("SEN");
+    expect(suggestedCountry(null, [])).toBe("CMR");
   });
 });
 
@@ -585,29 +430,5 @@ describe("reçu PDF", () => {
     expect(paymentDescription("essential", "monthly", "upgrade")).toBe(
       "Abonnement Essentiel — mensuel (passage au Pro, au prorata)",
     );
-  });
-});
-
-describe("pawaPay : diagnostic d'un jeton refusé", () => {
-  it("indique si le jeton appartient à l'autre environnement, sans le révéler", async () => {
-    const sandboxOk = vi.fn(async () => new Response("{}", { status: 200 }));
-    const provider = new PawaPayProvider(
-      "secret-token",
-      "production",
-      sandboxOk as unknown as typeof fetch,
-    );
-    const message = await provider.diagnoseToken();
-    expect((sandboxOk.mock.calls[0] as unknown as [string])[0]).toBe(
-      "https://api.sandbox.pawapay.io/v2/active-conf?operationType=DEPOSIT",
-    );
-    expect(message).toContain("c'est un jeton bac à sable");
-    expect(message).not.toContain("secret-token");
-
-    const refused = new PawaPayProvider(
-      "secret-token",
-      "production",
-      vi.fn(async () => new Response("{}", { status: 401 })) as unknown as typeof fetch,
-    );
-    expect(await refused.diagnoseToken()).toContain("refusé par les deux environnements");
   });
 });

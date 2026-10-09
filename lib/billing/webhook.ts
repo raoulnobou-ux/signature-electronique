@@ -7,7 +7,7 @@ import { settlePayment } from "./service";
 
 /**
  * Notification d'un prestataire de paiement :
- * 1. authentification propre au prestataire (signature Paddle ; pawaPay : contenu jamais cru) ;
+ * 1. authentification propre au prestataire (signature Notch Pay si sa clé est configurée) ;
  * 2. journal brut + idempotence (une même notification n'est traitée qu'une fois) ;
  * 3. revérification de la transaction par l'API avant toute activation (settlePayment).
  * Une erreur renvoie 500 pour que le prestataire réessaie ; l'événement reste rejouable.
@@ -52,7 +52,19 @@ export async function handlePaymentWebhook(
     eventId = existing?.id;
   }
 
-  if (!event.reference) {
+  // Notification sans notre référence : paiement retrouvé par l'identifiant du prestataire.
+  let reference = event.reference;
+  if (!reference && event.transactionId) {
+    const { data: byTx } = await admin
+      .from("payments")
+      .select("provider_ref")
+      .eq("provider", provider.name)
+      .eq("provider_tx_id", event.transactionId)
+      .maybeSingle();
+    reference = byTx?.provider_ref ?? null;
+  }
+
+  if (!reference) {
     await admin
       .from("payment_events")
       .update({ processed_at: new Date().toISOString() })
@@ -62,7 +74,7 @@ export async function handlePaymentWebhook(
 
   try {
     const result = await settlePayment({
-      reference: event.reference,
+      reference,
       transactionId: event.transactionId,
     });
     await admin

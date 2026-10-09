@@ -13,10 +13,8 @@ const complete = {
   GOTENBERG_URL: "https://gotenberg.fly.dev",
   GOTENBERG_TOKEN: "token",
   ANTHROPIC_API_KEY: "sk-ant",
-  PAWAPAY_API_TOKEN: "pawapay-token",
-  PADDLE_API_KEY: "pdl_live_apikey_x",
-  PADDLE_WEBHOOK_SECRET: "pdl_ntfset_x",
-  PADDLE_CLIENT_TOKEN: "live_x",
+  NOTCHPAY_PUBLIC_KEY: "pk.live",
+  NOTCHPAY_WEBHOOK_SECRET: "hash",
   SENTRY_DSN: "https://pub@o1.ingest.sentry.io/42",
 };
 
@@ -49,6 +47,14 @@ describe("vérifications de mise en production", () => {
     const report = summarize(productionChecks({ ...complete, SENTRY_DSN: "" }));
     expect(report.ready).toBe(true);
     expect(report.warnings.map((c) => c.id)).toEqual(["sentry"]);
+  });
+
+  it("clé Notch Pay de test : avertissement (aucun paiement réel)", () => {
+    const report = summarize(productionChecks({ ...complete, NOTCHPAY_PUBLIC_KEY: "pk_test.x" }));
+    expect(report.ready).toBe(true);
+    expect(report.warnings.map((c) => c.id)).toEqual(["payments_live"]);
+    const missing = summarize(productionChecks({ ...complete, NOTCHPAY_PUBLIC_KEY: "" }));
+    expect(missing.blocking.map((c) => c.id)).toEqual(["notchpay"]);
   });
 });
 

@@ -1,6 +1,6 @@
 # Paiements, plans et devises
 
-Ce guide sert à faire évoluer les paiements de QuickSign sans casser l'existant. Les choix sont justifiés dans `DECISIONS.md` (D95, D97, D108 à D111).
+Ce guide sert à faire évoluer les paiements de QuickSign sans casser l'existant. Les choix sont justifiés dans `DECISIONS.md` (D95, D97, D108 à D111, D123).
 
 ## Architecture
 
@@ -8,8 +8,7 @@ Ce guide sert à faire évoluer les paiements de QuickSign sans casser l'existan
 lib/billing/
   providers/
     types.ts            interface PaymentProvider, PaymentMethod, PaymentOption
-    card/paddle.ts      carte bancaire internationale (EUR, USD, GBP)
-    african/pawapay.ts  Mobile Money en zone franc CFA (XAF, et XOF à parité)
+    african/notchpay.ts Notch Pay : Mobile Money (MTN, Orange) et carte, en FCFA
     sandbox.ts          paiement simulé (développement, tests e2e)
   index.ts              registre : prestataires activés, moyen par devise, options par pays
   webhook.ts            traitement commun des notifications (signature, revérification, idempotence)
@@ -27,10 +26,10 @@ Le parcours d'un paiement :
 
 ## Activer ou désactiver un prestataire
 
-`PAYMENT_PROVIDERS` (Vercel → Settings → Environment Variables), par exemple `paddle,pawapay`.
+`PAYMENT_PROVIDERS` (Vercel → Settings → Environment Variables), par exemple `notchpay`.
 
 - Vide : tous les prestataires dont les clés sont renseignées sont actifs.
-- `pawapay` seul : la carte disparaît du site, sans modifier le code.
+- Un nom absent de la liste : ce prestataire disparaît du site, sans modifier le code.
 
 Redéployer après le changement.
 
@@ -71,9 +70,13 @@ Prix par marché, sans conversion automatique :
 4. Ajouter la devise dans le champ `currencies` d'un prestataire qui l'accepte (sinon elle s'affiche sur la page Tarifs mais ne peut pas être payée).
 5. Facultatif : `config/markets.ts`, pour que les pays concernés la voient par défaut.
 
-## Ajouter un pays au Mobile Money
+## Pays et moyens proposés par Notch Pay
 
-`PAWAPAY_COUNTRIES` (codes alpha-3), ou l'activer sur le compte pawaPay (lu par `GET /v2/active-conf`). Les pays connus sont dans `lib/billing/cfa.ts`.
+Le client ne choisit pas de pays sur QuickSign : la page Notch Pay affiche elle-même les moyens disponibles (Mobile Money selon le pays, carte bancaire partout). Pour proposer d'autres pays ou opérateurs, les activer sur le compte Notch Pay.
+
+## Prestataires retirés
+
+pawaPay et Paddle ont été retirés le 9 octobre 2026 (D123). Les paiements déjà enregistrés gardent leur nom de prestataire dans `payments.provider` et leurs reçus ; ils ne sont simplement plus revérifiés. Pour réintroduire un prestataire, suivre « Ajouter un prestataire » : l'historique Git contient les anciennes implémentations.
 
 ## Accès avant paiement
 

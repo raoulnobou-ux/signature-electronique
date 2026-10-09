@@ -111,8 +111,7 @@ Requête
 
 ### Paiements et webhooks
 
-- [x] **Paddle** : signature `Paddle-Signature` (HMAC-SHA256), horodatage de moins de 5 minutes (anti-rejeu), puis la transaction est **relue par l'API** avant activation.
-- [x] **pawaPay** : le contenu du callback n'est jamais cru. Seule la référence sert, puis le dépôt est relu par l'API.
+- [x] **Notch Pay** : signature `x-notch-signature` (HMAC-SHA256, comparaison en temps constant) exigée dès que `NOTCHPAY_WEBHOOK_SECRET` est configurée. Dans tous les cas le contenu n'est jamais cru : seule la référence sert, puis la transaction est **relue par l'API**. Elle doit porter notre référence, et une transaction de test est refusée avec une clé de production.
 - [x] Idempotence : événements uniques (`payment_events`) ; `complete_payment` transactionnel avec verrou de ligne, sans double prolongation.
 - [x] Montant et devise revérifiés contre le paiement attendu. Un faux retour de paiement n'active rien (testé de bout en bout).
 - [x] Aucune donnée de carte ni de compte Mobile Money ne transite par QuickSign.
@@ -199,7 +198,7 @@ Requête
 ## 4. Accès administrateur
 
 - Aucun tableau de bord administrateur n'expose le contenu des documents.
-- L'accès aux données passe par le tableau de bord Supabase, réservé au fondateur, avec 2FA obligatoire sur les comptes Supabase, Vercel, GitHub, Paddle et pawaPay.
+- L'accès aux données passe par le tableau de bord Supabase, réservé au fondateur, avec 2FA obligatoire sur les comptes Supabase, Vercel, GitHub et Notch Pay.
 - Si un accès exceptionnel à un document est nécessaire pour le support :
   - accord écrit de l'utilisateur ;
   - durée limitée et accès minimal ;
