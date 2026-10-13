@@ -22,6 +22,7 @@ import { paymentMethodLabel, renderReceipt } from "@/lib/billing/receipt";
 import { SandboxProvider } from "@/lib/billing/providers/sandbox";
 import { paymentDescription, reminderBucket } from "@/lib/billing/service";
 import { DEFAULT_PRICES } from "@/lib/entitlements/plans";
+import { providerErrorKind } from "@/lib/billing/providers/types";
 
 vi.mock("@/lib/audit", () => ({ recordAudit: vi.fn() }));
 vi.mock("@/lib/monitoring/app-errors", () => ({ logAppError: vi.fn() }));
@@ -201,6 +202,33 @@ describe("Notch Pay (Mobile Money et carte, FCFA)", () => {
       reference: DEPOSIT_ID,
       callback: checkoutRequest.redirectUrl,
     });
+  });
+
+  it("échec de création : catégorie de l'erreur conservée pour le diagnostic", async () => {
+    const kindOf = async (fetcher: unknown) => {
+      const provider = new NotchPayProvider("pk.live", "h", fetcher as typeof fetch);
+      return provider.createCheckout(checkoutRequest).then(
+        () => null,
+        (error: unknown) => providerErrorKind(error),
+      );
+    };
+    expect(await kindOf(jsonFetcher(401, { message: "Invalid API credentials" }))).toBe("config");
+    expect(await kindOf(jsonFetcher(422, { message: "Invalid amount" }))).toBe("rejected");
+    expect(await kindOf(jsonFetcher(503, {}))).toBe("unavailable");
+    expect(await kindOf(jsonFetcher(201, { status: "Accepted" }))).toBe("invalid_response");
+    expect(await kindOf(vi.fn().mockRejectedValue(new TypeError("fetch failed")))).toBe("network");
+    const timeout = new Error("timeout");
+    timeout.name = "TimeoutError";
+    expect(await kindOf(vi.fn().mockRejectedValue(timeout))).toBe("timeout");
+    // Le message de Notch Pay est gardé, numéro de téléphone masqué.
+    const masked = await new NotchPayProvider(
+      "pk.live",
+      "h",
+      jsonFetcher(422, { message: "Numéro +237670000001 invalide" }) as unknown as typeof fetch,
+    )
+      .createCheckout(checkoutRequest)
+      .catch((error: Error) => error.message);
+    expect(masked).toBe("Notch Pay 422: Numéro [numéro] invalide");
   });
 
   it("ancienne route d'initialisation si /payments n'existe pas ; erreur remontée", async () => {

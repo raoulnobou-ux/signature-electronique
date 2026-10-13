@@ -3,6 +3,8 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 import { logAppError } from "@/lib/monitoring/app-errors";
 import {
   PaymentProviderError,
+  errorKindForStatus,
+  providerErrorKind,
   type CheckoutRequest,
   type PaymentProvider,
   type TransactionStatus,
@@ -265,9 +267,16 @@ export class NotchPayProvider implements PaymentProvider {
     const url = typeof body?.authorization_url === "string" ? body.authorization_url : null;
     const transaction = body?.transaction as Transaction | undefined;
     if (status >= 300 || !url || !/^https:\/\//.test(url)) {
+      // Message de Notch Pay conservé pour le diagnostic (numéros masqués), jamais montré au client.
+      const message =
+        typeof body?.message === "string"
+          ? body.message.replace(/\+?\d{8,}/g, "[numéro]").slice(0, 200)
+          : "réponse invalide";
       throw new PaymentProviderError(
-        `Notch Pay ${status}: ${typeof body?.message === "string" ? body.message : "réponse invalide"}`,
+        `Notch Pay ${status}: ${message}`,
         body,
+        status >= 300 ? errorKindForStatus(status) : "invalid_response",
+        status,
       );
     }
     const transactionId =
@@ -291,9 +300,27 @@ export class NotchPayProvider implements PaymentProvider {
   }): Promise<VerifiedTransaction | null> {
     const id = transactionId && NOTCHPAY_REF.test(transactionId) ? transactionId : reference;
     if (!NOTCHPAY_REF.test(id)) return null;
-    const { status, body } = await this.request(`/payments/${encodeURIComponent(id)}`, {
-      method: "GET",
-    });
+    let response: Awaited<ReturnType<NotchPayProvider["request"]>>;
+    try {
+      response = await this.request(`/payments/${encodeURIComponent(id)}`, { method: "GET" });
+    } catch (error) {
+      // Notch Pay injoignable : noté, puis relancé pour que la notification soit renvoyée ;
+      // le paiement reste en attente et sera revérifié (page de retour, tâche planifiée).
+      await logAppError(
+        "billing.notchpay_verify",
+        `${reference} — ${providerErrorKind(error)}: ${error instanceof Error ? error.message : error}`,
+        { code: id },
+      );
+      throw error;
+    }
+    const { status, body } = response;
+    if (status >= 300 && status !== 404) {
+      await logAppError(
+        "billing.notchpay_verify",
+        `${reference} — ${errorKindForStatus(status)}: HTTP ${status}`,
+        { code: id },
+      );
+    }
     const tx = body?.transaction as Transaction | undefined;
     if (status >= 300 || !tx?.status) return null;
     const merchantReference = tx.merchant_reference ?? null;
@@ -315,9 +342,11 @@ export class NotchPayProvider implements PaymentProvider {
     const sandboxWithLiveKey = sandbox && !this.testMode;
     if (sandboxWithLiveKey) result = "failed";
     if (result === "failed" && !sandboxWithLiveKey) {
-      await logAppError("billing.notchpay_failed", notchPayFailureDetail(body?.transaction), {
-        code: tx.reference ?? id,
-      });
+      await logAppError(
+        "billing.notchpay_failed",
+        `${reference} — ${notchPayFailureDetail(body?.transaction)}`,
+        { code: tx.reference ?? id },
+      );
     }
     return {
       status: result,

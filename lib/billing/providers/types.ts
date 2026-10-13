@@ -89,12 +89,50 @@ export interface PaymentProvider {
   refund?(input: { transactionId: string; reason: string }): Promise<void>;
 }
 
+/**
+ * Catégorie d'un échec d'appel au prestataire, pour le diagnostic (jamais montrée au client) :
+ * - config : clé refusée ou compte non autorisé (401/403) — à corriger chez nous ou chez lui ;
+ * - rejected : requête refusée par le prestataire (400/422 : paramètre, montant, canal…) ;
+ * - unavailable : erreur du prestataire (5xx) ;
+ * - network / timeout : prestataire injoignable ou trop lent ;
+ * - invalid_response : réponse illisible ou incomplète ;
+ * - internal : contrôle interne avant l'appel.
+ */
+export type ProviderErrorKind =
+  | "config"
+  | "rejected"
+  | "unavailable"
+  | "network"
+  | "timeout"
+  | "invalid_response"
+  | "internal";
+
+/** Catégorie d'après le statut HTTP d'une réponse en erreur. */
+export function errorKindForStatus(status: number): ProviderErrorKind {
+  if (status === 401 || status === 403) return "config";
+  if (status >= 500) return "unavailable";
+  if (status >= 400) return "rejected";
+  return "invalid_response";
+}
+
 export class PaymentProviderError extends Error {
   constructor(
     message: string,
     readonly detail?: unknown,
+    readonly kind: ProviderErrorKind = "internal",
+    /** Statut HTTP de la réponse du prestataire, s'il y en a eu une. */
+    readonly status?: number,
   ) {
     super(message);
     this.name = "PaymentProviderError";
   }
+}
+
+/** Catégorie d'une erreur quelconque levée pendant un appel au prestataire. */
+export function providerErrorKind(error: unknown): ProviderErrorKind {
+  if (error instanceof PaymentProviderError) return error.kind;
+  if (error instanceof Error && (error.name === "TimeoutError" || error.name === "AbortError"))
+    return "timeout";
+  if (error instanceof TypeError) return "network"; // fetch failed
+  return "internal";
 }

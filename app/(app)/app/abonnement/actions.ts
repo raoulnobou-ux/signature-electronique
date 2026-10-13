@@ -16,6 +16,7 @@ import {
 import { failureKind, type FailureKind } from "@/lib/billing/failure";
 import { quoteCheckout, type Quote } from "@/lib/billing/quote";
 import { SANDBOX_METHODS, SANDBOX_OUTCOMES } from "@/lib/billing/providers/sandbox";
+import { providerErrorKind } from "@/lib/billing/providers/types";
 import { PLAN_LABELS, paymentDescription, settlePayment } from "@/lib/billing/service";
 import { getClientIp } from "@/lib/request";
 import type { BillingCycle, Currency, PlanId } from "@/lib/entitlements/plans";
@@ -44,7 +45,8 @@ export type BillingError =
   | "rate_limited"
   | "invalid"
   | "not_allowed"
-  | "provider_error";
+  | "provider_error"
+  | "provider_unreachable";
 
 type Fail = { ok: false; reason: BillingError };
 
@@ -220,14 +222,24 @@ export async function startCheckout(
     });
     return { ok: true, url };
   } catch (err) {
-    console.error("[billing] checkout", err);
-    await logAppError("billing.checkout", err, { userId: account.userId });
+    // Diagnostic : catégorie (config, rejected, network…), message du prestataire et notre
+    // référence, qui sert d'identifiant de corrélation (payments.provider_ref, merchant_reference
+    // chez Notch Pay, journaux). Aucune nouvelle tentative automatique : le client réessaie.
+    const kind = providerErrorKind(err);
     const detail = err instanceof Error ? err.message.slice(0, 300) : "";
+    console.error("[billing] checkout", { reference, kind, detail });
+    await logAppError("billing.checkout", `${kind} — ${detail}`, {
+      userId: account.userId,
+      code: reference,
+    });
     await admin
       .from("payments")
-      .update({ status: "failed", failure_reason: `checkout_error: ${detail}` })
+      .update({ status: "failed", failure_reason: `checkout_error:${kind}: ${detail}` })
       .eq("id", payment.id);
-    return { ok: false, reason: "provider_error" };
+    return {
+      ok: false,
+      reason: kind === "network" || kind === "timeout" ? "provider_unreachable" : "provider_error",
+    };
   }
 }
 

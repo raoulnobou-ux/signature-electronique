@@ -177,28 +177,48 @@
           "tab": "Firms",
           "title": "Lawyers, notaries, accountants, architects",
           "description": "Engagement letters, fee agreements, powers of attorney, reports: sign and stamp every document in seconds, with an audit trail that reassures your clients.",
-          "examples": ["Engagement letter", "Fee agreement", "Power of attorney", "Expert report"]
+          "examples": [
+            "Engagement letter",
+            "Fee agreement",
+            "Power of attorney",
+            "Expert report"
+          ]
         },
         {
           "key": "school",
           "tab": "Schools",
           "title": "Schools, institutes and universities",
           "description": "Enrollment certificates, transcripts, notices and circulars signed by management in bulk, with the institution's stamp.",
-          "examples": ["Enrollment certificate", "Transcript", "Notice", "Circular"]
+          "examples": [
+            "Enrollment certificate",
+            "Transcript",
+            "Notice",
+            "Circular"
+          ]
         },
         {
           "key": "business",
           "tab": "SMEs & NGOs",
           "title": "Companies, NGOs and associations",
           "description": "Contracts, purchase orders, meeting minutes, travel orders: get partners to sign remotely and keep every version safe.",
-          "examples": ["Service agreement", "Purchase order", "Meeting minutes", "Travel order"]
+          "examples": [
+            "Service agreement",
+            "Purchase order",
+            "Meeting minutes",
+            "Travel order"
+          ]
         },
         {
           "key": "admin",
           "tab": "Public sector",
           "title": "Public services and local authorities",
           "description": "Memos, letters and announcements signed and circulated faster, with a clear history of who signed what and when.",
-          "examples": ["Internal memo", "Official letter", "Announcement", "Internal decision"]
+          "examples": [
+            "Internal memo",
+            "Official letter",
+            "Announcement",
+            "Internal decision"
+          ]
         }
       ]
     },
@@ -439,7 +459,11 @@
       "metaTitle": "Create an account",
       "title": "Create your account",
       "subtitle": "Free, no credit card.",
-      "steps": ["Account", "Profile", "Confirmation"],
+      "steps": [
+        "Account",
+        "Profile",
+        "Confirmation"
+      ],
       "profileTitle": "Tell us about your organization",
       "profileSubtitle": "Optional — you can complete it later.",
       "continue": "Continue",
@@ -826,7 +850,8 @@
         "rate_limited": "Too many attempts. Try again in a few minutes.",
         "invalid": "Invalid request.",
         "not_allowed": "Not possible with your current subscription.",
-        "provider_error": "The payment service isn't responding. Try again in a moment."
+        "provider_error": "The payment couldn't be prepared. No amount was charged. Try again in a moment; if it happens again, contact us from the Contact page.",
+        "provider_unreachable": "The payment service isn't responding right now. No amount was charged: try again in a few minutes."
       },
       "sandbox": {
         "metaTitle": "Test payment",

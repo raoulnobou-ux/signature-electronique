@@ -213,7 +213,12 @@
           "tab": "Administrations",
           "title": "Services publics et collectivités",
           "description": "Notes de service, courriers et annonces signés et diffusés plus vite, avec un historique clair de qui a signé quoi et quand.",
-          "examples": ["Note de service", "Courrier officiel", "Annonce", "Décision interne"]
+          "examples": [
+            "Note de service",
+            "Courrier officiel",
+            "Annonce",
+            "Décision interne"
+          ]
         }
       ]
     },
@@ -454,7 +459,11 @@
       "metaTitle": "Créer un compte",
       "title": "Créez votre compte",
       "subtitle": "Gratuit, sans carte bancaire.",
-      "steps": ["Compte", "Profil", "Confirmation"],
+      "steps": [
+        "Compte",
+        "Profil",
+        "Confirmation"
+      ],
       "profileTitle": "Parlez-nous de votre structure",
       "profileSubtitle": "Facultatif — vous pourrez compléter plus tard.",
       "continue": "Continuer",
@@ -841,7 +850,8 @@
         "rate_limited": "Trop de tentatives. Réessayez dans quelques minutes.",
         "invalid": "Demande invalide.",
         "not_allowed": "Action impossible pour votre abonnement actuel.",
-        "provider_error": "Le service de paiement ne répond pas. Réessayez dans un instant."
+        "provider_error": "Le paiement n'a pas pu être préparé. Aucun montant n'a été débité. Réessayez dans un instant ; si cela se reproduit, écrivez-nous depuis la page Contact.",
+        "provider_unreachable": "Le service de paiement ne répond pas pour le moment. Aucun montant n'a été débité : réessayez dans quelques minutes."
       },
       "sandbox": {
         "metaTitle": "Paiement de test",
