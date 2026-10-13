@@ -6,8 +6,11 @@ import {
   mapNotchPayStatus,
   notchPayFailureDetail,
   notchPayMethod,
+  usableChannels,
   verifyNotchPaySignature,
 } from "@/lib/billing/providers/african/notchpay";
+import { failureKind, failureText } from "@/lib/billing/failure";
+import { paymentFailedEmail } from "@/lib/email/templates";
 import { sameCfaCurrency, suggestedCountry } from "@/lib/billing/cfa";
 import {
   quoteCheckout,
@@ -333,33 +336,139 @@ describe("Notch Pay (Mobile Money et carte, FCFA)", () => {
     ).toBeNull();
   });
 
-  it("notification : signature exigée si une clé est configurée ; seule la référence est retenue", () => {
+  it("notification : signature toujours exigée ; seule la référence est retenue", () => {
     const body = JSON.stringify({
       id: "evt_1",
       event: "payment.complete",
       data: { reference: TRX, merchant_reference: DEPOSIT_ID, status: "complete" },
     });
+    const secret = "webhook-hash";
+    const sign = (raw: string) =>
+      new Headers({ "x-notch-signature": createHmac("sha256", secret).update(raw).digest("hex") });
+
+    // Sans clé de hachage configurée : aucune notification n'est acceptée.
     const open = new NotchPayProvider("pk.live");
-    expect(open.parseWebhook(new Headers(), body)).toMatchObject({
+    expect(open.parseWebhook(new Headers(), body)).toBeNull();
+    expect(open.parseWebhook(sign(body), body)).toBeNull();
+
+    const signed = new NotchPayProvider("pk.live", secret);
+    expect(signed.parseWebhook(sign(body), body)).toMatchObject({
       key: "evt_1",
       type: "payment.complete",
       reference: DEPOSIT_ID,
       transactionId: TRX,
     });
-    expect(open.parseWebhook(new Headers(), "pas du json")).toBeNull();
-    expect(open.parseWebhook(new Headers(), JSON.stringify({ data: {} }))).toBeNull();
-
-    const secret = "webhook-hash";
-    const signed = new NotchPayProvider("pk.live", secret);
-    const signature = createHmac("sha256", secret).update(body).digest("hex");
-    expect(
-      signed.parseWebhook(new Headers({ "x-notch-signature": signature }), body)?.reference,
-    ).toBe(DEPOSIT_ID);
     expect(signed.parseWebhook(new Headers(), body)).toBeNull();
     expect(
       signed.parseWebhook(new Headers({ "x-notch-signature": "0".repeat(64) }), body),
     ).toBeNull();
-    expect(verifyNotchPaySignature(signature, `${body} `, secret)).toBe(false);
+    // Corps modifié après signature (même d'un espace) : refusé.
+    expect(signed.parseWebhook(sign(body), `${body} `)).toBeNull();
+    expect(verifyNotchPaySignature(null, body, secret)).toBe(false);
+    expect(verifyNotchPaySignature("pas-hexa", body, secret)).toBe(false);
+    expect(signed.parseWebhook(sign("pas du json"), "pas du json")).toBeNull();
+    const empty = JSON.stringify({ data: {} });
+    expect(signed.parseWebhook(sign(empty), empty)).toBeNull();
+  });
+
+  it("notification : seuls les événements qui règlent un paiement sont traités", () => {
+    const secret = "webhook-hash";
+    const provider = new NotchPayProvider("pk.live", secret);
+    const parse = (event: string) => {
+      const raw = JSON.stringify({
+        id: `evt_${event}`,
+        event,
+        data: { reference: TRX, merchant_reference: DEPOSIT_ID, status: "x" },
+      });
+      const signature = createHmac("sha256", secret).update(raw).digest("hex");
+      return provider.parseWebhook(new Headers({ "x-notch-signature": signature }), raw);
+    };
+    for (const event of [
+      "payment.complete",
+      "payment.failed",
+      "payment.canceled",
+      "payment.expired",
+    ]) {
+      expect(parse(event)?.reference).toBe(DEPOSIT_ID);
+    }
+    // Noté (clé d'idempotence) mais sans référence : ignoré par le traitement.
+    for (const event of ["payment.created", "transfer.complete", "customer.created"]) {
+      expect(parse(event)).toMatchObject({
+        key: `evt_${event}`,
+        reference: null,
+        transactionId: null,
+      });
+    }
+  });
+
+  it("canaux : seuls les canaux actifs (et ouverts en production avec une clé live) sont proposés", async () => {
+    const items = [
+      {
+        id: "card",
+        name: "Credit or debit Card",
+        type: "card",
+        active: false,
+        live: false,
+        currency: "XAF",
+      },
+      {
+        id: "cm.mtn",
+        name: "MTN Mobile Money",
+        type: "mobile",
+        active: true,
+        live: true,
+        currency: "XAF",
+      },
+      {
+        id: "cm.orange",
+        name: "Orange Money",
+        type: "mobile",
+        active: true,
+        live: true,
+        currency: "XAF",
+      },
+      {
+        id: "yoomee",
+        name: "Yoomee Money",
+        type: "wallet",
+        active: true,
+        live: false,
+        currency: "XAF",
+      },
+      { id: "ng.mtn", name: "MTN NG", type: "mobile", active: true, live: true, currency: "NGN" },
+      { id: 42, name: null, active: true, live: true },
+    ];
+    expect(usableChannels(items, false).map((c) => c.id)).toEqual(["cm.mtn", "cm.orange"]);
+    // Clé de test : un canal actif suffit, même non ouvert en production.
+    expect(usableChannels(items, true).map((c) => c.id)).toEqual(["cm.mtn", "cm.orange", "yoomee"]);
+    expect(usableChannels("pas une liste", false)).toEqual([]);
+
+    const fetcher = jsonFetcher(200, { code: 200, items });
+    const provider = new NotchPayProvider("pk.live", "h", fetcher as unknown as typeof fetch);
+    expect((await provider.listChannels())?.map((c) => c.name)).toEqual([
+      "MTN Mobile Money",
+      "Orange Money",
+    ]);
+    // Mis en cache : un seul appel à Notch Pay.
+    await provider.listChannels();
+    expect(fetcher).toHaveBeenCalledTimes(1);
+    expect((fetcher.mock.calls[0] as unknown as [string])[0]).toBe(
+      "https://api.notchpay.co/channels?currency=XAF",
+    );
+
+    // Notch Pay injoignable ou réponse inattendue : null (affichage générique).
+    const down = new NotchPayProvider(
+      "pk.live",
+      "h",
+      vi.fn().mockRejectedValue(new Error("timeout")) as unknown as typeof fetch,
+    );
+    expect(await down.listChannels()).toBeNull();
+    const odd = new NotchPayProvider(
+      "pk.live",
+      "h",
+      jsonFetcher(200, { channels: [] }) as unknown as typeof fetch,
+    );
+    expect(await odd.listChannels()).toBeNull();
   });
 
   it("statuts et moyens de paiement", () => {
@@ -369,6 +478,14 @@ describe("Notch Pay (Mobile Money et carte, FCFA)", () => {
     expect(mapNotchPayStatus("expired")).toBe("failed");
     expect(mapNotchPayStatus("pending")).toBe("pending");
     expect(mapNotchPayStatus("processing")).toBe("pending");
+    // Statuts finaux de la page « Collect » (dont l'orthographe « partialy » de Notch Pay).
+    expect(mapNotchPayStatus("abandoned")).toBe("failed");
+    expect(mapNotchPayStatus("refunded")).toBe("failed");
+    expect(mapNotchPayStatus("partialy-refunded")).toBe("failed");
+    expect(mapNotchPayStatus("COMPLETE")).toBe("successful");
+    // Payé en partie : jamais une réussite.
+    expect(mapNotchPayStatus("incomplete")).toBe("pending");
+    expect(mapNotchPayStatus(undefined)).toBe("pending");
     expect(paymentMethodLabel("cm.mtn")).toBe("Mobile Money (MTN)");
     expect(paymentMethodLabel("cm.orange")).toBe("Orange Money");
     expect(paymentMethodLabel("cm.mobile")).toBe("Mobile Money");
@@ -386,6 +503,33 @@ describe("Notch Pay (Mobile Money et carte, FCFA)", () => {
     expect(detail).not.toContain("690000000");
     expect(paymentMethodLabel("card")).toBe("Carte bancaire");
     expect(paymentMethodLabel("paypal")).toBe("PayPal");
+  });
+
+  it("échec : message simple pour le client, jamais le code brut", () => {
+    expect(failureKind("failed")).toBe("declined");
+    expect(failureKind("rejected")).toBe("declined");
+    expect(failureKind("canceled")).toBe("canceled");
+    expect(failureKind("abandoned")).toBe("canceled");
+    expect(failureKind("expired")).toBe("expired");
+    expect(failureKind("amount_mismatch")).toBe("technical");
+    expect(failureKind("checkout_error: Notch Pay 500")).toBe("technical");
+    expect(failureKind(null)).toBe("declined");
+    expect(failureText("expired", "fr")).toMatch(/délai/i);
+
+    for (const locale of ["fr", "en"] as const) {
+      for (const reason of ["failed", "amount_mismatch", "checkout_error: Notch Pay 500: boom"]) {
+        const email = paymentFailedEmail({
+          fullName: "Awa Ndzi",
+          amount: "5 000 FCFA",
+          reason,
+          locale,
+        });
+        expect(email.text).not.toContain(reason);
+        expect(email.html).not.toContain(reason);
+        expect(email.text).toContain(failureText(reason, locale));
+        expect(email.text).toContain("/app/abonnement");
+      }
+    }
   });
 });
 

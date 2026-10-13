@@ -1,6 +1,6 @@
 "use client";
 
-import { CreditCard, Lock, ShieldCheck, Smartphone } from "lucide-react";
+import { CreditCard, Lock, ShieldCheck, Smartphone, Wallet } from "lucide-react";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
@@ -17,6 +17,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
+import type { PaymentChannel } from "@/lib/billing";
 import type { PaymentMethod, PaymentOption } from "@/lib/billing/providers/types";
 import type { Quote } from "@/lib/billing/quote";
 import type { AccessState } from "@/lib/entitlements";
@@ -31,6 +32,10 @@ const METHOD_ICONS: Record<PaymentMethod, typeof CreditCard> = {
   mobile_money: Smartphone,
 };
 
+/** Icône d'un canal Notch Pay selon son type (mobile, card, wallet…). */
+const channelIcon = (type: string) =>
+  type === "card" ? CreditCard : type === "wallet" ? Wallet : Smartphone;
+
 type Selection = { plan: PaidPlan; cycle: BillingCycle; currency: Currency };
 
 /** Plans de l'espace Abonnement : devis exact (prorata) puis redirection vers le paiement. */
@@ -39,6 +44,7 @@ export function CheckoutPlans({
   limits,
   defaultCurrency,
   options,
+  channels,
   countries,
   defaultCountry,
   state,
@@ -49,6 +55,8 @@ export function CheckoutPlans({
   defaultCurrency: Currency;
   /** Moyens de paiement proposés (carte : EUR/USD/GBP ; Mobile Money : FCFA), selon le pays. */
   options: PaymentOption[];
+  /** Canaux ouverts sur le compte du prestataire (MTN, Orange…) ; null = inconnus. */
+  channels: PaymentChannel[] | null;
   /** Pays proposés pour le Mobile Money (ISO alpha-3), et celui présélectionné. */
   countries: string[];
   defaultCountry: string;
@@ -138,6 +146,7 @@ export function CheckoutPlans({
         limits={limits}
         defaultCurrency={defaultCurrency}
         headingLevel={3}
+        channels={channels?.map((c) => c.name) ?? null}
         checkout={{ label: t("choose"), labelFor, disabled: !available, onSelect: select }}
       />
 
@@ -220,15 +229,34 @@ export function CheckoutPlans({
                         onChange={() => chooseCurrency(option.currencies[0]!)}
                       />
                       <Icon className="mt-0.5 size-5 shrink-0 text-muted-foreground" aria-hidden />
-                      <span>
+                      <span className="min-w-0 space-y-2">
                         <span className="block text-sm font-medium">
-                          {t(`checkout.methods.${option.method}.title`)}
+                          {option.method === "mobile_money" &&
+                          channels?.some((c) => c.type === "card")
+                            ? t("checkout.methods.mobile_money.titleWithCard")
+                            : t(`checkout.methods.${option.method}.title`)}
                         </span>
                         <span className="block text-xs text-muted-foreground">
                           {locked
                             ? t("checkout.methods.locked")
                             : t(`checkout.methods.${option.method}.body`)}
                         </span>
+                        {option.method === "mobile_money" && !!channels?.length && (
+                          <span className="flex flex-wrap gap-1.5" data-testid="payment-channels">
+                            {channels.map((channel) => {
+                              const ChannelIcon = channelIcon(channel.type);
+                              return (
+                                <span
+                                  key={channel.id}
+                                  className="inline-flex items-center gap-1 rounded-full border border-border bg-background px-2 py-0.5 text-xs"
+                                >
+                                  <ChannelIcon className="size-3.5" aria-hidden />
+                                  {channel.name}
+                                </span>
+                              );
+                            })}
+                          </span>
+                        )}
                       </span>
                     </label>
                   );

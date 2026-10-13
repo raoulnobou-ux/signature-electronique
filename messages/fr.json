@@ -231,7 +231,7 @@
       "popular": "Le plus choisi",
       "cta": "Commencer gratuitement",
       "trialNote": "Compte gratuit pour découvrir, puis {price} pour signer. Annulable à tout moment.",
-      "paymentMethods": "Carte bancaire (Visa, Mastercard, PayPal, Apple Pay, Google Pay) partout ; Mobile Money (MTN, Orange…) en zone franc CFA.",
+      "paymentMethods": "Paiement sécurisé sur la page de notre partenaire Notch Pay, avec les moyens ouverts dans votre pays.",
       "plans": {
         "essential": {
           "name": "Essentiel",
@@ -271,7 +271,8 @@
         "name": "Gratuit",
         "description": "Pour découvrir : {stored} document, l'éditeur, {signatures} signature et {ai} questions par jour à l'assistant. Signer et exporter demandent un abonnement.",
         "cta": "Créer un compte gratuit"
-      }
+      },
+      "paymentMethodsLive": "Paiement par {channels}, sur la page sécurisée de Notch Pay."
     },
     "testimonials": {
       "eyebrow": "Ils signent avec QuickSign",
@@ -328,7 +329,7 @@
   },
   "pricingPage": {
     "metaTitle": "Tarifs",
-    "metaDescription": "Prix par pays en FCFA, euros, dollars ou livres. Compte gratuit pour découvrir, paiement par carte ou Mobile Money.",
+    "metaDescription": "Prix par pays en FCFA, euros, dollars ou livres. Compte gratuit pour découvrir, paiement en ligne sécurisé.",
     "compareTitle": "Comparer les plans",
     "feature": "Fonctionnalité",
     "included": "Inclus",
@@ -752,7 +753,7 @@
       "validUntil": "Valable jusqu'au {date}",
       "renew": "Renouveler",
       "paymentUnavailable": "Le paiement en ligne n'est pas encore activé. Écrivez-nous depuis la page Contact pour souscrire.",
-      "methodsNote": "Mobile Money (MTN, Orange) ou carte bancaire. Pas de prélèvement automatique : vous renouvelez quand vous voulez, nous vous rappelons avant l'échéance.",
+      "methodsNote": "Paiement sur la page sécurisée de Notch Pay. Pas de prélèvement automatique : vous renouvelez quand vous voulez, nous vous rappelons avant l'échéance.",
       "result": {
         "succes": {
           "title": "Paiement confirmé",
@@ -785,8 +786,9 @@
         "methods": {
           "locked": "Le passage au Pro se paie dans la devise de votre abonnement actuel.",
           "mobile_money": {
-            "title": "Mobile Money ou carte — en FCFA",
-            "body": "MTN Mobile Money, Orange Money ou carte bancaire, sur la page sécurisée Notch Pay."
+            "title": "Mobile Money — en FCFA",
+            "body": "Sur la page sécurisée de Notch Pay. Gardez votre téléphone à portée de main pour valider le paiement.",
+            "titleWithCard": "Mobile Money ou carte — en FCFA"
           },
           "card": {
             "title": "Carte bancaire",
@@ -844,7 +846,7 @@
       "sandbox": {
         "metaTitle": "Paiement de test",
         "title": "Paiement de test",
-        "notice": "Mode test : aucun argent réel n'est débité. En production, cette étape est remplacée par la page sécurisée de Notch Pay (Mobile Money ou carte).",
+        "notice": "Mode test : aucun argent réel n'est débité. En production, cette étape est remplacée par la page sécurisée de Notch Pay.",
         "method": "Moyen de paiement",
         "methods": {
           "mtn": "MTN Mobile Money",
@@ -858,7 +860,46 @@
       },
       "sponsored": "Plan Pro inclus grâce à votre équipe « {team} ».",
       "freeBody": "Un document, l'éditeur et l'assistant pour découvrir. Choisissez un plan pour signer et exporter.",
-      "documentsStored": "Documents importés"
+      "documentsStored": "Documents importés",
+      "paymentPage": {
+        "metaTitle": "Paiement",
+        "pending": {
+          "title": "Validez le paiement sur votre téléphone",
+          "body": "Une demande de paiement a été envoyée à votre numéro Mobile Money. Composez votre code secret pour la valider : cette page se met à jour toute seule.",
+          "progress": "Attente de la confirmation"
+        },
+        "success": {
+          "title": "Paiement confirmé",
+          "body": "Merci ! Votre plan est actif. Votre reçu vous a été envoyé par e-mail."
+        },
+        "timeout": {
+          "title": "Toujours pas de confirmation",
+          "body": "Nous n'avons pas encore reçu la confirmation de l'opérateur. Si vous avez validé, votre plan s'activera automatiquement dans quelques minutes. Sinon, vous pouvez réessayer."
+        },
+        "failed": {
+          "declined": {
+            "title": "Le paiement a été refusé",
+            "body": "Votre opérateur ou votre banque a refusé le paiement : solde insuffisant, code secret erroné ou demande non validée. Aucun montant n'a été débité."
+          },
+          "canceled": {
+            "title": "Paiement annulé",
+            "body": "Le paiement a été annulé avant d'être validé. Aucun montant n'a été débité."
+          },
+          "expired": {
+            "title": "Délai dépassé",
+            "body": "La demande de paiement n'a pas été validée à temps. Aucun montant n'a été débité."
+          },
+          "technical": {
+            "title": "Paiement non vérifié",
+            "body": "Nous n'avons pas pu vérifier ce paiement, aucun abonnement n'a été activé. Si un montant a été débité, écrivez-nous depuis la page Contact."
+          }
+        },
+        "actions": {
+          "retry": "Réessayer le paiement",
+          "dashboard": "Aller au tableau de bord",
+          "billing": "Voir mon abonnement"
+        }
+      }
     }
   },
   "documents": {

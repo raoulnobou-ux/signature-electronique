@@ -59,8 +59,11 @@ export function PricingPlans({
   defaultCurrency,
   headingLevel = 3,
   checkout,
+  channels,
 }: {
   prices: PriceTable;
+  /** Noms des moyens de paiement réellement ouverts (lus chez le prestataire) ; null = inconnus. */
+  channels?: string[] | null;
   /** Limites lues dans plans_config : les chiffres affichés sont ceux appliqués. */
   limits: LimitsTable;
   defaultCurrency: Currency;
@@ -80,6 +83,8 @@ export function PricingPlans({
   const locale = useLocale();
   const [cycle, setCycle] = useState<BillingCycle>("monthly");
   const [currency, setCurrency] = useState<Currency>(defaultCurrency);
+  const listFormat = (items: string[]) =>
+    new Intl.ListFormat(locale, { type: "disjunction" }).format(items);
   /** Remplace {documents}, {signatures}, {storage}, {ai}, {team} par les limites du plan. */
   const fill = (text: string, plan: keyof LimitsTable) => {
     const l = limits[plan];
@@ -248,7 +253,11 @@ export function PricingPlans({
         })}
       </ul>
       <div className="space-y-1 text-center text-sm text-muted-foreground">
-        <p>{t("paymentMethods")}</p>
+        <p>
+          {channels?.length
+            ? t("paymentMethodsLive", { channels: listFormat(channels) })
+            : t("paymentMethods")}
+        </p>
         <p className="text-xs">{t("priceNote")}</p>
       </div>
     </div>

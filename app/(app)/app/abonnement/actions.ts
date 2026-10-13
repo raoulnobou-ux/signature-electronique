@@ -7,10 +7,17 @@ import { z } from "zod";
 import { isCurrency } from "@/config/currencies";
 import { recordAudit } from "@/lib/audit";
 import { getCurrentAccount, type Account } from "@/lib/auth/account";
-import { getPaymentProvider, getSandboxProvider, mobileMoneyCountries } from "@/lib/billing";
+import {
+  getPaymentProvider,
+  getSandboxProvider,
+  mobileMoneyCountries,
+  paymentChannels,
+} from "@/lib/billing";
+import { failureKind, type FailureKind } from "@/lib/billing/failure";
 import { quoteCheckout, type Quote } from "@/lib/billing/quote";
 import { SANDBOX_METHODS, SANDBOX_OUTCOMES } from "@/lib/billing/providers/sandbox";
-import { PLAN_LABELS, paymentDescription } from "@/lib/billing/service";
+import { PLAN_LABELS, paymentDescription, settlePayment } from "@/lib/billing/service";
+import { getClientIp } from "@/lib/request";
 import type { BillingCycle, Currency, PlanId } from "@/lib/entitlements/plans";
 import { toLocale } from "@/i18n/config";
 import { publicEnv } from "@/lib/env";
@@ -124,13 +131,24 @@ export async function startCheckout(
   if ("ok" in ctx) return ctx;
   const { account, subscription } = ctx;
   if (!subscription) return { ok: false, reason: "invalid" };
-  if (!(await rateLimit("checkout", account.userId, 10, 600)))
+  // Tentatives limitées par compte et par adresse IP (plusieurs personnes peuvent partager
+  // une connexion : la limite par IP est plus large).
+  const ip = (await getClientIp()) ?? "unknown";
+  if (
+    !(await rateLimit("checkout", account.userId, 10, 600)) ||
+    !(await rateLimit("checkout-ip", ip, 30, 600))
+  )
     return { ok: false, reason: "rate_limited" };
 
   const quote = await computeQuote(account, subscription, parsed.data);
-  // FCFA → Notch Pay (Mobile Money ou carte) ; les autres devises attendent un prestataire.
+  // FCFA → Notch Pay ; les autres devises attendent un prestataire.
   const provider = getPaymentProvider(quote.currency);
   if (!provider) return { ok: false, reason: "payments_unavailable" };
+  // Aucun canal ouvert sur le compte du prestataire : inutile d'envoyer le client payer.
+  const channels = await paymentChannels();
+  if (channels !== null && channels.length === 0) {
+    return { ok: false, reason: "payments_unavailable" };
+  }
   // Pays du Mobile Money, quand le prestataire demande au client de le choisir.
   let country: string | undefined;
   if (quote.currency === "XAF") {
@@ -179,7 +197,8 @@ export async function startCheckout(
         phone: account.profile.phone,
         city: account.profile.city,
       },
-      redirectUrl: `${publicEnv.NEXT_PUBLIC_APP_URL}/api/billing/return?ref=${encodeURIComponent(reference)}`,
+      // Page d'état du paiement : elle n'active rien, elle demande au serveur de revérifier.
+      redirectUrl: `${publicEnv.NEXT_PUBLIC_APP_URL}/app/abonnement/paiement?ref=${encodeURIComponent(reference)}`,
       country,
       meta: { user_id: account.userId, payment_id: payment.id, kind: quote.kind },
     });
@@ -285,6 +304,72 @@ export async function getReceiptUrl(paymentId: string): Promise<{ ok: true; url:
     .from("receipts")
     .createSignedUrl(payment.receipt_path, 120, { download: `Recu-${payment.receipt_number}.pdf` });
   return data ? { ok: true, url: data.signedUrl } : { ok: false, reason: "provider_error" };
+}
+
+export type PaymentCheck = {
+  ok: true;
+  status: "pending" | "successful" | "failed";
+  failure: FailureKind | null;
+};
+
+/**
+ * État d'un paiement du compte connecté, pour la page de retour. Un paiement encore en
+ * attente est revérifié auprès du prestataire (jamais d'après l'adresse de retour) ; c'est
+ * cette revérification, pas le navigateur, qui peut activer l'abonnement.
+ * `hint` : identifiant Notch Pay (« trx.… ») ajouté par Notch Pay à l'adresse de retour,
+ * utilisé seulement si celui noté à la création manque ; la transaction doit de toute façon
+ * porter notre référence.
+ */
+export async function checkPayment(input: {
+  reference: string;
+  hint?: string | null;
+}): Promise<PaymentCheck | Fail> {
+  const parsed = z
+    .object({
+      reference: z.uuid(),
+      hint: z
+        .string()
+        .regex(/^trx\.[A-Za-z0-9_]{4,100}$/)
+        .nullish(),
+    })
+    .safeParse(input);
+  if (!parsed.success) return { ok: false, reason: "invalid" };
+  const account = await getCurrentAccount();
+  if (!account) return { ok: false, reason: "unauthenticated" };
+
+  const admin = createAdminClient();
+  const read = () =>
+    admin
+      .from("payments")
+      .select("status, failure_reason")
+      .eq("provider_ref", parsed.data.reference)
+      .eq("user_id", account.userId)
+      .maybeSingle();
+  let { data: payment } = await read();
+  if (!payment) return { ok: false, reason: "not_allowed" };
+
+  // Revérification limitée : la page interroge toutes les 5 s pendant 3 minutes au plus.
+  if (payment.status === "pending" && (await rateLimit("payment-check", account.userId, 60, 600))) {
+    try {
+      await settlePayment({
+        reference: parsed.data.reference,
+        transactionId: parsed.data.hint ?? null,
+      });
+    } catch (error) {
+      console.error("[billing] revérification du paiement", error);
+    }
+    payment = (await read()).data ?? payment;
+  }
+
+  if (payment.status === "successful") return { ok: true, status: "successful", failure: null };
+  if (payment.status === "failed" || payment.status === "cancelled") {
+    return {
+      ok: true,
+      status: "failed",
+      failure: failureKind(payment.status === "cancelled" ? "abandoned" : payment.failure_reason),
+    };
+  }
+  return { ok: true, status: "pending", failure: null };
 }
 
 /** Bac à sable local : simule la réponse de l'opérateur puis revient comme le ferait un prestataire. */

@@ -8,6 +8,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import type { PaymentProvider } from "./providers/types";
 import { settlePayment } from "./service";
 
+const MAX_BODY_BYTES = 64_000;
+
 /**
  * Notification d'un prestataire de paiement :
  * 1. authentification propre au prestataire (signature Notch Pay si sa clé est configurée) ;
@@ -21,8 +23,16 @@ export async function handlePaymentWebhook(
 ): Promise<Response> {
   if (!provider) return NextResponse.json({ error: "not_configured" }, { status: 404 });
 
+  // Corps trop gros refusé avant lecture (en-tête annoncé), puis après lecture (en-tête absent
+  // ou faux). Une notification Notch Pay fait moins de 5 Ko.
+  const announced = Number(request.headers.get("content-length") ?? 0);
+  if (announced > MAX_BODY_BYTES) {
+    return NextResponse.json({ error: "too_large" }, { status: 413 });
+  }
   const rawBody = await request.text();
-  if (rawBody.length > 200_000) return NextResponse.json({ error: "too_large" }, { status: 413 });
+  if (rawBody.length > MAX_BODY_BYTES) {
+    return NextResponse.json({ error: "too_large" }, { status: 413 });
+  }
   const event = provider.parseWebhook(request.headers, rawBody);
   if (!event) {
     // Notification refusée (signature absente ou fausse, contenu illisible) : notée, avec

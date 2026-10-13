@@ -31,7 +31,8 @@ async function payInSandbox(
   await page.waitForURL(/\/paiement-test\?ref=[0-9a-f-]{36}/);
   await page.getByRole("radio", { name: method }).click();
   await page.getByRole("button", { name: succeed ? /^Payer/ : "Simuler un échec" }).click();
-  await page.waitForURL(/\/app\/abonnement\?paiement=/);
+  // Retour sur la page d'état du paiement (revérifié par le serveur, jamais d'après l'URL).
+  await page.waitForURL(/\/app\/abonnement\/paiement\?ref=[0-9a-f-]{36}/);
 }
 
 test("essai → Essentiel payé par Mobile Money → reçu PDF, jours d'essai conservés", async ({
@@ -52,8 +53,8 @@ test("essai → Essentiel payé par Mobile Money → reçu PDF, jours d'essai co
   await expect(page.getByRole("dialog")).toContainText("vos jours restants sont conservés");
   await payInSandbox(page, "MTN Mobile Money");
 
-  await expect(page).toHaveURL(/paiement=succes/);
   await expect(page.getByText("Paiement confirmé")).toBeVisible();
+  await page.getByRole("link", { name: "Voir mon abonnement" }).click();
   const history = page.getByTestId("payment-history");
   await expect(history).toContainText("Abonnement Essentiel — mensuel");
   await expect(history).toContainText("Payé");
@@ -116,7 +117,11 @@ test("paiement refusé par l'opérateur → message clair, rien n'est activé", 
   await signInAs(page, user.email);
   await choosePlan(page, "Choisir Essentiel");
   await payInSandbox(page, "MTN Mobile Money", false);
-  await expect(page.getByText("Le paiement n'a pas abouti")).toBeVisible();
+  // Cause expliquée simplement (jamais le code technique), et bouton pour réessayer.
+  await expect(page.getByText("Le paiement a été refusé")).toBeVisible();
+  await expect(page.getByText("Solde insuffisant (simulation)")).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Réessayer le paiement" })).toBeVisible();
+  await page.goto("/app/abonnement");
   await expect(page.getByTestId("payment-history")).toContainText("Échoué");
   const { data: sub } = await adminClient()
     .from("subscriptions")
@@ -154,6 +159,7 @@ test("Essentiel → Pro au prorata, puis annulation et reprise", async ({ page }
   expect(new Date(sub!.current_period_end).getTime()).toBe(new Date(end).getTime());
 
   // Annulation : accès maintenu jusqu'à l'échéance, puis reprise
+  await page.goto("/app/abonnement");
   await page.getByRole("button", { name: "Annuler l'abonnement" }).click();
   await page.getByRole("button", { name: "Confirmer l'annulation" }).click();
   await expect(page.getByText(/Abonnement annulé : accès complet jusqu'au/)).toBeVisible();
@@ -200,7 +206,8 @@ test("sécurité : webhook non configuré, tâche planifiée protégée, faux re
   await page.goto(
     `/api/billing/return?status=successful&tx_ref=${ref}&transaction_id=sbx_successful_mtn_${"0".repeat(32)}`,
   );
-  await expect(page).toHaveURL(/paiement=attente/);
+  await expect(page).toHaveURL(new RegExp(`/app/abonnement/paiement\\?ref=${ref}`));
+  await expect(page.getByText("Validez le paiement sur votre téléphone")).toBeVisible();
   const { data: sub } = await adminClient()
     .from("subscriptions")
     .select("status")
@@ -217,7 +224,10 @@ test("le récapitulatif demande le moyen de paiement : Mobile Money (FCFA) ou ca
   await choosePlan(page, "Choisir Essentiel");
   const dialog = page.getByRole("dialog");
   await expect(dialog.getByText("Comment voulez-vous payer ?")).toBeVisible();
-  const mobile = dialog.getByRole("radio", { name: /Mobile Money — en FCFA/ });
+  // Canaux simulés du bac à sable (MTN, Orange, carte) : affichés tels que « lus » chez Notch Pay.
+  const mobile = dialog.getByRole("radio", { name: /Mobile Money ou carte — en FCFA/ });
+  await expect(dialog.getByTestId("payment-channels")).toContainText("MTN Mobile Money");
+  await expect(dialog.getByTestId("payment-channels")).toContainText("Orange Money");
   const card = dialog.getByRole("radio", { name: /Carte bancaire/ });
   await expect(mobile).toBeChecked();
   await expect(page.getByTestId("checkout-amount")).toContainText("FCFA");

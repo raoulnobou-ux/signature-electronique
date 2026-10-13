@@ -216,7 +216,7 @@
       "popular": "Most popular",
       "cta": "Start for free",
       "trialNote": "Free account to explore, then {price} to sign. Cancel anytime.",
-      "paymentMethods": "Card (Visa, Mastercard, PayPal, Apple Pay, Google Pay) everywhere; Mobile Money (MTN, Orange…) in the CFA franc zone.",
+      "paymentMethods": "Secure payment on our partner Notch Pay's page, with the methods available in your country.",
       "plans": {
         "essential": {
           "name": "Essential",
@@ -256,7 +256,8 @@
         "name": "Free",
         "description": "To explore: {stored} document, the editor, {signatures} signature and {ai} assistant questions per day. Signing and export require a subscription.",
         "cta": "Create a free account"
-      }
+      },
+      "paymentMethodsLive": "Pay with {channels}, on Notch Pay's secure page."
     },
     "testimonials": {
       "eyebrow": "They sign with QuickSign",
@@ -313,7 +314,7 @@
   },
   "pricingPage": {
     "metaTitle": "Pricing",
-    "metaDescription": "Local prices in CFA francs, euros, dollars or pounds. Free account to explore, card or Mobile Money payment.",
+    "metaDescription": "Local prices in CFA francs, euros, dollars or pounds. Free account to explore, secure online payment.",
     "compareTitle": "Compare plans",
     "feature": "Feature",
     "included": "Included",
@@ -737,7 +738,7 @@
       "validUntil": "Valid until {date}",
       "renew": "Renew",
       "paymentUnavailable": "Online payment isn't enabled yet. Write to us from the Contact page to subscribe.",
-      "methodsNote": "Mobile Money (MTN, Orange) or bank card. No automatic charge: you renew whenever you like, and we remind you before the due date.",
+      "methodsNote": "Payment on Notch Pay's secure page. No automatic charge: you renew whenever you like, and we remind you before the due date.",
       "result": {
         "succes": {
           "title": "Payment confirmed",
@@ -770,8 +771,9 @@
         "methods": {
           "locked": "Upgrading to Pro is paid in your current subscription's currency.",
           "mobile_money": {
-            "title": "Mobile Money or card — in CFA francs",
-            "body": "MTN Mobile Money, Orange Money or card, on the secure Notch Pay page."
+            "title": "Mobile Money — in CFA francs",
+            "body": "On Notch Pay's secure page. Keep your phone at hand to approve the payment.",
+            "titleWithCard": "Mobile Money or card — in CFA francs"
           },
           "card": {
             "title": "Card",
@@ -829,7 +831,7 @@
       "sandbox": {
         "metaTitle": "Test payment",
         "title": "Test payment",
-        "notice": "Test mode: no real money is charged. In production, this step is replaced by Notch Pay's secure page (Mobile Money or card).",
+        "notice": "Test mode: no real money is charged. In production, this step is replaced by Notch Pay's secure page.",
         "method": "Payment method",
         "methods": {
           "mtn": "MTN Mobile Money",
@@ -843,7 +845,46 @@
       },
       "sponsored": "Pro plan included through your team “{team}”.",
       "freeBody": "One document, the editor and the assistant to explore. Choose a plan to sign and export.",
-      "documentsStored": "Imported documents"
+      "documentsStored": "Imported documents",
+      "paymentPage": {
+        "metaTitle": "Payment",
+        "pending": {
+          "title": "Approve the payment on your phone",
+          "body": "A payment request was sent to your Mobile Money number. Enter your PIN to approve it: this page updates by itself.",
+          "progress": "Waiting for confirmation"
+        },
+        "success": {
+          "title": "Payment confirmed",
+          "body": "Thank you! Your plan is active. Your receipt was sent by email."
+        },
+        "timeout": {
+          "title": "Still no confirmation",
+          "body": "We haven't received the operator's confirmation yet. If you approved it, your plan will activate automatically within a few minutes. Otherwise, you can try again."
+        },
+        "failed": {
+          "declined": {
+            "title": "The payment was declined",
+            "body": "Your operator or bank declined the payment: insufficient balance, wrong PIN, or the request wasn't approved. No amount was charged."
+          },
+          "canceled": {
+            "title": "Payment canceled",
+            "body": "The payment was canceled before it was approved. No amount was charged."
+          },
+          "expired": {
+            "title": "Payment timed out",
+            "body": "The payment request wasn't approved in time. No amount was charged."
+          },
+          "technical": {
+            "title": "Payment not verified",
+            "body": "We couldn't verify this payment, so no subscription was activated. If an amount was charged, contact us from the Contact page."
+          }
+        },
+        "actions": {
+          "retry": "Retry the payment",
+          "dashboard": "Go to dashboard",
+          "billing": "View my subscription"
+        }
+      }
     }
   },
   "documents": {

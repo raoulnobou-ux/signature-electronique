@@ -126,12 +126,13 @@ Langue, pays de résidence, fuseau horaire et devise préférée par utilisateur
 - **Accès gratuit avant paiement** : un document, l'éditeur en découverte, une signature, l'assistant (5 messages par jour). Signer et exporter demandent un abonnement. Limites dans `plans_config` (ligne `free`) ; détails dans [`docs/PAIEMENTS.md`](docs/PAIEMENTS.md#accès-avant-paiement).
 - Page `/app/abonnement` : plan actuel, usage, choix du plan (mensuel ou annuel ; FCFA, euro, dollar ou livre), récapitulatif exact (prorata), historique et reçus PDF.
 - Plusieurs prestataires derrière une même interface (`lib/billing/providers/`), activés par `PAYMENT_PROVIDERS`. Guide complet : [`docs/PAIEMENTS.md`](docs/PAIEMENTS.md).
-  - **Notch Pay**, seul prestataire pour commencer (FCFA ; MTN Mobile Money, Orange Money et carte bancaire sur la page hébergée de Notch Pay) :
-    - variable `NOTCHPAY_PUBLIC_KEY` (`pk_test.…` pour les essais) et, recommandé, `NOTCHPAY_WEBHOOK_SECRET` ;
-    - webhook : `https://<domaine>/api/webhooks/notchpay`.
+  - **Notch Pay**, seul prestataire pour commencer (FCFA, page hébergée de Notch Pay ; les moyens affichés sont lus sur le compte Notch Pay : aujourd'hui MTN Mobile Money et Orange Money) :
+    - variables `NOTCHPAY_PUBLIC_KEY` (`pk_test.…` pour les essais) et `NOTCHPAY_WEBHOOK_SECRET` (obligatoire : sans elle, les notifications sont refusées) ;
+    - webhook : `https://<domaine>/api/webhooks/notchpay` ;
+    - diagnostic d'un paiement : `npm run notchpay:inspect -- trx.xxxxxxxx`.
   - D'autres prestataires (carte en euro, dollar, livre…) s'ajouteront derrière la même interface : voir [`docs/PAIEMENTS.md`](docs/PAIEMENTS.md#ajouter-un-prestataire).
 - Tant qu'aucun prestataire n'accepte une devise, le paiement se fait en FCFA, quel que soit le pays du visiteur. Les prix sont fixés par marché dans `plans_config`, sans conversion automatique.
-- Le retour client arrive sur `/api/billing/return` ; aucun plan n'est activé sans revérification de la transaction par l'API du prestataire.
+- Le retour client arrive sur `/app/abonnement/paiement` (attente de 3 minutes au plus, puis « Réessayer ») ; aucun plan n'est activé sans revérification de la transaction par l'API du prestataire.
 - Sans prestataire, `PAYMENTS_SANDBOX=true` active un paiement simulé (développement, tests e2e) ; jamais en production.
 - Tâche planifiée quotidienne : `/api/cron/billing` (rappels J-5/J-2/J, fin des anciens essais, grâce de 3 jours, retour à l'accès gratuit), déclarée dans `vercel.json`.
 - Les prix se modifient dans la table `plans_config` sans redéployer.

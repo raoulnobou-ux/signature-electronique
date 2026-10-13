@@ -19,9 +19,9 @@ const serverSchema = z.object({
   EMAIL_FROM: z.string().default("QuickSign <bonjour@quicksign.app>"),
   /** Prestataires de paiement activés (« notchpay ») ; vide = tous ceux configurés. */
   PAYMENT_PROVIDERS: z.string().optional(),
-  /** Notch Pay (Mobile Money et carte, FCFA) : clé publique (« pk.… », test : « pk_test.… »). */
+  /** Notch Pay (page hébergée, FCFA) : clé publique (« pk.… », test : « pk_test.… »). */
   NOTCHPAY_PUBLIC_KEY: z.string().optional(),
-  /** Clé de hachage des webhooks Notch Pay (en-tête x-notch-signature) ; facultative. */
+  /** Clé de hachage des webhooks Notch Pay (en-tête x-notch-signature) ; sans elle, notifications refusées. */
   NOTCHPAY_WEBHOOK_SECRET: z.string().optional(),
   /** "true" : paiements simulés sans prestataire (dev, tests). Ignoré en production Vercel. */
   PAYMENTS_SANDBOX: z.enum(["true", "false"]).optional(),

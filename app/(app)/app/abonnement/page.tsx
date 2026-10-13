@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Card, CardContent } from "@/components/ui/card";
 import { requireAccount } from "@/lib/auth/account";
-import { mobileMoneyCountries, paymentOptions } from "@/lib/billing";
+import { mobileMoneyCountries, paymentChannels, paymentOptions } from "@/lib/billing";
 import { suggestedCountry } from "@/lib/billing/cfa";
 import { paymentDescription } from "@/lib/billing/service";
 import { toLocale } from "@/i18n/config";
@@ -68,8 +68,13 @@ export default async function BillingPage({ searchParams }: PageProps<"/app/abon
       ? (params.paiement as keyof typeof RESULTS)
       : null;
   const result = resultKey ? RESULTS[resultKey] : null;
-  // Moyens de paiement proposés dans le pays du visiteur (carte, Mobile Money en zone CFA).
-  const options = paymentOptions(account.profile.country ?? visitorCountry);
+  // Moyens de paiement proposés dans le pays du visiteur, et canaux réellement ouverts chez
+  // le prestataire (aucun canal actif = paiement indisponible).
+  const channels = await paymentChannels();
+  const options =
+    channels !== null && channels.length === 0
+      ? []
+      : paymentOptions(account.profile.country ?? visitorCountry);
   const available = options.length > 0;
   const countries = options.some((o) => o.method === "mobile_money")
     ? await mobileMoneyCountries()
@@ -108,6 +113,7 @@ export default async function BillingPage({ searchParams }: PageProps<"/app/abon
             limits={await getPlanLimits()}
             defaultCurrency={currency}
             options={options}
+            channels={channels}
             countries={countries}
             defaultCountry={suggestedCountry(
               account.profile.phone,

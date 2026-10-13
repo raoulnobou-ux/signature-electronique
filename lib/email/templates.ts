@@ -1,4 +1,5 @@
 import type { Locale } from "@/i18n/config";
+import { failureText } from "@/lib/billing/failure";
 import { siteConfig } from "@/lib/site";
 import { firstName } from "@/lib/utils";
 import { renderEmail } from "./layout";
@@ -198,8 +199,9 @@ export function paymentFailedEmail({
           title: "The payment didn't go through",
           paragraphs: [
             greeting(fullName, locale),
-            `Your payment of ${amount} couldn't be completed${reason ? ` (${reason})` : ""}. No subscription was charged.`,
-            "Check your Mobile Money balance or try another payment method.",
+            `Your payment of ${amount} couldn't be completed. No amount was charged.`,
+            failureText(reason, "en"),
+            "You can try again now, with the same number or another payment method.",
           ],
           cta: { label: "Retry the payment", url: renewUrl() },
         },
@@ -213,8 +215,9 @@ export function paymentFailedEmail({
       title: "Le paiement n'a pas abouti",
       paragraphs: [
         greeting(fullName),
-        `Votre paiement de ${amount} n'a pas pu être finalisé${reason ? ` (${reason})` : ""}. Aucun abonnement n'a été facturé.`,
-        "Vérifiez le solde de votre compte Mobile Money ou essayez un autre moyen de paiement.",
+        `Votre paiement de ${amount} n'a pas pu être finalisé. Aucun montant n'a été débité.`,
+        failureText(reason, "fr"),
+        "Vous pouvez réessayer dès maintenant, avec le même numéro ou un autre moyen de paiement.",
       ],
       cta: { label: "Réessayer le paiement", url: renewUrl() },
     }),

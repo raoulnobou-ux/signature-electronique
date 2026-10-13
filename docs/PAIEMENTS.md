@@ -8,10 +8,11 @@ Ce guide sert à faire évoluer les paiements de QuickSign sans casser l'existan
 lib/billing/
   providers/
     types.ts            interface PaymentProvider, PaymentMethod, PaymentOption
-    african/notchpay.ts Notch Pay : Mobile Money (MTN, Orange) et carte, en FCFA
+    african/notchpay.ts Notch Pay : page hébergée, en FCFA (canaux lus chez Notch Pay)
     sandbox.ts          paiement simulé (développement, tests e2e)
   index.ts              registre : prestataires activés, moyen par devise, options par pays
   webhook.ts            traitement commun des notifications (signature, revérification, idempotence)
+  failure.ts            cause d'un échec traduite pour le client (jamais le code brut)
   quote.ts              devis exact (plein tarif, renouvellement, prorata), arrondis par devise
 config/currencies.ts    devises acceptées (décimales, montant minimal, arrondi, symbole)
 config/markets.ts       devise par défaut d'un pays, zone franc CFA
@@ -19,10 +20,13 @@ config/markets.ts       devise par défaut d'un pays, zone franc CFA
 
 Le parcours d'un paiement :
 
-1. Le récapitulatif affiche les moyens de paiement du pays du visiteur (`paymentOptions(pays)`).
-2. `startCheckout` enregistre un paiement `pending` et demande au prestataire l'URL de paiement.
-3. Le prestataire notifie `/api/webhooks/<nom>`. La notification n'est jamais crue telle quelle : la transaction est relue par l'API du prestataire (`verifyTransaction`) avant `complete_payment`.
-4. `complete_payment` (SQL) est idempotent : une notification en double ne prolonge pas l'abonnement deux fois.
+1. Le récapitulatif affiche les moyens de paiement du pays du visiteur (`paymentOptions(pays)`) et les canaux réellement ouverts chez le prestataire (`paymentChannels()`).
+2. `startCheckout` (limité par compte et par adresse IP) calcule le prix côté serveur, enregistre un paiement `pending` et demande au prestataire l'URL de paiement.
+3. Le client paie sur la page hébergée, puis revient sur `/app/abonnement/paiement?ref=<référence>`. Cette page n'active rien : elle interroge `checkPayment` toutes les 5 s pendant 3 minutes, qui relit notre base et, si le paiement est encore en attente, le fait revérifier par le serveur auprès du prestataire.
+4. Le prestataire notifie `/api/webhooks/<nom>` (source de vérité). La notification n'est jamais crue telle quelle : signature vérifiée, puis transaction relue par l'API du prestataire (`verifyTransaction`) avant `complete_payment`.
+5. `complete_payment` (SQL) est idempotent : une notification en double ne prolonge pas l'abonnement deux fois. Le premier arrivé (notification ou revérification de la page) active, l'autre ne fait rien.
+
+Contrôles avant activation (`settlePayment`) : statut `complete` chez Notch Pay, transaction portant notre référence (`merchant_reference`), montant au moins égal au prix enregistré, même devise, pas de transaction de test avec une clé de production.
 
 ## Activer ou désactiver un prestataire
 
@@ -72,7 +76,36 @@ Prix par marché, sans conversion automatique :
 
 ## Pays et moyens proposés par Notch Pay
 
-Le client ne choisit pas de pays sur QuickSign : la page Notch Pay affiche elle-même les moyens disponibles (Mobile Money selon le pays, carte bancaire partout). Pour proposer d'autres pays ou opérateurs, les activer sur le compte Notch Pay.
+Le client ne choisit pas de pays sur QuickSign : la page Notch Pay affiche elle-même les moyens activés sur le compte.
+
+QuickSign n'écrit aucun canal en dur. `NotchPayProvider.listChannels()` lit `GET /channels?currency=XAF` (cache de 10 minutes, délai de 4 s) et ne garde que les canaux `active` et, avec une clé de production, `live`. Les pages Tarifs et Abonnement affichent ces noms ; si Notch Pay ne répond pas, un texte générique les remplace ; si aucun canal n'est ouvert, le paiement est indisponible.
+
+Pour proposer la carte bancaire ou d'autres opérateurs : les faire activer sur le compte Notch Pay. Ils apparaissent alors d'eux-mêmes, sans redéployer (dans les 10 minutes).
+
+Canaux ouverts au 13 octobre 2026 (clé de production) : MTN Mobile Money (`cm.mtn`) et Orange Money (`cm.orange`). Carte bancaire, PayPal, EU Mobile Money et Yoomee : inactifs.
+
+## Notifications Notch Pay (webhook)
+
+- URL : `https://<domaine>/api/webhooks/notchpay`, à déclarer dans Notch Pay → Paramètres → Webhooks, avec les événements de paiement.
+- `NOTCHPAY_WEBHOOK_SECRET` (clé de hachage du webhook, « Hash Key ») est **obligatoire** : sans elle, toute notification est refusée (401). Le retour du client et la tâche planifiée continuent alors de régler les paiements, avec du retard.
+- Signature : HMAC-SHA256 du **corps brut** avec la clé de hachage, en-tête `x-notch-signature`, comparaison en temps constant. Attention : l'exemple Node de la documentation Notch Pay recalcule le corps avec `JSON.stringify(req.body)`, ce qui casse la signature.
+- Traités : `payment.complete`, `payment.failed`, `payment.canceled`, `payment.expired`, `payment.abandoned`. Les autres (dont `payment.created`, transferts, clients) sont notés dans `payment_events` puis ignorés.
+- Corps limité à 64 Ko ; seule la méthode POST est acceptée.
+
+## Écarts relevés entre la documentation Notch Pay et l'API (13 octobre 2026)
+
+| Documentation                                       | API réelle                                                                                                                              |
+| --------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET /resources/channels`, liste `channels`         | `GET /channels`, liste `items`                                                                                                          |
+| `GET /payments/{reference}` accepte notre référence | 404 avec notre référence : seule la référence Notch Pay (`trx.…`) fonctionne. Elle est notée à la création (`payments.provider_tx_id`). |
+| Événements lus dans `event.type`                    | Le champ s'appelle `event` (les deux sont lus)                                                                                          |
+| Signature calculée sur `JSON.stringify(req.body)`   | À calculer sur le corps brut                                                                                                            |
+| 6 statuts (Payments API)                            | Aussi `abandoned`, `incomplete`, `refunded`, `partialy-refunded` (page « Collect »)                                                     |
+| —                                                   | La liste des paiements avec une clé de production inclut aussi les paiements de test                                                    |
+
+## Diagnostic d'un paiement refusé
+
+`npm run notchpay:inspect -- trx.xxxxxxxx` affiche la réponse complète de Notch Pay (données personnelles masquées ; clé lue dans `.env.local`). La cause d'un refus n'est pas toujours transmise par Notch Pay : dans ce cas, s'adresser à son support avec la référence `trx.…`.
 
 ## Prestataires retirés
 

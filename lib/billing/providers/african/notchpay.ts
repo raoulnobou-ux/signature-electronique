@@ -22,17 +22,85 @@ export function isNotchPayTestKey(key: string): boolean {
   return key.startsWith("pk_test.");
 }
 
-/** Statut d'une transaction Notch Pay → statut interne. */
+/**
+ * Statut d'une transaction Notch Pay → statut interne. Statuts finaux d'échec relevés dans
+ * la documentation (Payments API et page « Collect ») ; « partialy-refunded » y est écrit
+ * ainsi, l'orthographe correcte est acceptée aussi.
+ */
+const FAILED_STATUSES = new Set([
+  "failed",
+  "rejected",
+  "canceled",
+  "cancelled",
+  "abandoned",
+  "expired",
+  "refunded",
+  "partialy-refunded",
+  "partially-refunded",
+]);
+
 export function mapNotchPayStatus(status: string | undefined): TransactionStatus {
   const s = (status ?? "").toLowerCase();
   if (s === "complete") return "successful";
-  if (
-    ["failed", "rejected", "canceled", "cancelled", "abandoned", "expired", "refunded"].includes(s)
-  )
-    return "failed";
+  if (FAILED_STATUSES.has(s)) return "failed";
   // pending, processing, hold, incomplete : encore en cours.
   return "pending";
 }
+
+/**
+ * Événements Notch Pay traités : ceux de la catégorie « Paiements » qui changent l'issue
+ * d'un paiement. payment.created et les autres catégories (transferts, clients…) sont
+ * notés puis ignorés.
+ */
+const SETTLING_EVENTS = new Set([
+  "payment.complete",
+  "payment.failed",
+  "payment.canceled",
+  "payment.cancelled",
+  "payment.expired",
+  "payment.abandoned",
+]);
+
+/** Canal de paiement actif sur le compte Notch Pay (GET /channels). */
+export type NotchPayChannel = {
+  /** Identifiant Notch Pay : cm.mtn, cm.orange, card… */
+  id: string;
+  /** Nom affiché par Notch Pay : « MTN Mobile Money », « Orange Money »… */
+  name: string;
+  /** mobile, card, wallet… */
+  type: string;
+};
+
+type ChannelItem = {
+  id?: unknown;
+  name?: unknown;
+  type?: unknown;
+  active?: unknown;
+  live?: unknown;
+  currency?: unknown;
+};
+
+/**
+ * Canaux utilisables : actifs sur le compte et, avec une clé de production, ouverts en
+ * production (« live »). En test, un canal actif suffit.
+ */
+export function usableChannels(items: unknown, testMode: boolean): NotchPayChannel[] {
+  if (!Array.isArray(items)) return [];
+  const channels: NotchPayChannel[] = [];
+  for (const item of items as ChannelItem[]) {
+    if (item?.active !== true || (!testMode && item.live !== true)) continue;
+    if (item.currency !== undefined && item.currency !== "XAF") continue;
+    if (typeof item.id !== "string" || typeof item.name !== "string") continue;
+    channels.push({
+      id: item.id.slice(0, 40),
+      name: item.name.slice(0, 60),
+      type: typeof item.type === "string" ? item.type.slice(0, 20) : "other",
+    });
+  }
+  return channels;
+}
+
+const CHANNELS_TTL_MS = 10 * 60_000;
 
 /** Notre référence (payments.provider_ref) : UUID v4. */
 const UUID_V4 = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -124,7 +192,41 @@ export class NotchPayProvider implements PaymentProvider {
     return isNotchPayTestKey(this.publicKey);
   }
 
-  private async request(path: string, init: { method: "GET" | "POST"; body?: unknown }) {
+  private channelsCache: { at: number; value: NotchPayChannel[] } | null = null;
+
+  /**
+   * Canaux réellement disponibles sur le compte (GET /channels, mis en cache 10 minutes).
+   * La documentation indique GET /resources/channels avec une liste « channels » ; l'API
+   * répond en réalité sur /channels avec une liste « items » (vérifié le 13 octobre 2026).
+   * null si Notch Pay ne répond pas : l'interface reste alors générique.
+   */
+  async listChannels(): Promise<NotchPayChannel[] | null> {
+    if (this.channelsCache && Date.now() - this.channelsCache.at < CHANNELS_TTL_MS) {
+      return this.channelsCache.value;
+    }
+    try {
+      // Délai court : la liste sert à l'affichage des pages Tarifs et Abonnement.
+      const { status, body } = await this.request("/channels?currency=XAF", {
+        method: "GET",
+        timeoutMs: 4_000,
+      });
+      if (status >= 300 || !Array.isArray(body?.items)) {
+        await logAppError("billing.notchpay_channels", `HTTP ${status}`);
+        return null;
+      }
+      const value = usableChannels(body.items, this.testMode);
+      this.channelsCache = { at: Date.now(), value };
+      return value;
+    } catch (error) {
+      await logAppError("billing.notchpay_channels", error);
+      return null;
+    }
+  }
+
+  private async request(
+    path: string,
+    init: { method: "GET" | "POST"; body?: unknown; timeoutMs?: number },
+  ) {
     const response = await this.fetcher(`${NOTCHPAY_API}${path}`, {
       method: init.method,
       headers: {
@@ -133,7 +235,7 @@ export class NotchPayProvider implements PaymentProvider {
         ...(init.body ? { "Content-Type": "application/json" } : {}),
       },
       body: init.body ? JSON.stringify(init.body) : undefined,
-      signal: AbortSignal.timeout(20_000),
+      signal: AbortSignal.timeout(init.timeoutMs ?? 20_000),
     });
     const body = (await response.json().catch(() => null)) as Record<string, unknown> | null;
     return { status: response.status, body };
@@ -233,15 +335,17 @@ export class NotchPayProvider implements PaymentProvider {
   }
 
   /**
-   * Notification de Notch Pay. Avec une clé de hachage configurée, la signature est exigée.
-   * Dans tous les cas le contenu n'est jamais cru : seule la référence sert, et la
-   * transaction est revérifiée par l'API avant toute activation.
+   * Notification de Notch Pay. La signature (HMAC-SHA256 du corps brut avec la clé de
+   * hachage, en-tête x-notch-signature) est toujours exigée : sans clé configurée, toute
+   * notification est refusée (le retour du client et la tâche planifiée prennent le relais).
+   * Le contenu n'est jamais cru : seule la référence sert, et la transaction est revérifiée
+   * par l'API avant toute activation. Les événements hors paiement sont rendus sans
+   * référence, donc notés puis ignorés.
    */
   parseWebhook(headers: Headers, rawBody: string): WebhookEvent | null {
-    if (this.webhookSecret) {
-      const signature = headers.get("x-notch-signature") ?? headers.get("x-noth-signature");
-      if (!verifyNotchPaySignature(signature, rawBody, this.webhookSecret)) return null;
-    }
+    if (!this.webhookSecret) return null;
+    const signature = headers.get("x-notch-signature") ?? headers.get("x-noth-signature");
+    if (!verifyNotchPaySignature(signature, rawBody, this.webhookSecret)) return null;
     let payload: { id?: unknown; event?: unknown; type?: unknown; data?: Transaction };
     try {
       payload = JSON.parse(rawBody) as typeof payload;
@@ -261,11 +365,12 @@ export class NotchPayProvider implements PaymentProvider {
     const type = String(payload.event ?? payload.type ?? "unknown").slice(0, 60);
     const status = String(data.status ?? "").slice(0, 40);
     const id = typeof payload.id === "string" ? payload.id.slice(0, 120) : null;
+    const settles = SETTLING_EVENTS.has(type.toLowerCase());
     return {
       key: id ?? `${merchantRef ?? txRef}:${type}:${status}`,
       type,
-      reference: merchantRef,
-      transactionId: txRef,
+      reference: settles ? merchantRef : null,
+      transactionId: settles ? txRef : null,
       payload,
     };
   }

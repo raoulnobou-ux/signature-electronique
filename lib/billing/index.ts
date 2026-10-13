@@ -2,11 +2,19 @@ import "server-only";
 import { serverEnv } from "@/lib/env.server";
 import { CURRENCY_CODES, type Currency } from "@/config/currencies";
 import { isCfaCountry } from "@/config/markets";
-import { NotchPayProvider } from "./providers/african/notchpay";
+import { NotchPayProvider, type NotchPayChannel } from "./providers/african/notchpay";
 import type { PaymentMethod, PaymentOption, PaymentProvider } from "./providers/types";
 import { SandboxProvider } from "./providers/sandbox";
 
 export type { PaymentOption };
+export type PaymentChannel = NotchPayChannel;
+
+/** Canaux simulés par le bac à sable local (développement, tests e2e). */
+const SANDBOX_CHANNELS: NotchPayChannel[] = [
+  { id: "cm.mtn", name: "MTN Mobile Money", type: "mobile" },
+  { id: "cm.orange", name: "Orange Money", type: "mobile" },
+  { id: "card", name: "Carte bancaire", type: "card" },
+];
 
 /**
  * Prestataires activés : PAYMENT_PROVIDERS (ex. « notchpay ») ; vide = tous ceux dont les
@@ -105,6 +113,23 @@ export function paymentOptions(country: string | null): PaymentOption[] {
 export async function mobileMoneyCountries(): Promise<string[]> {
   if (getNotchPay()) return [];
   return getSandboxProvider() ? ["CMR", "GAB", "COG", "CIV", "SEN"] : [];
+}
+
+/**
+ * Canaux de paiement réellement ouverts, pour l'affichage (noms et logos des moyens) :
+ * lus chez Notch Pay, jamais écrits en dur. null = inconnu (prestataire injoignable) ;
+ * [] = aucun canal actif, le paiement est alors indisponible.
+ */
+export async function paymentChannels(): Promise<NotchPayChannel[] | null> {
+  try {
+    const notch = getNotchPay();
+    if (notch) return await notch.listChannels();
+    if (getSandboxProvider()) return SANDBOX_CHANNELS;
+    return [];
+  } catch {
+    // Configuration serveur incomplète (développement) : affichage générique.
+    return null;
+  }
 }
 
 /** Paiements de test (aucun argent réel) : bac à sable du prestataire de chaque devise. */
