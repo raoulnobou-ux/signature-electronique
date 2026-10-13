@@ -464,3 +464,12 @@ Sécurité, inchangée dans son principe :
 - la signature `x-notch-signature` (HMAC-SHA256, temps constant) est exigée dès que la clé de hachage est configurée.
 
 L'interface `PaymentProvider` et le registre restent prêts pour ajouter d'autres moyens de paiement au fur et à mesure (`docs/PAIEMENTS.md`). Les anciens paiements gardent leur prestataire et leurs reçus. Version des textes juridiques : `2026-10-09`.
+
+**D124 — Suivi d'audit du 13 octobre 2026.**
+
+- **Next.js 16.4.0** (au lieu de 16.3.6) : `npm audit` signalait 6 avis de sécurité (SSRF de l'optimisation d'images, empoisonnement de cache SSG/ISR entre utilisateurs, fuites d'informations). Après mise à jour : 0 vulnérabilité en production.
+- **`can_write(p_user_id)`** (migration `20261013000100_can_write_self_only.sql`) : un compte connecté ne peut plus interroger la fonction pour un autre compte (elle révélait la présence d'un abonnement actif). Les politiques RLS l'appellent toujours avec `auth.uid()` ; le serveur (`service_role`) garde l'accès complet. Vérifié en transaction annulée sur la production avant application.
+- Les autres fonctions `SECURITY DEFINER` signalées par l'outil d'analyse Supabase (`owns_document`, `can_read_document`, `owns_folder`, `is_team_member`, `is_team_admin`, `my_*`, `mfa_satisfied`, `team_activity`) se limitent déjà à l'utilisateur connecté : laissées telles quelles.
+- Tables sans politique RLS (`app_errors`, `payment_events`, `rate_limit_hits`, `billing_notices`, `contact_messages`, `ai_faq_cache`) : voulu, accès serveur uniquement.
+- Reste à faire par le propriétaire : activer « Leaked password protection » (Supabase → Authentication).
+- Paiements Notch Pay : le seul paiement réussi (9 octobre) était une transaction de test ; les trois paiements réels du 13 octobre ont été refusés par Notch Pay (`status=failed`, aucune autre cause transmise). L'application a traité ces refus correctement ; la cause est à lire dans le tableau de bord Notch Pay (activation du compte en production, confirmation sur le téléphone).

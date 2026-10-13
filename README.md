@@ -9,7 +9,7 @@ QuickSign est une application web (SaaS) de signature électronique pensée pour
 
 ## Stack
 
-Next.js 16 (App Router, TypeScript strict) · Tailwind CSS v4 + composants façon shadcn/ui (Radix UI) · Motion (Framer Motion) · Supabase (Postgres, Auth, Storage, RLS) · pdf.js / pdf-lib · Gotenberg (Word → PDF) · Claude (Anthropic) · Resend · CinetPay · next-intl · TanStack Query · Vitest + Playwright.
+Next.js 16 (App Router, TypeScript strict) · Tailwind CSS v4 + composants façon shadcn/ui (Radix UI) · Motion (Framer Motion) · Supabase (Postgres, Auth, Storage, RLS) · pdf.js / pdf-lib · Gotenberg (Word → PDF) · Claude (Anthropic) · Resend · Notch Pay · next-intl · TanStack Query · Vitest + Playwright.
 
 ## Prérequis
 
@@ -73,7 +73,7 @@ Le design system est visible sur `/design`.
 
 ## Base de données
 
-Le schéma complet (tables, Row Level Security, buckets privés, trigger de création du profil et de l'essai de 6 jours) est dans `supabase/migrations/`. Principes :
+Le schéma complet (tables, Row Level Security, buckets privés, trigger de création du profil et de l'accès gratuit) est dans `supabase/migrations/`. Principes :
 
 - chaque table a la RLS activée : un utilisateur ne voit que ses données (ou celles de son équipe) ;
 - abonnements, paiements, journal d'audit et compteurs d'usage ne sont écrits que par le serveur ;
@@ -155,12 +155,12 @@ Langue, pays de résidence, fuseau horaire et devise préférée par utilisateur
 
 ## Tests
 
-- `npm test` : tests unitaires (droits, dates d'essai, validations, détection de type de fichier, génération du PDF signé, outils et boucle de l'assistant) **et** tests d'intégration de la base (RLS, triggers) si Supabase local tourne.
-- `npm run test:e2e` : parcours complets dans Chromium (bureau et mobile), dont inscription → e-mail de confirmation (lu dans Mailpit) → essai de 6 jours. Nécessite Supabase local et un build (`npm run build`).
+- `npm test` : tests unitaires (droits, accès gratuit et abonnements, validations, détection de type de fichier, génération du PDF signé, outils et boucle de l'assistant) **et** tests d'intégration de la base (RLS, triggers) si Supabase local tourne.
+- `npm run test:e2e` : parcours complets dans Chromium (bureau et mobile), dont inscription → e-mail de confirmation (lu dans Mailpit) → accès gratuit. Nécessite Supabase local et un build (`npm run build`).
 
 ## Déploiement
 
-Le guide complet, étape par étape, est dans [`docs/DEPLOIEMENT.md`](docs/DEPLOIEMENT.md) : Supabase (production et préproduction), Gotenberg (`deploy/gotenberg/`, Fly.io ou Render), Vercel (variables, tâches planifiées, région Paris), domaine et Resend (SPF/DKIM/DMARC), CinetPay, Sentry, test final.
+Le guide complet, étape par étape, est dans [`docs/DEPLOIEMENT.md`](docs/DEPLOIEMENT.md) : Supabase (production et préproduction), Gotenberg (`deploy/gotenberg/`, Fly.io ou Render), Vercel (variables, tâches planifiées, région Paris), domaine et Resend (SPF/DKIM/DMARC), Notch Pay, Sentry, test final.
 
 - `npm run deploy:check -- .env.production` : vérifie les variables de production (secrets, modes de test désactivés, HTTPS).
 - `npm run smoke -- https://<domaine>` : test rapide d'un déploiement (pages, en-têtes de sécurité, santé, webhooks, PWA).
