@@ -1,6 +1,9 @@
 import "server-only";
 import { NextResponse } from "next/server";
 import type { Json } from "@/lib/supabase/database.types";
+import { logAppError } from "@/lib/monitoring/app-errors";
+import { rateLimit } from "@/lib/rate-limit";
+import { getClientIp } from "@/lib/request";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { PaymentProvider } from "./providers/types";
 import { settlePayment } from "./service";
@@ -21,7 +24,19 @@ export async function handlePaymentWebhook(
   const rawBody = await request.text();
   if (rawBody.length > 200_000) return NextResponse.json({ error: "too_large" }, { status: 413 });
   const event = provider.parseWebhook(request.headers, rawBody);
-  if (!event) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  if (!event) {
+    // Notification refusée (signature absente ou fausse, contenu illisible) : notée, avec
+    // une limite par adresse, pour repérer une clé de hachage mal configurée.
+    const ip = (await getClientIp()) ?? "unknown";
+    if (await rateLimit("webhook-rejected", ip, 10, 3600)) {
+      const signed = [...request.headers.keys()].some((name) => name.includes("signature"));
+      await logAppError(
+        "billing.webhook_rejected",
+        `${provider.name} : notification refusée (${signed ? "signature présente mais invalide" : "sans signature"}, ${rawBody.length} octets)`,
+      );
+    }
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
 
   const admin = createAdminClient();
   const { data: inserted, error: insertError } = await admin
