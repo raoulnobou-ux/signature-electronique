@@ -1,7 +1,10 @@
 import { admin, hasLocalDb, userClient } from "./setup";
 import { describe, expect, it } from "vitest";
-import { runBillingCron } from "@/lib/billing/service";
 import type { TablesUpdate } from "@/lib/supabase/database.types";
+
+// Import différé : lib/billing/service lit les variables d'environnement au chargement, ce qui
+// ferait échouer le fichier entier (au lieu de l'ignorer) quand Supabase local n'est pas lancé.
+const runBillingCron = async () => (await import("@/lib/billing/service")).runBillingCron();
 
 const DAY = 86_400_000;
 const iso = (offsetMs: number) => new Date(Date.now() + offsetMs).toISOString();
