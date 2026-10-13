@@ -22,7 +22,8 @@
     "postinstall": "node scripts/copy-pdf-worker.mjs",
     "deploy:check": "node scripts/deploy-check.mts",
     "smoke": "node scripts/smoke.mts",
-    "check:bundle": "node --env-file-if-exists=.env.local scripts/check-bundle.mts"
+    "check:bundle": "node --env-file-if-exists=.env.local scripts/check-bundle.mts",
+    "notchpay:inspect": "node --env-file-if-exists=.env.local scripts/notchpay-inspect.mts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.129.0",
