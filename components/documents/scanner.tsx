@@ -318,7 +318,7 @@ function QuadEditor({
           className="absolute flex size-12 -translate-x-1/2 -translate-y-1/2 cursor-grab items-center justify-center"
           style={pct(p)}
         >
-          <span className="size-5 rounded-full border-2 border-white bg-brand-violet shadow-[0_0_0_4px_rgb(139_92_246/0.35)]" />
+          <span className="size-5 rounded-full border-2 border-white bg-brand-violet shadow-[0_0_0_4px_var(--accent)]" />
         </button>
       ))}
     </div>

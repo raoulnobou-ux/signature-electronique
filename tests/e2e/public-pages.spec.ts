@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 const pages = [
   { path: "/", heading: /Signez, faites signer, terminé/ },
   { path: "/tarifs", heading: /Un prix juste/ },
-  { path: "/securite", heading: /Vos documents sont en sécurité/ },
+  { path: "/securite", heading: /Comment nous protégeons vos documents/ },
   { path: "/contact", heading: /Parlons de votre structure/ },
   { path: "/cgu", heading: /Conditions générales/ },
   { path: "/confidentialite", heading: /Politique de confidentialité/ },

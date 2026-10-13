@@ -372,10 +372,7 @@ export function DrawPad({
         <canvas
           ref={canvasRef}
           aria-label={tc("hint")}
-          className={cn(
-            "block w-full touch-none [filter:drop-shadow(0_0_5px_rgb(139_92_246/0.45))]",
-            initials ? "h-44" : "h-56 sm:h-64",
-          )}
+          className={cn("block w-full touch-none", initials ? "h-44" : "h-56 sm:h-64")}
         />
         {/* Ligne de base, guide visuel (non exportée) */}
         <div

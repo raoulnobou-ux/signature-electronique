@@ -13,7 +13,7 @@ export function AppProviders({ children, nonce }: { children: ReactNode; nonce?:
   return (
     <ThemeProvider
       attribute="class"
-      defaultTheme="dark"
+      defaultTheme="light"
       enableSystem={false}
       disableTransitionOnChange
       nonce={nonce}

@@ -24,10 +24,7 @@ export function SignedDocumentDemo({
 }) {
   return (
     <div className="relative mx-auto w-full max-w-md lg:max-w-none" aria-hidden>
-      {/* Halo de marque derrière la carte */}
-      <div className="absolute -inset-10 -z-10 bg-[radial-gradient(closest-side,rgb(139_92_246/0.45),rgb(99_102_241/0.25)_50%,transparent)] dark:opacity-80" />
-
-      <div className="gradient-border animate-float rounded-[1.75rem] glass p-3 shadow-lift sm:p-4">
+      <div className="rounded-2xl border border-card-border bg-card p-3 shadow-lift sm:p-4">
         {/* Barre du fichier */}
         <div className="flex items-center justify-between gap-3 px-2 pt-1 pb-3">
           <div className="flex min-w-0 items-center gap-3">

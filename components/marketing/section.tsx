@@ -22,7 +22,7 @@ export function SectionHeading({
       </p>
       <h2
         id={id}
-        className="font-display text-3xl font-semibold tracking-tight text-balance sm:text-5xl"
+        className="font-display text-3xl font-semibold tracking-tight text-balance sm:text-[2.75rem] sm:leading-[1.1]"
       >
         {title}
       </h2>
@@ -49,7 +49,7 @@ export function Section({
       id={id}
       aria-labelledby={labelledBy}
       className={cn(
-        "relative mx-auto max-w-6xl scroll-mt-20 px-4 py-20 sm:px-6 sm:py-28",
+        "relative mx-auto max-w-6xl scroll-mt-20 px-4 py-16 sm:px-6 sm:py-20",
         className,
       )}
     >

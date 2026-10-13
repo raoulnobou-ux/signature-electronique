@@ -132,6 +132,19 @@ export async function paymentChannels(): Promise<NotchPayChannel[] | null> {
   }
 }
 
+/**
+ * Devises dans lesquelles un client peut réellement payer aujourd'hui (prestataires
+ * configurés ; toutes en bac à sable). null = configuration illisible (développement).
+ */
+export function payableCurrencies(): Currency[] | null {
+  try {
+    if (getSandboxProvider() && realProviders().length === 0) return [...CURRENCY_CODES];
+    return [...new Set(realProviders().flatMap((p) => [...p.currencies]))];
+  } catch {
+    return null;
+  }
+}
+
 /** Paiements de test (aucun argent réel) : bac à sable du prestataire de chaque devise. */
 export function testModes(): Record<Currency, boolean> {
   const sandbox = getSandboxProvider() !== null;

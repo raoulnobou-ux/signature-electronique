@@ -19,7 +19,7 @@ export async function SiteHeader() {
   ];
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border/60 bg-background/90 md:bg-background/60 md:backdrop-blur-xl">
+    <header className="sticky top-0 z-40 border-b border-border bg-background">
       <a
         href="#contenu"
         className="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:rounded-lg focus:bg-popover focus:px-3 focus:py-2"

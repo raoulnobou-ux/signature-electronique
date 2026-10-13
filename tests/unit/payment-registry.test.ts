@@ -34,6 +34,18 @@ describe("marchés", () => {
 });
 
 describe("registre des moyens de paiement", () => {
+  it("devises affichées : seulement celles qu'un prestataire peut encaisser", async () => {
+    // Notch Pay seul : FCFA uniquement (les prix en euro, dollar et livre restent configurés).
+    expect((await registry(NOTCHPAY)).payableCurrencies()).toEqual(["XAF"]);
+    // Aucun prestataire : rien n'est payable.
+    expect((await registry({})).payableCurrencies()).toEqual([]);
+    // Bac à sable local sans prestataire réel : toutes les devises, pour les tests.
+    const sandbox = await registry({ PAYMENTS_SANDBOX: "true" });
+    expect(sandbox.payableCurrencies()).toEqual(
+      expect.arrayContaining(["XAF", "EUR", "USD", "GBP"]),
+    );
+  });
+
   it("Notch Pay : un seul moyen, en FCFA, proposé dans tous les pays", async () => {
     const { paymentOptions } = await registry(NOTCHPAY);
     for (const country of ["CM", "SN", "FR", null]) {

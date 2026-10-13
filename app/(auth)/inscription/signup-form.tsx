@@ -394,7 +394,6 @@ function CheckEmail({ email, onEdit }: { email: string; onEdit: () => void }) {
   return (
     <div className="animate-in space-y-6 text-center duration-300 fade-in zoom-in-[0.98]">
       <div className="relative mx-auto flex size-20 items-center justify-center">
-        <div className="absolute -inset-6 bg-[radial-gradient(closest-side,rgb(129_140_248/0.35),transparent)]" />
         <div className="relative flex size-16 items-center justify-center rounded-2xl glass">
           <MailCheck className="size-7 text-accent-foreground" />
         </div>

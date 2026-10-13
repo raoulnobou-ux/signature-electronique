@@ -46,6 +46,7 @@ Requête
 - [x] **Cinq buckets, tous privés** : documents, signatures, reçus, certificats, avatars.
 - [x] Lecture directe limitée au dossier `<user_id>/` du compte ; aucune écriture directe (envoi par URL signée émise par le serveur).
 - [x] **Chemins générés par le serveur** : `<user_id>/<uuid>/…`, jamais à partir du nom de fichier. Le nom d'origine est seulement nettoyé et gardé comme métadonnée.
+- [ ] **Chemins écrits par le serveur seulement** (faille trouvée le 13 octobre 2026, correctif prêt, migration `20261013000200_storage_paths_server_only.sql` **à appliquer**) : jusqu'ici un compte connecté pouvait, par l'API REST de Supabase, créer un document, une signature ou un modèle, ou changer le chemin d'image de sa signature, en y inscrivant le chemin d'un fichier d'un autre compte ; le serveur, qui lit le stockage avec la clé de service, aurait signé ou intégré ce fichier. Correctif : création directe retirée (l'application passe déjà par le serveur), signature modifiable seulement pour le nom et « par défaut », et contrainte `*_paths_in_owner_folder` : tout chemin enregistré est dans le dossier de son propriétaire, même pour le serveur. Vérifié sur la production dans une transaction annulée (attaque acceptée avant, refusée après) ; test d'intégration n° 11 de `tests/integration/security.test.ts`.
 - [x] **URL signées courtes** :
   - téléchargements : 2 à 5 min ;
   - visionneuses et miniatures : 15 min ;
@@ -177,7 +178,7 @@ Requête
 
 ### Dépendances
 
-- [x] `npm audit --omit=dev` : **0 vulnérabilité** en production (6 octobre 2026).
+- [x] `npm audit --omit=dev` : **0 vulnérabilité** en production (13 octobre 2026, après Next.js 16.4.0 ; 16.3.6 avait 6 avis, dont SSRF et empoisonnement de cache).
 - [x] 5 alertes « high » dans la chaîne de développement (`eslint-config-next` → `braces`, déni de service par motif glob). Aucun effet en production ; non corrigées, car le seul correctif proposé est une régression majeure d'ESLint. À revoir à la prochaine version de `eslint-config-next`.
 
 ---

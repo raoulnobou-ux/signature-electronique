@@ -23,7 +23,6 @@ export async function HowItWorks() {
             <li key={item.title} className="reveal relative">
               <div className="h-full rounded-3xl glass p-6 text-center transition-transform duration-300 hover:-translate-y-1 sm:p-8">
                 <div className="relative mx-auto mb-6 flex size-20 items-center justify-center">
-                  <div className="absolute -inset-4 bg-[radial-gradient(closest-side,rgb(129_140_248/0.35),transparent)]" />
                   <div className="relative flex size-16 items-center justify-center rounded-2xl glass">
                     <Icon className="size-7 text-accent-foreground" strokeWidth={1.7} aria-hidden />
                   </div>

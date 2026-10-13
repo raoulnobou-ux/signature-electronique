@@ -1,8 +1,6 @@
 import { CheckCircle2, Fingerprint, ShieldCheck, Smartphone, Wallet } from "lucide-react";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { AmbientBackground } from "@/components/brand/ambient-background";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { SignedDocumentDemo } from "./signed-document-demo";
 
@@ -15,14 +13,9 @@ export async function Hero() {
   ];
 
   return (
-    <section className="relative isolate overflow-hidden">
-      <AmbientBackground grid />
+    <section className="relative overflow-hidden border-b border-border">
       <div className="mx-auto grid max-w-6xl items-center gap-14 px-4 pt-14 pb-20 sm:px-6 sm:pt-20 lg:grid-cols-[1.1fr_1fr] lg:gap-10 lg:pt-24 lg:pb-28">
         <div className="space-y-7 text-center lg:text-left">
-          <Badge variant="outline" className="glass px-3 py-1 text-foreground">
-            <span className="size-1.5 rounded-full bg-brand-cyan shadow-[0_0_10px_var(--brand-cyan)]" />
-            {t("badge")}
-          </Badge>
           <h1 className="font-display text-[2.6rem] leading-[1.05] font-semibold tracking-tight text-balance sm:text-6xl lg:text-[4.1rem]">
             {t("titleStart")} <span className="text-gradient">{t("titleHighlight")}</span>
           </h1>

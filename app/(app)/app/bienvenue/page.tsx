@@ -26,7 +26,6 @@ export default async function WelcomePage() {
     <div className="mx-auto max-w-3xl py-4 sm:py-10">
       <div className="mb-10 space-y-4 text-center">
         <div className="relative mx-auto flex size-20 items-center justify-center">
-          <div className="absolute -inset-8 bg-[radial-gradient(closest-side,rgb(139_92_246/0.4),transparent)]" />
           <div className="relative flex size-16 items-center justify-center rounded-2xl bg-brand-gradient text-white shadow-lift">
             <Sparkles className="size-7" aria-hidden />
           </div>

@@ -250,6 +250,61 @@ describe.skipIf(!hasLocalDb)("sécurité : isolement entre utilisateurs", () => 
     expect(kept).toHaveLength(1);
   });
 
+  it("11. A ne fait pas pointer sa signature, son document ou son modèle vers un fichier de B", async () => {
+    // Signature de A créée par le serveur, comme dans l'application.
+    const sigA = randomUUID();
+    await admin()
+      .from("signature_assets")
+      .insert({
+        id: sigA,
+        owner_id: a.id,
+        type: "signature",
+        name: "A",
+        method: "draw",
+        image_path: `${a.id}/${sigA}.png`,
+      });
+    // Avec sa propre session, A tente de détourner le chemin vers le fichier de B.
+    const hijack = await a.client
+      .from("signature_assets")
+      .update({ image_path: sigFileB })
+      .eq("id", sigA);
+    expect(hijack.error).not.toBeNull();
+    const { data: kept } = await admin()
+      .from("signature_assets")
+      .select("image_path")
+      .eq("id", sigA)
+      .single();
+    expect(kept?.image_path).toBe(`${a.id}/${sigA}.png`);
+    // Renommer reste possible.
+    const rename = await a.client
+      .from("signature_assets")
+      .update({ name: "Paraphe" })
+      .eq("id", sigA);
+    expect(rename.error).toBeNull();
+
+    // Création directe d'un document ou d'un modèle (même à son nom) : réservée au serveur.
+    const doc = await a.client.from("documents").insert({
+      owner_id: a.id,
+      title: "Détourné",
+      original_path: `${a.id}/x/original.pdf`,
+      original_type: "pdf",
+      original_name: "x.pdf",
+      pdf_path: fileB,
+    });
+    expect(doc.error).not.toBeNull();
+    const tpl = await a.client
+      .from("templates")
+      .insert({ owner_id: a.id, name: "Détourné", pdf_path: fileB } as never);
+    expect(tpl.error).not.toBeNull();
+
+    // Même le serveur ne peut pas enregistrer un chemin hors du dossier du propriétaire.
+    const server = await admin()
+      .from("signature_assets")
+      .update({ image_path: sigFileB })
+      .eq("id", sigA);
+    expect(server.error?.message).toMatch(/paths_in_owner_folder/);
+  });
+
   it("les sessions listées sont uniquement celles de l'utilisateur", async () => {
     const { data, error } = await a.client.rpc("my_sessions");
     expect(error).toBeNull();

@@ -40,7 +40,7 @@ export async function BeforeAfter() {
           </div>
         </div>
 
-        <div className="reveal gradient-border rounded-3xl glass p-6 glow sm:p-8">
+        <div className="reveal rounded-3xl gradient-border glass p-6 glow sm:p-8">
           <div className="mb-5 flex items-center gap-3">
             <Zap className="size-5 text-brand-cyan" aria-hidden />
             <h3 className="font-display text-lg font-semibold">{t("afterTitle")}</h3>

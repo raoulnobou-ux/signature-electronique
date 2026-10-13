@@ -15,7 +15,7 @@ export function TrialCard({ account }: { account: ShellAccount }) {
   const days = account.trialDaysRemaining;
 
   return (
-    <div className="gradient-border rounded-2xl glass p-4">
+    <div className="rounded-2xl gradient-border glass p-4">
       <div className="mb-2 flex items-center gap-2 text-sm font-semibold">
         <Sparkles className="size-4 text-accent-foreground" aria-hidden />
         {t("cardTitle")}

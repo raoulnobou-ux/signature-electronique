@@ -487,3 +487,16 @@ L'interface `PaymentProvider` et le registre restent prêts pour ajouter d'autre
 - **E-mail d'échec** : cause expliquée en une phrase, plus jamais le code technique (« failed », « checkout_error… »).
 - **Frais** : à la charge du marchand, confirmé sur les transactions réelles (`charge: "business"`, total = prix affiché).
 - Tests ajoutés : signature (absente, fausse, corps modifié), tri des événements, idempotence des notifications (doublon traité, doublon en échec rejoué), erreur → 500, montant inférieur, autre devise, transaction d'un autre paiement, paiement déjà réglé jamais réactivé, statuts de la page « Collect », canaux (live / test / injoignable, cache), messages d'échec. Non exécutés faute de Docker : tests d'intégration SQL (`complete_payment`) et parcours Playwright, mis à jour pour la nouvelle page.
+
+**D126 — Direction artistique « encre et papier » (13 octobre 2026).** L'identité d'origine (noir bleuté, dégradé indigo → violet → cyan, verre dépoli, lueurs, halos animés, texte en dégradé) donnait l'apparence d'un gabarit SaaS générique et nuisait à la lisibilité des documents.
+
+- Conservé : nom, logo (seul élément encore en dégradé), polices (Space Grotesk pour les titres, Inter pour le texte), indigo comme couleur de marque.
+- Neutres légèrement chauds (papier), une seule couleur d'action : l'encre indigo `#3D43D6` (contraste ≥ 6:1 avec le blanc) ; en sombre, charbon `#0F1013` et indigo éclairci `#8F94F5` avec texte sombre sur les boutons (contraste ≥ 4,5:1).
+- Thème clair par défaut pour les nouveaux visiteurs ; le thème sombre reste disponible et le choix enregistré de chacun est conservé.
+- Rayons resserrés (10 px), cartes en aplat avec bordure fine, ombres réservées à ce qui flotte (menus, fenêtres). En-têtes opaques (plus de flou : le contenu y apparaissait en taches).
+- Supprimés : fond animé (\`AmbientBackground\`), grille de points, halos, lueurs, verre dépoli, cartes qui se soulèvent ou flottent. Les utilitaires \`glass\`, \`glow\`, \`gradient-border\`, \`text-gradient\`, \`bg-brand-gradient\` sont gardés mais rendus sobres, pour ne pas toucher à leurs 100 usages.
+- Contenus retirés ou corrigés, faute de preuve : « Le plus choisi » (remplacé par « Pour les équipes »), « Rejoignez les structures qui… », « ≈ 20 minutes », « outils des grands éditeurs », TVA « calculée au paiement » (aucun calcul de taxe n'existe), « Vos documents sont en sécurité » (remplacé par une formulation factuelle), citation sans auteur et points en double sur les pages de connexion, adresse d'exemple en « .cm ».
+- Tarifs : seules les devises réellement payables sont affichées (aujourd'hui le FCFA) ; les prix en euro, dollar et livre restent dans \`plans_config\` et réapparaîtront dès qu'un prestataire les acceptera.
+- \`/design\` (vitrine interne) renvoie 404 en production.
+
+**D127 — Chemins de fichiers écrits par le serveur seulement (13 octobre 2026).** Voir SECURITY.md, « Stockage et fichiers ». Migration prête, non encore appliquée en production (validation du propriétaire demandée).

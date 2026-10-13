@@ -2,7 +2,7 @@ import type { ComponentProps } from "react";
 import { cn } from "@/lib/utils";
 
 type CardProps = ComponentProps<"div"> & {
-  /** Soulève légèrement la carte au survol (cartes cliquables). */
+  /** Bordure renforcée au survol (cartes cliquables). */
   interactive?: boolean;
 };
 
@@ -11,9 +11,8 @@ function Card({ className, interactive, ...props }: CardProps) {
     <div
       data-slot="card"
       className={cn(
-        "rounded-2xl glass shadow-soft",
-        interactive &&
-          "transition-[transform,box-shadow,border-color] duration-300 ease-out hover:-translate-y-0.5 hover:border-ring/30 hover:shadow-lift",
+        "rounded-xl border border-card-border bg-card",
+        interactive && "transition-colors duration-150 hover:border-input",
         className,
       )}
       {...props}

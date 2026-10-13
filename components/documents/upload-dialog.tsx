@@ -101,12 +101,11 @@ export function UploadDialog({ open, onOpenChange, folderId = null }: Props) {
               className={cn(
                 "relative flex flex-col items-center gap-4 overflow-hidden rounded-3xl border-2 border-dashed px-6 py-10 text-center transition-all duration-300",
                 dragActive
-                  ? "scale-[1.01] border-brand-violet bg-accent shadow-[0_0_40px_-10px_var(--brand-violet)]"
+                  ? "scale-[1.01] border-brand-violet bg-accent"
                   : "border-border bg-secondary/40",
               )}
             >
               <div className="relative">
-                <div className="absolute -inset-6 bg-[radial-gradient(closest-side,rgb(129_140_248/0.35),transparent)]" />
                 <div
                   className={cn(
                     "relative flex size-16 items-center justify-center rounded-2xl bg-brand-gradient text-white transition-transform duration-300",

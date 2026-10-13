@@ -2,7 +2,6 @@ import { Clock, Mail, MessageCircle } from "lucide-react";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { ClientMessages } from "@/components/providers/client-messages";
-import { AmbientBackground } from "@/components/brand/ambient-background";
 import { Card, CardContent } from "@/components/ui/card";
 import { siteConfig } from "@/lib/site";
 import { ContactForm } from "./contact-form";
@@ -33,7 +32,6 @@ export default async function ContactPage() {
 
   return (
     <div className="relative isolate">
-      <AmbientBackground intensity="subtle" />
       <div className="mx-auto grid max-w-6xl gap-12 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-[1fr_1.3fr]">
         <div className="space-y-8">
           <div className="space-y-4">

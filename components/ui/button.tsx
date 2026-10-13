@@ -5,28 +5,23 @@ import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
   [
-    "relative inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 rounded-xl font-medium whitespace-nowrap",
-    "transition-[transform,box-shadow,background-color,color,opacity] duration-200 ease-out",
-    "active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50",
+    "relative inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 rounded-lg font-medium whitespace-nowrap",
+    "transition-[background-color,border-color,color,opacity] duration-150 ease-out",
+    "disabled:pointer-events-none disabled:opacity-50",
     "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
     "[&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   ],
   {
     variants: {
       variant: {
-        // Bouton principal : dégradé de marque + lueur au survol.
-        default: [
-          "bg-brand-gradient text-white shadow-[0_8px_24px_-8px_rgb(99_102_241/0.6)]",
-          "hover:shadow-[0_0_0_1px_rgb(165_180_252/0.5),0_10px_36px_-6px_rgb(139_92_246/0.7)]",
-          "bg-[length:140%_100%] bg-left [transition-property:background-position,box-shadow,transform] hover:bg-right",
-        ],
+        // Action principale : aplat d'encre, une seule par zone.
+        default: "bg-primary text-primary-foreground hover:bg-primary/88",
         secondary:
-          "border border-border bg-secondary text-secondary-foreground hover:border-ring/40 hover:bg-accent",
+          "border border-border bg-background-elevated text-foreground hover:border-input hover:bg-secondary",
         outline:
           "border border-input bg-transparent text-foreground hover:border-ring/60 hover:bg-secondary",
         ghost: "text-foreground hover:bg-secondary",
-        destructive:
-          "bg-destructive text-white hover:shadow-[0_8px_28px_-8px_var(--destructive)] hover:brightness-110",
+        destructive: "bg-destructive text-white hover:bg-destructive/88",
         link: "h-auto px-0 text-primary underline-offset-4 hover:underline dark:text-accent-foreground",
       },
       size: {

@@ -27,7 +27,6 @@ const icons: Record<string, LucideIcon> = {
 /** Cartes larges (deux colonnes sur grand écran) : 4 larges + 4 simples = 3 rangées pleines. */
 const wide = new Set(["stamp", "ai", "word", "mobile"]);
 /** Cartes mises en avant par un halo. */
-const highlighted = new Set(["stamp", "ai"]);
 
 export async function Features() {
   const t = await getTranslations("landing.features");
@@ -44,21 +43,14 @@ export async function Features() {
       <ul className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {items.map((item) => {
           const Icon = icons[item.key] ?? FileText;
-          const big = highlighted.has(item.key);
           return (
             <li
               key={item.key}
               className={cn(
-                "reveal group relative overflow-hidden rounded-3xl glass p-6 transition-[transform,border-color] duration-300 hover:-translate-y-1 hover:border-ring/30",
+                "reveal group relative overflow-hidden rounded-xl glass p-6",
                 wide.has(item.key) && "lg:col-span-2",
               )}
             >
-              {big && (
-                <div
-                  aria-hidden
-                  className="absolute -top-24 -right-24 size-64 rounded-full bg-[radial-gradient(closest-side,rgb(139_92_246/0.35),transparent)] opacity-60 transition-opacity duration-500 group-hover:opacity-100"
-                />
-              )}
               <div className="mb-5 flex size-11 items-center justify-center rounded-xl bg-accent">
                 <Icon className="size-5 text-accent-foreground" aria-hidden />
               </div>

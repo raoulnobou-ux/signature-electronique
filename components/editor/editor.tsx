@@ -27,6 +27,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -95,6 +96,7 @@ export function Editor({
   signatureBlock,
 }: Props) {
   const t = useTranslations("editor");
+  const router = useRouter();
   const locale = useLocale();
   const editor = useEditorState(initialFields);
   const { fields, selected, update, select } = editor;
@@ -373,7 +375,7 @@ export function Editor({
             ? {
                 action: {
                   label: t("errors.choosePlan"),
-                  onClick: () => window.location.assign("/app/abonnement#plans"),
+                  onClick: () => router.push("/app/abonnement#plans"),
                 },
               }
             : undefined,
@@ -924,7 +926,6 @@ function SuccessScreen({
       <Confetti />
       <div className="relative w-full max-w-lg animate-in space-y-6 text-center duration-500 zoom-in-95 fade-in">
         <div className="relative mx-auto flex size-20 items-center justify-center">
-          <div className="absolute -inset-8 bg-[radial-gradient(closest-side,rgb(52_211_153/0.35),transparent)]" />
           <div className="relative flex size-16 items-center justify-center rounded-2xl bg-success text-white shadow-lift">
             <FileCheck2 className="size-8" aria-hidden />
           </div>

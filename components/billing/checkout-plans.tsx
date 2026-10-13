@@ -147,6 +147,7 @@ export function CheckoutPlans({
         defaultCurrency={defaultCurrency}
         headingLevel={3}
         channels={channels?.map((c) => c.name) ?? null}
+        currencies={options.length ? options.flatMap((o) => o.currencies) : null}
         checkout={{ label: t("choose"), labelFor, disabled: !available, onSelect: select }}
       />
 

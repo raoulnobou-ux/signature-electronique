@@ -48,8 +48,8 @@ const withIcons = (items: [string, string][]): Protection[] =>
 
 const fr: SecurityContent = {
   badge: "Sécurité et validité juridique",
-  titleStart: "Vos documents sont en sécurité.",
-  titleHighlight: "Vos signatures, traçables.",
+  titleStart: "Comment nous protégeons vos documents,",
+  titleHighlight: "et ce que prouve une signature.",
   intro:
     "Voici, en langage clair, comment QuickSign protège vos documents et ce que vaut juridiquement une signature réalisée avec notre service.",
   protectionsTitle: "Nos protections",
@@ -201,8 +201,8 @@ const fr: SecurityContent = {
 
 const en: SecurityContent = {
   badge: "Security and legal validity",
-  titleStart: "Your documents are safe.",
-  titleHighlight: "Your signatures, traceable.",
+  titleStart: "How we protect your documents,",
+  titleHighlight: "and what a signature proves.",
   intro:
     "Here is, in plain language, how QuickSign protects your documents and what a signature made with our service is worth legally.",
   protectionsTitle: "Our safeguards",

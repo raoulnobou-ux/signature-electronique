@@ -2,7 +2,6 @@ import { ShieldCheck } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getLocale, getTranslations } from "next-intl/server";
-import { AmbientBackground } from "@/components/brand/ambient-background";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { isLocale } from "@/i18n/config";
@@ -18,7 +17,6 @@ export default async function SecurityPage() {
   const c = securityContent[isLocale(locale) ? locale : "fr"];
   return (
     <div className="relative isolate">
-      <AmbientBackground intensity="subtle" />
       <section className="mx-auto max-w-4xl px-4 pt-14 pb-10 text-center sm:px-6 sm:pt-20">
         <Badge variant="outline" className="mb-5 glass px-3 py-1 text-foreground">
           <ShieldCheck aria-hidden /> {c.badge}

@@ -43,7 +43,7 @@ function ShellFrame({ account, children }: { account: ShellAccount; children: Re
     <div className="flex min-h-dvh">
       <AppSidebar account={account} />
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 border-b border-border bg-background/90 md:bg-background/70 md:backdrop-blur-xl">
+        <header className="sticky top-0 z-30 border-b border-border bg-background">
           <div className="flex h-14 items-center justify-between gap-3 px-4 sm:px-6 lg:h-16">
             <Link href="/app" className="lg:hidden" aria-label={tc("dashboardLink")}>
               <LogoMark className="size-8" />

@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Sparkles } from "lucide-react";
+import { Check } from "lucide-react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
@@ -60,8 +60,14 @@ export function PricingPlans({
   headingLevel = 3,
   checkout,
   channels,
+  currencies,
 }: {
   prices: PriceTable;
+  /**
+   * Devises réellement payables (prestataire configuré) ; les autres prix restent dans
+   * plans_config mais ne sont pas affichés. Absent : toutes les devises.
+   */
+  currencies?: Currency[] | null;
   /** Noms des moyens de paiement réellement ouverts (lus chez le prestataire) ; null = inconnus. */
   channels?: string[] | null;
   /** Limites lues dans plans_config : les chiffres affichés sont ceux appliqués. */
@@ -82,7 +88,12 @@ export function PricingPlans({
   const t = useTranslations("landing.pricing");
   const locale = useLocale();
   const [cycle, setCycle] = useState<BillingCycle>("monthly");
-  const [currency, setCurrency] = useState<Currency>(defaultCurrency);
+  const shown = currencies?.length
+    ? CURRENCY_CODES.filter((c) => currencies.includes(c))
+    : CURRENCY_CODES;
+  const [currency, setCurrency] = useState<Currency>(
+    shown.includes(defaultCurrency) ? defaultCurrency : shown[0]!,
+  );
   const listFormat = (items: string[]) =>
     new Intl.ListFormat(locale, { type: "disjunction" }).format(items);
   /** Remplace {documents}, {signatures}, {storage}, {ai}, {team} par les limites du plan. */
@@ -121,15 +132,17 @@ export function PricingPlans({
             },
           ]}
         />
-        <Segmented
-          label={t("currencyLabel")}
-          value={currency}
-          onChange={setCurrency}
-          options={CURRENCY_CODES.map((code) => ({
-            value: code,
-            label: code === "XAF" ? "FCFA" : code,
-          }))}
-        />
+        {shown.length > 1 && (
+          <Segmented
+            label={t("currencyLabel")}
+            value={currency}
+            onChange={setCurrency}
+            options={shown.map((code) => ({
+              value: code,
+              label: code === "XAF" ? "FCFA" : code,
+            }))}
+          />
+        )}
       </div>
 
       {!checkout && (
@@ -173,7 +186,7 @@ export function PricingPlans({
                   variant="brand"
                   className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1"
                 >
-                  <Sparkles aria-hidden /> {t("popular")}
+                  {t("popular")}
                 </Badge>
               )}
               <PlanHeading className="font-display text-2xl font-semibold">

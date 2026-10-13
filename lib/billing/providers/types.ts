@@ -99,13 +99,7 @@ export interface PaymentProvider {
  * - internal : contrôle interne avant l'appel.
  */
 export type ProviderErrorKind =
-  | "config"
-  | "rejected"
-  | "unavailable"
-  | "network"
-  | "timeout"
-  | "invalid_response"
-  | "internal";
+  "config" | "rejected" | "unavailable" | "network" | "timeout" | "invalid_response" | "internal";
 
 /** Catégorie d'après le statut HTTP d'une réponse en erreur. */
 export function errorKindForStatus(status: number): ProviderErrorKind {

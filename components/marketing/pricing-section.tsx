@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { ClientMessages } from "@/components/providers/client-messages";
-import { paymentChannels } from "@/lib/billing";
+import { payableCurrencies, paymentChannels } from "@/lib/billing";
 import { detectCurrency, getPlanLimits, getPrices } from "@/lib/pricing";
 import { PricingPlans } from "./pricing-plans";
 import { Section, SectionHeading } from "./section";
@@ -49,6 +49,7 @@ export async function PricingSection({ asPageHeader = false }: { asPageHeader?: 
             defaultCurrency={currency}
             headingLevel={asPageHeader ? 2 : 3}
             channels={channels?.map((c) => c.name) ?? null}
+            currencies={payableCurrencies()}
           />
         </ClientMessages>
       </div>

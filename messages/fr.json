@@ -66,7 +66,6 @@
   },
   "landing": {
     "hero": {
-      "badge": "Accessible à tout le monde",
       "titleStart": "Signez, faites signer, terminé.",
       "titleHighlight": "En 30 secondes.",
       "subtitle": "Fini l'impression, le scan et les allers-retours. Ouvrez votre Word ou PDF, apposez votre signature et le cachet de votre structure, puis envoyez un PDF signé et horodaté — même depuis votre téléphone.",
@@ -85,7 +84,7 @@
     },
     "beforeAfter": {
       "eyebrow": "Avant / Après",
-      "title": "Vingt minutes de papier. Ou trente secondes.",
+      "title": "Moins de papier. Plus de temps.",
       "beforeTitle": "Sans QuickSign",
       "beforeSteps": [
         "Imprimer le document",
@@ -93,7 +92,7 @@
         "Scanner chaque page",
         "Envoyer, puis réimprimer"
       ],
-      "beforeTime": "≈ 20 minutes, du papier et de l'encre",
+      "beforeTime": "Du papier, de l'encre et des allers-retours",
       "afterTitle": "Avec QuickSign",
       "afterSteps": [
         "Importer le Word ou le PDF",
@@ -124,7 +123,7 @@
     "features": {
       "eyebrow": "Fonctionnalités",
       "title": "Tout ce qu'il faut. Rien de superflu.",
-      "subtitle": "Les outils des grands éditeurs internationaux, pensés pour votre façon de travailler.",
+      "subtitle": "L'essentiel pour signer, faire signer et prouver, sans fonctions superflues.",
       "items": [
         {
           "key": "stamp",
@@ -224,7 +223,7 @@
     },
     "pricing": {
       "eyebrow": "Tarifs",
-      "title": "Un prix juste, dans votre devise.",
+      "title": "Un prix clair, sans surprise.",
       "subtitle": "Créez votre compte gratuitement et découvrez QuickSign avec un document. Abonnez-vous pour signer et exporter.",
       "monthly": "Mensuel",
       "yearly": "Annuel",
@@ -233,7 +232,7 @@
       "perMonth": "/ mois",
       "perYear": "/ an",
       "equivalentMonthly": "soit {amount} / mois",
-      "popular": "Le plus choisi",
+      "popular": "Pour les équipes",
       "cta": "Commencer gratuitement",
       "trialNote": "Compte gratuit pour découvrir, puis {price} pour signer. Annulable à tout moment.",
       "paymentMethods": "Paiement sécurisé sur la page de notre partenaire Notch Pay, avec les moyens ouverts dans votre pays.",
@@ -271,7 +270,7 @@
         }
       },
       "unlimited": "illimités",
-      "priceNote": "Prix fixés pour chaque marché, sans conversion automatique. Les taxes éventuelles (TVA) sont calculées au paiement selon votre pays.",
+      "priceNote": "Prix fixés pour chaque marché, sans conversion automatique. Le montant exact et la devise sont affichés avant le paiement.",
       "free": {
         "name": "Gratuit",
         "description": "Pour découvrir : {stored} document, l'éditeur, {signatures} signature et {ai} questions par jour à l'assistant. Signer et exporter demandent un abonnement.",
@@ -327,7 +326,7 @@
     },
     "finalCta": {
       "title": "Votre prochain document signé dans 30 secondes.",
-      "subtitle": "Rejoignez les structures qui ont dit adieu à l'imprimante et au scanner.",
+      "subtitle": "Créez votre compte gratuitement et signez votre premier document dès que vous êtes prêt.",
       "cta": "Commencer gratuitement",
       "secondary": "Voir les tarifs"
     }
@@ -405,13 +404,13 @@
   },
   "auth": {
     "side": {
-      "title": "La signature électronique qui vous fait gagner des heures.",
+      "title": "Signez et faites signer vos documents, où que vous soyez.",
       "points": [
         "Compte gratuit, sans carte bancaire",
-        "Aucune carte bancaire demandée",
-        "Vos documents restent privés et chiffrés"
+        "Vos documents restent privés et chiffrés",
+        "Fonctionne sur téléphone comme sur ordinateur"
       ],
-      "quote": "« Signez depuis votre téléphone, où que vous soyez. »"
+      "footnote": "Signature électronique simple, horodatée, avec journal d'audit et vérification d'intégrité."
     },
     "or": "ou",
     "google": "Continuer avec Google",
@@ -422,7 +421,7 @@
       "fullName": "Nom complet",
       "fullNamePlaceholder": "Awa Nkeng",
       "email": "Adresse e-mail",
-      "emailPlaceholder": "vous@exemple.cm",
+      "emailPlaceholder": "vous@exemple.com",
       "phone": "Téléphone (facultatif)",
       "phoneHint": "Pour les rappels WhatsApp et le paiement Mobile Money. Vous pourrez l'ajouter plus tard.",
       "country": "Pays",

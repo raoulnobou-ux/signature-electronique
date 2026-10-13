@@ -169,7 +169,7 @@ export function PageLayer<F extends EditorField>({
               className={cn(
                 "absolute inset-0 rounded-[3px] ring-offset-0 transition-shadow",
                 selected
-                  ? "shadow-[0_0_0_4px_rgb(139_92_246/0.18)] ring-2 ring-brand-violet"
+                  ? "shadow-[0_0_0_4px_var(--accent)] ring-2 ring-brand-violet"
                   : "ring-1 ring-brand-violet/0 group-hover:ring-brand-violet/60",
                 !isImageField(field.type) && !selected && "bg-brand-violet/[0.06]",
               )}

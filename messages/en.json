@@ -66,7 +66,6 @@
   },
   "landing": {
     "hero": {
-      "badge": "Accessible to everyone",
       "titleStart": "Sign, get it signed, done.",
       "titleHighlight": "In 30 seconds.",
       "subtitle": "No more printing, scanning and back-and-forth. Open your Word or PDF file, add your signature and your organization's stamp, then send a signed, timestamped PDF — even from your phone.",
@@ -85,7 +84,7 @@
     },
     "beforeAfter": {
       "eyebrow": "Before / After",
-      "title": "Twenty minutes of paperwork. Or thirty seconds.",
+      "title": "Less paper. More time.",
       "beforeTitle": "Without QuickSign",
       "beforeSteps": [
         "Print the document",
@@ -93,7 +92,7 @@
         "Scan every page",
         "Send, then print again"
       ],
-      "beforeTime": "≈ 20 minutes, paper and ink",
+      "beforeTime": "Paper, ink and back-and-forth",
       "afterTitle": "With QuickSign",
       "afterSteps": [
         "Import the Word or PDF file",
@@ -124,7 +123,7 @@
     "features": {
       "eyebrow": "Features",
       "title": "Everything you need. Nothing you don't.",
-      "subtitle": "The tools of the leading international platforms, designed around the way you work.",
+      "subtitle": "What you need to sign, collect signatures and keep proof, without the clutter.",
       "items": [
         {
           "key": "stamp",
@@ -224,7 +223,7 @@
     },
     "pricing": {
       "eyebrow": "Pricing",
-      "title": "A fair price, in your currency.",
+      "title": "Clear pricing, no surprises.",
       "subtitle": "Create your account for free and try QuickSign with one document. Subscribe to sign and export.",
       "monthly": "Monthly",
       "yearly": "Yearly",
@@ -233,7 +232,7 @@
       "perMonth": "/ month",
       "perYear": "/ year",
       "equivalentMonthly": "i.e. {amount} / month",
-      "popular": "Most popular",
+      "popular": "For teams",
       "cta": "Start for free",
       "trialNote": "Free account to explore, then {price} to sign. Cancel anytime.",
       "paymentMethods": "Secure payment on our partner Notch Pay's page, with the methods available in your country.",
@@ -271,7 +270,7 @@
         }
       },
       "unlimited": "unlimited",
-      "priceNote": "Prices set for each market, with no automatic conversion. Any applicable taxes (VAT) are calculated at checkout based on your country.",
+      "priceNote": "Prices set for each market, with no automatic conversion. The exact amount and currency are shown before payment.",
       "free": {
         "name": "Free",
         "description": "To explore: {stored} document, the editor, {signatures} signature and {ai} assistant questions per day. Signing and export require a subscription.",
@@ -327,7 +326,7 @@
     },
     "finalCta": {
       "title": "Your next document, signed in 30 seconds.",
-      "subtitle": "Join the organizations that said goodbye to the printer and the scanner.",
+      "subtitle": "Create your free account and sign your first document whenever you're ready.",
       "cta": "Start for free",
       "secondary": "See pricing"
     }
@@ -405,13 +404,13 @@
   },
   "auth": {
     "side": {
-      "title": "The e-signature that saves you hours.",
+      "title": "Sign and collect signatures, wherever you are.",
       "points": [
         "Free account, no credit card",
-        "No credit card required",
-        "Your documents stay private and encrypted"
+        "Your documents stay private and encrypted",
+        "Works on your phone and your computer"
       ],
-      "quote": "“Sign from your phone, wherever you are.”"
+      "footnote": "Simple electronic signature, timestamped, with an audit trail and integrity check."
     },
     "or": "or",
     "google": "Continue with Google",
@@ -422,7 +421,7 @@
       "fullName": "Full name",
       "fullNamePlaceholder": "Awa Nkeng",
       "email": "Email address",
-      "emailPlaceholder": "you@example.cm",
+      "emailPlaceholder": "you@example.com",
       "phone": "Phone (optional)",
       "phoneHint": "For WhatsApp reminders and Mobile Money payments. You can add it later.",
       "country": "Country",

@@ -116,7 +116,7 @@ export default async function DashboardPage(props: PageProps<"/app">) {
             href={href}
             className={
               primary
-                ? "group relative col-span-2 overflow-hidden rounded-2xl bg-brand-gradient p-4 text-white shadow-[0_14px_40px_-16px_rgb(99_102_241/0.9)] transition-transform hover:-translate-y-0.5 sm:col-span-1 sm:p-5"
+                ? "group relative col-span-2 overflow-hidden rounded-2xl bg-brand-gradient p-4 text-white shadow-lift transition-transform hover:-translate-y-0.5 sm:col-span-1 sm:p-5"
                 : "group rounded-2xl glass p-4 transition-[transform,border-color] hover:-translate-y-0.5 hover:border-ring/40 sm:p-5"
             }
           >

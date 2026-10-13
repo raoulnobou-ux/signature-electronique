@@ -6,69 +6,75 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* ==========================================================================
-   Tokens de design — QuickSign
-   Sombre profond par défaut ; le mode clair redéfinit les mêmes variables.
+   Tokens de design — QuickSign, direction « encre et papier »
+   Un document se lit sur du papier : thème clair par défaut, neutres légèrement chauds,
+   une seule couleur de marque (l'encre indigo), utilisée pour l'action principale, la
+   sélection et la signature. Pas de dégradé ni de lueur décoratifs : la hiérarchie vient
+   de la typographie, des espacements et de bordures fines. Le thème sombre redéfinit les
+   mêmes variables (charbon, pas de noir bleuté).
    ========================================================================== */
 
 :root {
-  --radius: 14px;
+  --radius: 10px;
 
-  /* Couleurs de marque (identiques dans les deux thèmes) */
-  --brand-indigo: #6366f1;
-  --brand-violet: #8b5cf6;
-  --brand-cyan: #22d3ee;
-  --brand-gradient: linear-gradient(120deg, #6366f1 0%, #8b5cf6 50%, #22d3ee 100%);
+  /* Encre de marque, identique dans les deux thèmes (logo, aplats sous texte blanc). */
+  --brand-ink: #3d43d6;
+  --brand-indigo: #3d43d6;
+  --brand-violet: #3d43d6;
+  --brand-cyan: #3d43d6;
+  --brand-gradient: linear-gradient(var(--brand-ink), var(--brand-ink));
 
-  /* Thème clair */
-  --background: #f6f7fb;
+  /* Thème clair (papier) */
+  --background: #f7f7f4;
   --background-elevated: #ffffff;
-  --foreground: #0b0f1a;
-  --muted: #eef0f6;
-  --muted-foreground: #525b70;
-  --card: rgb(255 255 255 / 0.72);
-  --card-border: rgb(15 23 42 / 0.08);
+  --foreground: #16171d;
+  --muted: #efefea;
+  --muted-foreground: #5b5d66;
+  --card: #ffffff;
+  --card-border: #e2e2dc;
   --popover: #ffffff;
-  --border: rgb(15 23 42 / 0.1);
-  --input: rgb(15 23 42 / 0.14);
-  --primary: #4f46e5;
+  --border: #e2e2dc;
+  --input: #d3d3cc;
+  --primary: #3d43d6;
   --primary-foreground: #ffffff;
-  --secondary: rgb(15 23 42 / 0.05);
-  --secondary-foreground: #0b0f1a;
-  --accent: rgb(99 102 241 / 0.1);
-  --accent-foreground: #3730a3;
-  --ring: #6366f1;
-  --destructive: #e11d48;
-  --success: #059669;
-  --warning: #d97706;
-  --glow: rgb(99 102 241 / 0.25);
-  --grid-dot: rgb(15 23 42 / 0.09);
-  --shadow-color: 222 47% 11%;
+  --secondary: #efefea;
+  --secondary-foreground: #16171d;
+  --accent: #ebecfa;
+  --accent-foreground: #2c31a8;
+  --ring: #3d43d6;
+  --destructive: #c42a3e;
+  --success: #17794b;
+  --warning: #9a5b00;
+  --glow: transparent;
+  --grid-dot: transparent;
+  --shadow-color: 40 8% 20%;
 }
 
 .dark {
-  --background: #07090f;
-  --background-elevated: #0c0f19;
-  --foreground: #e8ebf4;
-  --muted: #10131f;
-  --muted-foreground: #939bb0;
-  --card: rgb(255 255 255 / 0.035);
-  --card-border: rgb(255 255 255 / 0.08);
-  --popover: #0e1120;
-  --border: rgb(255 255 255 / 0.08);
-  --input: rgb(255 255 255 / 0.12);
-  --primary: #6366f1;
-  --primary-foreground: #ffffff;
-  --secondary: rgb(255 255 255 / 0.06);
-  --secondary-foreground: #e8ebf4;
-  --accent: rgb(129 140 248 / 0.14);
-  --accent-foreground: #c7d2fe;
-  --ring: #818cf8;
-  --destructive: #fb7185;
-  --success: #34d399;
-  --warning: #fbbf24;
-  --glow: rgb(129 140 248 / 0.35);
-  --grid-dot: rgb(255 255 255 / 0.07);
-  --shadow-color: 230 60% 2%;
+  --background: #0f1013;
+  --background-elevated: #16171b;
+  --foreground: #ececee;
+  --muted: #1b1c21;
+  --muted-foreground: #9c9ea7;
+  --card: #16171b;
+  --card-border: #27282f;
+  --popover: #1b1c21;
+  --border: #27282f;
+  --input: #35363e;
+  /* Indigo éclairci : lisible sur fond sombre ; texte sombre sur les boutons. */
+  --primary: #8f94f5;
+  --primary-foreground: #0f1013;
+  --secondary: #1f2026;
+  --secondary-foreground: #ececee;
+  --accent: #23253a;
+  --accent-foreground: #c3c6fb;
+  --ring: #8f94f5;
+  --destructive: #f07384;
+  --success: #4cc38a;
+  --warning: #e5a540;
+  --glow: transparent;
+  --grid-dot: transparent;
+  --shadow-color: 240 10% 2%;
   color-scheme: dark;
 }
 
@@ -107,27 +113,14 @@
   --radius-xl: calc(var(--radius) + 4px);
   --radius-2xl: calc(var(--radius) + 8px);
 
-  --shadow-soft:
-    0 1px 2px hsl(var(--shadow-color) / 0.12), 0 8px 24px -8px hsl(var(--shadow-color) / 0.25);
+  /* Ombres réservées à ce qui flotte au-dessus de la page (menus, fenêtres, aperçu). */
+  --shadow-soft: 0 1px 2px hsl(var(--shadow-color) / 0.06);
   --shadow-lift:
-    0 2px 4px hsl(var(--shadow-color) / 0.14), 0 22px 48px -16px hsl(var(--shadow-color) / 0.45);
+    0 1px 2px hsl(var(--shadow-color) / 0.08), 0 12px 32px -12px hsl(var(--shadow-color) / 0.28);
 
-  --animate-blob: blob 26s ease-in-out infinite;
   --animate-shimmer: shimmer 1.8s linear infinite;
   --animate-float: float 7s ease-in-out infinite;
 
-  @keyframes blob {
-    0%,
-    100% {
-      transform: translate3d(0, 0, 0) scale(1);
-    }
-    33% {
-      transform: translate3d(6%, -8%, 0) scale(1.08);
-    }
-    66% {
-      transform: translate3d(-6%, 5%, 0) scale(0.95);
-    }
-  }
   @keyframes shimmer {
     from {
       background-position: 200% 0;
@@ -175,7 +168,7 @@
   }
 
   ::selection {
-    background: rgb(99 102 241 / 0.35);
+    background: color-mix(in srgb, var(--primary) 28%, transparent);
   }
 
   :focus-visible {
@@ -192,53 +185,31 @@
   background-image: var(--brand-gradient);
 }
 
+/* Mot mis en avant dans un titre : couleur d'encre, sans dégradé. */
 @utility text-gradient {
-  background-image: var(--brand-gradient);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--primary);
 }
 
-/* Carte en verre dépoli avec bordure lumineuse fine */
+/* Surface : aplat et bordure fine (plus de verre dépoli : coûteux et peu lisible). */
 @utility glass {
   background-color: var(--card);
   border: 1px solid var(--card-border);
-  /* Le flou d'arrière-plan coûte cher sur mobile : réservé aux écrans larges. */
-  @media (min-width: 768px) {
-    backdrop-filter: blur(16px) saturate(140%);
-    -webkit-backdrop-filter: blur(16px) saturate(140%);
-  }
 }
 
-/* Bordure dégradée (via masque) — pour les éléments mis en avant */
+/* Élément mis en avant (plan, aperçu) : bordure d'encre. */
 @utility gradient-border {
-  position: relative;
-  &::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    padding: 1px;
-    border-radius: inherit;
-    background: var(--brand-gradient);
-    -webkit-mask:
-      linear-gradient(#000 0 0) content-box,
-      linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    pointer-events: none;
-  }
+  border-color: var(--primary);
+  box-shadow: inset 0 0 0 1px var(--primary);
 }
 
+/* Plus de lueur décorative : conservé pour compatibilité, sans effet. */
 @utility glow {
-  box-shadow:
-    0 0 0 1px var(--glow),
-    0 8px 32px -6px var(--glow);
+  box-shadow: none;
 }
 
-/* Grille de points subtile (fond de la landing) */
+/* Ancienne grille de points : retirée, la page reste un aplat papier. */
 @utility bg-dot-grid {
-  background-image: radial-gradient(var(--grid-dot) 1px, transparent 1px);
-  background-size: 22px 22px;
+  background-image: none;
 }
 
 @utility skeleton-shimmer {
@@ -378,10 +349,10 @@
 @keyframes tour-pulse {
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgb(139 92 246 / 0.7);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 60%, transparent);
   }
   50% {
-    box-shadow: 0 0 0 10px rgb(139 92 246 / 0);
+    box-shadow: 0 0 0 10px transparent;
   }
 }
 
@@ -389,7 +360,7 @@
   position: relative;
   z-index: 45;
   border-radius: 12px;
-  outline: 2px solid var(--brand-violet);
+  outline: 2px solid var(--primary);
   outline-offset: 3px;
   animation: tour-pulse 1.2s ease-out 3;
 }

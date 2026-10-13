@@ -17,7 +17,6 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { AmbientBackground } from "@/components/brand/ambient-background";
 import { Logo, LogoMark } from "@/components/brand/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Avatar } from "@/components/ui/avatar";
@@ -127,8 +126,6 @@ export function DesignSystemShowcase() {
 
   return (
     <div className="relative isolate min-h-dvh">
-      <AmbientBackground grid intensity="subtle" />
-
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/70 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
           <Logo />
@@ -156,8 +153,9 @@ export function DesignSystemShowcase() {
             L&apos;identité de <span className="text-gradient">QuickSign</span>
           </h1>
           <p className="max-w-2xl text-lg text-muted-foreground">
-            Sombre profond, dégradé électrique indigo → violet → cyan, verre dépoli et lueurs
-            douces. Chaque composant existe en thème sombre et clair, au doigt comme à la souris.
+            Encre et papier : neutres légèrement chauds, une seule couleur d&apos;encre pour
+            l&apos;action et la signature, des bordures fines plutôt que des effets. Chaque
+            composant existe en thème clair et sombre, au doigt comme à la souris.
           </p>
         </div>
 
