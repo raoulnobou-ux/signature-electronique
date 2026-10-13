@@ -499,4 +499,4 @@ L'interface `PaymentProvider` et le registre restent prêts pour ajouter d'autre
 - Tarifs : seules les devises réellement payables sont affichées (aujourd'hui le FCFA) ; les prix en euro, dollar et livre restent dans \`plans_config\` et réapparaîtront dès qu'un prestataire les acceptera.
 - \`/design\` (vitrine interne) renvoie 404 en production.
 
-**D127 — Chemins de fichiers écrits par le serveur seulement (13 octobre 2026).** Voir SECURITY.md, « Stockage et fichiers ». Migration prête, non encore appliquée en production (validation du propriétaire demandée).
+**D127 — Chemins de fichiers écrits par le serveur seulement (13 octobre 2026).** Voir SECURITY.md, « Stockage et fichiers ». Appliquée en production le 13 octobre 2026 après accord du propriétaire, puis revérifiée (attaque refusée, renommage accepté).
