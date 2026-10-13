@@ -1,5 +1,6 @@
 import "server-only";
 import { createHmac, timingSafeEqual } from "node:crypto";
+import { logAppError } from "@/lib/monitoring/app-errors";
 import {
   PaymentProviderError,
   type CheckoutRequest,
@@ -73,6 +74,37 @@ export function notchPayMethod(tx: { payment_method?: string | null; channel?: s
     if (typeof value === "string" && value && !/^pm[._]/i.test(value)) return value.slice(0, 60);
   }
   return "notchpay";
+}
+
+/** Champs utiles au diagnostic d'un échec ; jamais le client, son numéro ni sa carte. */
+const DETAIL_KEYS =
+  /^(status|message|reason|failure|error|code|channel|provider|description_status|status_message|failure_reason|failure_message)$/i;
+const PERSONAL_KEYS = /customer|phone|email|name|card|number|account|pan|msisdn/i;
+
+/**
+ * Cause d'un échec telle que décrite par Notch Pay (transaction et opération « charge »),
+ * sans aucune donnée personnelle, pour le journal des erreurs.
+ */
+export function notchPayFailureDetail(tx: unknown): string {
+  const parts: string[] = [];
+  const visit = (value: unknown, path: string, depth: number) => {
+    if (!value || typeof value !== "object" || depth > 2) return;
+    for (const [key, v] of Object.entries(value as Record<string, unknown>)) {
+      if (PERSONAL_KEYS.test(key)) continue;
+      const here = path ? `${path}.${key}` : key;
+      if ((typeof v === "string" || typeof v === "number") && DETAIL_KEYS.test(key)) {
+        parts.push(
+          `${here}=${String(v)
+            .replace(/\+?\d{8,}/g, "[numéro]")
+            .slice(0, 120)}`,
+        );
+      } else if (typeof v === "object") {
+        visit(v, here, depth + 1);
+      }
+    }
+  };
+  visit(tx, "", 0);
+  return parts.join(" ; ").slice(0, 900) || "aucun détail";
 }
 
 export class NotchPayProvider implements PaymentProvider {
@@ -180,6 +212,11 @@ export class NotchPayProvider implements PaymentProvider {
       tx.sandbox === true || tx.sandbox === 1 || tx.sandbox === "1" || tx.sandbox === "true";
     const sandboxWithLiveKey = sandbox && !this.testMode;
     if (sandboxWithLiveKey) result = "failed";
+    if (result === "failed" && !sandboxWithLiveKey) {
+      await logAppError("billing.notchpay_failed", notchPayFailureDetail(body?.transaction), {
+        code: tx.reference ?? id,
+      });
+    }
     return {
       status: result,
       reference,

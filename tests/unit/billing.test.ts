@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
   NotchPayProvider,
   mapNotchPayStatus,
+  notchPayFailureDetail,
   notchPayMethod,
   verifyNotchPaySignature,
 } from "@/lib/billing/providers/african/notchpay";
@@ -20,6 +21,7 @@ import { paymentDescription, reminderBucket } from "@/lib/billing/service";
 import { DEFAULT_PRICES } from "@/lib/entitlements/plans";
 
 vi.mock("@/lib/audit", () => ({ recordAudit: vi.fn() }));
+vi.mock("@/lib/monitoring/app-errors", () => ({ logAppError: vi.fn() }));
 vi.mock("@/lib/supabase/admin", () => ({ createAdminClient: vi.fn() }));
 vi.mock("@/lib/email/send", () => ({ sendEmail: vi.fn() }));
 vi.mock("@/lib/env", () => ({ publicEnv: { NEXT_PUBLIC_APP_URL: "http://localhost:3000" } }));
@@ -373,6 +375,15 @@ describe("Notch Pay (Mobile Money et carte, FCFA)", () => {
     expect(notchPayMethod({ payment_method: "pm.test_cETH", channel: null })).toBe("notchpay");
     expect(notchPayMethod({ payment_method: "pm.x", channel: "cm.orange" })).toBe("cm.orange");
     expect(paymentMethodLabel("notchpay")).toBe("Notch Pay");
+    const detail = notchPayFailureDetail({
+      status: "failed",
+      customer: { phone: "+237690000000", email: "a@b.cm" },
+      charge: { channel: "cm.mtn", message: "Solde insuffisant pour +237690000000", phone: "x" },
+    });
+    expect(detail).toBe(
+      "status=failed ; charge.channel=cm.mtn ; charge.message=Solde insuffisant pour [numéro]",
+    );
+    expect(detail).not.toContain("690000000");
     expect(paymentMethodLabel("card")).toBe("Carte bancaire");
     expect(paymentMethodLabel("paypal")).toBe("PayPal");
   });
