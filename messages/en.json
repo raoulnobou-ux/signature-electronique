@@ -134,7 +134,7 @@
         {
           "key": "momo",
           "title": "Mobile Money",
-          "description": "Pay for your subscription with MTN MoMo, Orange Money or a bank card."
+          "description": "Pay for your subscription with Mobile Money (MTN MoMo, Orange Money), on Notch Pay's secure page."
         },
         {
           "key": "whatsapp",
@@ -277,7 +277,7 @@
         },
         {
           "q": "How can I pay?",
-          "a": "With MTN Mobile Money, Orange Money or a card, through Notch Pay, our secure payment partner. More payment methods will be added over time. QuickSign never sees or stores your payment details."
+          "a": "With Mobile Money (MTN Mobile Money, Orange Money), through Notch Pay, our secure payment partner. More payment methods, including cards, will be added over time. QuickSign never sees or stores your payment details."
         },
         {
           "q": "What does free access include?",

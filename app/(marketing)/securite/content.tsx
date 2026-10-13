@@ -80,7 +80,7 @@ const fr: SecurityContent = {
     ],
     [
       "Paiements sécurisés",
-      "Les paiements sont traités par Notch Pay (Mobile Money et carte bancaire), prestataire spécialisé. Aucune donnée de carte ni code PIN ne transite ni n'est stocké chez QuickSign.",
+      "Les paiements sont traités par Notch Pay, prestataire spécialisé, sur sa page sécurisée. Aucune donnée de paiement ni code PIN ne transite ni n'est stocké chez QuickSign.",
     ],
     [
       "IA sous votre contrôle",
@@ -233,7 +233,7 @@ const en: SecurityContent = {
     ],
     [
       "Secure payments",
-      "Payments are processed by Notch Pay (Mobile Money and card), a specialised provider. No card data or PIN ever passes through or is stored at QuickSign.",
+      "Payments are processed by Notch Pay, a specialised provider, on its secure page. No payment data or PIN ever passes through or is stored at QuickSign.",
     ],
     [
       "AI under your control",
