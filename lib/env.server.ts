@@ -23,6 +23,15 @@ const serverSchema = z.object({
   NOTCHPAY_PUBLIC_KEY: z.string().optional(),
   /** Clé de hachage des webhooks Notch Pay (en-tête x-notch-signature) ; sans elle, notifications refusées. */
   NOTCHPAY_WEBHOOK_SECRET: z.string().optional(),
+  /** Chariow (carte bancaire et moyens locaux) : clé API (scopes checkout.write, sales.read, products.read). */
+  CHARIOW_API_KEY: z.string().optional(),
+  /** Secret de signature de la Pulse Chariow (« whsec_… ») ; sans lui, notifications refusées. */
+  CHARIOW_PULSE_SECRET: z.string().optional(),
+  /** Identifiants des produits Chariow (type Licence, prix en FCFA identiques à plans_config). */
+  CHARIOW_PRODUCT_ESSENTIAL_MONTHLY: z.string().optional(),
+  CHARIOW_PRODUCT_ESSENTIAL_YEARLY: z.string().optional(),
+  CHARIOW_PRODUCT_PRO_MONTHLY: z.string().optional(),
+  CHARIOW_PRODUCT_PRO_YEARLY: z.string().optional(),
   /** "true" : paiements simulés sans prestataire (dev, tests). Ignoré en production Vercel. */
   PAYMENTS_SANDBOX: z.enum(["true", "false"]).optional(),
   VERCEL_ENV: z.string().optional(),

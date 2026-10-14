@@ -9,6 +9,7 @@ lib/billing/
   providers/
     types.ts            interface PaymentProvider, PaymentMethod, PaymentOption
     african/notchpay.ts Notch Pay : page hébergée, en FCFA (canaux lus chez Notch Pay)
+    card/chariow.ts     Chariow : carte et autres moyens, produits Licence à prix fixes (FCFA)
     sandbox.ts          paiement simulé (développement, tests e2e)
   index.ts              registre : prestataires activés, moyen par devise, options par pays
   webhook.ts            traitement commun des notifications (signature, revérification, idempotence)
@@ -102,6 +103,48 @@ Canaux ouverts au 13 octobre 2026 (clé de production) : MTN Mobile Money (`cm.m
 | Signature calculée sur `JSON.stringify(req.body)`   | À calculer sur le corps brut                                                                                                            |
 | 6 statuts (Payments API)                            | Aussi `abandoned`, `incomplete`, `refunded`, `partialy-refunded` (page « Collect »)                                                     |
 | —                                                   | La liste des paiements avec une clé de production inclut aussi les paiements de test                                                    |
+
+## Chariow (carte bancaire et autres moyens)
+
+Chariow encaisse pour le compte de QuickSign (carte bancaire et moyens proposés dans le pays de l'acheteur), puis reverse les fonds au vendeur moins sa commission. Fichier : `lib/billing/providers/card/chariow.ts` ; notifications : `/api/webhooks/chariow`. Documentation officielle : https://chariow.dev (lue le 14 octobre 2026).
+
+### Fonctionnement
+
+1. Le client choisit « Carte bancaire et autres moyens » dans le récapitulatif.
+2. Le serveur relit le prix du produit Chariow (`GET /v1/products/{id}`) : s'il diffère du prix QuickSign (`plans_config`), aucun paiement n'est créé (erreur `config` dans `app_errors`). Un client ne peut donc jamais payer un montant que la vérification refuserait ensuite.
+3. Le serveur crée la vente (`POST /v1/checkout`) avec notre référence dans `custom_metadata.qs_ref`, l'adresse de retour `/app/abonnement/paiement` et l'adresse IP de l'acheteur (moyens proposés selon son pays). L'identifiant de vente (`sal_…`) est noté dans `payments.provider_tx_id`.
+4. Le client paie sur la page Chariow, puis revient sur la page d'état, qui fait revérifier la vente (`GET /v1/sales/{id}`).
+5. Chariow notifie `successful.sale` ou `failed.sale` : signature vérifiée, vente relue, puis `complete_payment`.
+
+### Limites
+
+- **Prix fixes** : pas de montant calculé, donc pas de passage au Pro au prorata par carte (proposé par Mobile Money) ; un passage au Pro par carte se fait à la fin de la période.
+- **Numéro de téléphone obligatoire** pour Chariow : sans numéro valide dans le profil, le client est invité à l'ajouter (Paramètres → Profil).
+- **Paiement en FCFA** : produits en FCFA, l'acheteur étranger paie ce montant par carte.
+- **Pas de mode test** connu chez Chariow : tout paiement par Chariow est réel.
+- Une vente `failed` ou `abandoned` peut être rouverte puis réussir chez Chariow : la notification `successful.sale` active alors l'abonnement (`complete_payment` accepte un paiement noté en échec).
+
+### Mise en place (une fois)
+
+1. **Produits** : Chariow → Produits → Nouveau produit, **type « Licence »** (le seul qui se rachète : les autres types refusent un deuxième achat avec `already_purchased`). Quatre produits, prix en **FCFA**, identiques à `plans_config` :
+
+   | Produit                      | Prix         |
+   | ---------------------------- | ------------ |
+   | QuickSign Essentiel — 1 mois | 5 000 FCFA   |
+   | QuickSign Essentiel — 1 an   | 50 000 FCFA  |
+   | QuickSign Pro — 1 mois       | 15 000 FCFA  |
+   | QuickSign Pro — 1 an         | 150 000 FCFA |
+
+   Tarification « paiement unique » (pas de prix libre), licences générées automatiquement, publier chaque produit, puis noter son identifiant (`prd_…`).
+
+2. **Clé API** : Chariow → Paramètres → Clés API → Créer une clé, scopes `checkout.write`, `sales.read`, `products.read`.
+3. **Pulse** : Chariow → Automatisations → Pulses → nouvelle Pulse vers `https://<domaine>/api/webhooks/chariow`, événements `successful.sale` et `failed.sale` (tous les produits), puis copier le **Signing secret** (`whsec_…`).
+4. **Vercel** → Settings → Environment Variables (Production) : `CHARIOW_API_KEY`, `CHARIOW_PULSE_SECRET`, `CHARIOW_PRODUCT_ESSENTIAL_MONTHLY`, `CHARIOW_PRODUCT_ESSENTIAL_YEARLY`, `CHARIOW_PRODUCT_PRO_MONTHLY`, `CHARIOW_PRODUCT_PRO_YEARLY`, puis redéployer.
+5. Vérifier : le récapitulatif propose « Carte bancaire et autres moyens » ; dans Chariow, onglet **Deliveries** de la Pulse, envoyer un test : QuickSign répond `200`.
+
+**Changer un prix** : modifier la même valeur dans `plans_config` **et** dans le produit Chariow. Tant qu'ils diffèrent, le paiement par carte de ce plan est refusé avant tout débit.
+
+**Après 5 notifications sans réponse 2xx, Chariow désactive la Pulse** et prévient par e-mail : la réactiver dans le tableau de bord, puis rejouer les livraisons manquées (onglet Deliveries). En attendant, la page d'état et la tâche planifiée revérifient les paiements en attente.
 
 ## Diagnostic d'un paiement refusé
 

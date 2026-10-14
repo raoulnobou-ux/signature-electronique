@@ -276,7 +276,8 @@
         "description": "To explore: {stored} document, the editor, {signatures} signature and {ai} assistant questions per day. Signing and export require a subscription.",
         "cta": "Create a free account"
       },
-      "paymentMethodsLive": "Pay with {channels}, on Notch Pay's secure page."
+      "paymentMethodsLive": "Pay with {channels}, on Notch Pay's secure page.",
+      "cardMethod": "bank card"
     },
     "testimonials": {
       "eyebrow": "They sign with QuickSign",
@@ -799,9 +800,11 @@
             "titleWithCard": "Mobile Money or card — in CFA francs"
           },
           "card": {
-            "title": "Card",
-            "body": "Visa, Mastercard, on our payment partner's secure form."
-          }
+            "title": "Card and other methods",
+            "body": "Visa, Mastercard, on our payment partner's secure form.",
+            "bodyChariow": "Visa, Mastercard or another method available in your country, on Chariow's secure page. Amount in CFA francs."
+          },
+          "prorataLocked": "Prorated upgrade: Mobile Money only."
         },
         "country": "Country of your Mobile Money number",
         "countryHint": "You'll enter the number you pay with on the secure payment page (it can differ from your account's number).",
@@ -813,7 +816,8 @@
         "secure": "Secure payment. QuickSign never sees or stores your card details.",
         "redirecting": "Redirecting to payment…",
         "cancel": "Cancel",
-        "currency": "Payment currency"
+        "currency": "Payment currency",
+        "addPhone": "Add my number"
       },
       "manage": {
         "title": "Manage subscription",
@@ -850,7 +854,9 @@
         "invalid": "Invalid request.",
         "not_allowed": "Not possible with your current subscription.",
         "provider_error": "The payment couldn't be prepared. No amount was charged. Try again in a moment; if it happens again, contact us from the Contact page.",
-        "provider_unreachable": "The payment service isn't responding right now. No amount was charged: try again in a few minutes."
+        "provider_unreachable": "The payment service isn't responding right now. No amount was charged: try again in a few minutes.",
+        "prorata_unavailable": "Upgrading to Pro with proration is paid by Mobile Money. Choose that method, or switch to Pro by card at the end of your period.",
+        "phone_required": "Card payment requires your phone number. Add it in Settings → Profile, then try again."
       },
       "sandbox": {
         "metaTitle": "Test payment",
@@ -873,8 +879,8 @@
       "paymentPage": {
         "metaTitle": "Payment",
         "pending": {
-          "title": "Approve the payment on your phone",
-          "body": "A payment request was sent to your Mobile Money number. Enter your PIN to approve it: this page updates by itself.",
+          "title": "Confirming your payment",
+          "body": "We're waiting for your payment to be confirmed. With Mobile Money, approve the request on your phone with your PIN. This page updates by itself.",
           "progress": "Waiting for confirmation"
         },
         "success": {

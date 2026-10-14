@@ -1,4 +1,4 @@
-import type { Currency } from "@/lib/entitlements/plans";
+import type { BillingCycle, Currency, PaidPlan } from "@/lib/entitlements/plans";
 
 /** Statut d'une transaction tel que confirmé par le prestataire (jamais par le navigateur). */
 export type TransactionStatus = "successful" | "failed" | "pending";
@@ -18,6 +18,13 @@ export interface CheckoutRequest {
   redirectUrl: string;
   /** Pays du numéro Mobile Money choisi par le client (ISO alpha-3), si demandé. */
   country?: string;
+  /** Plan et période payés (prestataires à produits fixes, comme Chariow). */
+  plan?: PaidPlan;
+  cycle?: BillingCycle;
+  /** Nouveau plan, renouvellement ou passage au Pro au prorata. */
+  kind?: "new" | "renewal" | "upgrade";
+  /** Adresse IP de l'acheteur (moyens de paiement proposés selon son pays). */
+  customerIp?: string;
   meta: Record<string, string>;
 }
 
@@ -51,12 +58,16 @@ export interface PaymentOption {
   currencies: Currency[];
   /** Mode test du prestataire (aucun argent réel). */
   testMode: boolean;
+  /** Montant calculé accepté (passage au Pro au prorata) ; faux pour les prix fixes. */
+  prorata: boolean;
+  /** Prestataire du moyen de paiement (affichage). */
+  provider: string;
 }
 
 /**
  * Prestataire de paiement. L'application ne connaît que cette interface :
- * - providers/african/ : moyens de paiement africains (Notch Pay : Mobile Money et carte) ;
- * - providers/card/ : à venir, paiement international par carte (euro, dollar, livre) ;
+ * - providers/african/ : Notch Pay (Mobile Money, page hébergée, montant libre) ;
+ * - providers/card/ : Chariow (carte bancaire et moyens locaux, produits à prix fixes) ;
  * - un nouveau prestataire s'ajoute en implémentant cette interface puis en le déclarant
  *   dans le registre (lib/billing/index.ts), sans toucher aux écrans ni aux actions.
  * Le navigateur n'appelle jamais un prestataire : il appelle notre serveur, qui crée le
@@ -68,6 +79,8 @@ export interface PaymentProvider {
   readonly method: PaymentMethod;
   /** Devises acceptées par ce prestataire. */
   readonly currencies: readonly Currency[];
+  /** Prix fixés chez le prestataire (pas de montant calculé, donc pas de prorata). */
+  readonly fixedPrices?: boolean;
   /** Le prestataire accepte-t-il un client de ce pays (ISO alpha-2) ? Absent = partout. */
   supportsCountry?(country: string): boolean;
   /** URL du paiement, et l'identifiant de transaction du prestataire s'il est déjà connu. */

@@ -276,7 +276,8 @@
         "description": "Pour découvrir : {stored} document, l'éditeur, {signatures} signature et {ai} questions par jour à l'assistant. Signer et exporter demandent un abonnement.",
         "cta": "Créer un compte gratuit"
       },
-      "paymentMethodsLive": "Paiement par {channels}, sur la page sécurisée de Notch Pay."
+      "paymentMethodsLive": "Paiement par {channels}, sur la page sécurisée de Notch Pay.",
+      "cardMethod": "carte bancaire"
     },
     "testimonials": {
       "eyebrow": "Ils signent avec QuickSign",
@@ -799,9 +800,11 @@
             "titleWithCard": "Mobile Money ou carte — en FCFA"
           },
           "card": {
-            "title": "Carte bancaire",
-            "body": "Visa, Mastercard, sur le formulaire sécurisé de notre partenaire de paiement."
-          }
+            "title": "Carte bancaire et autres moyens",
+            "body": "Visa, Mastercard, sur le formulaire sécurisé de notre partenaire de paiement.",
+            "bodyChariow": "Visa, Mastercard ou un autre moyen proposé dans votre pays, sur la page sécurisée de Chariow. Montant en FCFA."
+          },
+          "prorataLocked": "Passage au prorata : uniquement par Mobile Money."
         },
         "country": "Pays de votre numéro Mobile Money",
         "countryHint": "Vous saisirez sur la page sécurisée de paiement le numéro avec lequel vous payez (il peut être différent de celui de votre compte).",
@@ -813,7 +816,8 @@
         "secure": "Paiement sécurisé. QuickSign ne voit ni ne conserve jamais vos données de carte.",
         "redirecting": "Redirection vers le paiement…",
         "cancel": "Annuler",
-        "currency": "Devise de paiement"
+        "currency": "Devise de paiement",
+        "addPhone": "Ajouter mon numéro"
       },
       "manage": {
         "title": "Gérer l'abonnement",
@@ -850,7 +854,9 @@
         "invalid": "Demande invalide.",
         "not_allowed": "Action impossible pour votre abonnement actuel.",
         "provider_error": "Le paiement n'a pas pu être préparé. Aucun montant n'a été débité. Réessayez dans un instant ; si cela se reproduit, écrivez-nous depuis la page Contact.",
-        "provider_unreachable": "Le service de paiement ne répond pas pour le moment. Aucun montant n'a été débité : réessayez dans quelques minutes."
+        "provider_unreachable": "Le service de paiement ne répond pas pour le moment. Aucun montant n'a été débité : réessayez dans quelques minutes.",
+        "prorata_unavailable": "Le passage au Pro au prorata se paie par Mobile Money. Choisissez ce moyen, ou passez au Pro par carte à la fin de votre période.",
+        "phone_required": "Le paiement par carte demande votre numéro de téléphone. Ajoutez-le dans Paramètres → Profil, puis réessayez."
       },
       "sandbox": {
         "metaTitle": "Paiement de test",
@@ -873,8 +879,8 @@
       "paymentPage": {
         "metaTitle": "Paiement",
         "pending": {
-          "title": "Validez le paiement sur votre téléphone",
-          "body": "Une demande de paiement a été envoyée à votre numéro Mobile Money. Composez votre code secret pour la valider : cette page se met à jour toute seule.",
+          "title": "Paiement en cours de confirmation",
+          "body": "Nous attendons la confirmation de votre paiement. Par Mobile Money, validez la demande sur votre téléphone avec votre code secret. Cette page se met à jour toute seule.",
           "progress": "Attente de la confirmation"
         },
         "success": {

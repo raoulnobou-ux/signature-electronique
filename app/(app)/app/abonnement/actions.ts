@@ -9,14 +9,16 @@ import { recordAudit } from "@/lib/audit";
 import { getCurrentAccount, type Account } from "@/lib/auth/account";
 import {
   getPaymentProvider,
+  getProvider,
   getSandboxProvider,
   mobileMoneyCountries,
   paymentChannels,
 } from "@/lib/billing";
+import { ChariowProvider, chariowPhone } from "@/lib/billing/providers/card/chariow";
 import { failureKind, type FailureKind } from "@/lib/billing/failure";
 import { quoteCheckout, type Quote } from "@/lib/billing/quote";
 import { SANDBOX_METHODS, SANDBOX_OUTCOMES } from "@/lib/billing/providers/sandbox";
-import { providerErrorKind } from "@/lib/billing/providers/types";
+import { providerErrorKind, type PaymentProvider } from "@/lib/billing/providers/types";
 import { PLAN_LABELS, paymentDescription, settlePayment } from "@/lib/billing/service";
 import { getClientIp } from "@/lib/request";
 import type { BillingCycle, Currency, PlanId } from "@/lib/entitlements/plans";
@@ -36,6 +38,8 @@ const targetSchema = z.object({
     .string()
     .regex(/^[A-Z]{3}$/)
     .optional(),
+  /** Moyen choisi : Mobile Money (Notch Pay) ou carte (Chariow) ; absent = celui de la devise. */
+  method: z.enum(["card", "mobile_money"]).optional(),
 });
 
 export type BillingError =
@@ -46,7 +50,9 @@ export type BillingError =
   | "invalid"
   | "not_allowed"
   | "provider_error"
-  | "provider_unreachable";
+  | "provider_unreachable"
+  | "prorata_unavailable"
+  | "phone_required";
 
 type Fail = { ok: false; reason: BillingError };
 
@@ -89,6 +95,31 @@ async function computeQuote(
   );
 }
 
+/**
+ * Prestataire du moyen choisi, et refus explicites quand il ne convient pas : prix fixes
+ * (pas de prorata), produit non configuré pour ce plan, ou numéro de téléphone exigé.
+ */
+function resolveProvider(
+  target: z.infer<typeof targetSchema>,
+  quote: Quote,
+  account: Account,
+): { provider: PaymentProvider } | Fail {
+  const provider = target.method
+    ? getProvider(target.method, quote.currency)
+    : getPaymentProvider(quote.currency);
+  if (!provider) return { ok: false, reason: "payments_unavailable" };
+  if (provider.fixedPrices && quote.kind === "upgrade") {
+    return { ok: false, reason: "prorata_unavailable" };
+  }
+  if (provider instanceof ChariowProvider) {
+    if (!provider.productFor(quote.plan, quote.cycle)) {
+      return { ok: false, reason: "payments_unavailable" };
+    }
+    if (!chariowPhone(account.profile.phone)) return { ok: false, reason: "phone_required" };
+  }
+  return { provider };
+}
+
 /** Montant exact à payer pour un plan (prorata éventuel), affiché avant le paiement. */
 export async function getCheckoutQuote(
   input: z.input<typeof targetSchema>,
@@ -99,7 +130,8 @@ export async function getCheckoutQuote(
   if ("ok" in ctx) return ctx;
   if (!ctx.subscription) return { ok: false, reason: "invalid" };
   const quote = await computeQuote(ctx.account, ctx.subscription, parsed.data);
-  if (!getPaymentProvider(quote.currency)) return { ok: false, reason: "payments_unavailable" };
+  const resolved = resolveProvider(parsed.data, quote, ctx.account);
+  if ("ok" in resolved) return resolved;
   const end = new Date(ctx.subscription.current_period_end);
   const startsAt =
     quote.kind !== "upgrade" &&
@@ -143,13 +175,15 @@ export async function startCheckout(
     return { ok: false, reason: "rate_limited" };
 
   const quote = await computeQuote(account, subscription, parsed.data);
-  // FCFA → Notch Pay ; les autres devises attendent un prestataire.
-  const provider = getPaymentProvider(quote.currency);
-  if (!provider) return { ok: false, reason: "payments_unavailable" };
-  // Aucun canal ouvert sur le compte du prestataire : inutile d'envoyer le client payer.
-  const channels = await paymentChannels();
-  if (channels !== null && channels.length === 0) {
-    return { ok: false, reason: "payments_unavailable" };
+  const resolved = resolveProvider(parsed.data, quote, account);
+  if ("ok" in resolved) return resolved;
+  const { provider } = resolved;
+  // Aucun canal ouvert sur le compte Notch Pay : inutile d'envoyer le client payer.
+  if (provider.name === "notchpay") {
+    const channels = await paymentChannels();
+    if (channels !== null && channels.length === 0) {
+      return { ok: false, reason: "payments_unavailable" };
+    }
   }
   // Pays du Mobile Money, quand le prestataire demande au client de le choisir.
   let country: string | undefined;
@@ -202,6 +236,10 @@ export async function startCheckout(
       // Page d'état du paiement : elle n'active rien, elle demande au serveur de revérifier.
       redirectUrl: `${publicEnv.NEXT_PUBLIC_APP_URL}/app/abonnement/paiement?ref=${encodeURIComponent(reference)}`,
       country,
+      plan: quote.plan,
+      cycle: quote.cycle,
+      kind: quote.kind,
+      customerIp: ip === "unknown" ? undefined : ip,
       meta: { user_id: account.userId, payment_id: payment.id, kind: quote.kind },
     });
     if (transactionId) {

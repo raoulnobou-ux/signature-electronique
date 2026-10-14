@@ -500,3 +500,13 @@ L'interface `PaymentProvider` et le registre restent prêts pour ajouter d'autre
 - \`/design\` (vitrine interne) renvoie 404 en production.
 
 **D127 — Chemins de fichiers écrits par le serveur seulement (13 octobre 2026).** Voir SECURITY.md, « Stockage et fichiers ». Appliquée en production le 13 octobre 2026 après accord du propriétaire, puis revérifiée (attaque refusée, renommage accepté).
+
+**D128 — Chariow, second prestataire : carte bancaire et autres moyens (14 octobre 2026).** Notch Pay reste le prestataire du Mobile Money (frais bas, montant libre, prorata). Chariow s'ajoute derrière la même interface `PaymentProvider` pour la carte bancaire et les moyens proposés dans le pays de l'acheteur, et sert de solution de repli si le compte Notch Pay reste bloqué.
+
+- Pourquoi Chariow : il encaisse pour le compte du vendeur (pas de compte marchand à ouvrir, obstacle rencontré avec CinetPay, pawaPay et Paddle), propose une API serveur (`POST /v1/checkout`, `GET /v1/sales/{id}`), un guide d'intégration SaaS, et des notifications signées (HMAC-SHA256 du corps brut, clé d'idempotence `x-pulse-delivery-id`). Source : https://chariow.dev, lue le 14 octobre 2026.
+- Alternatives examinées : Lemon Squeezy (versement bancaire au Cameroun non listé ; PayPal non confirmé), Gumroad (même incertitude), Paddle (inscription jamais validée), Maketou (aucune information vérifiable trouvée).
+- Produits de type **Licence** : seul type qui se rachète (renouvellements) ; les autres renvoient `already_purchased`.
+- Prix fixés dans Chariow : comparés au prix QuickSign avant de créer la vente ; pas de prorata par carte.
+- Coût : commission de 10 % ou 15 % selon l'annonce de Chariow de juillet 2025 (grille en refonte, à confirmer), contre des frais plus bas chez Notch Pay.
+- Données : Chariow reçoit le nom, l'e-mail et le téléphone de l'acheteur ; ajouté à la politique de confidentialité et aux CGU (version `2026-10-14`). Le journal `payment_events` ne garde jamais ces coordonnées.
+- À confirmer par le propriétaire avec Chariow : vente d'un abonnement à un service externe autorisée, versements vers le Cameroun, commission en vigueur.

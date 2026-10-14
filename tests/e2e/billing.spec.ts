@@ -207,7 +207,7 @@ test("sécurité : webhook non configuré, tâche planifiée protégée, faux re
     `/api/billing/return?status=successful&tx_ref=${ref}&transaction_id=sbx_successful_mtn_${"0".repeat(32)}`,
   );
   await expect(page).toHaveURL(new RegExp(`/app/abonnement/paiement\\?ref=${ref}`));
-  await expect(page.getByText("Validez le paiement sur votre téléphone")).toBeVisible();
+  await expect(page.getByText("Paiement en cours de confirmation")).toBeVisible();
   const { data: sub } = await adminClient()
     .from("subscriptions")
     .select("status")

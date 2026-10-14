@@ -50,9 +50,49 @@ describe("registre des moyens de paiement", () => {
     const { paymentOptions } = await registry(NOTCHPAY);
     for (const country of ["CM", "SN", "FR", null]) {
       expect(paymentOptions(country)).toEqual([
-        { method: "mobile_money", currencies: ["XAF"], testMode: false },
+        {
+          method: "mobile_money",
+          currencies: ["XAF"],
+          testMode: false,
+          prorata: true,
+          provider: "notchpay",
+        },
       ]);
     }
+  });
+
+  it("Chariow : la carte s'ajoute au Mobile Money, sans prorata, et seulement si configuré", async () => {
+    const CHARIOW = {
+      CHARIOW_API_KEY: "sk_live_x",
+      CHARIOW_PULSE_SECRET: "whsec_x",
+      CHARIOW_PRODUCT_ESSENTIAL_MONTHLY: "prd_ess_m",
+      CHARIOW_PRODUCT_PRO_MONTHLY: "prd_pro_m",
+    };
+    const both = await registry({ ...NOTCHPAY, ...CHARIOW });
+    expect(both.paymentOptions("CM")).toEqual([
+      { method: "card", currencies: ["XAF"], testMode: false, prorata: false, provider: "chariow" },
+      {
+        method: "mobile_money",
+        currencies: ["XAF"],
+        testMode: false,
+        prorata: true,
+        provider: "notchpay",
+      },
+    ]);
+    expect(both.getProvider("card", "XAF")?.name).toBe("chariow");
+    expect(both.getProvider("mobile_money", "XAF")?.name).toBe("notchpay");
+    // Sans moyen précisé, le FCFA reste au Mobile Money (comportement d'avant).
+    expect(both.getPaymentProvider("XAF")?.name).toBe("notchpay");
+    expect(both.providerByName("chariow")?.name).toBe("chariow");
+    expect(both.payableCurrencies()).toEqual(["XAF"]);
+
+    // Chariow seul : la carte en FCFA est le seul moyen.
+    const alone = await registry(CHARIOW);
+    expect(alone.paymentOptions("FR").map((o) => o.provider)).toEqual(["chariow"]);
+
+    // Clé sans aucun produit, ou désactivé par PAYMENT_PROVIDERS : absent.
+    expect((await registry({ CHARIOW_API_KEY: "sk_live_x" })).getChariow()).toBeNull();
+    expect((await registry({ ...CHARIOW, PAYMENT_PROVIDERS: "notchpay" })).getChariow()).toBeNull();
   });
 
   it("clé de test : mode test affiché", async () => {

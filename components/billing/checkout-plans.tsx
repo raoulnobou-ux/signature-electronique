@@ -2,9 +2,14 @@
 
 import { CreditCard, Lock, ShieldCheck, Smartphone, Wallet } from "lucide-react";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
-import { getCheckoutQuote, startCheckout } from "@/app/(app)/app/abonnement/actions";
+import {
+  getCheckoutQuote,
+  startCheckout,
+  type BillingError,
+} from "@/app/(app)/app/abonnement/actions";
 import { PricingPlans } from "@/components/marketing/pricing-plans";
 import { Button } from "@/components/ui/button";
 import {
@@ -36,7 +41,7 @@ const METHOD_ICONS: Record<PaymentMethod, typeof CreditCard> = {
 const channelIcon = (type: string) =>
   type === "card" ? CreditCard : type === "wallet" ? Wallet : Smartphone;
 
-type Selection = { plan: PaidPlan; cycle: BillingCycle; currency: Currency };
+type Selection = { plan: PaidPlan; cycle: BillingCycle; currency: Currency; method: PaymentMethod };
 
 /** Plans de l'espace Abonnement : devis exact (prorata) puis redirection vers le paiement. */
 export function CheckoutPlans({
@@ -64,6 +69,7 @@ export function CheckoutPlans({
   plan: PlanId;
 }) {
   const t = useTranslations("app.billing");
+  const router = useRouter();
   const tPricing = useTranslations("landing.pricing");
   const format = useFormatter();
   const locale = useLocale();
@@ -95,48 +101,81 @@ export function CheckoutPlans({
   };
 
   const available = options.length > 0;
-  const optionFor = (currency: Currency) => options.find((o) => o.currencies.includes(currency));
+  const optionOf = (method: PaymentMethod) => options.find((o) => o.method === method);
 
-  const select = (p: PaidPlan, cycle: BillingCycle, shown: Currency) => {
-    // Devise affichée si un moyen de paiement l'accepte, sinon la première devise par carte.
-    const fallback = options.find((o) => o.method === "card") ?? options[0];
-    const currency = optionFor(shown) ? shown : fallback?.currencies[0];
-    if (!currency) return;
-    setSelection({ plan: p, cycle, currency });
+  /** Message d'erreur ; numéro manquant : lien vers le profil pour l'ajouter. */
+  const showError = (reason: BillingError) =>
+    toast.error(
+      t(`errors.${reason}`),
+      reason === "phone_required"
+        ? {
+            action: {
+              label: t("checkout.addPhone"),
+              onClick: () => router.push("/app/parametres"),
+            },
+          }
+        : undefined,
+    );
+
+  /**
+   * Devis pour un plan, une devise et un moyen de paiement. En cas de refus (prix fixes
+   * sans prorata, numéro manquant…), le choix précédent est conservé.
+   */
+  const requestQuote = (next: Selection, previous: Selection | null) => {
+    setSelection(next);
     setQuote(null);
     startQuote(async () => {
-      const result = await getCheckoutQuote({ plan: p, cycle, currency });
+      const result = await getCheckoutQuote(next);
       if (result.ok) setQuote(result);
       else {
-        toast.error(t(`errors.${result.reason}`));
-        setSelection(null);
+        showError(result.reason);
+        if (previous) requestQuote(previous, null);
+        else setSelection(null);
       }
     });
   };
 
-  /** Choix du moyen de paiement ou de la devise : nouveau devis dans cette devise. */
+  const select = (p: PaidPlan, cycle: BillingCycle, shown: Currency) => {
+    // Le Mobile Money d'abord pour le FCFA, puis le premier moyen qui accepte la devise.
+    const option =
+      options.find((o) => o.method === "mobile_money" && o.currencies.includes(shown)) ??
+      options.find((o) => o.currencies.includes(shown)) ??
+      options[0];
+    if (!option) return;
+    const currency = option.currencies.includes(shown) ? shown : option.currencies[0]!;
+    requestQuote({ plan: p, cycle, currency, method: option.method }, null);
+  };
+
+  /** Autre moyen de paiement : nouveau devis (sa devise si l'actuelle n'y est pas). */
+  const chooseMethod = (option: PaymentOption) => {
+    if (!selection || selection.method === option.method) return;
+    const currency = option.currencies.includes(selection.currency)
+      ? selection.currency
+      : option.currencies[0]!;
+    requestQuote({ ...selection, method: option.method, currency }, selection);
+  };
+
+  /** Autre devise pour le même moyen de paiement. */
   const chooseCurrency = (currency: Currency) => {
     if (!selection || selection.currency === currency) return;
-    select(selection.plan, selection.cycle, currency);
+    requestQuote({ ...selection, currency }, selection);
   };
 
   const pay = () => {
     if (!selection) return;
     startPaying(async () => {
       const result = await startCheckout(
-        optionFor(selection.currency)?.method === "mobile_money"
-          ? { ...selection, country }
-          : selection,
+        selection.method === "mobile_money" ? { ...selection, country } : selection,
       );
       if (result.ok) {
         toast.message(t("checkout.redirecting"));
         window.location.assign(result.url);
-      } else toast.error(t(`errors.${result.reason}`));
+      } else showError(result.reason);
     });
   };
 
   const q = quote?.quote;
-  const selected = q ? optionFor(q.currency) : undefined;
+  const selected = selection ? optionOf(selection.method) : undefined;
   const periodEnd = quote ? new Date(quote.endsAt) : null;
 
   return (
@@ -146,7 +185,11 @@ export function CheckoutPlans({
         limits={limits}
         defaultCurrency={defaultCurrency}
         headingLevel={3}
-        channels={channels?.map((c) => c.name) ?? null}
+        channels={
+          options.some((o) => o.provider === "chariow")
+            ? [...(channels?.map((c) => c.name) ?? []), tPricing("cardMethod")]
+            : (channels?.map((c) => c.name) ?? null)
+        }
         currencies={options.length ? options.flatMap((o) => o.currencies) : null}
         checkout={{ label: t("choose"), labelFor, disabled: !available, onSelect: select }}
       />
@@ -208,9 +251,12 @@ export function CheckoutPlans({
                 <legend className="mb-2 text-sm font-medium">{t("checkout.method")}</legend>
                 {options.map((option) => {
                   const Icon = METHOD_ICONS[option.method];
-                  const checked = option.currencies.includes(q.currency);
-                  // Le prorata garde la devise de l'abonnement en cours.
-                  const locked = q.kind === "upgrade" && !checked;
+                  const checked = selection?.method === option.method;
+                  // Le prorata garde la devise de l'abonnement en cours, et exige un montant
+                  // calculé (impossible avec des prix fixes, comme chez Chariow).
+                  const noProrata = q.kind === "upgrade" && !option.prorata;
+                  const locked =
+                    noProrata || (q.kind === "upgrade" && !option.currencies.includes(q.currency));
                   const disabled = locked || loadingQuote;
                   return (
                     <label
@@ -227,7 +273,7 @@ export function CheckoutPlans({
                         className="mt-1 accent-[var(--color-primary)]"
                         checked={checked}
                         disabled={disabled}
-                        onChange={() => chooseCurrency(option.currencies[0]!)}
+                        onChange={() => chooseMethod(option)}
                       />
                       <Icon className="mt-0.5 size-5 shrink-0 text-muted-foreground" aria-hidden />
                       <span className="min-w-0 space-y-2">
@@ -238,9 +284,13 @@ export function CheckoutPlans({
                             : t(`checkout.methods.${option.method}.title`)}
                         </span>
                         <span className="block text-xs text-muted-foreground">
-                          {locked
-                            ? t("checkout.methods.locked")
-                            : t(`checkout.methods.${option.method}.body`)}
+                          {noProrata
+                            ? t("checkout.methods.prorataLocked")
+                            : locked
+                              ? t("checkout.methods.locked")
+                              : option.provider === "chariow"
+                                ? t("checkout.methods.card.bodyChariow")
+                                : t(`checkout.methods.${option.method}.body`)}
                         </span>
                         {option.method === "mobile_money" && !!channels?.length && (
                           <span className="flex flex-wrap gap-1.5" data-testid="payment-channels">

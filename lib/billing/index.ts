@@ -3,6 +3,7 @@ import { serverEnv } from "@/lib/env.server";
 import { CURRENCY_CODES, type Currency } from "@/config/currencies";
 import { isCfaCountry } from "@/config/markets";
 import { NotchPayProvider, type NotchPayChannel } from "./providers/african/notchpay";
+import { ChariowProvider } from "./providers/card/chariow";
 import type { PaymentMethod, PaymentOption, PaymentProvider } from "./providers/types";
 import { SandboxProvider } from "./providers/sandbox";
 
@@ -29,6 +30,7 @@ export function providerEnabled(name: string): boolean {
 }
 
 let notchpay: NotchPayProvider | null | undefined;
+let chariow: ChariowProvider | null | undefined;
 let sandbox: SandboxProvider | null | undefined;
 
 /** Notch Pay : Mobile Money et carte (FCFA), dès que NOTCHPAY_PUBLIC_KEY est défini. */
@@ -40,6 +42,28 @@ export function getNotchPay(): NotchPayProvider | null {
         : null;
   }
   return notchpay;
+}
+
+/**
+ * Chariow : carte bancaire et moyens locaux (page Chariow), dès que la clé API et au moins un
+ * produit sont configurés. Un plan dont le produit manque n'est simplement pas proposé.
+ */
+export function getChariow(): ChariowProvider | null {
+  if (chariow === undefined) {
+    const products = {
+      "essential.monthly": serverEnv.CHARIOW_PRODUCT_ESSENTIAL_MONTHLY,
+      "essential.yearly": serverEnv.CHARIOW_PRODUCT_ESSENTIAL_YEARLY,
+      "pro.monthly": serverEnv.CHARIOW_PRODUCT_PRO_MONTHLY,
+      "pro.yearly": serverEnv.CHARIOW_PRODUCT_PRO_YEARLY,
+    } as const;
+    chariow =
+      serverEnv.CHARIOW_API_KEY &&
+      Object.values(products).some(Boolean) &&
+      providerEnabled("chariow")
+        ? new ChariowProvider(serverEnv.CHARIOW_API_KEY, products, serverEnv.CHARIOW_PULSE_SECRET)
+        : null;
+  }
+  return chariow;
 }
 
 /** Bac à sable local (PAYMENTS_SANDBOX=true), jamais en production Vercel. */
@@ -55,7 +79,7 @@ export function getSandboxProvider(): SandboxProvider | null {
 
 /** Prestataires réels configurés et activés, par moyen de paiement. */
 function realProviders(): PaymentProvider[] {
-  return [getNotchPay()].filter((p): p is NonNullable<typeof p> => p !== null);
+  return [getNotchPay(), getChariow()].filter((p): p is NonNullable<typeof p> => p !== null);
 }
 
 /**
@@ -94,12 +118,20 @@ export function paymentOptions(country: string | null): PaymentOption[] {
     );
     const currencies = [...new Set(real.flatMap((p) => [...p.currencies]))];
     if (currencies.length) {
-      options.push({ method, currencies, testMode: testModes()[currencies[0]!] });
+      options.push({
+        method,
+        currencies,
+        testMode: real.some((p) => "testMode" in p && p.testMode === true),
+        prorata: real.some((p) => !p.fixedPrices),
+        provider: real[0]!.name,
+      });
     } else if (sandbox && (method === "card" || !country || isCfaCountry(country))) {
       options.push({
         method,
         currencies: method === "card" ? ["EUR", "USD", "GBP"] : ["XAF"],
         testMode: true,
+        prorata: true,
+        provider: sandbox.name,
       });
     }
   }
@@ -132,6 +164,15 @@ export async function paymentChannels(): Promise<NotchPayChannel[] | null> {
   }
 }
 
+/** La carte bancaire (Chariow) est-elle proposée ? Faux si la configuration est illisible. */
+export function cardPaymentsEnabled(): boolean {
+  try {
+    return getChariow() !== null;
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Devises dans lesquelles un client peut réellement payer aujourd'hui (prestataires
  * configurés ; toutes en bac à sable). null = configuration illisible (développement).
@@ -150,6 +191,7 @@ export function testModes(): Record<Currency, boolean> {
   const sandbox = getSandboxProvider() !== null;
   const notch = getNotchPay();
   const mobile = notch ? notch.testMode : sandbox;
+  // Chariow n'a pas de mode test : une devise payable par carte via Chariow est réelle.
   return Object.fromEntries(
     CURRENCY_CODES.map((c) => [c, methodForCurrency(c) === "mobile_money" ? mobile : sandbox]),
   ) as Record<Currency, boolean>;
@@ -158,6 +200,7 @@ export function testModes(): Record<Currency, boolean> {
 /** Prestataire qui a créé un paiement (payments.provider), pour le revérifier. */
 export function providerByName(name: string): PaymentProvider | null {
   if (name === "notchpay") return getNotchPay();
+  if (name === "chariow") return getChariow();
   if (name === "sandbox") return getSandboxProvider();
   return null;
 }

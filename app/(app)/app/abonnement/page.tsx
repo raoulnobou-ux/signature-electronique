@@ -71,10 +71,10 @@ export default async function BillingPage({ searchParams }: PageProps<"/app/abon
   // Moyens de paiement proposés dans le pays du visiteur, et canaux réellement ouverts chez
   // le prestataire (aucun canal actif = paiement indisponible).
   const channels = await paymentChannels();
-  const options =
-    channels !== null && channels.length === 0
-      ? []
-      : paymentOptions(account.profile.country ?? visitorCountry);
+  const options = paymentOptions(account.profile.country ?? visitorCountry).filter(
+    // Compte Notch Pay sans canal ouvert : le Mobile Money disparaît, la carte (Chariow) reste.
+    (o) => !(o.provider === "notchpay" && channels !== null && channels.length === 0),
+  );
   const available = options.length > 0;
   const countries = options.some((o) => o.method === "mobile_money")
     ? await mobileMoneyCountries()

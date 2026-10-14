@@ -1,6 +1,12 @@
 import { getTranslations } from "next-intl/server";
 import { ClientMessages } from "@/components/providers/client-messages";
-import { payableCurrencies, paymentChannels } from "@/lib/billing";
+import { cardPaymentsEnabled, payableCurrencies, paymentChannels } from "@/lib/billing";
+
+/** Noms des moyens ouverts, plus la carte bancaire quand Chariow est configuré. */
+function withCard(names: string[] | null, card: string): string[] | null {
+  if (!cardPaymentsEnabled()) return names;
+  return [...(names ?? []), card];
+}
 import { detectCurrency, getPlanLimits, getPrices } from "@/lib/pricing";
 import { PricingPlans } from "./pricing-plans";
 import { Section, SectionHeading } from "./section";
@@ -48,7 +54,7 @@ export async function PricingSection({ asPageHeader = false }: { asPageHeader?: 
             limits={limits}
             defaultCurrency={currency}
             headingLevel={asPageHeader ? 2 : 3}
-            channels={channels?.map((c) => c.name) ?? null}
+            channels={withCard(channels?.map((c) => c.name) ?? null, t("cardMethod"))}
             currencies={payableCurrencies()}
           />
         </ClientMessages>

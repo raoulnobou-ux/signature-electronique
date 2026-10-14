@@ -130,6 +130,7 @@ Langue, pays de résidence, fuseau horaire et devise préférée par utilisateur
     - variables `NOTCHPAY_PUBLIC_KEY` (`pk_test.…` pour les essais) et `NOTCHPAY_WEBHOOK_SECRET` (obligatoire : sans elle, les notifications sont refusées) ;
     - webhook : `https://<domaine>/api/webhooks/notchpay` ;
     - diagnostic d'un paiement : `npm run notchpay:inspect -- trx.xxxxxxxx`.
+  - **Chariow** pour la carte bancaire et les autres moyens (page Chariow, FCFA, produits Licence à prix fixes) : variables `CHARIOW_API_KEY`, `CHARIOW_PULSE_SECRET` et les quatre `CHARIOW_PRODUCT_*` ; notifications : `https://<domaine>/api/webhooks/chariow`. Mise en place : [`docs/PAIEMENTS.md`](docs/PAIEMENTS.md#chariow-carte-bancaire-et-autres-moyens).
   - D'autres prestataires (carte en euro, dollar, livre…) s'ajouteront derrière la même interface : voir [`docs/PAIEMENTS.md`](docs/PAIEMENTS.md#ajouter-un-prestataire).
 - Tant qu'aucun prestataire n'accepte une devise, le paiement se fait en FCFA, quel que soit le pays du visiteur. Les prix sont fixés par marché dans `plans_config`, sans conversion automatique.
 - Le retour client arrive sur `/app/abonnement/paiement` (attente de 3 minutes au plus, puis « Réessayer ») ; aucun plan n'est activé sans revérification de la transaction par l'API du prestataire.
