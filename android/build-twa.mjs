@@ -172,6 +172,16 @@ async function build() {
 
   // APK de test, installable directement sur un téléphone.
   gradle("assembleRelease");
+  await signApk(password);
+}
+
+/**
+ * Aligne et signe l'APK de test avec les build-tools installés (Bubblewrap attend une autre
+ * version). Le mot de passe passe par une variable d'environnement, jamais en argument.
+ */
+async function signApk(password) {
+  const { execFileSync } = await import("node:child_process");
+  const tools = join(TOOLCHAIN, "sdk", "build-tools", "36.0.0");
   const apkUnsigned = join(
     PROJECT,
     "app",
@@ -181,10 +191,34 @@ async function build() {
     "release",
     "app-release-unsigned.apk",
   );
-  const apkAligned = join(PROJECT, "app-release-unsigned-aligned.apk");
+  const aligned = join(PROJECT, "app-release-aligned.apk");
   const apk = join(PROJECT, "app-release-signed.apk");
-  await sdk.zipalign(apkUnsigned, apkAligned);
-  await sdk.apksigner(KEYSTORE, password, ALIAS, password, apkAligned, apk);
+  const env = { ...process.env, JAVA_HOME: jdkPath, QS_KS_PASS: password };
+  execFileSync(join(tools, "zipalign.exe"), ["-f", "-p", "4", apkUnsigned, aligned], { env });
+  try {
+    execFileSync(
+      "cmd.exe",
+      [
+        "/c",
+        join(tools, "apksigner.bat"),
+        "sign",
+        "--ks",
+        KEYSTORE,
+        "--ks-key-alias",
+        ALIAS,
+        "--ks-pass",
+        "env:QS_KS_PASS",
+        "--key-pass",
+        "env:QS_KS_PASS",
+        "--out",
+        apk,
+        aligned,
+      ],
+      { env, stdio: "pipe" },
+    );
+  } catch (error) {
+    throw new Error(`apksigner a échoué (code ${error?.status ?? "?"})`);
+  }
   log.info(`APK de test : ${apk}`);
 }
 
@@ -198,6 +232,7 @@ try {
   else if (command === "key") await createKey();
   else if (command === "fingerprint") await fingerprint();
   else if (command === "build") await build();
+  else if (command === "apk") await signApk(JSON.parse(readFileSync(SECRETS, "utf8")).password);
   else throw new Error("Usage : node build-twa.mjs init | key | build");
 } catch (error) {
   // Jamais de mot de passe dans un message d'erreur.
