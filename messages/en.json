@@ -133,7 +133,7 @@
         {
           "key": "momo",
           "title": "Mobile Money",
-          "description": "Pay for your subscription with Mobile Money (MTN MoMo, Orange Money), on Notch Pay's secure page."
+          "description": "Pay for your subscription by Mobile Money or card, on Chariow's secure page."
         },
         {
           "key": "whatsapp",
@@ -176,48 +176,28 @@
           "tab": "Firms",
           "title": "Lawyers, notaries, accountants, architects",
           "description": "Engagement letters, fee agreements, powers of attorney, reports: sign and stamp every document in seconds, with an audit trail that reassures your clients.",
-          "examples": [
-            "Engagement letter",
-            "Fee agreement",
-            "Power of attorney",
-            "Expert report"
-          ]
+          "examples": ["Engagement letter", "Fee agreement", "Power of attorney", "Expert report"]
         },
         {
           "key": "school",
           "tab": "Schools",
           "title": "Schools, institutes and universities",
           "description": "Enrollment certificates, transcripts, notices and circulars signed by management in bulk, with the institution's stamp.",
-          "examples": [
-            "Enrollment certificate",
-            "Transcript",
-            "Notice",
-            "Circular"
-          ]
+          "examples": ["Enrollment certificate", "Transcript", "Notice", "Circular"]
         },
         {
           "key": "business",
           "tab": "SMEs & NGOs",
           "title": "Companies, NGOs and associations",
           "description": "Contracts, purchase orders, meeting minutes, travel orders: get partners to sign remotely and keep every version safe.",
-          "examples": [
-            "Service agreement",
-            "Purchase order",
-            "Meeting minutes",
-            "Travel order"
-          ]
+          "examples": ["Service agreement", "Purchase order", "Meeting minutes", "Travel order"]
         },
         {
           "key": "admin",
           "tab": "Public sector",
           "title": "Public services and local authorities",
           "description": "Memos, letters and announcements signed and circulated faster, with a clear history of who signed what and when.",
-          "examples": [
-            "Internal memo",
-            "Official letter",
-            "Announcement",
-            "Internal decision"
-          ]
+          "examples": ["Internal memo", "Official letter", "Announcement", "Internal decision"]
         }
       ]
     },
@@ -235,7 +215,7 @@
       "popular": "For teams",
       "cta": "Start for free",
       "trialNote": "Free account to explore, then {price} to sign. Cancel anytime.",
-      "paymentMethods": "Secure payment on our partner Notch Pay's page, with the methods available in your country.",
+      "paymentMethods": "Secure payment on our partner Chariow's page, with the methods available in your country.",
       "plans": {
         "essential": {
           "name": "Essential",
@@ -277,7 +257,7 @@
         "cta": "Create a free account"
       },
       "paymentMethodsLive": "Pay with {channels}, on a secure payment page.",
-      "cardMethod": "bank card"
+      "cardMethod": "Mobile Money or card"
     },
     "testimonials": {
       "eyebrow": "They sign with QuickSign",
@@ -297,7 +277,7 @@
         },
         {
           "q": "How can I pay?",
-          "a": "With Mobile Money (MTN Mobile Money, Orange Money), through Notch Pay, our secure payment partner. More payment methods, including cards, will be added over time. QuickSign never sees or stores your payment details."
+          "a": "By Mobile Money or card, depending on the methods available in your country, through Chariow, our secure payment partner. QuickSign never sees or stores your payment details."
         },
         {
           "q": "What does free access include?",
@@ -459,11 +439,7 @@
       "metaTitle": "Create an account",
       "title": "Create your account",
       "subtitle": "Free, no credit card.",
-      "steps": [
-        "Account",
-        "Profile",
-        "Confirmation"
-      ],
+      "steps": ["Account", "Profile", "Confirmation"],
       "profileTitle": "Tell us about your organization",
       "profileSubtitle": "Optional — you can complete it later.",
       "continue": "Continue",
@@ -762,7 +738,7 @@
       "validUntil": "Valid until {date}",
       "renew": "Renew",
       "paymentUnavailable": "Online payment isn't enabled yet. Write to us from the Contact page to subscribe.",
-      "methodsNote": "Payment on Notch Pay's secure page. No automatic charge: you renew whenever you like, and we remind you before the due date.",
+      "methodsNote": "Payment on Chariow's secure page. No automatic charge: you renew whenever you like, and we remind you before the due date.",
       "result": {
         "succes": {
           "title": "Payment confirmed",
@@ -800,9 +776,9 @@
             "titleWithCard": "Mobile Money or card — in CFA francs"
           },
           "card": {
-            "title": "Card and other methods",
+            "title": "Mobile Money or card — in CFA francs",
             "body": "Visa, Mastercard, on our payment partner's secure form.",
-            "bodyChariow": "Visa, Mastercard or another method available in your country, on Chariow's secure page. Amount in CFA francs."
+            "bodyChariow": "On Chariow's secure page, with the methods available in your country."
           },
           "prorataLocked": "Prorated upgrade: Mobile Money only."
         },
@@ -861,7 +837,7 @@
       "sandbox": {
         "metaTitle": "Test payment",
         "title": "Test payment",
-        "notice": "Test mode: no real money is charged. In production, this step is replaced by Notch Pay's secure page.",
+        "notice": "Test mode: no real money is charged. In production, this step is replaced by Chariow's secure page.",
         "method": "Payment method",
         "methods": {
           "mtn": "MTN Mobile Money",

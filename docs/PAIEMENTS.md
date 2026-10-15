@@ -104,6 +104,12 @@ Canaux ouverts au 13 octobre 2026 (clé de production) : MTN Mobile Money (`cm.m
 | 6 statuts (Payments API)                            | Aussi `abandoned`, `incomplete`, `refunded`, `partialy-refunded` (page « Collect »)                                                     |
 | —                                                   | La liste des paiements avec une clé de production inclut aussi les paiements de test                                                    |
 
+## Prestataire actif (15 octobre 2026)
+
+**Chariow seul** : `PAYMENT_PROVIDERS=chariow` (D129). Notch Pay est désactivé, sans suppression de code. Pour le réactiver : `PAYMENT_PROVIDERS=notchpay,chariow` dans Vercel, puis redéployer ; le Mobile Money Notch Pay et le prorata reviennent alors.
+
+Sans prestataire à montant libre, le passage Essentiel → Pro se paie au plein tarif et commence à la fin de la période payée.
+
 ## Chariow (carte bancaire et autres moyens)
 
 Chariow encaisse pour le compte de QuickSign (carte bancaire et moyens proposés dans le pays de l'acheteur), puis reverse les fonds au vendeur moins sa commission. Fichier : `lib/billing/providers/card/chariow.ts` ; notifications : `/api/webhooks/chariow`. Documentation officielle : https://chariow.dev (lue le 14 octobre 2026).

@@ -510,3 +510,11 @@ L'interface `PaymentProvider` et le registre restent prêts pour ajouter d'autre
 - Coût : commission de 10 % ou 15 % selon l'annonce de Chariow de juillet 2025 (grille en refonte, à confirmer), contre des frais plus bas chez Notch Pay.
 - Données : Chariow reçoit le nom, l'e-mail et le téléphone de l'acheteur ; ajouté à la politique de confidentialité et aux CGU (version `2026-10-14`). Le journal `payment_events` ne garde jamais ces coordonnées.
 - À confirmer par le propriétaire avec Chariow : vente d'un abonnement à un service externe autorisée, versements vers le Cameroun, commission en vigueur.
+
+**D129 — Chariow seul prestataire de paiement ; Notch Pay désactivé (15 octobre 2026).** Décision du propriétaire : Chariow fonctionne (paiement testé par lui), Notch Pay refusait les paiements réels sans cause communiquée.
+
+- Désactivation par configuration, sans suppression de code : `PAYMENT_PROVIDERS=chariow` sur Vercel. Le code Notch Pay, sa route de notification et ses tests restent en place ; le réactiver = remettre `notchpay,chariow` puis redéployer.
+- Conséquence : plus de montant calculé, donc plus de prorata. Le passage Essentiel → Pro se paie au plein tarif et le Pro commence à la fin de la période Essentiel déjà payée (`quoteCheckout(..., { prorata: false })` rend un « renewal » ; `complete_payment` programme la bascule). Aucun jour payé n'est perdu.
+- Le FCFA, dont le moyen naturel est le Mobile Money, revient à Chariow quand aucun prestataire Mobile Money n'est actif (`getPaymentProvider`).
+- Textes clients (accueil, FAQ, tarifs, récapitulatif, page Sécurité, assistant IA), CGU, confidentialité et cookies : Chariow seul (version `2026-10-15`).
+- Paiements Notch Pay encore « en attente » : plus revérifiés (prestataire désactivé) ; la tâche planifiée les marque abandonnés après 24 h. Les paiements Notch Pay réussis gardent leurs reçus.

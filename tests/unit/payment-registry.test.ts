@@ -89,6 +89,8 @@ describe("registre des moyens de paiement", () => {
     // Chariow seul : la carte en FCFA est le seul moyen.
     const alone = await registry(CHARIOW);
     expect(alone.paymentOptions("FR").map((o) => o.provider)).toEqual(["chariow"]);
+    // Le FCFA sans Mobile Money configuré : Chariow prend le relais.
+    expect(alone.getPaymentProvider("XAF")?.name).toBe("chariow");
 
     // Clé sans aucun produit, ou désactivé par PAYMENT_PROVIDERS : absent.
     expect((await registry({ CHARIOW_API_KEY: "sk_live_x" })).getChariow()).toBeNull();

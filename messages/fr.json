@@ -133,7 +133,7 @@
         {
           "key": "momo",
           "title": "Mobile Money",
-          "description": "Payez votre abonnement par Mobile Money (MTN MoMo, Orange Money), sur la page sécurisée de Notch Pay."
+          "description": "Payez votre abonnement par Mobile Money ou carte bancaire, sur la page sécurisée de Chariow."
         },
         {
           "key": "whatsapp",
@@ -212,12 +212,7 @@
           "tab": "Administrations",
           "title": "Services publics et collectivités",
           "description": "Notes de service, courriers et annonces signés et diffusés plus vite, avec un historique clair de qui a signé quoi et quand.",
-          "examples": [
-            "Note de service",
-            "Courrier officiel",
-            "Annonce",
-            "Décision interne"
-          ]
+          "examples": ["Note de service", "Courrier officiel", "Annonce", "Décision interne"]
         }
       ]
     },
@@ -235,7 +230,7 @@
       "popular": "Pour les équipes",
       "cta": "Commencer gratuitement",
       "trialNote": "Compte gratuit pour découvrir, puis {price} pour signer. Annulable à tout moment.",
-      "paymentMethods": "Paiement sécurisé sur la page de notre partenaire Notch Pay, avec les moyens ouverts dans votre pays.",
+      "paymentMethods": "Paiement sécurisé sur la page de notre partenaire Chariow, avec les moyens proposés dans votre pays.",
       "plans": {
         "essential": {
           "name": "Essentiel",
@@ -277,7 +272,7 @@
         "cta": "Créer un compte gratuit"
       },
       "paymentMethodsLive": "Paiement par {channels}, sur une page de paiement sécurisée.",
-      "cardMethod": "carte bancaire"
+      "cardMethod": "Mobile Money ou carte bancaire"
     },
     "testimonials": {
       "eyebrow": "Ils signent avec QuickSign",
@@ -297,7 +292,7 @@
         },
         {
           "q": "Comment puis-je payer ?",
-          "a": "Par Mobile Money (MTN Mobile Money, Orange Money), via Notch Pay, notre partenaire de paiement sécurisé. D'autres moyens de paiement, dont la carte bancaire, seront ajoutés progressivement. QuickSign ne voit ni ne stocke jamais vos informations de paiement."
+          "a": "Par Mobile Money ou carte bancaire, selon les moyens proposés dans votre pays, via Chariow, notre partenaire de paiement sécurisé. QuickSign ne voit ni ne stocke jamais vos informations de paiement."
         },
         {
           "q": "Que comprend l'accès gratuit ?",
@@ -459,11 +454,7 @@
       "metaTitle": "Créer un compte",
       "title": "Créez votre compte",
       "subtitle": "Gratuit, sans carte bancaire.",
-      "steps": [
-        "Compte",
-        "Profil",
-        "Confirmation"
-      ],
+      "steps": ["Compte", "Profil", "Confirmation"],
       "profileTitle": "Parlez-nous de votre structure",
       "profileSubtitle": "Facultatif — vous pourrez compléter plus tard.",
       "continue": "Continuer",
@@ -762,7 +753,7 @@
       "validUntil": "Valable jusqu'au {date}",
       "renew": "Renouveler",
       "paymentUnavailable": "Le paiement en ligne n'est pas encore activé. Écrivez-nous depuis la page Contact pour souscrire.",
-      "methodsNote": "Paiement sur la page sécurisée de Notch Pay. Pas de prélèvement automatique : vous renouvelez quand vous voulez, nous vous rappelons avant l'échéance.",
+      "methodsNote": "Paiement sur la page sécurisée de Chariow. Pas de prélèvement automatique : vous renouvelez quand vous voulez, nous vous rappelons avant l'échéance.",
       "result": {
         "succes": {
           "title": "Paiement confirmé",
@@ -800,9 +791,9 @@
             "titleWithCard": "Mobile Money ou carte — en FCFA"
           },
           "card": {
-            "title": "Carte bancaire et autres moyens",
+            "title": "Mobile Money ou carte bancaire — en FCFA",
             "body": "Visa, Mastercard, sur le formulaire sécurisé de notre partenaire de paiement.",
-            "bodyChariow": "Visa, Mastercard ou un autre moyen proposé dans votre pays, sur la page sécurisée de Chariow. Montant en FCFA."
+            "bodyChariow": "Sur la page sécurisée de Chariow, avec les moyens proposés dans votre pays."
           },
           "prorataLocked": "Passage au prorata : uniquement par Mobile Money."
         },
@@ -861,7 +852,7 @@
       "sandbox": {
         "metaTitle": "Paiement de test",
         "title": "Paiement de test",
-        "notice": "Mode test : aucun argent réel n'est débité. En production, cette étape est remplacée par la page sécurisée de Notch Pay.",
+        "notice": "Mode test : aucun argent réel n'est débité. En production, cette étape est remplacée par la page sécurisée de Chariow.",
         "method": "Moyen de paiement",
         "methods": {
           "mtn": "MTN Mobile Money",

@@ -45,16 +45,20 @@ export function roundAmount(value: number, currency: Currency): number {
  * - période payée ou grâce : « renewal » à plein tarif, la nouvelle période s'enchaîne
  *   à la fin de l'actuelle ;
  * - essai ou compte expiré : « new » (les jours d'essai restants sont conservés).
+ * Sans prorata (prestataire à prix fixes, comme Chariow), l'Essentiel → Pro devient un
+ * « renewal » au plein tarif : le Pro commence à la fin de la période payée, sans perte.
  */
 export function quoteCheckout(
   sub: QuoteSubscription,
   target: { plan: PaidPlan; cycle: BillingCycle; currency: Currency },
   prices: PriceTable,
   now = new Date(),
+  options: { prorata?: boolean } = {},
 ): Quote {
   const periodActive = sub.state === "active" && sub.currentPeriodEnd.getTime() > now.getTime();
 
   if (
+    options.prorata !== false &&
     periodActive &&
     sub.plan === "essential" &&
     target.plan === "pro" &&

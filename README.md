@@ -126,7 +126,8 @@ Langue, pays de résidence, fuseau horaire et devise préférée par utilisateur
 - **Accès gratuit avant paiement** : un document, l'éditeur en découverte, une signature, l'assistant (5 messages par jour). Signer et exporter demandent un abonnement. Limites dans `plans_config` (ligne `free`) ; détails dans [`docs/PAIEMENTS.md`](docs/PAIEMENTS.md#accès-avant-paiement).
 - Page `/app/abonnement` : plan actuel, usage, choix du plan (mensuel ou annuel ; FCFA, euro, dollar ou livre), récapitulatif exact (prorata), historique et reçus PDF.
 - Plusieurs prestataires derrière une même interface (`lib/billing/providers/`), activés par `PAYMENT_PROVIDERS`. Guide complet : [`docs/PAIEMENTS.md`](docs/PAIEMENTS.md).
-  - **Notch Pay**, seul prestataire pour commencer (FCFA, page hébergée de Notch Pay ; les moyens affichés sont lus sur le compte Notch Pay : aujourd'hui MTN Mobile Money et Orange Money) :
+  - **Prestataire actif : Chariow seul** (`PAYMENT_PROVIDERS=chariow`, décision D129). Notch Pay reste dans le code, désactivé.
+  - **Notch Pay** (désactivé depuis le 15 octobre 2026), seul prestataire au départ (FCFA, page hébergée de Notch Pay ; les moyens affichés sont lus sur le compte Notch Pay : aujourd'hui MTN Mobile Money et Orange Money) :
     - variables `NOTCHPAY_PUBLIC_KEY` (`pk_test.…` pour les essais) et `NOTCHPAY_WEBHOOK_SECRET` (obligatoire : sans elle, les notifications sont refusées) ;
     - webhook : `https://<domaine>/api/webhooks/notchpay` ;
     - diagnostic d'un paiement : `npm run notchpay:inspect -- trx.xxxxxxxx`.

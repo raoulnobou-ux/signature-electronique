@@ -12,7 +12,14 @@ export default defineConfig({
     projects: [
       {
         extends: true,
-        test: { name: "unit", environment: "node", include: ["tests/unit/**/*.test.{ts,tsx}"] },
+        // 20 s : sur une machine chargée, le premier import d'un module lourd (pdf.js, registre
+        // rechargé par vi.resetModules) dépasse parfois les 5 s par défaut sans être en erreur.
+        test: {
+          name: "unit",
+          environment: "node",
+          include: ["tests/unit/**/*.test.{ts,tsx}"],
+          testTimeout: 20_000,
+        },
       },
       {
         extends: true,

@@ -82,9 +82,9 @@ export const cookiesDoc: LegalDoc = {
 
         <h2>Paiement</h2>
         <p>
-          La page de paiement de Notch Pay s&apos;ouvre sur son propre site. Elle peut y déposer ses
+          La page de paiement de Chariow s&apos;ouvre sur son propre site. Elle peut y déposer ses
           propres cookies, nécessaires au paiement et à la prévention de la fraude ; ils sont régis
-          par la politique de Notch Pay.
+          par la politique de Chariow.
         </p>
 
         <h2>Vos choix</h2>
@@ -167,8 +167,8 @@ export const cookiesDoc: LegalDoc = {
 
         <h2>Payment</h2>
         <p>
-          Notch Pay&apos;s payment page opens on its own website. It may set its own cookies there,
-          required for payment and fraud prevention; they are governed by Notch Pay&apos;s policy.
+          Chariow&apos;s payment page opens on its own website. It may set its own cookies there,
+          required for payment and fraud prevention; they are governed by Chariow&apos;s policy.
         </p>
 
         <h2>Your choices</h2>

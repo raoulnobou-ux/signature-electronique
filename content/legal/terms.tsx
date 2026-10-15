@@ -7,7 +7,7 @@ const mail = <a href={`mailto:${siteConfig.supportEmail}`}>{siteConfig.supportEm
 /**
  * Conditions générales d'utilisation et de vente. Elles décrivent le fonctionnement réel :
  * accès gratuit, abonnements prépayés sans prélèvement automatique, grâce de 3 jours,
- * paiement via Notch Pay, signature électronique simple.
+ * paiement via Chariow, signature électronique simple.
  */
 export const termsDoc: LegalDoc = {
   fr: {
@@ -58,10 +58,10 @@ export const termsDoc: LegalDoc = {
             seront ajoutés progressivement.
           </li>
           <li>
-            <strong>Paiement.</strong> Il est traité sur la page sécurisée de nos prestataires de
-            paiement : Notch Pay pour le Mobile Money, Chariow pour la carte bancaire et les autres
-            moyens proposés dans votre pays. QuickSign n&apos;a jamais accès à vos données de carte
-            ni à votre code Mobile Money, et vous remet un reçu pour chaque paiement.
+            <strong>Paiement.</strong> Il est traité sur la page sécurisée de Chariow, notre
+            prestataire de paiement, avec les moyens proposés dans votre pays (Mobile Money, carte
+            bancaire…). QuickSign n&apos;a jamais accès à vos données de carte ni à votre code
+            Mobile Money, et vous remet un reçu pour chaque paiement.
           </li>
           <li>
             <strong>Durée.</strong> L&apos;abonnement est payé d&apos;avance pour un mois ou un an.
@@ -201,10 +201,10 @@ export const termsDoc: LegalDoc = {
             currencies and payment methods will be added over time.
           </li>
           <li>
-            <strong>Payment.</strong> It is processed on the secure page of our payment providers:
-            Notch Pay for Mobile Money, Chariow for cards and other methods available in your
-            country. QuickSign never has access to your card details or Mobile Money PIN, and gives
-            you a receipt for every payment.
+            <strong>Payment.</strong> It is processed on the secure page of Chariow, our payment
+            provider, with the methods available in your country (Mobile Money, card…). QuickSign
+            never has access to your card details or Mobile Money PIN, and gives you a receipt for
+            every payment.
           </li>
           <li>
             <strong>Term.</strong> A subscription is paid in advance for one month or one year.

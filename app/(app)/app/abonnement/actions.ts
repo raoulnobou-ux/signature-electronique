@@ -80,6 +80,10 @@ async function computeQuote(
   subscription: NonNullable<Awaited<ReturnType<typeof readSubscription>>>,
   target: z.infer<typeof targetSchema>,
 ): Promise<Quote> {
+  // Prestataire à prix fixes (Chariow) : pas de prorata, le Pro démarre à la fin de la période.
+  const provider = target.method
+    ? getProvider(target.method, target.currency as Currency)
+    : getPaymentProvider(target.currency as Currency);
   return quoteCheckout(
     {
       state: account.entitlements.state,
@@ -92,6 +96,8 @@ async function computeQuote(
     },
     target,
     await getPrices(),
+    new Date(),
+    { prorata: !provider?.fixedPrices },
   );
 }
 

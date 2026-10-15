@@ -129,15 +129,10 @@ export const privacyDoc: LegalDoc = {
               <td>États-Unis</td>
             </tr>
             <tr>
-              <td>Notch Pay</td>
-              <td>Paiement par Mobile Money</td>
-              <td>Cameroun ; opérateurs de Mobile Money</td>
-            </tr>
-            <tr>
               <td>Chariow</td>
               <td>
-                Paiement par carte bancaire et autres moyens : reçoit vos nom, adresse e-mail et
-                numéro de téléphone pour la vente
+                Paiement (Mobile Money, carte bancaire et autres moyens selon votre pays) : reçoit
+                vos nom, adresse e-mail et numéro de téléphone pour la vente
               </td>
               <td>Afrique ; réseaux de cartes et opérateurs (voir la politique de Chariow)</td>
             </tr>
@@ -365,15 +360,10 @@ export const privacyDoc: LegalDoc = {
               <td>United States</td>
             </tr>
             <tr>
-              <td>Notch Pay</td>
-              <td>Mobile Money payments</td>
-              <td>Cameroon; Mobile Money operators</td>
-            </tr>
-            <tr>
               <td>Chariow</td>
               <td>
-                Card and other payments: receives your name, email address and phone number for
-                the sale
+                Payments (Mobile Money, cards and other methods depending on your country): receives
+                your name, email address and phone number for the sale
               </td>
               <td>Africa; card networks and operators (see Chariow&apos;s policy)</td>
             </tr>

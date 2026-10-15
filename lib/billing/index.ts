@@ -99,9 +99,17 @@ export function methodForCurrency(currency: Currency): PaymentMethod {
   return currency === "XAF" ? "mobile_money" : "card";
 }
 
-/** Prestataire d'un paiement dans une devise donnée (moyen de paiement naturel de la devise). */
+/**
+ * Prestataire d'un paiement dans une devise donnée : celui du moyen naturel de la devise,
+ * sinon tout prestataire réel qui l'accepte (ex. Chariow seul pour le FCFA).
+ */
 export function getPaymentProvider(currency: Currency): PaymentProvider | null {
-  return getProvider(methodForCurrency(currency), currency);
+  const natural = realProviders().find(
+    (p) => p.method === methodForCurrency(currency) && p.currencies.includes(currency),
+  );
+  return (
+    natural ?? realProviders().find((p) => p.currencies.includes(currency)) ?? getSandboxProvider()
+  );
 }
 
 /**

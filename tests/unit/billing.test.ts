@@ -51,6 +51,25 @@ function sub(overrides: Partial<QuoteSubscription>): QuoteSubscription {
 }
 
 describe("devis de paiement", () => {
+  it("Essentiel → Pro sans prorata (prix fixes, Chariow) : plein tarif, à la suite de la période", () => {
+    const q = quoteCheckout(
+      sub({}),
+      { plan: "pro", cycle: "monthly", currency: "XAF" },
+      prices,
+      NOW,
+      { prorata: false },
+    );
+    // Renouvellement vers le Pro : complete_payment le fait démarrer à la fin de l'Essentiel payé.
+    expect(q).toEqual({
+      kind: "renewal",
+      plan: "pro",
+      cycle: "monthly",
+      currency: "XAF",
+      amount: 15000,
+      fullPrice: 15000,
+    });
+  });
+
   it("Essentiel → Pro : immédiat, au prorata des jours restants", () => {
     const q = quoteCheckout(
       sub({}),
