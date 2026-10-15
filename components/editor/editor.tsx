@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { isStoreApp } from "@/lib/store-app";
 import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -370,8 +371,9 @@ export function Editor({
           t(
             `errors.${known.includes(response.error) ? response.error : "generic"}` as "errors.generic",
           ),
-          // Accès gratuit : la finalisation mène au choix d'un plan.
-          response.error === "read_only"
+          // Accès gratuit : la finalisation mène au choix d'un plan (jamais dans l'application
+          // Play Store, où l'on n'invite pas à payer).
+          response.error === "read_only" && !isStoreApp()
             ? {
                 action: {
                   label: t("errors.choosePlan"),

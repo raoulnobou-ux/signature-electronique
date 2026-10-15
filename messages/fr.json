@@ -62,7 +62,8 @@
     "follow": "Suivez QuickSign",
     "whatsapp": "Écrire sur WhatsApp",
     "whatsappMessage": "Bonjour QuickSign, j'ai une question :",
-    "cookies": "Cookies"
+    "cookies": "Cookies",
+    "deleteAccount": "Supprimer mon compte"
   },
   "landing": {
     "hero": {
@@ -212,7 +213,12 @@
           "tab": "Administrations",
           "title": "Services publics et collectivités",
           "description": "Notes de service, courriers et annonces signés et diffusés plus vite, avec un historique clair de qui a signé quoi et quand.",
-          "examples": ["Note de service", "Courrier officiel", "Annonce", "Décision interne"]
+          "examples": [
+            "Note de service",
+            "Courrier officiel",
+            "Annonce",
+            "Décision interne"
+          ]
         }
       ]
     },
@@ -454,7 +460,11 @@
       "metaTitle": "Créer un compte",
       "title": "Créez votre compte",
       "subtitle": "Gratuit, sans carte bancaire.",
-      "steps": ["Compte", "Profil", "Confirmation"],
+      "steps": [
+        "Compte",
+        "Profil",
+        "Confirmation"
+      ],
       "profileTitle": "Parlez-nous de votre structure",
       "profileSubtitle": "Facultatif — vous pourrez compléter plus tard.",
       "continue": "Continuer",

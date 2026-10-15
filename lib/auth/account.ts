@@ -17,6 +17,7 @@ import {
 } from "@/lib/entitlements";
 import { createClient } from "@/lib/supabase/server";
 import type { Tables } from "@/lib/supabase/database.types";
+import { scheduleLimitNotice } from "@/lib/billing/limit-notice";
 
 export type Profile = Tables<"profiles">;
 
@@ -186,5 +187,8 @@ export async function guard(
   if (!account) return { ok: false, reason: "unauthenticated" };
   if (!account.emailConfirmed) return { ok: false, reason: "email_unverified" };
   const check = checkAccess(account.entitlements, feature, quota);
-  return check.ok ? { ok: true, account } : { ok: false, reason: check.reason };
+  if (check.ok) return { ok: true, account };
+  // Limite atteinte : e-mail automatique (au plus un par semaine), envoyé après la réponse.
+  scheduleLimitNotice(account, check.reason, quota?.kind);
+  return { ok: false, reason: check.reason };
 }

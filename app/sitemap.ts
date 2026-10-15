@@ -7,6 +7,7 @@ const routes = [
   "/securite",
   "/contact",
   "/cgu",
+  "/suppression-compte",
   "/confidentialite",
   "/mentions-legales",
   "/cookies",

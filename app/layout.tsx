@@ -1,3 +1,4 @@
+import { STORE_MODE_SCRIPT } from "@/lib/store-app";
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { headers } from "next/headers";
@@ -53,8 +54,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: dark)", color: "#07090F" },
-    { media: "(prefers-color-scheme: light)", color: "#F6F7FB" },
+    { media: "(prefers-color-scheme: dark)", color: "#0F1013" },
+    { media: "(prefers-color-scheme: light)", color: "#F7F7F4" },
   ],
   width: "device-width",
   initialScale: 1,
@@ -69,9 +70,13 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang={locale}
-      className={`${inter.variable} ${spaceGrotesk.variable} dark`}
+      className={`${inter.variable} ${spaceGrotesk.variable}`}
       suppressHydrationWarning
     >
+      <head>
+        {/* Application Play Store : repère posé avant l'affichage (voir lib/store-app.ts). */}
+        <script nonce={nonce} dangerouslySetInnerHTML={{ __html: STORE_MODE_SCRIPT }} />
+      </head>
       <body className="min-h-dvh">
         <ClientMessages>
           <AppProviders nonce={nonce}>{children}</AppProviders>

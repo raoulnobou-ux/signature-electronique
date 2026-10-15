@@ -74,6 +74,7 @@ export function AccessBanner({ account }: { account: ShellAccount }) {
         size="sm"
         variant={tone === "info" ? "default" : "secondary"}
         className="shrink-0"
+        data-store-hide
       >
         <Link href="/app/abonnement">{cta}</Link>
       </Button>

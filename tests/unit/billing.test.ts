@@ -574,7 +574,8 @@ describe("Notch Pay (Mobile Money et carte, FCFA)", () => {
         expect(email.text).not.toContain(reason);
         expect(email.html).not.toContain(reason);
         expect(email.text).toContain(failureText(reason, locale));
-        expect(email.text).toContain("/app/abonnement");
+        // Lien de paiement ouvert dans le navigateur (jamais capturé par l application Android).
+        expect(email.text).toContain("/payer");
       }
     }
   });

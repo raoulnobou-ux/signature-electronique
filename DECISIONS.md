@@ -518,3 +518,12 @@ L'interface `PaymentProvider` et le registre restent prêts pour ajouter d'autre
 - Le FCFA, dont le moyen naturel est le Mobile Money, revient à Chariow quand aucun prestataire Mobile Money n'est actif (`getPaymentProvider`).
 - Textes clients (accueil, FAQ, tarifs, récapitulatif, page Sécurité, assistant IA), CGU, confidentialité et cookies : Chariow seul (version `2026-10-15`).
 - Paiements Notch Pay encore « en attente » : plus revérifiés (prestataire désactivé) ; la tâche planifiée les marque abandonnés après 24 h. Les paiements Notch Pay réussis gardent leurs reçus.
+
+**D130 — Application Android (Play Store) et e-mail automatique de limite (15 octobre 2026).**
+
+- **Modèle** : application « compagnon » gratuite (Trusted Web Activity) ; l'abonnement se paie sur le site (Chariow). Google Play Billing n'est pas utilisable depuis le Cameroun (pas de compte marchand Google pour ce pays, selon le tableau des pays de la Play Console) ; hors États-Unis, Royaume-Uni et EEE, Google n'autorise pas d'inviter à payer ailleurs dans l'application.
+- **Mode application** (\`lib/store-app.ts\`) : repère posé avant l'affichage quand l'application s'ouvre (\`?source=play\` ou référent \`android-app://\`), gardé dans \`sessionStorage\` (propre à l'application, jamais étendu à Chrome). Règles CSS : prix, plans, liens vers les tarifs et le paiement masqués ; état de l'abonnement et reçus visibles.
+- **Liens des e-mails** : \`/payer\`, page publique hors de \`/app\`. L'application ne capture pas les liens (filtre d'intention retiré du projet Android) : ils s'ouvrent dans le navigateur, où l'on peut payer.
+- **E-mail « limite atteinte »** (\`lib/billing/limit-notice.ts\`) : déclenché automatiquement par \`guard()\` et l'assistant quand une action est refusée ; accès gratuit → s'abonner, Essentiel → passer au Pro, Pro → rien. Envoyé après la réponse (\`after()\`), au plus une fois par semaine ISO (\`billing_notices\`), seulement si le profil accepte les e-mails.
+- **Vérification Android** : \`/.well-known/assetlinks.json\` servi depuis \`ANDROID_PACKAGE_NAME\` (défaut \`com.raoulnobou.quicksign\`, définitif après publication) et \`ANDROID_CERT_FINGERPRINTS\` ; rien n'est publié sans empreinte valide.
+- **Suppression de compte** : page publique \`/suppression-compte\` (exigée par Google Play).

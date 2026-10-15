@@ -364,3 +364,17 @@
   outline-offset: 3px;
   animation: tour-pulse 1.2s ease-out 3;
 }
+
+/* ==========================================================================
+   Application Play Store (lib/store-app.ts) : aucun prix, choix de plan ni lien vers le
+   paiement. Le compte, l'état de l'abonnement et les reçus restent visibles.
+   ========================================================================== */
+[data-store="play"] [data-store-hide],
+[data-store="play"] #tarifs,
+[data-store="play"] #plans,
+[data-store="play"] a[href="/tarifs"],
+[data-store="play"] a[href^="/tarifs?"],
+[data-store="play"] a[href^="/app/abonnement#plans"],
+[data-store="play"] a[href^="/payer"] {
+  display: none !important;
+}

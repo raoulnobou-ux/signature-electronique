@@ -31,6 +31,7 @@ import { rateLimit } from "@/lib/rate-limit";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isSameOriginRequest } from "@/lib/security/origin";
 import { createClient } from "@/lib/supabase/server";
+import { scheduleLimitNotice } from "@/lib/billing/limit-notice";
 
 export const maxDuration = 300;
 
@@ -116,6 +117,7 @@ export async function POST(request: Request) {
   const pro = ent.features.ai_advanced;
   if ((input.documentId || input.quickAction) && !pro) return fail("feature_not_in_plan");
   const access = checkAccess(ent, "ai_assistant", { kind: "aiMessagesToday" });
+  if (!access.ok) scheduleLimitNotice(account, access.reason, "aiMessagesToday");
   if (!access.ok) return fail(access.reason === "quota_exceeded" ? "quota" : "feature_not_in_plan");
   // Pro : « illimité raisonnable » ; tous : pas plus de 20 messages par minute.
   const [perMinute, perDay] = await Promise.all([

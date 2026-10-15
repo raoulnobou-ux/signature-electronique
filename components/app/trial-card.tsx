@@ -25,7 +25,7 @@ export function TrialCard({ account }: { account: ShellAccount }) {
         <Progress value={(days / TRIAL_DAYS) * 100} aria-label={t("daysLeft", { days })} />
         <p className="text-xs font-medium">{t("daysLeft", { days })}</p>
       </div>
-      <Button asChild size="sm" className="w-full">
+      <Button asChild size="sm" className="w-full" data-store-hide>
         <Link href="/app/abonnement">{t("choosePlan")}</Link>
       </Button>
     </div>

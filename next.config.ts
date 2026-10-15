@@ -34,6 +34,10 @@ const nextConfig: NextConfig = {
     // partent directement vers le stockage via une URL signée.
     serverActions: { bodySizeLimit: "3mb" },
   },
+  async rewrites() {
+    // Vérification de l'application Android (Digital Asset Links), configurée sur Vercel.
+    return [{ source: "/.well-known/assetlinks.json", destination: "/api/android/assetlinks" }];
+  },
   async headers() {
     return [
       { source: "/:path*", headers: securityHeaders },

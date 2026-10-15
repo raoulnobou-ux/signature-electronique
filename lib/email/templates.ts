@@ -54,7 +54,12 @@ export function welcomeEmail({ fullName, locale }: { fullName: string } & L) {
 // ---------------------------------------------------------------------------
 
 const billingUrl = () => `${siteConfig.url}/app/abonnement`;
-const renewUrl = () => `${siteConfig.url}/app/abonnement#plans`;
+/**
+ * Lien de paiement des e-mails : /payer, page publique qui redirige vers le choix d'un plan.
+ * Il s'ouvre dans le navigateur (l'application Android ne capture pas les liens) : le
+ * client peut payer, ce qui est impossible dans l'application Play Store.
+ */
+const renewUrl = () => `${siteConfig.url}/payer`;
 const greeting = (fullName: string, locale?: Locale) => {
   const name = firstName(fullName);
   if (isEn(locale)) return name ? `Hello ${name},` : "Hello,";
@@ -597,6 +602,93 @@ export function teamInvitationEmail({
       ],
       cta: { label: "Rejoindre l'équipe", url: link },
       footnote: "Si vous ne vous attendiez pas à cette invitation, ignorez simplement cet e-mail.",
+    }),
+  };
+}
+
+/** Ce que le client a voulu faire, pour un e-mail de limite clair. */
+const LIMIT_LABELS: Record<"fr" | "en", Record<string, string>> = {
+  fr: {
+    documentsStored: "importer un nouveau document",
+    documentsThisMonth: "signer un nouveau document ce mois-ci",
+    aiMessagesToday: "poser une nouvelle question à l'assistant aujourd'hui",
+    signatureAssets: "enregistrer une nouvelle signature",
+    default: "utiliser cette fonction",
+  },
+  en: {
+    documentsStored: "import a new document",
+    documentsThisMonth: "sign a new document this month",
+    aiMessagesToday: "ask the assistant another question today",
+    signatureAssets: "save a new signature",
+    default: "use this feature",
+  },
+};
+
+/**
+ * Limite atteinte (envoyé automatiquement, au plus une fois par semaine) : accès gratuit →
+ * s'abonner ; Essentiel → passer au Pro. Le lien mène au choix d'un plan sur le site.
+ */
+export function limitReachedEmail({
+  fullName,
+  offer,
+  quota,
+  price,
+  locale,
+}: {
+  fullName: string;
+  offer: "subscribe" | "upgrade";
+  quota: string | null;
+  price: string;
+} & L) {
+  const lang = isEn(locale) ? "en" : "fr";
+  const what = LIMIT_LABELS[lang][quota ?? "default"] ?? LIMIT_LABELS[lang].default;
+  if (lang === "en") {
+    const upgrade = offer === "upgrade";
+    return {
+      subject: upgrade
+        ? "You've reached the limit of your Essential plan"
+        : "You've reached the limit of your free QuickSign access",
+      ...renderEmail(
+        {
+          preheader: upgrade
+            ? "Pro removes the limit: unlimited documents, stamps, multiple signers."
+            : "Subscribe to sign and export your documents.",
+          title: upgrade ? "Go further with Pro" : "Keep signing with QuickSign",
+          paragraphs: [
+            greeting(fullName, locale),
+            `You just tried to ${what}, but your ${upgrade ? "Essential plan" : "free access"} has reached its limit. Your documents are kept.`,
+            upgrade
+              ? `Pro gives you unlimited documents, company stamps, multiple signers, templates and the advanced assistant, from ${price} per month.`
+              : `With a subscription you sign, stamp and export your documents, from ${price} per month. Pay by Mobile Money or card.`,
+          ],
+          cta: { label: upgrade ? "Switch to Pro" : "Choose my plan", url: renewUrl() },
+          footnote:
+            "You receive this email because you reached a limit of your account. You can turn off these emails in Settings → Notifications.",
+        },
+        locale,
+      ),
+    };
+  }
+  const upgrade = offer === "upgrade";
+  return {
+    subject: upgrade
+      ? "Vous avez atteint la limite de votre plan Essentiel"
+      : "Votre accès gratuit QuickSign a atteint sa limite",
+    ...renderEmail({
+      preheader: upgrade
+        ? "Le Pro lève la limite : documents illimités, cachets, plusieurs signataires."
+        : "Abonnez-vous pour signer et exporter vos documents.",
+      title: upgrade ? "Allez plus loin avec le Pro" : "Continuez à signer avec QuickSign",
+      paragraphs: [
+        greeting(fullName),
+        `Vous venez d'essayer de ${what}, mais votre ${upgrade ? "plan Essentiel" : "accès gratuit"} a atteint sa limite. Vos documents sont conservés.`,
+        upgrade
+          ? `Le Pro vous donne des documents illimités, les cachets d'entreprise, plusieurs signataires, les modèles et l'assistant avancé, à partir de ${price} par mois.`
+          : `Avec un abonnement, vous signez, tamponnez et exportez vos documents, à partir de ${price} par mois. Paiement par Mobile Money ou carte bancaire.`,
+      ],
+      cta: { label: upgrade ? "Passer au Pro" : "Choisir mon abonnement", url: renewUrl() },
+      footnote:
+        "Vous recevez cet e-mail car vous avez atteint une limite de votre compte. Vous pouvez désactiver ces messages dans Paramètres → Notifications.",
     }),
   };
 }
