@@ -276,7 +276,7 @@
         "description": "Pour découvrir : {stored} document, l'éditeur, {signatures} signature et {ai} questions par jour à l'assistant. Signer et exporter demandent un abonnement.",
         "cta": "Créer un compte gratuit"
       },
-      "paymentMethodsLive": "Paiement par {channels}, sur la page sécurisée de Notch Pay.",
+      "paymentMethodsLive": "Paiement par {channels}, sur une page de paiement sécurisée.",
       "cardMethod": "carte bancaire"
     },
     "testimonials": {

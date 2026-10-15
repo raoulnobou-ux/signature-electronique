@@ -276,7 +276,7 @@
         "description": "To explore: {stored} document, the editor, {signatures} signature and {ai} assistant questions per day. Signing and export require a subscription.",
         "cta": "Create a free account"
       },
-      "paymentMethodsLive": "Pay with {channels}, on Notch Pay's secure page.",
+      "paymentMethodsLive": "Pay with {channels}, on a secure payment page.",
       "cardMethod": "bank card"
     },
     "testimonials": {
