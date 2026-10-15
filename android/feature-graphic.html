@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <title>QuickSign — image de présentation Play Store</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+      }
+      body {
+        width: 1024px;
+        height: 500px;
+        overflow: hidden;
+        background: #f7f7f4;
+        color: #16171d;
+        font-family: "Segoe UI", Inter, system-ui, sans-serif;
+        display: flex;
+        align-items: center;
+      }
+      .text {
+        padding-left: 72px;
+        width: 470px;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        font-weight: 700;
+        font-size: 30px;
+      }
+      .mark {
+        width: 52px;
+        height: 52px;
+        border-radius: 13px;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6, #22d3ee);
+        display: grid;
+        place-items: center;
+      }
+      h1 {
+        font-size: 46px;
+        line-height: 1.08;
+        margin: 30px 0 16px;
+        letter-spacing: -0.02em;
+      }
+      h1 span {
+        color: #3d43d6;
+      }
+      p {
+        font-size: 21px;
+        color: #5b5d66;
+        margin: 0;
+        line-height: 1.4;
+      }
+      .doc {
+        margin-left: 40px;
+        width: 400px;
+        height: 380px;
+        background: #fff;
+        border: 1px solid #e2e2dc;
+        border-radius: 18px;
+        padding: 30px 32px;
+        box-sizing: border-box;
+        box-shadow: 0 14px 36px -16px rgba(40, 36, 30, 0.3);
+        position: relative;
+      }
+      .line {
+        height: 10px;
+        border-radius: 5px;
+        background: #e9e9e4;
+        margin-bottom: 13px;
+      }
+      .title {
+        height: 14px;
+        width: 55%;
+        background: #3f414a;
+        margin-bottom: 26px;
+      }
+      .sig {
+        position: absolute;
+        left: 32px;
+        right: 32px;
+        bottom: 34px;
+        border-top: 1.5px solid #d3d3cc;
+        padding-top: 10px;
+        font-size: 14px;
+        color: #5b5d66;
+      }
+      svg.pen {
+        position: absolute;
+        right: 40px;
+        bottom: 58px;
+      }
+      .badge {
+        position: absolute;
+        top: 26px;
+        right: 28px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #17794b;
+        background: #e6f2ec;
+        padding: 5px 12px;
+        border-radius: 999px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="text">
+      <div class="brand">
+        <div class="mark">
+          <svg width="30" height="30" viewBox="0 0 32 32" fill="none">
+            <path
+              d="M6 21c3-7 6-10 8-7s-2 7 1 6 4-8 6-6 1 5 5 4"
+              stroke="#fff"
+              stroke-width="2.6"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </div>
+        QuickSign
+      </div>
+      <h1>Signez vos documents, <span>où que vous soyez.</span></h1>
+      <p>PDF et Word, signature, cachet, plusieurs signataires et preuve d'intégrité.</p>
+    </div>
+    <div class="doc">
+      <div class="badge">Signé</div>
+      <div class="line title"></div>
+      <div class="line"></div>
+      <div class="line" style="width: 92%"></div>
+      <div class="line" style="width: 96%"></div>
+      <div class="line" style="width: 70%"></div>
+      <div class="line" style="width: 88%"></div>
+      <div class="line" style="width: 60%"></div>
+      <svg class="pen" width="170" height="60" viewBox="0 0 170 60" fill="none">
+        <path
+          d="M6 44c10-26 22-36 28-24s-8 26 4 22 14-30 22-22 2 18 14 16 10-20 18-14 4 12 18 10 20-6 52-8"
+          stroke="#1d2a8f"
+          stroke-width="3"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+      <div class="sig">Fait à Douala · Signature</div>
+    </div>
+  </body>
+</html>

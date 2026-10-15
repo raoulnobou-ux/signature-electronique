@@ -50,3 +50,5 @@ next-env.d.ts
 supabase/.temp/
 supabase/.branches/
 /public/pdfjs/
+/android/*.keystore
+/android/signing/
